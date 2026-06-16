@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__claude_ai_Figma__get_metadata",
+      "mcp__claude_ai_Figma__get_screenshot",
+      "Bash(curl -s -o \"d:/DS/oobor/_figma_preview.png\" \"https://www.figma.com/api/mcp/asset/9f8cd16c-a795-4444-83a4-0fa826dcfb00\")",
+      "mcp__claude_ai_Figma__get_variable_defs",
+      "mcp__claude_ai_Figma__get_design_context",
+      "Bash(node -e \"const fs=require\\('fs'\\);const f='C:\\\\\\\\\\\\\\\\Users\\\\\\\\\\\\\\\\Lenovo\\\\\\\\\\\\\\\\.claude\\\\\\\\\\\\\\\\projects\\\\\\\\\\\\\\\\d--DS-oobor\\\\\\\\\\\\\\\\26186f99-9b1b-4a84-a26d-bdd56ac35bb8\\\\\\\\\\\\\\\\tool-results\\\\\\\\\\\\\\\\mcp-claude_ai_Figma-get_design_context-1781575451106.txt';const a=JSON.parse\\(fs.readFileSync\\(f,'utf8'\\)\\);console.log\\('entries',a.length\\);a.forEach\\(\\(e,i\\)=>console.log\\(i,e.type,\\(e.text||''\\).length\\)\\);\")",
+      "Bash(node -e \"const fs=require\\('fs'\\);const f='C:/Users/Lenovo/.claude/projects/d--DS-oobor/26186f99-9b1b-4a84-a26d-bdd56ac35bb8/tool-results/mcp-claude_ai_Figma-get_design_context-1781575451106.txt';const a=JSON.parse\\(fs.readFileSync\\(f,'utf8'\\)\\);console.log\\('entries',a.length\\);a.forEach\\(\\(e,i\\)=>console.log\\(i,e.type,\\(e.text||''\\).length\\)\\);\")",
+      "Bash(node -e \"const fs=require\\('fs'\\);const f='C:/Users/Lenovo/.claude/projects/d--DS-oobor/26186f99-9b1b-4a84-a26d-bdd56ac35bb8/tool-results/mcp-claude_ai_Figma-get_design_context-1781575451106.txt';const a=JSON.parse\\(fs.readFileSync\\(f,'utf8'\\)\\);for\\(let i=1;i<5;i++\\){console.log\\('=== entry',i,'==='\\);console.log\\(a[i].text\\);}\")",
+      "Bash(node -e ' *)",
+      "Bash(npm -v)",
+      "Bash(npx --yes create-next-app@latest . --typescript --tailwind --app --eslint --src-dir --import-alias \"@/*\" --no-turbopack --use-npm --yes)",
+      "Bash(mkdir -p .claude/figma-refs)",
+      "Bash(mv _figma_preview.png .claude/figma-refs/contact-page.png)"
+    ]
+  }
+}
