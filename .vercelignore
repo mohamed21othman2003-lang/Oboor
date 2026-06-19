@@ -1,0 +1,7 @@
+.next
+.git
+.claude
+data
+.playwright-mcp
+*.jpeg
+*.png.txt

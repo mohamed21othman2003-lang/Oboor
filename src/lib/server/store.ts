@@ -2,7 +2,8 @@ import { promises as fs } from "fs";
 import path from "path";
 
 // تخزين بسيط للطلبات في ملفات JSON (نسخة تشغيلية سريعة قبل قاعدة بيانات كاملة)
-const DIR = path.join(process.cwd(), "data");
+// على Vercel نظام الملفات للقراءة فقط ما عدا /tmp — فنكتب هناك (مؤقت لكل instance).
+const DIR = process.env.VERCEL ? path.join("/tmp", "oboor-data") : path.join(process.cwd(), "data");
 
 export type SubmissionKind = "contact" | "admission";
 export type Submission = { id: string; createdAt: string } & Record<string, unknown>;

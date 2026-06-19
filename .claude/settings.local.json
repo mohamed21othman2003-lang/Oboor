@@ -166,7 +166,23 @@
       "Bash(rm -f t01.jpeg t02.jpeg t03.jpeg t04.jpeg t06.jpeg t07.jpeg t08.jpeg t05.jpeg t09.jpeg)",
       "Bash(rm -f data/contact.json data/admission.json)",
       "Bash(git check-ignore *)",
-      "Bash(echo \"commit exit: $?\")"
+      "Bash(echo \"commit exit: $?\")",
+      "Bash(export VERCEL_TOKEN=VERCEL_TOKEN_REDACTED)",
+      "Bash(npx --yes vercel@latest --prod --yes)",
+      "Bash(npx --yes vercel@latest --prod --yes --scope m-othman-s-projects)",
+      "Bash(curl -s -o /dev/null -w \"status=%{http_code}\\\\n\" https://oobor.vercel.app/)",
+      "Bash(curl -s https://oobor.vercel.app/)",
+      "Bash(curl -s -o /dev/null -w \"status=%{http_code}\\\\n\" https://oobor.vercel.app/contact)",
+      "Bash(curl -s -o /dev/null -w \"status=%{http_code}\\\\n\" https://oobor.vercel.app/admission)",
+      "Bash(curl -s -o /dev/null -w \"status=%{http_code}\\\\n\" https://oobor.vercel.app/branches)",
+      "Bash(curl -s -o /dev/null -w \"live status=%{http_code}\\\\n\" https://oobor.vercel.app/)",
+      "Bash(curl -s -w \"\\\\nstatus=%{http_code}\\\\n\" -X POST https://oobor.vercel.app/api/contact -F \"name=Live Test\" -F \"phone=0561000111\" -F \"message=hi\")",
+      "Bash(curl -s -w \"\\\\nstatus=%{http_code}\\\\n\" -X POST https://oobor.vercel.app/api/admission -F \"childName=LiveChild\" -F \"parentName=LiveParent\" -F \"phone=0561000222\")",
+      "Bash(curl -s -o /dev/null -w \"status=%{http_code}\\\\n\" -X POST https://oobor.vercel.app/api/contact -F \"phone=05\")",
+      "Bash(rm -f lt01.jpeg lt02.jpeg lt03.jpeg lt04.jpeg lt05.jpeg lt06.jpeg lt07.jpeg)",
+      "Bash(git reset *)",
+      "Bash(git rm *)",
+      "Bash(node -e \"const fs=require\\('fs'\\);const f='.claude/settings.local.json';let s=fs.readFileSync\\(f,'utf8'\\);s=s.split\\('VERCEL_TOKEN_REDACTED'\\).join\\('VERCEL_TOKEN_REDACTED'\\);fs.writeFileSync\\(f,s\\);console.log\\('redacted on disk'\\);\")"
     ],
     "additionalDirectories": [
       "C:\\Users\\Lenovo\\Desktop"

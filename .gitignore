@@ -48,3 +48,8 @@ next-env.d.ts
 
 # runtime form submissions
 /data
+
+.vercel
+
+# local Claude settings (may contain command logs)
+.claude/settings.local.json
