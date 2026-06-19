@@ -45,3 +45,6 @@ next-env.d.ts
 
 # design reference exports (not part of the app)
 /.claude/figma-refs/
+
+# runtime form submissions
+/data
