@@ -35,6 +35,26 @@ export default async function BranchProfilePage({ params }: { params: Promise<{ 
 
   const features = locale === "en" ? BRANCH_FEATURES_EN : BRANCH_FEATURES;
 
+  const highlights = [
+    { value: "+19", label: pick(locale, "عامًا في الريادة", "Years of leadership") },
+    { value: "+6,300", label: pick(locale, "مستفيد احتُضن بحب", "Beneficiaries served") },
+    { value: "+43", label: pick(locale, "نقطة رعاية في الوطن", "Care points nationwide") },
+    { value: "+7", label: pick(locale, "برامج تأهيلية", "Rehabilitation programs") },
+  ];
+
+  const journey = [
+    { step: "1", title: pick(locale, "التقييم والتشخيص", "Assessment & Diagnosis"), desc: pick(locale, "تقييمٌ شاملٌ بأدواتٍ حديثة لتحديد احتياج الطفل بدقة.", "A comprehensive assessment with modern tools to precisely identify the child's needs.") },
+    { step: "2", title: pick(locale, "الخطة الفردية", "Individualized Plan"), desc: pick(locale, "خطةٌ تأهيليةٌ مصممةٌ خصيصًا لكل طفلٍ وأهدافه.", "A rehabilitation plan tailored specifically to each child and their goals.") },
+    { step: "3", title: pick(locale, "الجلسات التأهيلية", "Rehabilitation Sessions"), desc: pick(locale, "تنفيذ البرنامج على يد نخبةٍ من الأخصائيين المتخصصين.", "The program is delivered by a select team of specialized practitioners.") },
+    { step: "4", title: pick(locale, "المتابعة والتمكين", "Follow-up & Empowerment"), desc: pick(locale, "قياسٌ مستمرٌ للتقدّم ودمجٌ للأسرة في كل خطوة.", "Continuous progress tracking and family involvement at every step.") },
+  ];
+
+  const accreditations = [
+    pick(locale, "ISO 9001 — إدارة الجودة", "ISO 9001 — Quality Management"),
+    pick(locale, "برامج تأهيلية معتمدة", "Accredited rehabilitation programs"),
+    pick(locale, "كوادر مرخّصة ومؤهّلة", "Licensed & qualified staff"),
+  ];
+
   const intro = pick(
     locale,
     `يقدّم ${b.name} خدمات الرعاية والتأهيل المتكاملة لذوي الاحتياجات الخاصة وأسرهم في ${b.city}، عبر فريقٍ متخصص وبرامج معتمدة مصممة وفق احتياج كل طفل، وبيئةٍ مهيأة بأحدث أدوات التقييم والتأهيل.`,
@@ -61,6 +81,16 @@ export default async function BranchProfilePage({ params }: { params: Promise<{ 
           <h1 className="text-3xl font-extrabold text-ink">{b.name}</h1>
           <p className="mt-1 text-lg text-brand">{pick(locale, `${b.city} ، السعودية`, `${b.city}, Saudi Arabia`)}</p>
           <p className="mt-4 text-sm leading-7 text-ink-muted">{intro}</p>
+        </section>
+
+        {/* Highlights */}
+        <section className="mt-6 grid grid-cols-4 gap-3 rounded-xl bg-brand-deep p-5 text-center text-white">
+          {highlights.map((h) => (
+            <div key={h.label}>
+              <p className="text-2xl font-extrabold text-brand" dir="ltr">{h.value}</p>
+              <p className="mt-1 text-[11px] leading-4 text-white/80">{h.label}</p>
+            </div>
+          ))}
         </section>
 
         {/* Info table */}
@@ -101,10 +131,47 @@ export default async function BranchProfilePage({ params }: { params: Promise<{ 
           </div>
         </section>
 
+        {/* Rehabilitation journey */}
+        <section className="mt-8">
+          <h2 className="mb-3 text-lg font-bold text-brand-deep">{pick(locale, "رحلة التأهيل في الفرع", "The Rehabilitation Journey")}</h2>
+          <div className="grid grid-cols-2 gap-3">
+            {journey.map((j) => (
+              <div key={j.step} className="flex gap-3 rounded-xl border border-line p-4">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand text-sm font-bold text-white">{j.step}</span>
+                <div>
+                  <h3 className="text-sm font-bold text-ink">{j.title}</h3>
+                  <p className="mt-1 text-xs leading-6 text-ink-muted">{j.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Accreditations */}
+        <section className="mt-8">
+          <h2 className="mb-3 text-lg font-bold text-brand-deep">{pick(locale, "الاعتمادات والجودة", "Accreditations & Quality")}</h2>
+          <div className="flex flex-wrap gap-2">
+            {accreditations.map((a) => (
+              <span key={a} className="rounded-full bg-surface px-4 py-1.5 text-xs font-semibold text-brand-dark ring-1 ring-brand/15">{a}</span>
+            ))}
+          </div>
+        </section>
+
+        {/* Contact */}
+        <section className="mt-8 rounded-xl bg-surface p-5">
+          <h2 className="mb-3 text-lg font-bold text-brand-deep">{pick(locale, "تواصل معنا", "Contact Us")}</h2>
+          <div className="grid grid-cols-2 gap-y-2 text-sm text-ink">
+            <p><span className="font-semibold text-ink-soft">{pick(locale, "الهاتف الموحّد: ", "Unified line: ")}</span>920000109</p>
+            <p><span className="font-semibold text-ink-soft">{pick(locale, "البريد: ", "Email: ")}</span>info@oboor.com.sa</p>
+            <p><span className="font-semibold text-ink-soft">{pick(locale, "الموقع: ", "Website: ")}</span>oboor.com.sa</p>
+            <p><span className="font-semibold text-ink-soft">{pick(locale, "العنوان: ", "Address: ")}</span>{b.address}</p>
+          </div>
+        </section>
+
         {/* Footer */}
         <footer className="mt-10 flex items-center justify-between border-t border-line pt-5 text-sm text-ink-soft">
           <span>oboor.com.sa</span>
-          <span>{pick(locale, "للحجز والاستفسار: ", "Bookings & inquiries: ")}920000109</span>
+          <span>{pick(locale, "مركز عبور للرعاية والتأهيل © جميع الحقوق محفوظة", "Oboor Center for Care & Rehabilitation © All rights reserved")}</span>
         </footer>
       </div>
     </div>
