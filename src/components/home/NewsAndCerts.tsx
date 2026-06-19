@@ -42,8 +42,8 @@ export default function NewsAndCerts({ locale }: { locale: Locale }) {
       <div className="relative mx-auto grid max-w-7xl gap-10 px-6 lg:grid-cols-3 lg:px-8">
         {/* News */}
         <div className="lg:col-span-2">
-          <div className="mb-6 flex items-end justify-between gap-4">
-            <Link href="/news" className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap text-sm font-semibold text-white/90 transition-colors hover:text-white">
+          <div className="mb-6 flex items-start justify-between gap-4">
+            <Link href="/news" className="mt-1 inline-flex shrink-0 items-center gap-1 whitespace-nowrap text-sm font-semibold text-white/90 transition-colors hover:text-white">
               {pick(locale, "عرض الكل", "View All")}
               <svg className="dir-flip" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M15 6l-6 6 6 6" /></svg>
             </Link>
@@ -61,8 +61,8 @@ export default function NewsAndCerts({ locale }: { locale: Locale }) {
 
         {/* Certifications */}
         <div>
-          <div className="mb-6 flex items-end justify-between gap-4">
-            <Link href="/about" className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap text-sm font-semibold text-white/90 transition-colors hover:text-white">
+          <div className="mb-6 flex items-start justify-between gap-4">
+            <Link href="/about" className="mt-1 inline-flex shrink-0 items-center gap-1 whitespace-nowrap text-sm font-semibold text-white/90 transition-colors hover:text-white">
               {pick(locale, "عرض الكل", "View All")}
               <svg className="dir-flip" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M15 6l-6 6 6 6" /></svg>
             </Link>
