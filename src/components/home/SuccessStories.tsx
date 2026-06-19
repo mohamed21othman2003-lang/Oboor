@@ -81,13 +81,13 @@ const STORIES_EN: typeof STORIES = [
 
 function Story({ s, locale }: { s: (typeof STORIES)[number]; locale: Locale }) {
   return (
-    <div className="overflow-hidden rounded-2xl bg-white text-start shadow-lg">
-      <div className="relative h-48">
+    <div className="flex h-full flex-col overflow-hidden rounded-2xl bg-white text-start shadow-lg">
+      <div className="relative h-48 shrink-0">
         <Image src={s.img} alt={s.name} fill sizes="(max-width:768px) 100vw, 33vw" className="object-cover" />
         <span className="absolute right-3 top-3 rounded-full bg-brand px-3 py-1 text-[11px] font-semibold text-white">{s.program}</span>
         <span className="absolute bottom-3 left-3 rounded-lg bg-black/55 px-3 py-1 text-[11px] font-medium text-white backdrop-blur">{s.duration}</span>
       </div>
-      <div className="p-5">
+      <div className="flex flex-1 flex-col p-5">
         <h3 className="mb-4 text-base font-bold text-ink">{s.name} - {s.age}</h3>
         <div className="grid grid-cols-2 gap-3">
           <div className="rounded-lg bg-[#fdeced] p-3">
@@ -105,7 +105,7 @@ function Story({ s, locale }: { s: (typeof STORIES)[number]; locale: Locale }) {
           <p className="text-sm leading-7 text-ink">{s.quote}</p>
         </div>
 
-        <div className="mt-4 flex items-center justify-between border-t border-line pt-3 text-xs text-ink-muted">
+        <div className="mt-auto flex items-center justify-between border-t border-line pt-3 text-xs text-ink-muted">
           <span className="flex items-center gap-3">
             <span className="flex items-center gap-1">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
