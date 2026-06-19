@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { pick, type Locale } from "@/i18n/config";
 
 const REGIONS = [
@@ -114,13 +115,18 @@ export default function BranchMap({ locale }: { locale: Locale }) {
         </ul>
 
         <div className="mt-4 flex items-center gap-2">
-          <button className="flex-1 rounded-lg bg-brand py-2 text-[12px] font-semibold text-white transition-colors hover:bg-brand-dark">
+          <Link href="/branches/narjes" className="flex-1 rounded-lg bg-brand py-2 text-center text-[12px] font-semibold text-white transition-colors hover:bg-brand-dark">
             {pick(locale, "عرض التفاصيل", "View Details")}
-          </button>
-          <button className="flex items-center gap-1 rounded-lg border border-line px-3 py-2 text-[12px] font-semibold text-ink-muted transition-colors hover:bg-surface">
+          </Link>
+          <a
+            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(pick(locale, "مركز عبور - حي النرجس، طريق الأمير محمد بن سلمان، الرياض", "Oboor Center - Al-Narjis District, Prince Mohammed bin Salman Road, Riyadh"))}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1 rounded-lg border border-line px-3 py-2 text-[12px] font-semibold text-ink-muted transition-colors hover:bg-surface"
+          >
             {pick(locale, "الاتجاهات", "Directions")}
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M7 17L17 7M17 7H8M17 7v9" strokeLinecap="round" strokeLinejoin="round" /></svg>
-          </button>
+          </a>
         </div>
       </div>
     </div>

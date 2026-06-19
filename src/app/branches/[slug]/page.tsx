@@ -81,6 +81,8 @@ export default async function BranchDetailPage({ params }: { params: Promise<{ s
     { icon: <PinIcon />, label: pick(locale, "العنوان", "Address"), value: b.address },
   ];
 
+  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${pick(locale, "مركز عبور", "Oboor Center")} - ${b.address}`)}`;
+
   return (
     <>
       {/* Hero */}
@@ -97,14 +99,24 @@ export default async function BranchDetailPage({ params }: { params: Promise<{ s
           <div className="flex flex-col items-stretch justify-between gap-8 lg:flex-row lg:items-center">
             {/* Buttons (end / left in RTL) */}
             <div className="order-3 flex flex-col gap-3 lg:w-64">
-              <button className="flex items-center justify-center gap-2 rounded-xl bg-brand px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-dark">
+              <a
+                href={`/branches/${slug}/profile`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 rounded-xl bg-brand px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-dark"
+              >
                 <DownloadIcon />
                 {pick(locale, "تحميل البروفايل", "Download Profile")}
-              </button>
-              <button className="flex items-center justify-center gap-2 rounded-xl border border-brand px-6 py-3 text-sm font-semibold text-brand transition-colors hover:bg-brand/5">
+              </a>
+              <a
+                href={mapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 rounded-xl border border-brand px-6 py-3 text-sm font-semibold text-brand transition-colors hover:bg-brand/5"
+              >
                 <NavIcon />
                 {pick(locale, "الاتجاهات", "Directions")}
-              </button>
+              </a>
             </div>
 
             {/* Info (middle) */}
