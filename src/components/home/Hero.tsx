@@ -59,6 +59,12 @@ export default function Hero({ locale }: { locale: Locale }) {
   const go = (idx: number) => setI(((idx % n) + n) % n);
   const s = slides[i];
 
+  // التدرّج يتبع جهة النص: يمين في العربي، شمال في الإنجليزي
+  const gradient =
+    locale === "en"
+      ? "bg-gradient-to-r from-[rgba(13,61,69,0.9)] from-0% via-[rgba(13,61,69,0.4)] via-50% to-transparent to-80%"
+      : "bg-gradient-to-l from-[rgba(13,61,69,0.85)] from-0% via-[rgba(13,61,69,0.28)] via-45% to-transparent to-75%";
+
   return (
     <section className="relative min-h-[600px] w-full overflow-hidden lg:h-[791px]">
       {/* Background image */}
@@ -67,25 +73,26 @@ export default function Hero({ locale }: { locale: Locale }) {
         alt={pick(locale, "مركز عبور للرعاية والتأهيل", "Oboor Center for Care & Rehabilitation")}
         fill
         priority
+        quality={90}
         sizes="100vw"
         className="object-cover object-bottom"
       />
-      {/* Gradient — darker on the right (text side), image stays bright on the left */}
-      <div className="absolute inset-0 bg-gradient-to-l from-[rgba(13,61,69,0.9)] via-[rgba(13,61,69,0.4)] to-transparent" />
+      {/* Gradient — teal concentrated behind the text side (direction-aware) */}
+      <div className={`absolute inset-0 ${gradient}`} />
 
       {/* Content */}
-      <div className="relative mx-auto flex h-full min-h-[600px] max-w-7xl items-center justify-start px-6 lg:min-h-0 lg:px-[100px]">
+      <div className="relative mx-auto flex h-full min-h-[600px] max-w-[1600px] items-center justify-start px-6 lg:min-h-0 lg:px-16">
         <div key={i} className="flex w-full max-w-xl flex-col items-start gap-6 text-start motion-safe:animate-[fadeIn_0.5s_ease]">
           <span className="inline-flex items-center gap-2 rounded-full border border-brand/40 bg-brand/20 px-4 py-2 text-sm font-medium text-[#7ee8f0]">
             <span className="h-2 w-2 rounded-full bg-brand opacity-95" />
             {badge}
           </span>
 
-          <h1 className="text-4xl font-extrabold leading-tight text-white sm:text-5xl lg:text-[52px] lg:leading-[1.25]">
+          <h1 className="text-4xl font-extrabold leading-tight text-white [text-shadow:0_2px_18px_rgba(13,61,69,0.5)] sm:text-5xl lg:text-[52px] lg:leading-[1.25]">
             {s.heading}
           </h1>
 
-          <p className="max-w-[507px] text-base leading-relaxed text-white/85 sm:text-lg lg:text-xl">
+          <p className="max-w-[507px] text-base leading-relaxed text-white/90 [text-shadow:0_1px_12px_rgba(13,61,69,0.55)] sm:text-lg lg:text-xl">
             {s.desc}
           </p>
 

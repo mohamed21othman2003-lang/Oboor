@@ -18,11 +18,23 @@ const MESSAGE_TYPES: { value: string; ar: string; en: string }[] = [
 export default function ContactForm({ locale }: { locale: Locale }) {
   const [type, setType] = useState("خدمة");
   const [sent, setSent] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    // TODO: wire to backend / API route
-    setSent(true);
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch("/api/contact", { method: "POST", body: new FormData(e.currentTarget) });
+      const data = await res.json();
+      if (!res.ok || !data.ok) throw new Error(data.error || "");
+      setSent(true);
+    } catch (err) {
+      setError(pick(locale, "حدث خطأ، حاول مرة أخرى.", "Something went wrong, please try again."));
+    } finally {
+      setLoading(false);
+    }
   }
 
   const field =
@@ -76,18 +88,22 @@ export default function ContactForm({ locale }: { locale: Locale }) {
 
       <button
         type="submit"
-        className="mt-6 flex w-full items-center justify-center gap-2 rounded-lg bg-brand py-3.5 text-sm font-semibold text-white transition-colors hover:bg-brand-dark"
+        disabled={loading}
+        className="mt-6 flex w-full items-center justify-center gap-2 rounded-lg bg-brand py-3.5 text-sm font-semibold text-white transition-colors hover:bg-brand-dark disabled:opacity-60"
       >
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <path strokeLinecap="round" strokeLinejoin="round" d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
         </svg>
-        {pick(locale, "إرسال الطلب", "Submit Request")}
+        {loading ? pick(locale, "جارٍ الإرسال...", "Sending...") : pick(locale, "إرسال الطلب", "Submit Request")}
       </button>
 
       {sent && (
         <p className="mt-4 rounded-lg bg-brand/10 px-4 py-3 text-center text-sm font-medium text-brand-deep">
           {pick(locale, "تم إرسال طلبك بنجاح، سنتواصل معك قريباً.", "Your request has been sent successfully. We'll be in touch soon.")}
         </p>
+      )}
+      {error && (
+        <p className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-center text-sm font-medium text-red-600">{error}</p>
       )}
     </form>
   );
