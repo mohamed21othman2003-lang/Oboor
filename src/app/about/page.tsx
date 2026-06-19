@@ -1,0 +1,282 @@
+import Image from "next/image";
+import Link from "next/link";
+import type { Metadata } from "next";
+import { getSpecialists } from "@/lib/specialistsData";
+import { REGION_BRANCHES, REGION_BRANCHES_EN } from "@/lib/branchesData";
+import { getLocale } from "@/i18n/locale";
+import { pick, type Locale } from "@/i18n/config";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  return {
+    title: pick(locale, "من نحن | مركز عبور للرعاية والتأهيل", "About Us | Oboor Center for Care & Rehabilitation"),
+    description: pick(
+      locale,
+      "تأسست مراكز عبور عام ٢٠٠٧ كأكبر سلسلة مراكز متخصصة في التشخيص والتقييم والتأهيل للأشخاص ذوي الإعاقة.",
+      "Founded in 2007, Oboor Centers are the largest chain specialized in the diagnosis, assessment and rehabilitation of people with disabilities."
+    ),
+  };
+}
+
+function Chev() {
+  return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="dir-flip"><path strokeLinecap="round" strokeLinejoin="round" d="M15 18l-6-6 6-6" /></svg>;
+}
+function TagLine({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="inline-flex items-center gap-2 text-sm font-bold text-brand">
+      <span className="inline-block h-0.5 w-6 rounded-full bg-brand" />
+      {children}
+    </span>
+  );
+}
+
+const PROGRAMS = [
+  { title: "علاج النطق والتخاطب", title_en: "Speech & Language Therapy", desc: "برامج متخصصة لتطوير مهارات التواصل والنطق واللغة، وعلاج اضطرابات النطق المختلفة، ووضع خطط علاجية فردية لكل حالة.", desc_en: "Specialized programs to develop communication, speech and language skills, treat various speech disorders, and design an individual treatment plan for each case.", icon: "chat" },
+  { title: "العلاج الطبيعي", title_en: "Physical Therapy", desc: "جلسات علاجية تُعنى بتحسين الوظائف الحركية، وتنمية المهارات الحسية، وإعادة التأهيل الحركي بأساليب علمية حديثة.", desc_en: "Therapy sessions focused on improving motor function, developing sensory skills, and motor rehabilitation using modern, evidence-based methods.", icon: "activity" },
+  { title: "العلاج الوظيفي", title_en: "Occupational Therapy", desc: "يُركز على تطوير مهارات الحياة اليومية والحركات الدقيقة، لتعزيز الاستقلالية والاندماج الوظيفي والمجتمعي.", desc_en: "Focuses on developing daily living skills and fine motor skills to enhance independence and functional and social integration.", icon: "hand" },
+  { title: "العلاج النفسي", title_en: "Psychological Services", desc: "دعم نفسي متخصص للأشخاص ذوي الإعاقة وأسرهم، يشمل التقييم والإرشاد، ووضع خطط دعم سلوكية شاملة.", desc_en: "Specialized psychological support for people with disabilities and their families, including assessment, counseling, and comprehensive behavioral support plans.", icon: "brain" },
+  { title: "العلاج الاجتماعي", title_en: "Social Services", desc: "برامج تُعزز مهارات التواصل الاجتماعي والاندماج المجتمعي، وتُسهم في بناء شبكة دعم متينة للفرد وأسرته.", desc_en: "Programs that strengthen social communication skills and community integration, helping build a strong support network for the individual and their family.", icon: "users" },
+];
+
+// ترتيب العرض كما في الديزاين
+const SMALL_BRANCH_SLUGS = ["kharj", "wadi-dawasir", "qassim", "majmaah", "sharqia", "jouf", "madinah", "taif", "aseer"];
+
+export default async function AboutPage() {
+  const locale = await getLocale();
+  const branches = locale === "en" ? REGION_BRANCHES_EN : REGION_BRANCHES;
+  const SMALL_BRANCHES = SMALL_BRANCH_SLUGS.map((s) => branches.find((b) => b.slug === s)!);
+  const specialists = getSpecialists(locale);
+
+  return (
+    <>
+      {/* Hero */}
+      <section className="overflow-hidden bg-gradient-to-b from-[#ebf7f9] to-white">
+        <div className="mx-auto max-w-7xl px-6 py-10 lg:px-8">
+          <nav className="mb-8 flex items-center justify-start gap-2 text-sm text-ink-soft">
+            <span className="text-brand">{pick(locale, "من نحن", "About Us")}</span>
+            <Chev />
+            <Link href="/" className="hover:text-brand">{pick(locale, "الرئيسية", "Home")}</Link>
+          </nav>
+
+          <div className="grid items-center gap-12 lg:grid-cols-2">
+            {/* Image (right) */}
+            <div className="relative order-1 mx-auto h-[440px] w-full max-w-[480px]">
+              <div className="relative h-full w-full overflow-hidden rounded-3xl shadow-lg">
+                <Image src="/figma/about/hero.jpg" alt={pick(locale, "مركز عبور", "Oboor Center")} fill className="object-cover" sizes="(max-width:1024px) 100vw, 480px" priority />
+              </div>
+              <span className="absolute right-5 top-6 flex items-center gap-2 rounded-xl bg-white px-3 py-2 text-xs font-bold text-ink shadow-lg">
+                <CalIcon /> {pick(locale, "تأهيل شامل ومتكامل", "Comprehensive, integrated rehabilitation")}
+              </span>
+              <span className="absolute bottom-8 left-5 flex items-center gap-2 rounded-xl bg-white px-3 py-2 shadow-lg">
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand/10 text-brand"><CalIcon /></span>
+                <span className="text-start"><span className="block text-[10px] text-ink-soft">{pick(locale, "تأسس عام", "Established")}</span><span className="block text-sm font-extrabold text-brand">{pick(locale, "٢٠٠٧", "2007")}</span></span>
+              </span>
+            </div>
+
+            {/* Text (left) */}
+            <div className="order-2 text-start">
+              <TagLine>{pick(locale, "منذ عام ٢٠٠٧ — رائدون في التأهيل والرعاية", "Since 2007 — pioneers in rehabilitation and care")}</TagLine>
+              <h1 className="mt-4 text-4xl font-extrabold text-ink sm:text-5xl">{pick(locale, <>من <span className="text-brand">نحن</span></>, <>About <span className="text-brand">Us</span></>)}</h1>
+              <p className="mt-5 text-base leading-8 text-ink-muted">
+                {pick(locale, "تأسست مراكز عبور عام ٢٠٠٧، وأصبحت اليوم من أكبر سلاسل المراكز المتخصصة في التشخيص والتقييم والتأهيل والتعليم للأشخاص ذوي الإعاقة في المملكة العربية السعودية، عبر شبكة فروع ممتدة وكوادر متخصصة رفيعة المستوى.", "Founded in 2007, Oboor Centers have grown into one of the largest chains specialized in the diagnosis, assessment, rehabilitation and education of people with disabilities in Saudi Arabia, through an extensive network of branches and highly qualified specialists.")}
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* About intro */}
+      <section className="bg-white py-16">
+        <div className="mx-auto grid max-w-7xl items-center gap-12 px-6 lg:grid-cols-2 lg:px-8">
+          {/* Text (right) */}
+          <div className="order-2 text-start lg:order-1">
+            <TagLine>{pick(locale, "تعرّف علينا", "Get to know us")}</TagLine>
+            <h2 className="mt-4 text-3xl font-extrabold text-ink">{pick(locale, <>تعرّف على مركز <span className="text-brand">عبور</span></>, <>Get to know <span className="text-brand">Oboor</span> Center</>)}</h2>
+            <div className="mt-5 space-y-4 text-sm leading-8 text-ink-muted">
+              <p>{pick(locale, "تأسست مراكز عبور عام ٢٠٠٧ كأكبر سلسلة مراكز متخصصة في تقديم وتطوير خدمات التشخيص والتقييم والتأهيل والتعليم للأشخاص ذوي الإعاقة في المملكة العربية السعودية.", "Oboor Centers were founded in 2007 as the largest chain specialized in providing and developing diagnosis, assessment, rehabilitation and education services for people with disabilities in Saudi Arabia.")}</p>
+              <p>{pick(locale, "نهدف إلى تمكين الأشخاص ذوي الإعاقة من حياة أكثر جودة واستقلالية من خلال منظومة متكاملة من البرامج التأهيلية والتعليمية وكوادر بشرية مؤهلة وبيئات علاجية مجهزة بأحدث التقنيات.", "We aim to empower people with disabilities to live with greater quality and independence through an integrated system of rehabilitation and educational programs, qualified staff, and therapeutic environments equipped with the latest technologies.")}</p>
+              <p>{pick(locale, "تمتد خدماتنا عبر شبكة فروع واسعة تغطي مناطق رئيسية في المملكة، مما يُمكّن الأسر من الوصول إلى الرعاية المتخصصة بيسر وسهولة وضمان الاستمرارية في مسيرة التأهيل.", "Our services extend across a wide network of branches covering major regions of the Kingdom, enabling families to access specialized care easily and ensuring continuity throughout the rehabilitation journey.")}</p>
+            </div>
+          </div>
+          {/* Image (left) */}
+          <div className="relative order-1 h-[420px] lg:order-2">
+            <div className="relative h-full w-full overflow-hidden rounded-3xl shadow-lg">
+              <Image src="/figma/about/intro.jpg" alt={pick(locale, "جلسة تأهيل", "Rehabilitation session")} fill className="object-cover" sizes="(max-width:1024px) 100vw, 50vw" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Mission & Vision */}
+      <section className="bg-surface py-16">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="mb-12 text-center">
+            <span className="inline-flex items-center gap-2 text-sm font-bold text-brand">
+              <span className="inline-block h-0.5 w-6 rounded-full bg-brand" />
+              {pick(locale, "توجهاتنا الاستراتيجية", "Our strategic direction")}
+              <span className="inline-block h-0.5 w-6 rounded-full bg-brand" />
+            </span>
+            <h2 className="mt-3 text-3xl font-extrabold text-ink sm:text-4xl">{pick(locale, "رسالتنا ورؤيتنا", "Our Mission & Vision")}</h2>
+          </div>
+          <div className="grid gap-6 lg:grid-cols-2">
+            {/* رسالتنا (dark, right) */}
+            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-bl from-brand-deep to-[#0a2329] p-8 text-start text-white">
+              <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand/20 text-brand"><TargetIcon /></span>
+              <p className="mt-4 text-sm text-brand">{pick(locale, "رسالتنا", "Our Mission")}</p>
+              <h3 className="mt-1 text-xl font-extrabold">{pick(locale, "تحسين نوعية الحياة والاندماج الفعّال", "Improving quality of life and meaningful integration")}</h3>
+              <p className="mt-3 text-sm leading-8 text-white/75">{pick(locale, "تحسين نوعية حياة الأشخاص من ذوي الإعاقة وأسرهم، ودمجهم الفعّال في المجتمع، من خلال برامج تأهيلية وتعليمية مبنية على أسس علمية وممارسات مهنية عالية الجودة.", "Improving the quality of life of people with disabilities and their families and integrating them meaningfully into society, through rehabilitation and educational programs built on scientific foundations and high-quality professional practices.")}</p>
+              <Link href="/programs" className="mt-5 inline-flex items-center gap-2 rounded-xl bg-brand px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-dark">{pick(locale, "عرض الخدمات", "View Services")}<Chev /></Link>
+            </div>
+            {/* رؤيتنا (light, left) */}
+            <div className="relative overflow-hidden rounded-3xl bg-[#e8f7f9] p-8 text-start">
+              <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-brand shadow-sm"><EyeIcon /></span>
+              <p className="mt-4 text-sm text-brand-dark">{pick(locale, "رؤيتنا", "Our Vision")}</p>
+              <h3 className="mt-1 text-xl font-extrabold text-ink">{pick(locale, "الكيان الرائد والمرجعي", "The leading, reference entity")}</h3>
+              <p className="mt-3 text-sm leading-8 text-ink-muted">{pick(locale, "أن نكون الكيان الرائد والمرجعي في تقديم الخدمات المتكاملة والمستدامة للأشخاص ذوي الإعاقة وأسرهم على مستوى المملكة والمنطقة.", "To be the leading, reference entity in providing integrated and sustainable services for people with disabilities and their families across the Kingdom and the region.")}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Programs */}
+      <section className="bg-white py-16">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
+            <div className="text-start">
+              <h2 className="text-3xl font-extrabold text-ink">{pick(locale, "نبذة عن البرامج", "About our programs")}</h2>
+              <p className="mt-2 max-w-2xl text-sm leading-7 text-ink-muted">{pick(locale, "نعتمد في مراكز عبور منهجية علمية متكاملة مدعومة بأحدث التقنيات والبيئات العلاجية المتخصصة لضمان أفضل نتائج تأهيلية ممكنة لكل حالة.", "At Oboor Centers we follow an integrated, evidence-based methodology supported by the latest technologies and specialized therapeutic environments to ensure the best possible rehabilitation outcomes for each case.")}</p>
+            </div>
+            <Link href="/programs" className="flex items-center gap-2 rounded-xl bg-brand px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-dark">{pick(locale, "عرض الخدمات", "View Services")}<Chev /></Link>
+          </div>
+
+          <div className="grid items-center gap-10 lg:grid-cols-2">
+            {/* List (right) */}
+            <div className="order-2 space-y-3 lg:order-1">
+              {PROGRAMS.map((p) => (
+                <div key={p.title} className="flex items-start gap-4 rounded-2xl border border-line bg-white p-4 text-start shadow-sm">
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand/10 text-brand">{PROG_ICONS[p.icon]}</span>
+                  <div>
+                    <h3 className="text-base font-bold text-ink">{pick(locale, p.title, p.title_en)}</h3>
+                    <p className="mt-1 text-xs leading-6 text-ink-muted">{pick(locale, p.desc, p.desc_en)}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            {/* Image (left) */}
+            <div className="relative order-1 h-[480px] lg:order-2">
+              <div className="relative h-full w-full overflow-hidden rounded-3xl shadow-lg">
+                <Image src="/figma/about/programs.jpg" alt={pick(locale, "برامج عبور", "Oboor programs")} fill className="object-cover" sizes="(max-width:1024px) 100vw, 50vw" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Specialists */}
+      <section className="bg-surface py-16">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="mb-10 text-start">
+            <h2 className="text-3xl font-extrabold text-ink">{pick(locale, "نبذة عن الأخصائيين", "About our specialists")}</h2>
+            <p className="mt-2 max-w-2xl text-sm leading-7 text-ink-muted">{pick(locale, "يضمّ مركز عبور نخبة من الأخصائيين والاستشاريين المؤهلين والحاصلين على اعتمادات دولية في مختلف مجالات التأهيل.", "Oboor Center brings together a select team of qualified specialists and consultants holding international accreditations across various fields of rehabilitation.")}</p>
+          </div>
+          <div className="grid gap-7 md:grid-cols-2 lg:grid-cols-3">
+            {specialists.slice(0, 3).map((s) => (
+              <article key={s.slug} className="flex flex-col overflow-hidden rounded-[18px] border border-line bg-white">
+                <div className="relative h-[240px] w-full bg-[#f3f5f6]">
+                  <Image src={s.image} alt={s.name} fill className="object-cover" sizes="(max-width:768px) 100vw, 33vw" />
+                </div>
+                <div className="flex flex-1 flex-col gap-3 p-5">
+                  <div className="flex justify-start">
+                    <span className="rounded-full bg-[#e8f7f8] px-3 py-1 text-xs font-semibold text-[#1a9aa5]">{s.specialty}</span>
+                  </div>
+                  <h3 className="text-start text-lg font-bold text-ink">{s.name}</h3>
+                  <p className="text-start text-sm leading-7 text-ink-muted">{s.desc}</p>
+                  <Link href="/specialists" className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-[14px] bg-brand py-2.5 text-xs font-semibold text-white transition-colors hover:bg-brand-dark">{pick(locale, "عرض التفاصيل", "View Details")}</Link>
+                </div>
+              </article>
+            ))}
+          </div>
+          <div className="mt-10 flex justify-center">
+            <Link href="/specialists" className="rounded-2xl border-2 border-brand px-12 py-3 text-sm font-semibold text-brand transition-colors hover:bg-brand hover:text-white">{pick(locale, "عرض الكل", "View All")}</Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Branches */}
+      <section className="bg-white py-16">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
+            <div className="text-start">
+              <TagLine>{pick(locale, "حضور واسع في المملكة", "A wide presence across the Kingdom")}</TagLine>
+              <h2 className="mt-3 text-3xl font-extrabold text-ink">{pick(locale, "نبذة عن الفروع", "About our branches")}</h2>
+              <p className="mt-2 max-w-2xl text-sm leading-7 text-ink-muted">{pick(locale, "تمتد مراكز عبور عبر أكثر من ١١ مدينة رئيسية في المملكة العربية السعودية، لضمان وصول خدماتنا المتخصصة إلى الأسر أينما كانت، مع الحفاظ على نفس مستوى الجودة والتميّز في كل موقع.", "Oboor Centers span more than 11 major cities across Saudi Arabia, ensuring our specialized services reach families wherever they are, while maintaining the same level of quality and excellence at every location.")}</p>
+            </div>
+            <Link href="/branches" className="flex items-center gap-2 rounded-xl bg-brand px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-dark">{pick(locale, "استعرض الفروع", "Browse Branches")}<Chev /></Link>
+          </div>
+
+          <div className="grid gap-4 lg:grid-cols-4">
+            {/* Main branch (dark, right) */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-bl from-brand-deep to-[#0a2329] p-6 text-start text-white lg:order-1 lg:row-span-3">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-brand/20 px-3 py-1 text-xs font-bold text-brand"><PinIcon />{pick(locale, "الفرع الرئيسي", "Main Branch")}</span>
+              <h3 className="mt-4 text-3xl font-extrabold">{pick(locale, "الرياض", "Riyadh")}</h3>
+              <p className="mt-1 text-sm text-white/70">{pick(locale, "منطقة الرياض — ٣ فروع", "Riyadh Region — 3 branches")}</p>
+              <ul className="mt-5 space-y-2 text-sm text-white/85">
+                {pick(locale, ["حي العليا", "حي النرجس", "حي الصحافة"], ["Al-Olaya District", "Al-Narjes District", "Al-Sahafa District"]).map((d) => (
+                  <li key={d} className="flex items-center justify-start gap-2"><span className="h-1.5 w-1.5 rounded-full bg-brand" />{d}</li>
+                ))}
+              </ul>
+              <div className="mt-5 flex items-center justify-start gap-2 border-t border-white/10 pt-4 text-sm text-white/80">
+                <PhoneIcon />920-000-001
+              </div>
+            </div>
+
+            {/* Small branches */}
+            {SMALL_BRANCHES.map((b) => (
+              <div key={b.slug} className="rounded-2xl border border-line bg-white p-5 text-start shadow-sm lg:order-2">
+                <p className="flex items-center justify-start gap-1.5 text-xs text-ink-soft"><PinIcon />{b.region}</p>
+                <h3 className="mt-1.5 text-lg font-bold text-ink">{b.city}</h3>
+                <Link href={`/branches/${b.slug}`} className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-brand hover:text-brand-dark">{pick(locale, "عرض الفرع", "View Branch")}<Chev /></Link>
+              </div>
+            ))}
+          </div>
+
+          {/* Bottom CTA */}
+          <div className="mt-6 flex flex-col items-center justify-between gap-4 rounded-2xl bg-[#e8f7f9] p-5 sm:flex-row">
+            <div className="flex items-center gap-3 text-start">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand text-white"><PinIcon /></span>
+              <div>
+                <p className="text-base font-bold text-ink">{pick(locale, "نتوسع باستمرار لخدمتكم في كل منطقة", "We keep expanding to serve you in every region")}</p>
+                <p className="mt-0.5 text-sm text-ink-muted">{pick(locale, "هل تبحث عن فرع قريب منك؟ تواصل معنا لمعرفة أقرب مركز إلى موقعك.", "Looking for a branch near you? Contact us to find the nearest center to your location.")}</p>
+              </div>
+            </div>
+            <Link href="/contact" className="flex items-center gap-2 rounded-xl bg-brand px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-dark">{pick(locale, "تواصل معنا", "Contact Us")}<Chev /></Link>
+          </div>
+        </div>
+      </section>
+    </>
+  );
+}
+
+const PROG_ICONS: Record<string, React.ReactNode> = {
+  chat: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>,
+  activity: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></svg>,
+  hand: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 11V6a2 2 0 0 0-4 0v5M14 10V4a2 2 0 0 0-4 0v6M10 10.5V6a2 2 0 0 0-4 0v8" /><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2a8 8 0 0 1-8-8 2 2 0 1 1 4 0" /></svg>,
+  brain: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9.5 3A2.5 2.5 0 0 0 7 5.5a2.5 2.5 0 0 0-1 4.8A2.5 2.5 0 0 0 7 15a2.5 2.5 0 0 0 5 .5V5.5A2.5 2.5 0 0 0 9.5 3zM14.5 3A2.5 2.5 0 0 1 17 5.5a2.5 2.5 0 0 1 1 4.8A2.5 2.5 0 0 1 17 15a2.5 2.5 0 0 1-5 .5" /></svg>,
+  users: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" /></svg>,
+};
+
+function CalIcon() {
+  return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-brand"><rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" /></svg>;
+}
+function EyeIcon() {
+  return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z" /><circle cx="12" cy="12" r="3" /></svg>;
+}
+function TargetIcon() {
+  return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="5" /><circle cx="12" cy="12" r="1" /></svg>;
+}
+function PinIcon() {
+  return <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>;
+}
+function PhoneIcon() {
+  return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z" /></svg>;
+}

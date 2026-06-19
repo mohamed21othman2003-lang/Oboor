@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local agent/tooling artifacts
+/.playwright-mcp
+
+# design reference exports (not part of the app)
+/.claude/figma-refs/
