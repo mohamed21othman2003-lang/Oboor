@@ -51,14 +51,17 @@ export default function Footer({ locale }: { locale: Locale }) {
           <Image src="/figma/imgImage.png" alt={pick(locale, "مركز عبور", "Oboor Center")} width={130} height={76} className="h-16 w-auto" />
           <p className="mt-5 text-sm leading-8 text-white/55">{t.brandDesc}</p>
           <div className="mt-6 flex gap-3">
-            <Social href="#" label={pick(locale, "إكس", "X")}>
+            <Social href="https://x.com/hdc_ksa" label={pick(locale, "إكس", "X")}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2H21.5l-7.5 8.57L23 22h-6.594l-5.165-6.75L5.32 22H2.06l8.02-9.166L1 2h6.76l4.668 6.17L18.244 2zm-1.157 18h1.83L7.01 3.92H5.05L17.087 20z" /></svg>
             </Social>
-            <Social href="#" label={pick(locale, "انستغرام", "Instagram")}>
+            <Social href="https://www.instagram.com/hdc_ksa" label={pick(locale, "انستغرام", "Instagram")}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="5" /><circle cx="12" cy="12" r="4" /><circle cx="17.5" cy="6.5" r="1" fill="currentColor" /></svg>
             </Social>
-            <Social href="#" label={pick(locale, "تيك توك", "TikTok")}>
+            <Social href="https://www.tiktok.com/@hdc_ksa" label={pick(locale, "تيك توك", "TikTok")}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 3a5.5 5.5 0 0 0 4 4v3a8.5 8.5 0 0 1-4-1v6a6 6 0 1 1-6-6v3a3 3 0 1 0 3 3V3h3z" /></svg>
+            </Social>
+            <Social href="https://wa.me/966920003452" label={pick(locale, "واتساب", "WhatsApp")}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2zm5.8 14.06c-.24.68-1.42 1.32-1.95 1.36-.5.04-.5.4-3.16-.66-2.66-1.05-4.3-3.78-4.43-3.96-.13-.18-1.05-1.4-1.05-2.66s.66-1.89.9-2.15c.24-.26.52-.32.7-.32l.5.01c.16.01.38-.06.59.45.24.58.82 2 .89 2.14.07.14.12.31.02.49-.09.18-.14.29-.28.45l-.42.49c-.14.14-.28.29-.12.57.16.28.71 1.17 1.53 1.9 1.05.94 1.94 1.23 2.22 1.37.28.14.44.12.6-.07.18-.21.69-.8.87-1.08.18-.28.36-.23.6-.14.25.09 1.57.74 1.84.88.27.14.45.21.52.32.07.12.07.68-.17 1.36z" /></svg>
             </Social>
           </div>
         </div>

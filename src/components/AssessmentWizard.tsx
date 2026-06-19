@@ -127,7 +127,7 @@ export default function AssessmentWizard({ locale }: { locale: Locale }) {
           </p>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
             <a href="/admission" className="rounded-xl bg-brand px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-dark">{pick(locale, "طلب التحاق", "Apply Now")}</a>
-            <a href="https://wa.me/966561000274" target="_blank" rel="noopener noreferrer" className="rounded-xl bg-[#25D366] px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90">{pick(locale, "تواصل عبر الواتساب", "Contact via WhatsApp")}</a>
+            <a href="https://wa.me/966920003452" target="_blank" rel="noopener noreferrer" className="rounded-xl bg-[#25D366] px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90">{pick(locale, "تواصل عبر الواتساب", "Contact via WhatsApp")}</a>
             <button onClick={reset} className="rounded-xl border border-line px-6 py-3 text-sm font-semibold text-ink-muted transition-colors hover:bg-surface">{pick(locale, "تقييم جديد", "New Assessment")}</button>
           </div>
         </div>

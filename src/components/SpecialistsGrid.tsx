@@ -176,7 +176,7 @@ function Modal({ s, locale, onClose }: { s: Specialist; locale: Locale; onClose:
             {/* Footer */}
             <div className="flex items-center gap-3">
               <a
-                href="https://wa.me/966561000274"
+                href="https://wa.me/966920003452"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-brand py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-dark"

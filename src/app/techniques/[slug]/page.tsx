@@ -143,7 +143,7 @@ export default async function TechniqueDetailPage({ params }: { params: Promise<
           <p className="mx-auto mt-3 max-w-2xl text-sm text-white/75">{pick(locale, "يمكنك التواصل معنا لمساعدتك في اختيار البرنامج أو الخدمة أو التقنية الأنسب وفق احتياجات طفلك.", "You can reach out to us for help choosing the program, service, or technology best suited to your child's needs.")}</p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
             <Link href="/admission" className="rounded-xl bg-brand px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-dark">{pick(locale, "طلب التحاق", "Apply Now")}</Link>
-            <a href="https://wa.me/966561000274" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 rounded-xl bg-[#25D366] px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90">{pick(locale, "تواصل عبر الواتساب", "Contact via WhatsApp")}</a>
+            <a href="https://wa.me/966920003452" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 rounded-xl bg-[#25D366] px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90">{pick(locale, "تواصل عبر الواتساب", "Contact via WhatsApp")}</a>
             <Link href="/branches" className="rounded-xl bg-white px-6 py-3 text-sm font-semibold text-ink transition-colors hover:bg-surface">{pick(locale, "اعثر على أقرب فرع", "Find Nearest Branch")}</Link>
           </div>
         </div>

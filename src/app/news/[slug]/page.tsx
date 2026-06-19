@@ -134,7 +134,7 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
                     <span className="h-2 w-2 rounded-full bg-success" />
                     {pick(locale, "التسجيل مفتوح - مقاعد محدودة", "Registration open - limited seats")}
                   </div>
-                  <a href="https://wa.me/966561000274" target="_blank" rel="noopener noreferrer" className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-dark">
+                  <a href="https://wa.me/966920003452" target="_blank" rel="noopener noreferrer" className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-dark">
                     <PhoneIcon />
                     {pick(locale, "تواصل معنا للتسجيل", "Contact us to register")}
                   </a>

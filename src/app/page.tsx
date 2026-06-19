@@ -24,7 +24,7 @@ export default async function Home() {
 
       {/* WhatsApp float */}
       <a
-        href="https://wa.me/966561000274"
+        href="https://wa.me/966920003452"
         target="_blank"
         rel="noopener noreferrer"
         aria-label={pick(locale, "تواصل عبر واتساب", "Contact via WhatsApp")}
