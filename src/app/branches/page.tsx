@@ -136,7 +136,7 @@ export default async function BranchesPage() {
                 <p className="mt-1 flex items-center justify-start gap-1.5 text-start text-xs text-ink-soft"><PhoneIconSm />0561000274</p>
                 <div className="mt-3 flex items-center gap-2">
                   <Link href="/branches/narjes" className="flex-1 rounded-lg bg-brand py-2 text-center text-xs font-semibold text-white transition-colors hover:bg-brand-dark">{pick(locale, "عرض التفاصيل", "View Details")}</Link>
-                  <button className="flex items-center gap-1 rounded-lg border border-brand px-3 py-2 text-xs font-semibold text-brand transition-colors hover:bg-brand/5">{pick(locale, "الاتجاهات", "Directions")}<NavIconSm /></button>
+                  <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(pick(locale, "مركز عبور - حي النرجس، طريق الأمير محمد بن سلمان، الرياض", "Oboor Center - Al-Narjes District, Prince Mohammed Bin Salman Road, Riyadh"))}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 rounded-lg border border-brand px-3 py-2 text-xs font-semibold text-brand transition-colors hover:bg-brand/5">{pick(locale, "الاتجاهات", "Directions")}<NavIconSm /></a>
                 </div>
               </div>
 

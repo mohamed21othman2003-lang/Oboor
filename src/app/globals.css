@@ -45,6 +45,16 @@ body {
   transform: scaleX(-1);
 }
 
+/* Printable documents (e.g. branch profile → save as PDF) */
+@media print {
+  .no-print { display: none !important; }
+  .profile-doc {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  @page { margin: 14mm; }
+}
+
 /* Hero slide transition */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(8px); }

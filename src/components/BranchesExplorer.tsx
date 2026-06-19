@@ -89,10 +89,15 @@ function BranchCard({ b, locale }: { b: Branch; locale: Locale }) {
         <Link href={`/branches/${b.slug}`} className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-brand py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-dark">
           {pick(locale, "عرض التفاصيل", "View Details")}
         </Link>
-        <button className="flex items-center justify-center gap-1.5 rounded-xl border border-brand px-4 py-2.5 text-sm font-semibold text-brand transition-colors hover:bg-brand/5">
+        <a
+          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${pick(locale, "مركز عبور", "Oboor Center")} - ${b.address}`)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-center gap-1.5 rounded-xl border border-brand px-4 py-2.5 text-sm font-semibold text-brand transition-colors hover:bg-brand/5"
+        >
           {pick(locale, "الاتجاهات", "Directions")}
           <NavIcon />
-        </button>
+        </a>
       </div>
     </article>
   );
