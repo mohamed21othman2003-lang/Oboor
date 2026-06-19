@@ -1,0 +1,128 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import { BRANCHES, BRANCHES_EN, regionTabs, type Branch } from "@/lib/branchesData";
+import { pick, type Locale } from "@/i18n/config";
+
+export default function BranchesExplorer({ locale }: { locale: Locale }) {
+  const tabs = regionTabs(locale);
+  const source = locale === "en" ? BRANCHES_EN : BRANCHES;
+  const allLabel = pick(locale, "الكل", "All");
+  const [region, setRegion] = useState(allLabel);
+  const list = region === allLabel ? source : source.filter((b) => b.region === region);
+
+  return (
+    <section className="bg-white py-16">
+      <div className="mx-auto max-w-7xl px-6 lg:px-8">
+        {/* Heading */}
+        <div className="mb-8 text-start">
+          <h2 className="text-3xl font-extrabold text-ink">{pick(locale, "تصفّح الفروع ", "Browse Branches ")}<span className="text-brand">{pick(locale, "بالمنطقة", "by Region")}</span></h2>
+          <p className="mt-2 text-sm text-ink-muted">{pick(locale, "اختر المنطقة من القائمة لعرض جميع الفروع التابعة لها بشكل مفصّل.", "Choose a region from the list to view all of its branches in detail.")}</p>
+        </div>
+
+        {/* Region tabs */}
+        <div className="mb-8 flex flex-wrap items-center justify-start gap-2.5">
+          {tabs.map((t) => {
+            const active = t.name === region;
+            return (
+              <button
+                key={t.name}
+                onClick={() => setRegion(t.name)}
+                className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                  active ? "bg-brand text-white" : "bg-white text-ink-muted ring-1 ring-line hover:bg-surface"
+                }`}
+              >
+                <span className={`flex h-5 min-w-[20px] items-center justify-center rounded-full px-1 text-xs font-bold ${active ? "bg-white/25 text-white" : "bg-surface text-ink-soft"}`}>{t.count}</span>
+                {t.name}
+                <span className={`h-2 w-2 rounded-full ${active ? "bg-white" : "bg-brand"}`} />
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Branch cards */}
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {list.map((b) => <BranchCard key={b.slug} b={b} locale={locale} />)}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function BranchCard({ b, locale }: { b: Branch; locale: Locale }) {
+  return (
+    <article className="flex flex-col rounded-2xl border border-line bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
+      {/* Header */}
+      <div className="flex items-start justify-between gap-3 border-b border-line pb-4">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand/10 text-brand">
+          <BuildingIcon />
+        </span>
+        <div className="text-start">
+          <h3 className="text-lg font-bold text-ink">{b.name}</h3>
+          <p className="mt-0.5 text-sm">
+            <span className="font-semibold text-brand">{b.city}</span>{" "}
+            <span className="text-ink-soft">{b.area}</span>
+          </p>
+        </div>
+      </div>
+
+      {/* Rows */}
+      <div className="space-y-3 py-4">
+        <InfoRow icon={<PinIcon />} label={pick(locale, "العنوان", "Address")} value={b.address} />
+        <InfoRow icon={<ClockIcon />} label={pick(locale, "أوقات العمل", "Working Hours")} value={b.hours} />
+        <InfoRow icon={<PhoneIcon />} label={pick(locale, "رقم التواصل", "Phone Number")} value={b.phone} />
+      </div>
+
+      {/* Services */}
+      <div className="text-start">
+        <p className="mb-2 text-xs font-semibold text-ink-soft">{pick(locale, "الخدمات المتوفرة", "Available Services")}</p>
+        <div className="flex flex-wrap justify-start gap-1.5">
+          {b.services.map((s) => (
+            <span key={s} className="rounded-full bg-surface px-2.5 py-1 text-[11px] font-medium text-brand-dark ring-1 ring-brand/15">{s}</span>
+          ))}
+        </div>
+      </div>
+
+      {/* Buttons */}
+      <div className="mt-5 flex items-center gap-2.5">
+        <Link href={`/branches/${b.slug}`} className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-brand py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-dark">
+          {pick(locale, "عرض التفاصيل", "View Details")}
+        </Link>
+        <button className="flex items-center justify-center gap-1.5 rounded-xl border border-brand px-4 py-2.5 text-sm font-semibold text-brand transition-colors hover:bg-brand/5">
+          {pick(locale, "الاتجاهات", "Directions")}
+          <NavIcon />
+        </button>
+      </div>
+    </article>
+  );
+}
+
+function InfoRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+  return (
+    <div className="text-start">
+      <p className="flex items-center justify-start gap-1.5 text-xs font-semibold text-ink-soft">
+        <span className="text-brand">{icon}</span>
+        {label}
+      </p>
+      <p className="mt-0.5 text-sm leading-6 text-ink-muted">{value}</p>
+    </div>
+  );
+}
+
+/* Icons */
+function BuildingIcon() {
+  return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="3" width="16" height="18" rx="2" /><path d="M9 7h2M13 7h2M9 11h2M13 11h2M9 15h2M13 15h2" /></svg>;
+}
+function PinIcon() {
+  return <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>;
+}
+function ClockIcon() {
+  return <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" strokeLinecap="round" /></svg>;
+}
+function PhoneIcon() {
+  return <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z" /></svg>;
+}
+function NavIcon() {
+  return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11" /></svg>;
+}

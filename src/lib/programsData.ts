@@ -1,0 +1,869 @@
+// Auto-extracted from Figma — program detail pages
+import { type Locale } from "@/i18n/config";
+
+export type ProgramDetail = {
+  slug: string; title: string; subtitle: string; image: string;
+  about: string[]; philosophyIntro: string; philosophy: string[];
+  methods: { name: string; desc: string }[];
+  duration: string; target: string; targetTags: string[];
+  trainingIntro: string; trainingAreas: { title: string; desc: string }[];
+  targetList?: string[];
+  stationsIntro?: string; stations?: string[];
+};
+
+export const PROGRAM_DETAILS: ProgramDetail[] = [
+  {
+    "slug": "montaliq",
+    "title": "برنامج منطلق",
+    "subtitle": "برنامج تأهيلي متكامل ومقنن للأطفال ذوي اضطراب طيف التوحد",
+    "image": "/figma/programs/montaliq.jpg",
+    "about": [
+      "برنامج منطلق هو برنامج تأهيلي متكامل ومقنن صُمِّم خصيصاً للأطفال ذوي اضطراب طيف التوحد (ASD)، يستند إلى أحدث الأساليب العلمية المعتمدة دولياً في مجال التأهيل السلوكي والمعرفي.",
+      "يعتمد البرنامج على مبدأ التدخل المبكر المكثف والتخطيط الفردي لكل حالة، مع مراعاة الفروق الفردية بين الأطفال وتصميم خطط تأهيلية تتناسب مع قدرات كل طفل ومستواه الحالي.",
+      "يضمن البرنامج إشراك الأسرة بشكل فعّال في مسيرة التأهيل، من خلال التدريب المستمر والتواصل الدائم مع الفريق المتخصص، مما يعزز استمرارية التأهيل داخل المنزل وخارجه."
+    ],
+    "philosophyIntro": "هو برنامج تأهيلي متكامل ومقنن لأطفال اضطراب طيف التوحد، حيث يعتمد البرنامج على نظام التعليم المنظم والمرئي Structure Teaching، كما أنه مصمم بحيث يغطي احتياجات الطفل حسب قدراته وإمكانياته والتي من شأنها المساهمة في تحقيق الاستقلالية المطلوبة.",
+    "philosophy": [
+      "يتضمن البرنامج استخدام البطاقات المصورة للقيام بنشاطات محددة خلال تواجد الطفل في المركز.",
+      "يقوم البرنامج على تنظيم بيئة الطفل من خلال وضع صور على الأماكن التي يرتادها داخل المركز.",
+      "يقدم البرنامج لكل طفل جدول نشاط يتضمن عدد من الأنشطة التي يجب أن يقوم بها خلال اليوم التدريبي داخل المركز",
+      "يستخدم البرنامج التعزيز والتعليم من خلال المحاولات المنفصلة لزيادة السلوك المرغوب لدى الطفل خلال رحلة التعليم.",
+      "يقوم البرنامج على استخدام التعليم الفردي بناءً على نقاط القوة والضعف، وتفعيل دور الأسرة في عملية التعليم."
+    ],
+    "methods": [
+      {
+        "name": "LOVAAS",
+        "desc": "التحليل التطبيقي للسلوك المعدَّل"
+      },
+      {
+        "name": "TEACCH",
+        "desc": "التعليم المنظم لأطفال التوحد"
+      },
+      {
+        "name": "Early Start Denver Model",
+        "desc": "نموذج دنفر للتدخل المبكر"
+      }
+    ],
+    "duration": "البرنامج عبارة عن 6 مستويات يتضمن كل مستوى مجالات أساسية وأخرى إضافية، مدة التدريب لكل مستوى 14 أسبوعًا ويتم خلالها التدريب على المهارات المختلفة بالتدرج من مهارات بسيطة، إلى متوسطة، إلى معقدة.",
+    "target": "الأطفال من ذوي اضطراب طيف التوحد من عمر سنتين وحتى ١٢ سنة .",
+    "targetTags": [
+      "توحد متوسط",
+      "توحد خفيف",
+      "توحد شديد"
+    ],
+    "trainingIntro": "يغطي برنامج منطلق تسعة مجالات تدريبية متكاملة تشمل جميع جوانب النمو والتطور لدى الطفل.",
+    "trainingAreas": [
+      {
+        "title": "الانتباه",
+        "desc": "تطوير القدرة على التركيز والانتباه الموجه والمشترك"
+      },
+      {
+        "title": "التقليد",
+        "desc": "اكتساب مهارة محاكاة الأفعال والأصوات والحركات"
+      },
+      {
+        "title": "اللغة الاستقبالية",
+        "desc": "فهم التعليمات والكلمات والجمل الموجهة للطفل"
+      },
+      {
+        "title": "اللغة التعبيرية",
+        "desc": "تطوير القدرة على التعبير اللفظي وغير اللفظي"
+      },
+      {
+        "title": "ما قبل الأكاديمي",
+        "desc": "بناء مهارات القراءة والكتابة والحساب التمهيدية"
+      },
+      {
+        "title": "الاعتماد على النفس",
+        "desc": "تنمية مهارات الرعاية الذاتية والاستقلالية الشخصية"
+      },
+      {
+        "title": "المهارات الحركية الدقيقة والكبرى",
+        "desc": "تطوير التنسيق الحركي والقدرات الجسمية"
+      },
+      {
+        "title": "الاستقلالي",
+        "desc": "القدرة على أداء المهام بشكل مستقل دون توجيه مستمر"
+      },
+      {
+        "title": "الاجتماعي",
+        "desc": "بناء مهارات التواصل والتفاعل مع الآخرين"
+      }
+    ]
+  },
+  {
+    "slug": "faal",
+    "title": "برنامج فعّال",
+    "subtitle": "برنامج تدخل مبكر متخصص لتأهيل أطفال فرط الحركة وتشتت الانتباه وتنمية مهاراتهم السلوكية والمعرفية والاجتماعية.",
+    "image": "/figma/programs/faal.jpg",
+    "about": [
+      "يهدف برنامج فعّال إلى تمكين الطفل من التغلب على الصعوبات التي تواجهه من خلال التدريب على مهارات محددة حتى يصبح فعالًا في بيئته مع أسرته وأصدقائه، ويساعده في تنظيم روتين يومه، وتصبح حركته موجهة وذات فاعلية.",
+      "يساعد البرنامج الطفل على أن يصبح أكثر فاعلية في حياته اليومية مع أسرته وأصدقائه، كما يدعمه في تنظيم روتين يومه وتنفيذ مهامه بصورة أكثر استقلالية، بحيث تصبح حركته موجهة وذات هدف واضح بما ينعكس إيجابًا على أدائه الاجتماعي والأكاديمي."
+    ],
+    "philosophyIntro": "هو برنامج تدخل مبكر مخصص لأطفال فرط الحركة وتشتت الانتباه، ينطلق البرنامج من الاهتمام بالصعوبات المرتبطة باضطراب فرط الحركة وتشتت الانتباه، حيث إن الطفل (غالبًا) لديه قدرات عقلية جيدة، ولكن قلة التركيز وسهولة التشتت والاندفاعية وضعف المهارات الاجتماعية تمنعه من ممارسة حياته بشكل طبيعي وتؤثر على تحصيله الدراسي وعلاقاته الاجتماعية.",
+    "philosophy": [
+      "يعتمد البرنامج على التدريبات الجماعية لتنمية المهارات الاجتماعية والتواصلية وتعزيز التفاعل مع الآخرين.",
+      "يساعد الطفل على التغلب على قلة التركيز وسهولة التشتت والاندفاعية بما يدعم أداءه اليومي والأكاديمي.",
+      "يركز البرنامج على الصعوبات المرتبطة باضطراب فرط الحركة وتشتت الانتباه مع فهم قدرات الطفل العقلية وإمكاناته الفردية.",
+      "يهيئ الطفل للبيئة الأكاديمية ويمكنه من تحسين التحصيل الدراسي وفقًا لقدراته وإمكاناته الحقيقية."
+    ],
+    "methods": [
+      {
+        "name": "",
+        "desc": "البرنامج من إعداد وتطوير خبراء في المجال، ويعتمد على نتائج وتوصيات أحدث الأبحاث والبرامج العلمية المهتمة باضطراب فرط الحركة وتشتت الانتباه."
+      }
+    ],
+    "duration": "البرنامج عبارة عن 4 مستويات مدة كل مستوى 14 أسبوع",
+    "target": "أطفال فرط الحركة وتشتت الانتباه (ADHD)",
+    "targetTags": [],
+    "trainingIntro": "يغطي برنامج فعّال ستة مجالات تدريبية متخصصة تهدف إلى تطوير المهارات الأساسية المرتبطة باضطراب فرط الحركة وتشتت الانتباه.",
+    "trainingAreas": [
+      {
+        "title": "المجال المعرفي",
+        "desc": "تطوير مهارات الانتباه والتركيز والإدراك المعرفي."
+      },
+      {
+        "title": "مجال التواصل",
+        "desc": "تنمية مهارات التواصل الفعال والتفاعل مع الآخرين."
+      },
+      {
+        "title": "المجال الاجتماعي",
+        "desc": "بناء المهارات الاجتماعية وتعزيز التفاعل الإيجابي."
+      },
+      {
+        "title": "المجال السلوكي",
+        "desc": "تعديل السلوك وتنمية مهارات ضبط النفس والانضباط."
+      },
+      {
+        "title": "المجال الاستقلالي",
+        "desc": "تنمية مهارات الاعتماد على النفس وأداء المهام اليومية."
+      },
+      {
+        "title": "المجال الحركي الوظيفي",
+        "desc": "تطوير التآزر الحركي والمهارات الحركية الوظيفية."
+      }
+    ]
+  },
+  {
+    "slug": "school-prep",
+    "title": "برنامج الإعداد المدرسي",
+    "subtitle": "برنامج تدريبي وتعليمي متكامل لإعداد الطفل للاندماج والتكيّف مع البيئة المدرسية.",
+    "image": "/figma/programs/school-prep.jpg",
+    "about": [
+      "برنامج الإعداد المدرسي يهدف إلى إعداد الأطفال وتعزيز السلوكيات السليمة لديهم في البيئة المدرسية والمنزلية، وتطوير المهارات الأساسية والمفاهيم المختلفة.",
+      "يشمل البرنامج تطوير مهارات الأرقام والحساب ، والأشكال والألوان، والحروف والكلمات، والعلوم والاكتشاف؛ لتهيئة الطفل ذهنياً وأكاديمياً قبل الالتحاق بالمدرسة.",
+      "يُصمَّم البرنامج وفق احتياجات الطفل الفردية، مع إشراك الأسرة بشكل فعّال لضمان استمرارية المهارات المكتسبة في البيئتين المنزلية والمدرسية.",
+      "هو برنامج تدريبي تعليمي للأطفال (ذوي الإعاقة) يعتمد على مراجع علمية متعددة وتوصيات الأبحاث العلمية الحديثة، وُضع في قالب مخصص لمركز عبور."
+    ],
+    "philosophyIntro": "يهدف البرنامج إلى إعداد الأطفال ومساعدتهم على اكتساب مهارات في مجالات متعددة، من خلال منهجية تعليمية متكاملة تراعي الفروق الفردية وتوظّف التعلم متعدد الحواس",
+    "philosophy": [
+      "استخدام التعلم متعدد الحواس والتعرض لمحتوى المناهج لتهيئة الطفل ذهنيًا وأكاديميًا.",
+      "تعزيز السلوكيات السليمة وتعديل السلوك وتنمية المهارات الاجتماعية لدى الطفل.",
+      "يركز البرنامج على الصعوبات المرتبطة باضطراب فرط الحركة وتشتت الانتباه مع فهم قدرات الطفل العقلية وإمكاناته الفردية.",
+      "تنمية مهارات التكيف مع البيئة المدرسية والتعامل مع المعلمين والمرشدين والمناهج."
+    ],
+    "methods": [
+      {
+        "name": "",
+        "desc": "البرنامج من إعداد وتطوير خبراء في المجال، ويقوم على نتائج وتوصيات أحدث الأبحاث والبرامج العلمية المهتمة بالتأهيل التعليمي."
+      }
+    ],
+    "duration": "يشمل البرنامج ٤ مستويات ، كل مستوى مدته ١٤ أسبوعاً ، يتم فيه تدريب الأطفال على المهارات المختلفة بالتدرج من بسيطة إلى معقدة.",
+    "target": "أطفال ذوي التوحد وفرط الحركة وتشتت الانتباه وذوي الأداء العالي والإعاقات الذهنية البسيطة.",
+    "targetTags": [
+      "توحد",
+      "إعاقات ذهنية بسيطة"
+    ],
+    "trainingIntro": "يغطي البرنامج مجموعة متكاملة من المهارات الأكاديمية والسلوكية والاجتماعية اللازمة لتهيئة الطفل للمدرسة.",
+    "trainingAreas": [
+      {
+        "title": "مجال (حروفي)",
+        "desc": "تطوير مهارات التعرف على الحروف العربية والكلمات وبناء القاعدة اللغوية الأساسية."
+      },
+      {
+        "title": "مجال (أرقامي)",
+        "desc": "بناء مفاهيم الأرقام والعمليات الحسابية الأساسية والتعرف على الأشكال والألوان."
+      },
+      {
+        "title": "المجال الاجتماعي",
+        "desc": "بناء المهارات الاجتماعية وتعزيز التفاعل الإيجابي مع الأقران والبيئة المدرسية."
+      },
+      {
+        "title": "المجال السلوكي",
+        "desc": "تعديل السلوك وتنمية مهارات ضبط النفس والانضباط اللازمة للبيئة الصفية."
+      },
+      {
+        "title": "مجال (اكتشف وفكر)",
+        "desc": "تحفيز الفضول العلمي وتطوير مهارات الاستكشاف والتفكير والحل الإبداعي للمشكلات."
+      },
+      {
+        "title": "المجال الحركي الوظيفي",
+        "desc": "تطوير التآزر الحركي والمهارات الحركية الوظيفية الدقيقة والكبرى اللازمة للتعلم."
+      }
+    ]
+  },
+  {
+    "slug": "khuta",
+    "title": "برنامج خطى",
+    "subtitle": "برنامج علاجي متكامل ومقنن للتدخل المبكر وفق استراتيجيات برنامج HELP المثبتة عالميًا.",
+    "image": "/figma/programs/khuta.jpg",
+    "about": [
+      "برنامج خطى هو برنامج علاجي متكامل ومقنن للتدخل المبكر، ينطلق من برنامج HELP وفق استراتيجيات أثبتت نجاحها عالمياً في مجال تأهيل الأطفال ذوي الإعاقة.",
+      "يتضمن البرنامج ٥ مجالات تدريبية أساسية تشمل التنظيم الحسي التناسقي، والمساعدة الذاتية، والمجال الاجتماعي العاطفي، والمجال الحركي، ومجال التواصل.",
+      "يُصمَّم البرنامج وفق مستويين متدرجين، مع مراعاة الفروق الفردية لكل طفل، وإشراك الأسرة كشريك أساسي في مسيرة التأهيل لضمان الاستمرارية داخل المنزل وخارجه.",
+      "يعتمد تطبيق برنامج خطى على استراتيجيات التدخل المبكر المعتمدة على التطور النمائي لبرنامج HELP والتي تشجع وتحفز الطفل وتهدف إلى تنمية قدراته ومهاراته."
+    ],
+    "philosophyIntro": "يغطي البرنامج المهارات الحركية والاجتماعية والتناسق الحسي والتواصل والمهارات الاستقلالية، وفق منهج نمائي تطويري مستوحى من أحدث الأبحاث العلمية.",
+    "philosophy": [
+      "يساهم في تطوير المهارات الاستقلالية والتناسق الحسي لدى الطفل.",
+      "يركز على تنمية القدرات الحركية والاجتماعية والتواصلية لدى الطفل.",
+      "يحفز الطفل ويشجعه على التفاعل الإيجابي مع البيئة المحيطة.",
+      "يعتمد البرنامج على استراتيجيات التدخل المبكر المعتمدة على التطور النمائي."
+    ],
+    "methods": [
+      {
+        "name": "HELP",
+        "desc": "مستوحى من برامج نمائية تطويرية، تحديداً برنامج HELP، ويتم مراجعة المنهج وتطويره بناءً على نظرية جان بياجيه ومتطلبات النمو الطبيعي"
+      }
+    ],
+    "duration": "البرنامج عبارة عن مستويين ، يحتوي كل مستوى على ٥ مجالات أساسية. مدة التدريب في كل مستوى ١٤ أسبوعاً ، بالتدرج من مهارات بسيطة إلى معقدة.",
+    "target": "الإعاقة الحركية ممن لديهم تعدد إعاقات، ومستوى معدل ذكاء ضمن نطاق الإعاقة الذهنية المتوسطة والشديدة مع وجود مشكلات في التطور الحركي. يستهدف البرنامج فئة التدخل المبكر كبرنامج انتقالي يساعد على تطوير القدرات وتهيئة الطفل لمهارات أعلى.",
+    "targetTags": [],
+    "trainingIntro": "يغطي برنامج خطى خمسة مجالات تدريبية أساسية لتنمية مهارات الطفل الحركية والاجتماعية والاستقلالية.",
+    "trainingAreas": [
+      {
+        "title": "مجال التنظيم الحسي التناسقي",
+        "desc": "تطوير قدرة الطفل على معالجة المدخلات الحسية وتنسيقها لاستجابات حركية ووظيفية سليمة."
+      },
+      {
+        "title": "مجال المساعدة الذاتية",
+        "desc": "تنمية مهارات الرعاية الذاتية والاعتماد على النفس في المهام اليومية الأساسية."
+      },
+      {
+        "title": "المجال الاجتماعي العاطفي",
+        "desc": "بناء المهارات الاجتماعية وتعزيز الوعي العاطفي والتفاعل الإيجابي مع الآخرين."
+      },
+      {
+        "title": "المجال الحركي",
+        "desc": "تطوير المهارات الحركية الكبرى والدقيقة وتحسين التآزر والتوازن الحركي الوظيفي."
+      },
+      {
+        "title": "مجال التواصل",
+        "desc": "تنمية مهارات التواصل اللفظي وغير اللفظي والتعبير عن الاحتياجات بأساليب فعّالة."
+      }
+    ]
+  },
+  {
+    "slug": "mental-dev",
+    "title": "برنامج التنمية الذهنية",
+    "subtitle": "برنامج تدريبي مقنن للأطفال ذوي الإعاقة الذهنية مستند إلى برنامج Portage العالمي للتنمية الشاملة للطفولة المبكرة.",
+    "image": "/figma/programs/mental-dev.jpg",
+    "about": [
+      "برنامج التنمية الذهنية هو برنامج تدريبي مقنن ومتكامل مخصص للأطفال من ذوي الإعاقة الذهنية، تم تطويره استنادًا إلى برامج التنمية الشاملة للطفولة المبكرة (بورتاج) المعتمدة عالميًا. يركز البرنامج على تنمية المهارات الأساسية التي يحتاجها الطفل في مختلف جوانب النمو والتطور، من خلال خطة تدريبية منهجية تراعي مستوى الطفل النمائي وقدراته الفردية.",
+      "يساعد البرنامج على بناء وتطوير المهارات المعرفية والاجتماعية والحركية والتواصلية والاستقلالية، بما ينعكس بشكل مباشر على تحسين الأداء اليومي للطفل ورفع مستوى جاهزيته التعليمية والتطورية، مع الاعتماد على أساليب تدريب علمية مدروسة ومراحل تدريبية متدرجة تناسب احتياجات كل طفل."
+    ],
+    "philosophyIntro": "هو برنامج تدريبي مقنن ومتكامل مخصص للأطفال من ذوي الإعاقة الذهنية وذوي متلازمة داون، تم تصميمه وفق أسس علمية حديثة مستمدة من برنامج التنمية الشاملة للطفولة المبكرة (بورتاج) المعتمد عالميًا. يعتمد البرنامج على تقديم محتوى تدريبي منظم يركز على تنمية المهارات الأساسية التي تؤثر بشكل مباشر في تطور الطفل الأكاديمي والاجتماعي والسلوكي.",
+    "philosophy": [
+      "يهدف إلى تنمية المهارات الأساسية: المعرفية، الاجتماعية، التواصل، الحركية، والرعاية الذاتية.",
+      "يزود الطفل بالمهارات الأساسية المؤثرة في النواحي التعليمية والتطورية.",
+      "يتضمن البرنامج أهم المجالات التي تمت التوصية بها عالميًا.",
+      "مشتق من برنامج التنمية الشاملة للطفولة المبكرة (بورتاج)."
+    ],
+    "methods": [
+      {
+        "name": "",
+        "desc": "تم صياغة البرنامج استنادًا على البرنامج المقنن (Portage) برنامج التنمية الشاملة للطفولة المبكرة."
+      }
+    ],
+    "duration": "البرنامج عبارة عن 6 مستويات يحتوي كل مستوى على 5 مجالات أساسية، مدة التدريب في كل مستوى 14 أسبوع، يتم خلالها تدريب الأطفال على المهارات المختلفة بالتدرج من مهارات بسيطة، متوسطة، إلى معقدة.",
+    "target": "",
+    "targetTags": [],
+    "trainingIntro": "يغطي البرنامج خمسة مجالات تدريبية أساسية لتنمية المهارات الذهنية والتطورية للأطفال.",
+    "trainingAreas": [
+      {
+        "title": "المجال الحركي",
+        "desc": "تنمية المهارات الحركية الكبرى والدقيقة وتحسين التوازن والتناسق الجسدي."
+      },
+      {
+        "title": "المجال الاستقلالي",
+        "desc": "تعزيز قدرة الطفل على أداء المهام اليومية والرعاية الذاتية باستقلالية."
+      },
+      {
+        "title": "المجال الاجتماعي",
+        "desc": "بناء مهارات التفاعل الاجتماعي وتطوير العلاقات والتواصل مع الآخرين."
+      },
+      {
+        "title": "المجال الإدراكي",
+        "desc": "تنمية الانتباه والإدراك والتفكير وحل المشكلات والمهارات المعرفية الأساسية."
+      },
+      {
+        "title": "المجال الاتصالي",
+        "desc": "تطوير مهارات التواصل اللفظي وغير اللفظي وفهم اللغة والتعبير."
+      }
+    ],
+    "targetList": [
+      "فئة الإعاقة الذهنية بأنواعها",
+      "متلازمة داون",
+      "مستوى معدل ذكاء ضمن نطاق الإعاقة الذهنية المتوسطة والشديدة",
+      "الفئة العمرية من سنتين إلى 12 سنة",
+      "يتم تحديد المستويات حسب العمر النمائي والتطوري للطفل"
+    ]
+  },
+  {
+    "slug": "girls",
+    "title": "برنامج عبور لتأهيل الفتيات",
+    "subtitle": "برنامج تدريبي متكامل مخصص للفتيات من ذوي الإعاقة فوق 12 سنة، يهدف إلى تمكينهن من اكتساب المهارات الحياتية والاجتماعية والمهنية التي تساعدهن على تحقيق أعلى درجات الاستقلالية والاندماج الاجتماعي.",
+    "image": "/figma/programs/girls.jpg",
+    "about": [
+      "يعتمد البرنامج على مجموعة متكاملة من المحطات التدريبية التفاعلية المصممة بعناية لتلبية احتياجات الفتيات من عمر 12 سنة فأكثر، حيث توفر بيئة تدريبية عملية تحاكي مواقف الحياة اليومية وتساعد على تنمية المهارات بشكل تطبيقي مباشر. ويستند البرنامج إلى فلسفة تعليمية تعتمد على التعلم من خلال التفاعل والممارسة الفعلية، باستخدام منهجية تدريب مرنة تراعي الفروق الفردية بين المتدربات، وتسمح بتكييف الأنشطة بما يتناسب مع قدرات واحتياجات كل فتاة لتحقيق أفضل استفادة ممكنة."
+    ],
+    "philosophyIntro": "يرتكز البرنامج على التدريب العملي التفاعلي داخل بيئة تحاكي مواقف الحياة اليومية، بهدف تمكين الفتيات من اكتساب مهارات الاستقلال والعناية الذاتية والتفاعل الاجتماعي بصورة تطبيقية واقعية. كما يعتمد على الدمج بين التدريب الفردي والجماعي لضمان تحقيق أفضل نتائج حسب احتياج كل فتاة وقدراتها",
+    "philosophy": [
+      "يعتمد البرنامج على دورة تدريبية منظمة تجمع بين التدريب المستمر والتطبيق العملي.",
+      "يجمع بين التدريب الفردي والجماعي وفق احتياجات ومستوى كل حالة.",
+      "يركز على تطوير المهارات الحياتية التي تساعد الفتاة على إدارة شؤونها اليومية باستقلالية أكبر.",
+      "يعتمد البرنامج على التعلم العملي من خلال التجربة المباشرة داخل محطات تدريبية متخصصة."
+    ],
+    "methods": [
+      {
+        "name": "",
+        "desc": "تدريب عملي قائم على المحاكاة الواقعية"
+      },
+      {
+        "name": "",
+        "desc": "منهج تفاعلي مرن يراعي الفروق الفردية"
+      },
+      {
+        "name": "",
+        "desc": "بيئات تدريب تحاكي الحياة اليومية"
+      }
+    ],
+    "duration": "دورة تشغيلية تعتمد على: 3 أسابيع تدريب + أسبوع مشروع تطبيقي",
+    "target": "الفتيات من ذوي الإعاقة الذهنية",
+    "targetTags": [
+      "اضطراب طيف التوحد",
+      "المتلازمات المختلفة"
+    ],
+    "trainingIntro": "يقدم برنامج عبور مجموعة من المحطات التدريبية التفاعلية المصممة لتنمية المهارات الحياتية والاجتماعية والمهنية للفتيات داخل بيئة تدريب واقعية وآمنة",
+    "trainingAreas": [
+      {
+        "title": "محطة اللياقة والعناية الشخصية",
+        "desc": "تنمية مهارات النظافة الشخصية والعناية بالمظهر والصحة العامة بشكل يومي."
+      },
+      {
+        "title": "محطة التعايش الأسري",
+        "desc": "تعزيز فهم الأدوار الأسرية وتطوير مهارات التعامل والتعاون داخل المنزل."
+      },
+      {
+        "title": "محطة الثقافة والتكنولوجيا",
+        "desc": "تنمية الوعي الثقافي والمهارات الأساسية في استخدام التكنولوجيا بصورة آمنة ومفيدة."
+      },
+      {
+        "title": "محطة البستنة والمشتل",
+        "desc": "تنمية المسؤولية والمهارات العملية عبر تعلم الزراعة والعناية بالنباتات."
+      },
+      {
+        "title": "محطة محاكاة التسوق",
+        "desc": "تدريب الفتاة على مهارات الشراء واختيار المنتجات والتعامل مع مواقف التسوق اليومية."
+      },
+      {
+        "title": "محطة الفن والأشغال اليدوية",
+        "desc": "تنمية الوعي الثقافي والمهارات الأساسية في استخدام التكنولوجيا بصورة آمنة ومفيدة."
+      }
+    ]
+  },
+  {
+    "slug": "youth",
+    "title": "برنامج عبور لتأهيل الشباب",
+    "subtitle": "برنامج تدريبي متكامل مخصص للشباب من ذوي الإعاقة فوق 15 سنة، يهدف إلى تمكينهم من اكتساب المهارات الحياتية والاجتماعية والمهنية التي تساعدهم على تحقيق أعلى درجات الاستقلالية والاندماج.",
+    "image": "/figma/programs/youth.jpg",
+    "about": [
+      "هو برنامج تأهيلي وتعليمي مصمم خصيصًا للشباب الذكور من ذوي الإعاقة للأعمار فوق 12 سنة، يهدف البرنامج إلى تطوير مهارات الشباب الشخصية والاجتماعية والوظيفية، كما يهدف إلى تمكين الشباب من اكتساب المهارات الحياتية والاجتماعية والمهنية التي تساعدهم على تحقيق أعلى درجات الاستقلالية والاندماج الاجتماعي."
+    ],
+    "philosophyIntro": "يعتمد البرنامج على إحداث فرص تفاعل بيئي واجتماعي لتأهيل الشاب لحياة أفضل، وفق منهجية مرنة تراعي الفروق الفردية.",
+    "philosophy": [
+      "يعتمد البرنامج على مستويين رئيسيين ومجموعة من المحطات التدريبية التفاعلية لتلبية احتياجات الشباب ما فوق 12 سنة، ويستند على فلسفة التعلم من خلال التفاعل والممارسة المباشرة.",
+      "يقوم البرنامج على إحداث فرص تفاعل بيئي واجتماعي لتأهيل الشاب لحياة أفضل، ويعتمد على التقييم الفردي والعمل الجماعي والمرونة في التدريب وفق مستوى كل شاب واحتياجاته."
+    ],
+    "methods": [
+      {
+        "name": "ASDAN",
+        "desc": "يستند برنامج شباب عبور إلى منهج ASDAN لتنمية المهارات الحياتية."
+      }
+    ],
+    "duration": "يتضمن البرنامج مهارات مختلفة تتدرج من المستوى البسيط إلى المستوى المعقد، ويرتبط البرنامج بتعريض الشاب لمحطات تطبيقية يوظف فيها المهارات المختلفة عن طريق ممارسة أنشطة ذات علاقة بالمجال، ويحقق الطالب الانتقال إلى مهارات أعلى في المجالات ذاتها.",
+    "target": "الشباب من عمر 12 سنة فأكثر ممن يعانون من:",
+    "targetTags": [],
+    "trainingIntro": "يغطي البرنامج مجموعة من المجالات التدريبية التي تساعد على تطوير مهارات الشباب الحياتية والاجتماعية والمهنية بشكل متدرج وعملي.",
+    "trainingAreas": [
+      {
+        "title": "المجال المعرفي والأكاديمي",
+        "desc": "تنمية مهارات النظافة الشخصية والعناية بالمظهر والصحة العامة بشكل يومي."
+      },
+      {
+        "title": "المهارات الاستقلالية",
+        "desc": "تعزيز فهم الأدوار الأسرية وتطوير مهارات التعامل والتعاون داخل المنزل."
+      },
+      {
+        "title": "المجال الحركي",
+        "desc": "تنمية الوعي الثقافي والمهارات الأساسية في استخدام التكنولوجيا بصورة آمنة ومفيدة."
+      },
+      {
+        "title": "التهيئة المهنية",
+        "desc": "تنمية الوعي المهني والمهارات الأساسية التي تساعد الشاب على الاندماج في سوق العمل."
+      },
+      {
+        "title": "المجال الاجتماعي",
+        "desc": "تدريب الشاب على مهارات الشراء واختيار المنتجات والتعامل مع مواقف التسوق اليومية."
+      }
+    ],
+    "targetList": [
+      "الإعاقة الذهنية",
+      "اضطراب طيف التوحد",
+      "الشلل الدماغي",
+      "فرط الحركة وتشتت الانتباه ADHD",
+      "الشباب الذين لم تناسب البيئة المدرسية مع احتياجاتهم الفردية"
+    ],
+    "stationsIntro": "هي عبارة عن محطات تطبيقية يتم تفعيلها داخل مراكز الشباب بغرض محاكاة المواقف اليومية والأنشطة التي قد يمارسها الفرد خارج المركز.",
+    "stations": [
+      "محطة الرياضة والبدنية",
+      "محطة الفن والأشغال اليدوية",
+      "محطة المطبخ",
+      "محطة بيت الشعر",
+      "محطة محاكاة التسوق",
+      "محطة الأعمال المكتبية",
+      "محطة التقنية",
+      "محطة البستنة"
+    ]
+  }
+];
+
+export const PROGRAM_DETAILS_EN: ProgramDetail[] = [
+  {
+    "slug": "montaliq",
+    "title": "Montaliq Program",
+    "subtitle": "A comprehensive, structured rehabilitation program for children with Autism Spectrum Disorder.",
+    "image": "/figma/programs/montaliq.jpg",
+    "about": [
+      "Montaliq is a comprehensive, structured rehabilitation program designed specifically for children with Autism Spectrum Disorder (ASD), built on the latest internationally recognized scientific methods in behavioral and cognitive rehabilitation.",
+      "The program is based on the principle of intensive early intervention and an individualized plan for each case, taking into account the individual differences between children and designing rehabilitation plans suited to each child's abilities and current level.",
+      "The program ensures the family's active involvement in the rehabilitation journey through ongoing training and continuous communication with the specialized team, reinforcing the continuity of rehabilitation both inside and outside the home."
+    ],
+    "philosophyIntro": "It is a comprehensive, structured rehabilitation program for children with Autism Spectrum Disorder. The program relies on the Structured Teaching system (organized and visual), and is designed to meet the child's needs according to their abilities and potential, helping them achieve the desired independence.",
+    "philosophy": [
+      "The program uses picture cards to carry out specific activities during the child's time at the center.",
+      "The program organizes the child's environment by placing images on the areas they use within the center.",
+      "The program provides each child with an activity schedule that includes a number of activities to be completed during the training day at the center.",
+      "The program uses reinforcement and discrete trial training to increase the child's desired behavior throughout the learning journey.",
+      "The program uses individualized teaching based on strengths and weaknesses, and activates the family's role in the learning process."
+    ],
+    "methods": [
+      {
+        "name": "LOVAAS",
+        "desc": "Modified Applied Behavior Analysis"
+      },
+      {
+        "name": "TEACCH",
+        "desc": "Structured Teaching for children with autism"
+      },
+      {
+        "name": "Early Start Denver Model",
+        "desc": "The Denver Model for Early Intervention"
+      }
+    ],
+    "duration": "The program consists of 6 levels, each level including core areas and additional ones. The training duration for each level is 14 weeks, during which various skills are trained progressively from simple to intermediate to complex.",
+    "target": "Children with Autism Spectrum Disorder from 2 to 12 years of age.",
+    "targetTags": [
+      "Moderate autism",
+      "Mild autism",
+      "Severe autism"
+    ],
+    "trainingIntro": "The Montaliq program covers nine integrated training areas spanning all aspects of the child's growth and development.",
+    "trainingAreas": [
+      {
+        "title": "Attention",
+        "desc": "Developing the ability to focus and maintain directed and joint attention"
+      },
+      {
+        "title": "Imitation",
+        "desc": "Acquiring the skill of imitating actions, sounds, and movements"
+      },
+      {
+        "title": "Receptive Language",
+        "desc": "Understanding instructions, words, and sentences directed at the child"
+      },
+      {
+        "title": "Expressive Language",
+        "desc": "Developing the ability for verbal and non-verbal expression"
+      },
+      {
+        "title": "Pre-Academic",
+        "desc": "Building foundational reading, writing, and arithmetic skills"
+      },
+      {
+        "title": "Self-Reliance",
+        "desc": "Developing self-care skills and personal independence"
+      },
+      {
+        "title": "Fine and Gross Motor Skills",
+        "desc": "Developing motor coordination and physical abilities"
+      },
+      {
+        "title": "Independence",
+        "desc": "The ability to perform tasks independently without constant guidance"
+      },
+      {
+        "title": "Social",
+        "desc": "Building communication and interaction skills with others"
+      }
+    ]
+  },
+  {
+    "slug": "faal",
+    "title": "Fa'al Program",
+    "subtitle": "A specialized early intervention program to rehabilitate children with ADHD and develop their behavioral, cognitive, and social skills.",
+    "image": "/figma/programs/faal.jpg",
+    "about": [
+      "The Fa'al program aims to empower the child to overcome the challenges they face by training specific skills until they become effective in their environment with their family and friends, helping them organize their daily routine so their movement becomes directed and purposeful.",
+      "The program helps the child become more effective in their daily life with their family and friends, and supports them in organizing their daily routine and completing tasks more independently, so their movement becomes directed with a clear purpose, positively reflecting on their social and academic performance."
+    ],
+    "philosophyIntro": "It is an early intervention program dedicated to children with ADHD. The program focuses on the difficulties associated with ADHD, where the child (often) has good cognitive abilities, but lack of focus, easy distractibility, impulsivity, and weak social skills prevent them from living normally and affect their academic achievement and social relationships.",
+    "philosophy": [
+      "The program relies on group exercises to develop social and communication skills and enhance interaction with others.",
+      "It helps the child overcome lack of focus, easy distractibility, and impulsivity in a way that supports their daily and academic performance.",
+      "The program focuses on the difficulties associated with ADHD while understanding the child's cognitive abilities and individual potential.",
+      "It prepares the child for the academic environment and enables them to improve their academic achievement according to their true abilities and potential."
+    ],
+    "methods": [
+      {
+        "name": "",
+        "desc": "The program was prepared and developed by experts in the field, relying on the findings and recommendations of the latest research and scientific programs concerned with ADHD."
+      }
+    ],
+    "duration": "The program consists of 4 levels, each level lasting 14 weeks.",
+    "target": "Children with Attention Deficit Hyperactivity Disorder (ADHD)",
+    "targetTags": [],
+    "trainingIntro": "The Fa'al program covers six specialized training areas aimed at developing the core skills associated with ADHD.",
+    "trainingAreas": [
+      {
+        "title": "Cognitive Area",
+        "desc": "Developing attention, focus, and cognitive perception skills."
+      },
+      {
+        "title": "Communication Area",
+        "desc": "Developing effective communication skills and interaction with others."
+      },
+      {
+        "title": "Social Area",
+        "desc": "Building social skills and enhancing positive interaction."
+      },
+      {
+        "title": "Behavioral Area",
+        "desc": "Modifying behavior and developing self-control and discipline skills."
+      },
+      {
+        "title": "Independence Area",
+        "desc": "Developing self-reliance skills and performing daily tasks."
+      },
+      {
+        "title": "Functional Motor Area",
+        "desc": "Developing motor coordination and functional motor skills."
+      }
+    ]
+  },
+  {
+    "slug": "school-prep",
+    "title": "School Preparation Program",
+    "subtitle": "An integrated training and educational program to prepare the child to integrate and adapt to the school environment.",
+    "image": "/figma/programs/school-prep.jpg",
+    "about": [
+      "The School Preparation Program aims to prepare children and reinforce sound behaviors in the school and home environments, and to develop core skills and various concepts.",
+      "The program includes developing numbers and arithmetic skills, shapes and colors, letters and words, and science and discovery, to prepare the child mentally and academically before starting school.",
+      "The program is designed according to the child's individual needs, with active family involvement to ensure the continuity of acquired skills in both the home and school environments.",
+      "It is a training and educational program for children (with disabilities) based on multiple scientific references and the recommendations of modern scientific research, framed specifically for Oboor Center."
+    ],
+    "philosophyIntro": "The program aims to prepare children and help them acquire skills in multiple areas through an integrated educational methodology that takes into account individual differences and employs multi-sensory learning.",
+    "philosophy": [
+      "Using multi-sensory learning and exposure to curriculum content to prepare the child mentally and academically.",
+      "Reinforcing sound behaviors, modifying behavior, and developing the child's social skills.",
+      "The program focuses on the difficulties associated with ADHD while understanding the child's cognitive abilities and individual potential.",
+      "Developing skills to adapt to the school environment and interact with teachers, counselors, and curricula."
+    ],
+    "methods": [
+      {
+        "name": "",
+        "desc": "The program was prepared and developed by experts in the field, based on the findings and recommendations of the latest research and scientific programs concerned with educational rehabilitation."
+      }
+    ],
+    "duration": "The program includes 4 levels, each level lasting 14 weeks, during which children are trained on various skills progressively from simple to complex.",
+    "target": "Children with autism, ADHD, high functioning, and mild intellectual disabilities.",
+    "targetTags": [
+      "Autism",
+      "Mild intellectual disabilities"
+    ],
+    "trainingIntro": "The program covers an integrated set of academic, behavioral, and social skills needed to prepare the child for school.",
+    "trainingAreas": [
+      {
+        "title": "Letters Area",
+        "desc": "Developing skills in recognizing Arabic letters and words and building the basic linguistic foundation."
+      },
+      {
+        "title": "Numbers Area",
+        "desc": "Building number concepts, basic arithmetic operations, and recognizing shapes and colors."
+      },
+      {
+        "title": "Social Area",
+        "desc": "Building social skills and enhancing positive interaction with peers and the school environment."
+      },
+      {
+        "title": "Behavioral Area",
+        "desc": "Modifying behavior and developing the self-control and discipline skills needed for the classroom environment."
+      },
+      {
+        "title": "Discover & Think Area",
+        "desc": "Stimulating scientific curiosity and developing skills of exploration, thinking, and creative problem-solving."
+      },
+      {
+        "title": "Functional Motor Area",
+        "desc": "Developing motor coordination and the fine and gross functional motor skills needed for learning."
+      }
+    ]
+  },
+  {
+    "slug": "khuta",
+    "title": "Khuta Program",
+    "subtitle": "A comprehensive, structured therapeutic program for early intervention based on the globally proven strategies of the HELP program.",
+    "image": "/figma/programs/khuta.jpg",
+    "about": [
+      "Khuta is a comprehensive, structured therapeutic program for early intervention, derived from the HELP program according to strategies that have proven successful worldwide in rehabilitating children with disabilities.",
+      "The program includes 5 core training areas covering sensory-coordination integration, self-help, the social-emotional area, the motor area, and the communication area.",
+      "The program is designed across two progressive levels, taking into account the individual differences of each child and involving the family as a key partner in the rehabilitation journey to ensure continuity inside and outside the home.",
+      "The application of the Khuta program relies on early intervention strategies based on the developmental progression of the HELP program, which encourage and motivate the child and aim to develop their abilities and skills."
+    ],
+    "philosophyIntro": "The program covers motor, social, sensory-coordination, communication, and independence skills, following a developmental approach inspired by the latest scientific research.",
+    "philosophy": [
+      "It contributes to developing the child's independence and sensory-coordination skills.",
+      "It focuses on developing the child's motor, social, and communication abilities.",
+      "It motivates and encourages the child toward positive interaction with the surrounding environment.",
+      "The program relies on early intervention strategies based on developmental progression."
+    ],
+    "methods": [
+      {
+        "name": "HELP",
+        "desc": "Inspired by developmental programs, specifically the HELP program, the curriculum is reviewed and developed based on Jean Piaget's theory and the requirements of natural development"
+      }
+    ],
+    "duration": "The program consists of two levels, each level containing 5 core areas. The training duration for each level is 14 weeks, progressing from simple to complex skills.",
+    "target": "Children with physical disabilities who have multiple disabilities, and an IQ level within the range of moderate to severe intellectual disability with problems in motor development. The program targets the early intervention group as a transitional program that helps develop abilities and prepare the child for higher-level skills.",
+    "targetTags": [],
+    "trainingIntro": "The Khuta program covers five core training areas to develop the child's motor, social, and independence skills.",
+    "trainingAreas": [
+      {
+        "title": "Sensory-Coordination Integration Area",
+        "desc": "Developing the child's ability to process and coordinate sensory input for sound motor and functional responses."
+      },
+      {
+        "title": "Self-Help Area",
+        "desc": "Developing self-care and self-reliance skills in basic daily tasks."
+      },
+      {
+        "title": "Social-Emotional Area",
+        "desc": "Building social skills and enhancing emotional awareness and positive interaction with others."
+      },
+      {
+        "title": "Motor Area",
+        "desc": "Developing gross and fine motor skills and improving functional motor coordination and balance."
+      },
+      {
+        "title": "Communication Area",
+        "desc": "Developing verbal and non-verbal communication skills and expressing needs in effective ways."
+      }
+    ]
+  },
+  {
+    "slug": "mental-dev",
+    "title": "Mental Development Program",
+    "subtitle": "A structured training program for children with intellectual disabilities, based on the global Portage program for comprehensive early childhood development.",
+    "image": "/figma/programs/mental-dev.jpg",
+    "about": [
+      "The Mental Development Program is a structured, comprehensive training program dedicated to children with intellectual disabilities, developed based on the globally recognized comprehensive early childhood development programs (Portage). The program focuses on developing the core skills a child needs across various aspects of growth and development, through a systematic training plan that takes into account the child's developmental level and individual abilities.",
+      "The program helps build and develop cognitive, social, motor, communication, and independence skills, directly reflecting on improving the child's daily performance and raising their educational and developmental readiness, relying on well-studied scientific training methods and progressive training stages suited to each child's needs."
+    ],
+    "philosophyIntro": "It is a structured, comprehensive training program dedicated to children with intellectual disabilities and Down syndrome, designed according to modern scientific foundations derived from the globally recognized comprehensive early childhood development program (Portage). The program relies on providing organized training content focused on developing the core skills that directly affect the child's academic, social, and behavioral development.",
+    "philosophy": [
+      "It aims to develop core skills: cognitive, social, communication, motor, and self-care.",
+      "It equips the child with the core skills that influence educational and developmental aspects.",
+      "The program includes the most important areas recommended globally.",
+      "Derived from the comprehensive early childhood development program (Portage)."
+    ],
+    "methods": [
+      {
+        "name": "",
+        "desc": "The program was formulated based on the structured (Portage) program for comprehensive early childhood development."
+      }
+    ],
+    "duration": "The program consists of 6 levels, each level containing 5 core areas. The training duration for each level is 14 weeks, during which children are trained on various skills progressively from simple, to intermediate, to complex.",
+    "target": "",
+    "targetTags": [],
+    "trainingIntro": "The program covers five core training areas to develop children's mental and developmental skills.",
+    "trainingAreas": [
+      {
+        "title": "Motor Area",
+        "desc": "Developing gross and fine motor skills and improving balance and physical coordination."
+      },
+      {
+        "title": "Independence Area",
+        "desc": "Enhancing the child's ability to perform daily tasks and self-care independently."
+      },
+      {
+        "title": "Social Area",
+        "desc": "Building social interaction skills and developing relationships and communication with others."
+      },
+      {
+        "title": "Cognitive Area",
+        "desc": "Developing attention, perception, thinking, problem-solving, and core cognitive skills."
+      },
+      {
+        "title": "Communication Area",
+        "desc": "Developing verbal and non-verbal communication skills and language comprehension and expression."
+      }
+    ],
+    "targetList": [
+      "The intellectual disability category in all its types",
+      "Down syndrome",
+      "IQ level within the range of moderate to severe intellectual disability",
+      "Age group from 2 to 12 years",
+      "Levels are determined according to the child's developmental age"
+    ]
+  },
+  {
+    "slug": "girls",
+    "title": "Oboor Girls Rehabilitation Program",
+    "subtitle": "A comprehensive training program dedicated to girls with disabilities over 12 years of age, aiming to empower them to acquire the life, social, and vocational skills that help them achieve the highest degrees of independence and social integration.",
+    "image": "/figma/programs/girls.jpg",
+    "about": [
+      "The program relies on an integrated set of interactive training stations carefully designed to meet the needs of girls aged 12 and above, providing a practical training environment that simulates everyday life situations and helps develop skills through direct, hands-on application. The program is based on an educational philosophy that depends on learning through interaction and actual practice, using a flexible training methodology that takes into account individual differences among trainees and allows activities to be adapted to suit each girl's abilities and needs for the best possible benefit."
+    ],
+    "philosophyIntro": "The program is based on interactive, hands-on training within an environment that simulates everyday life situations, with the goal of empowering girls to acquire independence, self-care, and social interaction skills in a practical, realistic manner. It also combines individual and group training to ensure the best results according to each girl's needs and abilities.",
+    "philosophy": [
+      "The program relies on a structured training cycle that combines continuous training and practical application.",
+      "It combines individual and group training according to the needs and level of each case.",
+      "It focuses on developing the life skills that help the girl manage her daily affairs more independently.",
+      "The program relies on hands-on learning through direct experience within specialized training stations."
+    ],
+    "methods": [
+      {
+        "name": "",
+        "desc": "Hands-on training based on real-life simulation"
+      },
+      {
+        "name": "",
+        "desc": "A flexible, interactive approach that takes into account individual differences"
+      },
+      {
+        "name": "",
+        "desc": "Training environments that simulate everyday life"
+      }
+    ],
+    "duration": "An operational cycle based on: 3 weeks of training + 1 week of an applied project",
+    "target": "Girls with intellectual disabilities",
+    "targetTags": [
+      "Autism Spectrum Disorder",
+      "Various syndromes"
+    ],
+    "trainingIntro": "The Oboor program offers a set of interactive training stations designed to develop girls' life, social, and vocational skills within a realistic and safe training environment.",
+    "trainingAreas": [
+      {
+        "title": "Fitness & Personal Care Station",
+        "desc": "Developing skills in personal hygiene, grooming, and general health on a daily basis."
+      },
+      {
+        "title": "Family Living Station",
+        "desc": "Enhancing understanding of family roles and developing skills for interacting and cooperating within the home."
+      },
+      {
+        "title": "Culture & Technology Station",
+        "desc": "Developing cultural awareness and basic skills in using technology safely and beneficially."
+      },
+      {
+        "title": "Gardening & Nursery Station",
+        "desc": "Developing responsibility and practical skills through learning farming and caring for plants."
+      },
+      {
+        "title": "Shopping Simulation Station",
+        "desc": "Training the girl in purchasing skills, selecting products, and handling everyday shopping situations."
+      },
+      {
+        "title": "Art & Handicrafts Station",
+        "desc": "Developing cultural awareness and basic skills in using technology safely and beneficially."
+      }
+    ]
+  },
+  {
+    "slug": "youth",
+    "title": "Oboor Youth Rehabilitation Program",
+    "subtitle": "A comprehensive training program dedicated to youth with disabilities over 15 years of age, aiming to empower them to acquire the life, social, and vocational skills that help them achieve the highest degrees of independence and integration.",
+    "image": "/figma/programs/youth.jpg",
+    "about": [
+      "It is a rehabilitation and educational program designed specifically for young men with disabilities over 12 years of age. The program aims to develop the youth's personal, social, and functional skills, and to empower them to acquire the life, social, and vocational skills that help them achieve the highest degrees of independence and social integration."
+    ],
+    "philosophyIntro": "The program relies on creating environmental and social interaction opportunities to rehabilitate the young person for a better life, following a flexible methodology that takes into account individual differences.",
+    "philosophy": [
+      "The program is based on two main levels and a set of interactive training stations to meet the needs of youth over 12 years of age, grounded in the philosophy of learning through interaction and direct practice.",
+      "The program is built on creating environmental and social interaction opportunities to rehabilitate the young person for a better life, relying on individual assessment, group work, and flexibility in training according to each young person's level and needs."
+    ],
+    "methods": [
+      {
+        "name": "ASDAN",
+        "desc": "The Oboor Youth program is based on the ASDAN approach for developing life skills."
+      }
+    ],
+    "duration": "The program includes various skills progressing from simple to complex, and connects the young person to applied stations where they employ different skills by practicing activities related to the field, enabling the student to transition to higher-level skills within the same areas.",
+    "target": "Youth aged 12 and above who experience:",
+    "targetTags": [],
+    "trainingIntro": "The program covers a set of training areas that help develop youth's life, social, and vocational skills progressively and practically.",
+    "trainingAreas": [
+      {
+        "title": "Cognitive & Academic Area",
+        "desc": "Developing skills in personal hygiene, grooming, and general health on a daily basis."
+      },
+      {
+        "title": "Independence Skills",
+        "desc": "Enhancing understanding of family roles and developing skills for interacting and cooperating within the home."
+      },
+      {
+        "title": "Motor Area",
+        "desc": "Developing cultural awareness and basic skills in using technology safely and beneficially."
+      },
+      {
+        "title": "Vocational Preparation",
+        "desc": "Developing vocational awareness and the basic skills that help the young person integrate into the labor market."
+      },
+      {
+        "title": "Social Area",
+        "desc": "Training the young person in purchasing skills, selecting products, and handling everyday shopping situations."
+      }
+    ],
+    "targetList": [
+      "Intellectual disability",
+      "Autism Spectrum Disorder",
+      "Cerebral palsy",
+      "ADHD",
+      "Youth for whom the school environment did not suit their individual needs"
+    ],
+    "stationsIntro": "These are applied stations activated within the youth centers to simulate the daily situations and activities that an individual might engage in outside the center.",
+    "stations": [
+      "Sports & Physical Station",
+      "Art & Handicrafts Station",
+      "Kitchen Station",
+      "Bait Al-Sha'ar (Tent) Station",
+      "Shopping Simulation Station",
+      "Office Work Station",
+      "Technology Station",
+      "Gardening Station"
+    ]
+  }
+];
+
+export const getProgram = (slug: string, locale: Locale = "ar") =>
+  (locale === "en" ? PROGRAM_DETAILS_EN : PROGRAM_DETAILS).find((p) => p.slug === slug);

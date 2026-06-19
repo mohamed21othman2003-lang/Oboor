@@ -1,26 +1,52 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* ===== Oboor Design Tokens (extracted from Figma) ===== */
+@theme {
+  --font-sans: var(--font-cairo), system-ui, sans-serif;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  /* Brand */
+  --color-brand: #2cbcc8;
+  --color-brand-dark: #1796a3;
+  --color-brand-deep: #0d3d45;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Surfaces */
+  --color-background: #ffffff;
+  --color-foreground: #1f2a30;
+  --color-surface: #f5f9fa;
+  --color-surface-muted: #f3f4f6;
+
+  /* Text */
+  --color-ink: #1f2a30;
+  --color-ink-muted: #5f6b73;
+  --color-ink-soft: #6a7f87;
+
+  /* Borders */
+  --color-line: #e4e8ea;
+  --color-line-soft: #dce8ea;
+
+  /* Footer / dark sections */
+  --color-night: #1a2e35;
+  --color-night-deep: #0f2027;
+
+  /* Status */
+  --color-success: #27ae60;
+  --color-danger: #e74c3c;
+  --color-warning: #f39c12;
+  --color-info: #3498db;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+}
+
+/* Mirror directional (horizontal) icons when the layout flips to LTR.
+   The icons are authored left-pointing for the default RTL layout. */
+[dir="ltr"] .dir-flip {
+  transform: scaleX(-1);
+}
+
+/* Hero slide transition */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
