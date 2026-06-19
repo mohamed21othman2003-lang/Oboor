@@ -16,8 +16,8 @@ export default function Gallery({ locale }: { locale: Locale }) {
   return (
     <section className="bg-surface py-20">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <div className="mb-8 flex items-end justify-between gap-4">
-          <Link href="/gallery" className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap text-sm font-semibold text-brand transition-colors hover:text-brand-dark">
+        <div className="mb-8 flex items-start justify-between gap-4">
+          <Link href="/gallery" className="mt-1 inline-flex shrink-0 items-center gap-1 whitespace-nowrap text-sm font-semibold text-brand transition-colors hover:text-brand-dark">
             {pick(locale, "عرض الكل", "View All")}
             <svg className="dir-flip" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M15 6l-6 6 6 6" /></svg>
           </Link>
