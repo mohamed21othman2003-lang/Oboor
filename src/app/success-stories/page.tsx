@@ -132,7 +132,7 @@ export default async function SuccessStoriesPage() {
               <ClipboardIcon />
               {pick(locale, "قيم طفلك الان", "Assess Your Child")}
             </Link>
-            <a href="https://wa.me/966561000274" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 rounded-xl bg-[#25D366] px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90">
+            <a href="https://wa.me/966920003452" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 rounded-xl bg-[#25D366] px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90">
               <WhatsappIcon />
               {pick(locale, "تواصل عبر الواتساب", "Contact via WhatsApp")}
             </a>

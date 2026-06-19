@@ -178,7 +178,7 @@ export default async function BranchesPage() {
           <h2 className="mt-5 text-3xl font-extrabold text-white sm:text-4xl">{pick(locale, "أتحتاجنا بجانبك لاختيار الوجهة؟", "Need help choosing the right option?")}</h2>
           <p className="mx-auto mt-3 max-w-2xl text-sm text-white/75">{pick(locale, "نحن هنا لنكون بوصلتك؛ نختار معًا الفرع الأقرب لروح طفلك، والأنسب لتحقيق طموحه.", "We are here to guide you in finding the most suitable branch for your child's needs and potential, ensuring the best path toward their goals.")}</p>
           <div className="mt-8 flex justify-center">
-            <a href="https://wa.me/966561000274" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 rounded-xl bg-[#25D366] px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90">
+            <a href="https://wa.me/966920003452" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 rounded-xl bg-[#25D366] px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90">
               <WhatsappIcon />
               {pick(locale, "تواصل عبر الواتساب", "Contact via WhatsApp")}
             </a>
