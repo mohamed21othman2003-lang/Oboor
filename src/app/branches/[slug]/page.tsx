@@ -95,8 +95,8 @@ export default async function BranchDetailPage({ params }: { params: Promise<{ s
           </nav>
 
           <div className="flex flex-col items-stretch justify-between gap-8 lg:flex-row lg:items-center">
-            {/* Buttons (left) */}
-            <div className="order-3 flex flex-col gap-3 lg:order-1 lg:w-64">
+            {/* Buttons (end / left in RTL) */}
+            <div className="order-3 flex flex-col gap-3 lg:w-64">
               <button className="flex items-center justify-center gap-2 rounded-xl bg-brand px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-dark">
                 <DownloadIcon />
                 {pick(locale, "تحميل البروفايل", "Download Profile")}
@@ -120,8 +120,8 @@ export default async function BranchDetailPage({ params }: { params: Promise<{ s
               ))}
             </div>
 
-            {/* Title (right) */}
-            <div className="order-1 text-start lg:order-3">
+            {/* Title (start / right in RTL) */}
+            <div className="order-1 text-start">
               <h1 className="text-4xl font-extrabold text-ink">{b.name}</h1>
               <p className="mt-2 text-lg text-brand">{pick(locale, `${b.city} ، السعودية`, `${b.city}, Saudi Arabia`)}</p>
               <div className="mt-3 flex items-center justify-start gap-2">
