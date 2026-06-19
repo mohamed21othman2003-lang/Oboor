@@ -43,14 +43,14 @@ export default function NewsAndCerts({ locale }: { locale: Locale }) {
         {/* News */}
         <div className="lg:col-span-2">
           <div className="mb-6 flex items-start justify-between gap-4">
-            <Link href="/news" className="mt-1 inline-flex shrink-0 items-center gap-1 whitespace-nowrap text-sm font-semibold text-white/90 transition-colors hover:text-white">
-              {pick(locale, "عرض الكل", "View All")}
-              <svg className="dir-flip" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M15 6l-6 6 6 6" /></svg>
-            </Link>
             <div className="min-w-0 text-start">
               <h3 className="text-2xl font-extrabold text-white">{pick(locale, "صدى العبور وحراكه", "The Impact of Oboor in Motion")}</h3>
               <p className="mt-1 text-sm text-white/70">{pick(locale, "هنا ندوّن تفاصيل الأثر، تابع آخر المستجدات.", "Here, we document the details of our impact. Stay updated with the latest news and developments.")}</p>
             </div>
+            <Link href="/news" className="mt-1 inline-flex shrink-0 items-center gap-1 whitespace-nowrap text-sm font-semibold text-white/90 transition-colors hover:text-white">
+              {pick(locale, "عرض الكل", "View All")}
+              <svg className="dir-flip" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M15 6l-6 6 6 6" /></svg>
+            </Link>
           </div>
           <div className="grid gap-5 sm:grid-cols-2">
             {news.map((n) => (
@@ -62,14 +62,14 @@ export default function NewsAndCerts({ locale }: { locale: Locale }) {
         {/* Certifications */}
         <div>
           <div className="mb-6 flex items-start justify-between gap-4">
-            <Link href="/about" className="mt-1 inline-flex shrink-0 items-center gap-1 whitespace-nowrap text-sm font-semibold text-white/90 transition-colors hover:text-white">
-              {pick(locale, "عرض الكل", "View All")}
-              <svg className="dir-flip" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M15 6l-6 6 6 6" /></svg>
-            </Link>
             <div className="min-w-0 text-start">
               <h3 className="text-2xl font-extrabold text-white">{pick(locale, "عبور، بالشهادات العالمية", "Oboor, Globally Accredited")}</h3>
               <p className="mt-1 text-sm text-white/70">{pick(locale, "سجلٌ حافل بالاعتمادات، وتمكينٌ مبنيٌ على أعلى معايير الجودة.", "A distinguished record of international accreditations and empowerment built on the highest quality standards.")}</p>
             </div>
+            <Link href="/about" className="mt-1 inline-flex shrink-0 items-center gap-1 whitespace-nowrap text-sm font-semibold text-white/90 transition-colors hover:text-white">
+              {pick(locale, "عرض الكل", "View All")}
+              <svg className="dir-flip" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M15 6l-6 6 6 6" /></svg>
+            </Link>
           </div>
           <div className="grid grid-cols-2 gap-4">
             {[0, 1, 2, 3].map((i) => (
