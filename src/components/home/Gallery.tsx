@@ -16,11 +16,12 @@ export default function Gallery({ locale }: { locale: Locale }) {
   return (
     <section className="bg-surface py-20">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <div className="mb-8 flex items-center justify-between">
-          <Link href="/gallery" className="text-sm font-semibold text-brand transition-colors hover:text-brand-dark">
-            {pick(locale, "عرض الكل ‹", "View All ‹")}
+        <div className="mb-8 flex items-end justify-between gap-4">
+          <Link href="/gallery" className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap text-sm font-semibold text-brand transition-colors hover:text-brand-dark">
+            {pick(locale, "عرض الكل", "View All")}
+            <svg className="dir-flip" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M15 6l-6 6 6 6" /></svg>
           </Link>
-          <div className="text-start">
+          <div className="min-w-0 text-start">
             <span className="rounded-full bg-brand/10 px-4 py-1.5 text-sm font-medium text-brand-dark">{pick(locale, "المعرض", "Gallery")}</span>
             <h2 className="mt-3 text-3xl font-extrabold text-ink sm:text-4xl">{pick(locale, "ملامح من عبور", "Moments from Oboor")}</h2>
           </div>

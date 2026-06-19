@@ -26,8 +26,9 @@ function NewsCard({ n, locale }: { n: (typeof NEWS)[number]; locale: Locale }) {
       <div className="p-4">
         <h4 className="text-sm font-bold leading-7 text-ink">{n.title}</h4>
         <p className="mt-1 text-xs leading-6 text-ink-muted">{n.desc}</p>
-        <Link href="/news" className="mt-3 inline-block text-xs font-semibold text-brand transition-colors hover:text-brand-dark">
-          {pick(locale, "اقرأ المزيد ‹", "Read More ‹")}
+        <Link href="/news" className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-brand transition-colors hover:text-brand-dark">
+          {pick(locale, "اقرأ المزيد", "Read More")}
+          <svg className="dir-flip" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M15 6l-6 6 6 6" /></svg>
         </Link>
       </div>
     </div>
@@ -41,9 +42,12 @@ export default function NewsAndCerts({ locale }: { locale: Locale }) {
       <div className="relative mx-auto grid max-w-7xl gap-10 px-6 lg:grid-cols-3 lg:px-8">
         {/* News */}
         <div className="lg:col-span-2">
-          <div className="mb-6 flex items-center justify-between">
-            <Link href="/news" className="text-sm font-semibold text-white/90 transition-colors hover:text-white">{pick(locale, "عرض الكل ‹", "View All ‹")}</Link>
-            <div className="text-start">
+          <div className="mb-6 flex items-end justify-between gap-4">
+            <Link href="/news" className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap text-sm font-semibold text-white/90 transition-colors hover:text-white">
+              {pick(locale, "عرض الكل", "View All")}
+              <svg className="dir-flip" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M15 6l-6 6 6 6" /></svg>
+            </Link>
+            <div className="min-w-0 text-start">
               <h3 className="text-2xl font-extrabold text-white">{pick(locale, "صدى العبور وحراكه", "The Impact of Oboor in Motion")}</h3>
               <p className="mt-1 text-sm text-white/70">{pick(locale, "هنا ندوّن تفاصيل الأثر، تابع آخر المستجدات.", "Here, we document the details of our impact. Stay updated with the latest news and developments.")}</p>
             </div>
@@ -57,9 +61,12 @@ export default function NewsAndCerts({ locale }: { locale: Locale }) {
 
         {/* Certifications */}
         <div>
-          <div className="mb-6 flex items-center justify-between">
-            <Link href="/about" className="text-sm font-semibold text-white/90 transition-colors hover:text-white">{pick(locale, "عرض الكل ‹", "View All ‹")}</Link>
-            <div className="text-start">
+          <div className="mb-6 flex items-end justify-between gap-4">
+            <Link href="/about" className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap text-sm font-semibold text-white/90 transition-colors hover:text-white">
+              {pick(locale, "عرض الكل", "View All")}
+              <svg className="dir-flip" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M15 6l-6 6 6 6" /></svg>
+            </Link>
+            <div className="min-w-0 text-start">
               <h3 className="text-2xl font-extrabold text-white">{pick(locale, "عبور، بالشهادات العالمية", "Oboor, Globally Accredited")}</h3>
               <p className="mt-1 text-sm text-white/70">{pick(locale, "سجلٌ حافل بالاعتمادات، وتمكينٌ مبنيٌ على أعلى معايير الجودة.", "A distinguished record of international accreditations and empowerment built on the highest quality standards.")}</p>
             </div>
