@@ -48,7 +48,7 @@ body {
 /* Printable documents (e.g. branch profile → save as PDF) */
 @media print {
   .no-print { display: none !important; }
-  .profile-doc {
+  .profile-doc, .profile-doc * {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
