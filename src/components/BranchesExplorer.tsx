@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { BRANCHES, BRANCHES_EN, regionTabs, type Branch } from "@/lib/branchesData";
 import { pick, type Locale } from "@/i18n/config";
 
@@ -10,10 +11,15 @@ export default function BranchesExplorer({ locale }: { locale: Locale }) {
   const source = locale === "en" ? BRANCHES_EN : BRANCHES;
   const allLabel = pick(locale, "الكل", "All");
   const [region, setRegion] = useState(allLabel);
-  const list = region === allLabel ? source : source.filter((b) => b.region === region);
+  const q = (useSearchParams().get("q") || "").trim().toLowerCase();
+
+  const byRegion = region === allLabel ? source : source.filter((b) => b.region === region);
+  const list = q
+    ? byRegion.filter((b) => [b.name, b.city, b.area, b.region, ...b.services].some((v) => v.toLowerCase().includes(q)))
+    : byRegion;
 
   return (
-    <section className="bg-white py-16">
+    <section id="branches-list" className="bg-white py-16">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         {/* Heading */}
         <div className="mb-8 text-start">
@@ -41,10 +47,27 @@ export default function BranchesExplorer({ locale }: { locale: Locale }) {
           })}
         </div>
 
+        {/* Active search note */}
+        {q && (
+          <p className="mb-6 text-sm text-ink-muted">
+            {pick(locale, "نتائج البحث عن: ", "Results for: ")}
+            <span className="font-bold text-brand-dark">{q}</span>
+            {" — "}
+            <span>{pick(locale, `${list.length} فرع`, `${list.length} branch(es)`)}</span>
+          </p>
+        )}
+
         {/* Branch cards */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {list.map((b) => <BranchCard key={b.slug} b={b} locale={locale} />)}
-        </div>
+        {list.length > 0 ? (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {list.map((b) => <BranchCard key={b.slug} b={b} locale={locale} />)}
+          </div>
+        ) : (
+          <div className="rounded-2xl border border-dashed border-line bg-surface p-12 text-center">
+            <p className="text-base font-semibold text-ink">{pick(locale, "لا توجد نتائج مطابقة", "No matching results")}</p>
+            <p className="mt-1 text-sm text-ink-muted">{pick(locale, "جرّب اسم مدينة أو فرع آخر.", "Try a different city or branch name.")}</p>
+          </div>
+        )}
       </div>
     </section>
   );
