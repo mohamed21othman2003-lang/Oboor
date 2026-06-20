@@ -105,7 +105,10 @@ export default function ServiceSearchBar({ locale = "ar", searchLabel }: { regio
     setCatKey("programs");
     setRegion(ALL);
     setProgramIdx(ALL);
-    router.push("/programs");
+    // only clear URL filters when already on the services page — don't navigate away from home
+    if (typeof window !== "undefined" && window.location.pathname === "/programs") {
+      router.push("/programs");
+    }
   }
 
   return (
