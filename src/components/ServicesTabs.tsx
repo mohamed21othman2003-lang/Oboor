@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import ProgramCard, { type Program } from "@/components/ProgramCard";
 import { pick, type Locale } from "@/i18n/config";
 
@@ -62,6 +63,20 @@ const TECHNIQUES_EN: Program[] = [
   { badge: "Technology", href: "/techniques/auditory-integration", title: "Auditory Integration", desc: "A program that helps improve auditory information processing, focus, and response to different sound stimuli.", features: ["Improving auditory attention", "Reducing sound sensitivity", "Supporting focus and cognition"], regions: ["Riyadh", "Jeddah", "Eastern Province"] },
 ];
 
+// مصدر مشترك لفئات الخدمات (يستخدمه شريط البحث للفلترة)
+export type ServiceCategoryKey = "programs" | "clinical" | "techniques";
+export function serviceCategories(locale: Locale) {
+  return [
+    { key: "programs" as const, label: pick(locale, "برامج تأهيلية", "Rehabilitation Programs"), items: locale === "en" ? PROGRAMS_EN : PROGRAMS_AR },
+    { key: "clinical" as const, label: pick(locale, "خدمات عيادية", "Clinical Services"), items: locale === "en" ? CLINICAL_EN : CLINICAL_AR },
+    { key: "techniques" as const, label: pick(locale, "تقنيات تأهيلية", "Rehabilitation Technologies"), items: locale === "en" ? TECHNIQUES_EN : TECHNIQUES_AR },
+  ];
+}
+export function serviceRegions(locale: Locale): string[] {
+  const all = serviceCategories(locale).flatMap((c) => c.items.flatMap((i) => i.regions ?? []));
+  return [...new Set(all)];
+}
+
 const bookIcon = <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" /><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" /></svg>;
 const stethoscopeIcon = <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 3v6a5 5 0 0 0 10 0V3" /><path d="M4 3H2M14 3h-2M9 14v3a4 4 0 0 0 8 0v-1" /><circle cx="19" cy="13" r="2" /></svg>;
 const chipIcon = <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="6" y="6" width="12" height="12" rx="2" /><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4" /></svg>;
@@ -79,6 +94,9 @@ export default function ServicesTabs({ locale = "ar" }: { locale?: Locale }) {
 
   const [active, setActive] = useState<(typeof TABS)[number]["key"]>("programs");
   const current = TABS.find((t) => t.key === active)!;
+
+  const region = useSearchParams().get("region");
+  const items = region ? current.data.filter((p) => p.regions?.includes(region)) : current.data;
 
   // افتح التاب الصحيح حسب الرابط (#clinical / #techniques / #programs)
   useEffect(() => {
@@ -121,7 +139,7 @@ export default function ServicesTabs({ locale = "ar" }: { locale?: Locale }) {
       </div>
 
       {/* Grid */}
-      <section className="bg-white py-16">
+      <section id="services-tabs" className="scroll-mt-24 bg-white py-16">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mb-10 text-start">
             <h2 className="flex items-center justify-start gap-2 text-3xl font-extrabold text-ink">
@@ -129,12 +147,25 @@ export default function ServicesTabs({ locale = "ar" }: { locale?: Locale }) {
               <span className="text-brand">{current.icon}</span>
             </h2>
             <p className="mt-3 max-w-3xl text-sm text-ink-muted">{current.intro}</p>
+            {region && (
+              <p className="mt-2 text-sm text-ink-muted">
+                {pick(locale, "المنطقة: ", "Region: ")}<span className="font-bold text-brand-dark">{region}</span>
+                {" — "}{pick(locale, `${items.length} نتيجة`, `${items.length} result(s)`)}
+              </p>
+            )}
           </div>
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {current.data.map((p) => (
-              <ProgramCard key={p.title} p={p} locale={locale} />
-            ))}
-          </div>
+          {items.length > 0 ? (
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {items.map((p) => (
+                <ProgramCard key={p.title} p={p} locale={locale} />
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-dashed border-line bg-surface p-12 text-center">
+              <p className="text-base font-semibold text-ink">{pick(locale, "لا توجد نتائج في هذه المنطقة", "No results in this region")}</p>
+              <p className="mt-1 text-sm text-ink-muted">{pick(locale, "جرّب منطقة أخرى أو تصفّح كل المناطق.", "Try another region or browse all regions.")}</p>
+            </div>
+          )}
         </div>
       </section>
     </>

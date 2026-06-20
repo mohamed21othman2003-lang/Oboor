@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { getLocale } from "@/i18n/locale";
 import { pick, type Locale } from "@/i18n/config";
 import ServiceSearchBar from "@/components/ServiceSearchBar";
@@ -91,7 +92,9 @@ export default async function ServicesPage() {
   return (
     <>
       <Hero locale={locale} />
-      <ServicesTabs locale={locale} />
+      <Suspense fallback={null}>
+        <ServicesTabs locale={locale} />
+      </Suspense>
       <CTA locale={locale} />
     </>
   );
