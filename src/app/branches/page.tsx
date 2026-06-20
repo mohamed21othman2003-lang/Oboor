@@ -2,7 +2,9 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { MAP_REGIONS, MAP_REGIONS_EN, BRANCH_FEATURES, BRANCH_FEATURES_EN } from "@/lib/branchesData";
+import { Suspense } from "react";
 import BranchesExplorer from "@/components/BranchesExplorer";
+import BranchSearch from "@/components/BranchSearch";
 import { getLocale } from "@/i18n/locale";
 import { pick } from "@/i18n/config";
 
@@ -61,21 +63,14 @@ export default async function BranchesPage() {
           </div>
 
           {/* Search bar */}
-          <div className="mx-auto mt-8 flex max-w-3xl items-center gap-3">
-            <div className="relative flex-1">
-              <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-ink-soft"><SearchIcon /></span>
-              <input type="text" placeholder={pick(locale, "ابحث بالمدينة أو اسم الفرع...", "Search by city or branch name...")} className="w-full rounded-xl border border-line bg-white py-3 pr-11 pl-4 text-start text-sm text-ink shadow-sm placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-brand/30" />
-            </div>
-            <button className="flex shrink-0 items-center gap-2 rounded-xl bg-brand px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-dark">
-              <SearchIcon />
-              {pick(locale, "بحث", "Search")}
-            </button>
-          </div>
+          <BranchSearch locale={locale} />
         </div>
       </section>
 
       {/* Branches by region (interactive) */}
-      <BranchesExplorer locale={locale} />
+      <Suspense fallback={null}>
+        <BranchesExplorer locale={locale} />
+      </Suspense>
 
       {/* Map */}
       <section className="bg-surface py-16">
@@ -203,9 +198,6 @@ function ZoomBtn({ children }: { children: React.ReactNode }) {
 /* Icons */
 function PinIconSm() {
   return <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-brand"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>;
-}
-function SearchIcon() {
-  return <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3" /></svg>;
 }
 function ExpandIcon() {
   return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" /></svg>;
