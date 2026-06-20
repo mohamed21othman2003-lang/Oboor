@@ -67,10 +67,6 @@ export default async function AboutPage() {
               <span className="absolute right-5 top-6 flex items-center gap-2 rounded-xl bg-white px-3 py-2 text-xs font-bold text-ink shadow-lg">
                 <CalIcon /> {pick(locale, "تأهيل شامل ومتكامل", "Comprehensive, integrated rehabilitation")}
               </span>
-              <span className="absolute bottom-8 left-5 flex items-center gap-2 rounded-xl bg-white px-3 py-2 shadow-lg">
-                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand/10 text-brand"><CalIcon /></span>
-                <span className="text-start"><span className="block text-[10px] text-ink-soft">{pick(locale, "تأسس عام", "Established")}</span><span className="block text-sm font-extrabold text-brand">{pick(locale, "٢٠٠٧", "2007")}</span></span>
-              </span>
             </div>
 
             {/* Text (left) */}
