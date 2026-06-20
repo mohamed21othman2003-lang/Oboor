@@ -62,10 +62,14 @@ export default async function AboutPage() {
             {/* Image (right) */}
             <div className="relative order-1 mx-auto h-[440px] w-full max-w-[480px]">
               <div className="relative h-full w-full overflow-hidden rounded-3xl shadow-lg">
-                <Image src="/figma/about/hero.jpg" alt={pick(locale, "مركز عبور", "Oboor Center")} fill className="object-cover" sizes="(max-width:1024px) 100vw, 480px" priority />
+                <Image src="/figma/about/hero-v2.jpg" alt={pick(locale, "مركز عبور", "Oboor Center")} fill className="object-cover" sizes="(max-width:1024px) 100vw, 480px" priority />
               </div>
               <span className="absolute right-5 top-6 flex items-center gap-2 rounded-xl bg-white px-3 py-2 text-xs font-bold text-ink shadow-lg">
                 <CalIcon /> {pick(locale, "تأهيل شامل ومتكامل", "Comprehensive, integrated rehabilitation")}
+              </span>
+              <span className="absolute left-5 top-[13%] flex items-center gap-2 rounded-xl bg-white px-3 py-2 shadow-lg">
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand/10 text-brand"><CalIcon /></span>
+                <span className="text-start"><span className="block text-[10px] text-ink-soft">{pick(locale, "تأسس عام", "Established")}</span><span className="block text-sm font-extrabold text-brand">{pick(locale, "٢٠٠٧", "2007")}</span></span>
               </span>
             </div>
 
