@@ -41,6 +41,26 @@ export default function ContactForm({ locale }: { locale: Locale }) {
     "w-full rounded-lg border border-line bg-surface px-4 py-3 text-sm text-ink outline-none transition-colors placeholder:text-ink-soft focus:border-brand focus:bg-white";
   const labelCls = "mb-2 block text-sm font-semibold text-ink";
 
+  if (sent) {
+    return (
+      <div className="flex flex-col items-center rounded-2xl bg-white p-10 text-center shadow-sm ring-1 ring-line sm:p-12">
+        <span className="flex h-20 w-20 items-center justify-center rounded-full bg-brand/10 text-brand">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M20 6 9 17l-5-5" /></svg>
+        </span>
+        <h3 className="mt-6 text-2xl font-extrabold text-ink">{pick(locale, "تم إرسال رسالتك بنجاح", "Your message has been sent")}</h3>
+        <p className="mt-3 max-w-md text-sm leading-7 text-ink-muted">
+          {pick(locale, "شكراً لتواصلك مع مركز عبور. استلمنا رسالتك وسيتواصل معك فريقنا في أقرب وقت.", "Thank you for reaching out to Oboor Center. We've received your message and our team will contact you shortly.")}
+        </p>
+        <button
+          onClick={() => setSent(false)}
+          className="mt-8 rounded-lg border border-brand px-6 py-3 text-sm font-semibold text-brand transition-colors hover:bg-brand hover:text-white"
+        >
+          {pick(locale, "إرسال رسالة أخرى", "Send another message")}
+        </button>
+      </div>
+    );
+  }
+
   return (
     <form onSubmit={handleSubmit} className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-line sm:p-8">
       <div className="grid gap-5 sm:grid-cols-2">
@@ -97,11 +117,6 @@ export default function ContactForm({ locale }: { locale: Locale }) {
         {loading ? pick(locale, "جارٍ الإرسال...", "Sending...") : pick(locale, "إرسال الطلب", "Submit Request")}
       </button>
 
-      {sent && (
-        <p className="mt-4 rounded-lg bg-brand/10 px-4 py-3 text-center text-sm font-medium text-brand-deep">
-          {pick(locale, "تم إرسال طلبك بنجاح، سنتواصل معك قريباً.", "Your request has been sent successfully. We'll be in touch soon.")}
-        </p>
-      )}
       {error && (
         <p className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-center text-sm font-medium text-red-600">{error}</p>
       )}
