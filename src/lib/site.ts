@@ -21,8 +21,13 @@ export const SERVICES = [
   "الدعم التربوي والأكاديمي",
 ] as const;
 
+// مصدر واحد لبيانات التواصل — عدّل هنا وينعكس في كل الموقع (صفحة التواصل + الفوتر)
 export const CONTACT = {
-  email: "info@hc.com.sa",
+  email: "info@hdc.com.sa",
   customerService: "0561000274",
   unified: "920003452",
+  whatsapp: "966920003452", // wa.me
+  website: "oboor.com.sa",
+  mainBranchAr: "الرياض ( الفرع الرئيسي )",
+  mainBranchEn: "Riyadh (Main Branch)",
 };
