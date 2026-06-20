@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { ALL_BRANCHES, getBranch, BRANCH_FEATURES, BRANCH_FEATURES_EN } from "@/lib/branchesData";
 import { getLocale } from "@/i18n/locale";
 import { pick } from "@/i18n/config";
+import { CONTACT } from "@/lib/site";
 import BranchProfileActions from "@/components/BranchProfileActions";
 
 export function generateStaticParams() {
@@ -29,7 +30,7 @@ export default async function BranchProfilePage({ params }: { params: Promise<{ 
     { label: pick(locale, "الحي", "District"), value: b.area },
     { label: pick(locale, "العنوان", "Address"), value: b.address },
     { label: pick(locale, "رقم الهاتف", "Phone"), value: b.phone },
-    { label: pick(locale, "البريد الإلكتروني", "Email"), value: "info@oboor.com.sa" },
+    { label: pick(locale, "البريد الإلكتروني", "Email"), value: CONTACT.email },
     { label: pick(locale, "ساعات العمل", "Working Hours"), value: b.hours },
   ];
 
@@ -161,9 +162,9 @@ export default async function BranchProfilePage({ params }: { params: Promise<{ 
         <section className="mt-8 rounded-xl bg-surface p-5">
           <h2 className="mb-3 text-lg font-bold text-brand-deep">{pick(locale, "تواصل معنا", "Contact Us")}</h2>
           <div className="grid grid-cols-2 gap-y-2 text-sm text-ink">
-            <p><span className="font-semibold text-ink-soft">{pick(locale, "الهاتف الموحّد: ", "Unified line: ")}</span>920000109</p>
-            <p><span className="font-semibold text-ink-soft">{pick(locale, "البريد: ", "Email: ")}</span>info@oboor.com.sa</p>
-            <p><span className="font-semibold text-ink-soft">{pick(locale, "الموقع: ", "Website: ")}</span>oboor.com.sa</p>
+            <p><span className="font-semibold text-ink-soft">{pick(locale, "الهاتف الموحّد: ", "Unified line: ")}</span>{CONTACT.unified}</p>
+            <p><span className="font-semibold text-ink-soft">{pick(locale, "البريد: ", "Email: ")}</span>{CONTACT.email}</p>
+            <p><span className="font-semibold text-ink-soft">{pick(locale, "الموقع: ", "Website: ")}</span>{CONTACT.website}</p>
             <p><span className="font-semibold text-ink-soft">{pick(locale, "العنوان: ", "Address: ")}</span>{b.address}</p>
           </div>
         </section>

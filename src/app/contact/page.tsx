@@ -52,11 +52,11 @@ function Hero({ locale }: { locale: Locale }) {
 }
 
 /* ---------- Contact info cards ---------- */
-type Card = { icon: React.ReactNode; title: string; value: string; note: string; cta: string };
+type Card = { icon: React.ReactNode; title: string; value: string; note: string; cta: string; href: string };
 
-function InfoCard({ icon, title, value, note, cta }: Card) {
+function InfoCard({ icon, title, value, note, cta, href }: Card) {
   return (
-    <div className="flex flex-col gap-4 rounded-2xl bg-gradient-to-bl from-brand to-brand-deep p-7 text-white shadow-lg">
+    <a href={href} className="flex flex-col gap-4 rounded-2xl bg-gradient-to-bl from-brand to-brand-deep p-7 text-white shadow-lg transition-transform hover:-translate-y-1">
       <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/15">{icon}</div>
       <div>
         <h3 className="text-lg font-bold">{title}</h3>
@@ -69,7 +69,7 @@ function InfoCard({ icon, title, value, note, cta }: Card) {
           <path strokeLinecap="round" strokeLinejoin="round" d="M15 18l-6-6 6-6" />
         </svg>
       </span>
-    </div>
+    </a>
   );
 }
 
@@ -88,9 +88,9 @@ function ContactCards({ locale }: { locale: Locale }) {
     <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
       <h2 className="mb-8 text-center text-2xl font-bold text-ink">{pick(locale, "معلومات التواصل", "Contact Information")}</h2>
       <div className="grid gap-6 md:grid-cols-3">
-        <InfoCard icon={mail} title={pick(locale, "البريد الإلكتروني", "Email")} note={pick(locale, "نرد خلال ٢٤ ساعة", "We reply within 24 hours")} value={CONTACT.email} cta={pick(locale, "تواصل الآن", "Contact Now")} />
-        <InfoCard icon={headset} title={pick(locale, "خدمة العملاء", "Customer Service")} note={pick(locale, "للدعم والمتابعة", "For support & follow-up")} value={CONTACT.customerService} cta={pick(locale, "اتصل الآن", "Call Now")} />
-        <InfoCard icon={phone} title={pick(locale, "الرقم الموحد", "Unified Number")} note={pick(locale, "للاستفسارات العامة", "For general inquiries")} value={CONTACT.unified} cta={pick(locale, "اتصل الآن", "Call Now")} />
+        <InfoCard icon={mail} title={pick(locale, "البريد الإلكتروني", "Email")} note={pick(locale, "نرد خلال ٢٤ ساعة", "We reply within 24 hours")} value={CONTACT.email} cta={pick(locale, "تواصل الآن", "Contact Now")} href={`mailto:${CONTACT.email}`} />
+        <InfoCard icon={headset} title={pick(locale, "خدمة العملاء", "Customer Service")} note={pick(locale, "للدعم والمتابعة", "For support & follow-up")} value={CONTACT.customerService} cta={pick(locale, "اتصل الآن", "Call Now")} href={`tel:${CONTACT.customerService}`} />
+        <InfoCard icon={phone} title={pick(locale, "الرقم الموحد", "Unified Number")} note={pick(locale, "للاستفسارات العامة", "For general inquiries")} value={CONTACT.unified} cta={pick(locale, "اتصل الآن", "Call Now")} href={`tel:${CONTACT.unified}`} />
       </div>
     </section>
   );
@@ -207,10 +207,10 @@ function SocialSection({ locale }: { locale: Locale }) {
           <SocialLink label="Instagram" href="https://www.instagram.com/hdc_ksa">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="5" /><circle cx="12" cy="12" r="4" /><circle cx="17.5" cy="6.5" r="1" fill="currentColor" /></svg>
           </SocialLink>
-          <SocialLink label="Tik Tok" href="#">
+          <SocialLink label="Tik Tok" href="https://www.tiktok.com/@hdc_ksa">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 3a5.5 5.5 0 0 0 4 4v3a8.5 8.5 0 0 1-4-1v6a6 6 0 1 1-6-6v3a3 3 0 1 0 3 3V3h3z" /></svg>
           </SocialLink>
-          <SocialLink label="X" href="#">
+          <SocialLink label="X" href="https://x.com/hdc_ksa">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2H21.5l-7.5 8.57L23 22h-6.594l-5.165-6.75L5.32 22H2.06l8.02-9.166L1 2h6.76l4.668 6.17L18.244 2zm-1.157 18h1.83L7.01 3.92H5.05L17.087 20z" /></svg>
           </SocialLink>
         </div>
