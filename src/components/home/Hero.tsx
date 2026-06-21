@@ -11,6 +11,7 @@ export default function Hero({ locale }: { locale: Locale }) {
 
   const slides = [
     {
+      img: "/figma/home/imgImageWithFallback.jpg",
       heading: pick(
         locale,
         <>مركز <span className="text-brand">عبور</span><br />للرعاية النهارية والتأهيل</>,
@@ -23,6 +24,7 @@ export default function Hero({ locale }: { locale: Locale }) {
       ),
     },
     {
+      img: "/figma/home/hero-slide2-clean.jpg",
       heading: pick(
         locale,
         <>التدخل المبكر خطوة مبكرة في الصغر<br />تُنير سائر العُمر</>,
@@ -35,6 +37,7 @@ export default function Hero({ locale }: { locale: Locale }) {
       ),
     },
     {
+      img: "/figma/home/hero-slide3.jpg",
       heading: pick(
         locale,
         <>ليُعبّروا بأصواتهم<br />ويُعبّروا بخطواتهم</>,
@@ -67,16 +70,19 @@ export default function Hero({ locale }: { locale: Locale }) {
 
   return (
     <section className="relative min-h-[600px] w-full overflow-hidden lg:h-[791px]">
-      {/* Background image */}
-      <Image
-        src="/figma/home/imgImageWithFallback.jpg"
-        alt={pick(locale, "مركز عبور للرعاية والتأهيل", "Oboor Center for Care & Rehabilitation")}
-        fill
-        priority
-        quality={90}
-        sizes="100vw"
-        className="object-cover object-bottom"
-      />
+      {/* Background images — one per slide, cross-fading */}
+      {slides.map((sl, idx) => (
+        <Image
+          key={sl.img}
+          src={sl.img}
+          alt={pick(locale, "مركز عبور للرعاية والتأهيل", "Oboor Center for Care & Rehabilitation")}
+          fill
+          priority={idx === 0}
+          quality={90}
+          sizes="100vw"
+          className={`object-cover object-bottom transition-opacity duration-700 ${idx === i ? "opacity-100" : "opacity-0"}`}
+        />
+      ))}
       {/* Gradient — teal concentrated behind the text side (direction-aware) */}
       <div className={`absolute inset-0 ${gradient}`} />
 
