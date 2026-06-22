@@ -49,6 +49,52 @@ export const PRELIM_QUESTIONS = [
   "هل يتّبع طفلك التعليمات البسيطة دون صعوبة؟",
 ];
 
+// أسئلة مخصّصة لكل نوع تقييم (مصاغة بصيغة إيجابية: نعم = جيد)
+export const ASSESS_QUESTIONS: Record<string, string[]> = {
+  speech: [
+    "هل ينطق طفلك الكلمات بوضوح يناسب عمره؟",
+    "هل يكوّن طفلك جملاً مفيدة للتعبير عن احتياجاته؟",
+    "هل يفهم الآخرون كلام طفلك بسهولة؟",
+    "هل تنمو حصيلة طفلك اللغوية باستمرار؟",
+    "هل يستطيع طفلك متابعة محادثة بسيطة؟",
+  ],
+  adhd: [
+    "هل يستطيع طفلك التركيز في مهمة حتى ينهيها؟",
+    "هل يجلس طفلك بهدوء عندما يتطلّب الموقف ذلك؟",
+    "هل ينتظر طفلك دوره دون تسرّع؟",
+    "هل يتّبع طفلك التعليمات المكوّنة من عدّة خطوات؟",
+    "هل يستطيع طفلك تنظيم أغراضه وإنهاء واجباته؟",
+  ],
+  mchat: [
+    "هل ينظر طفلك في عينيك أثناء التحدث معه؟",
+    "هل يستجيب طفلك عند مناداته باسمه؟",
+    "هل يشير طفلك بإصبعه ليُريك شيئاً يهتم به؟",
+    "هل يقلّد طفلك حركاتك أو تعبيرات وجهك؟",
+    "هل يشارك طفلك في اللعب التخيّلي مع الآخرين؟",
+  ],
+  learning: [
+    "هل يميّز طفلك الحروف والأرقام المناسبة لعمره؟",
+    "هل يتذكّر طفلك ما تعلّمه بسهولة؟",
+    "هل تتناسب قدرة طفلك على القراءة أو الكتابة مع عمره؟",
+    "هل يربط طفلك بين أصوات الحروف وأشكالها؟",
+    "هل ينجز طفلك واجباته الدراسية دون صعوبة كبيرة؟",
+  ],
+  social: [
+    "هل يبادر طفلك باللعب مع الأطفال الآخرين؟",
+    "هل يشارك طفلك ألعابه وأدواته مع أقرانه؟",
+    "هل يعبّر طفلك عن مشاعره بطريقة مناسبة؟",
+    "هل يفهم طفلك مشاعر الآخرين ويتجاوب معها؟",
+    "هل يكوّن طفلك صداقات ويحافظ عليها؟",
+  ],
+  sensory: [
+    "هل يتقبّل طفلك الأصوات العالية دون انزعاج شديد؟",
+    "هل يتحمّل طفلك ملمس الملابس والأطعمة المختلفة؟",
+    "هل تتناسب استجابة طفلك للمس والحركة مع الموقف؟",
+    "هل يحافظ طفلك على توازنه أثناء الحركة واللعب؟",
+    "هل يتأقلم طفلك مع الأماكن المزدحمة أو الجديدة؟",
+  ],
+};
+
 export const ANSWER_OPTIONS = ["نعم", "أحياناً", "لا"];
 
 // ===== English mirrors =====
@@ -90,6 +136,51 @@ export const PRELIM_QUESTIONS_EN = [
   "Does your child follow simple instructions without difficulty?",
 ];
 
+export const ASSESS_QUESTIONS_EN: Record<string, string[]> = {
+  speech: [
+    "Does your child pronounce words clearly for their age?",
+    "Does your child form meaningful sentences to express their needs?",
+    "Do others understand your child's speech easily?",
+    "Is your child's vocabulary growing steadily?",
+    "Can your child follow a simple conversation?",
+  ],
+  adhd: [
+    "Can your child focus on a task until it's finished?",
+    "Does your child sit calmly when the situation requires it?",
+    "Does your child wait their turn without rushing?",
+    "Does your child follow multi-step instructions?",
+    "Can your child organize their belongings and finish tasks?",
+  ],
+  mchat: [
+    "Does your child make eye contact when you talk to them?",
+    "Does your child respond when called by their name?",
+    "Does your child point to show you something they're interested in?",
+    "Does your child imitate your movements or facial expressions?",
+    "Does your child engage in pretend play with others?",
+  ],
+  learning: [
+    "Does your child recognize letters and numbers appropriate for their age?",
+    "Does your child remember what they've learned easily?",
+    "Is your child's reading or writing ability on par with their age?",
+    "Does your child link letter sounds to their shapes?",
+    "Does your child complete schoolwork without major difficulty?",
+  ],
+  social: [
+    "Does your child initiate play with other children?",
+    "Does your child share toys and tools with peers?",
+    "Does your child express their feelings appropriately?",
+    "Does your child understand and respond to others' feelings?",
+    "Does your child make and keep friends?",
+  ],
+  sensory: [
+    "Does your child tolerate loud sounds without severe distress?",
+    "Does your child tolerate different clothing and food textures?",
+    "Is your child's response to touch and movement appropriate to the situation?",
+    "Does your child keep their balance during movement and play?",
+    "Does your child adapt to crowded or new places?",
+  ],
+};
+
 export const ANSWER_OPTIONS_EN = ["Yes", "Sometimes", "No"];
 
 // ===== Locale-aware getters =====
@@ -101,4 +192,9 @@ export const getAssessments = (locale: Locale = "ar"): Assessment[] => (locale =
 export const getAssessment = (slug: string, locale: Locale = "ar"): Assessment | undefined =>
   getAssessments(locale).find((a) => a.slug === slug);
 export const getPrelimQuestions = (locale: Locale = "ar") => (locale === "en" ? PRELIM_QUESTIONS_EN : PRELIM_QUESTIONS);
+// أسئلة التقييم حسب نوعه (مع رجوع للأسئلة العامة لو النوع غير معروف)
+export const getQuestionsFor = (slug: string, locale: Locale = "ar") => {
+  const map = locale === "en" ? ASSESS_QUESTIONS_EN : ASSESS_QUESTIONS;
+  return map[slug] ?? getPrelimQuestions(locale);
+};
 export const getAnswerOptions = (locale: Locale = "ar") => (locale === "en" ? ANSWER_OPTIONS_EN : ANSWER_OPTIONS);
