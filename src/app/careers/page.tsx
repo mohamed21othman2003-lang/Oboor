@@ -61,7 +61,7 @@ export default async function CareersPage() {
             <div className="relative order-1 mx-auto h-[420px] w-full max-w-[495px] lg:order-2">
               <div className="absolute -bottom-4 -left-4 h-full w-full rounded-3xl bg-brand/10" />
               <div className="relative h-full w-full overflow-hidden rounded-3xl shadow-lg">
-                <Image src="/figma/careers/hero.jpg" alt={pick(locale, "فريق عبور", "Oboor team")} fill className="object-cover" sizes="(max-width:1024px) 100vw, 495px" priority />
+                <Image src="/figma/careers/hero-v2.jpg" alt={pick(locale, "فريق عبور", "Oboor team")} fill className="object-cover" sizes="(max-width:1024px) 100vw, 495px" priority />
               </div>
               {/* Floating badge */}
               <div className="absolute bottom-5 left-5 flex items-center gap-3 rounded-2xl bg-white px-4 py-2.5 shadow-lg">
