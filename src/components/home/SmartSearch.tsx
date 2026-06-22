@@ -1,3 +1,4 @@
+import Link from "next/link";
 import ProgramCard, { type Program } from "@/components/ProgramCard";
 import ServiceSearchBar from "@/components/ServiceSearchBar";
 import { pick, type Locale } from "@/i18n/config";
@@ -44,12 +45,17 @@ const PROGRAMS_EN: Program[] = [
   },
 ];
 
+const bookIcon = <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" /><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" /></svg>;
+const stethoscopeIcon = <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 3v6a5 5 0 0 0 10 0V3" /><path d="M4 3H2M14 3h-2M9 14v3a4 4 0 0 0 8 0v-1" /><circle cx="19" cy="13" r="2" /></svg>;
+const chipIcon = <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="6" y="6" width="12" height="12" rx="2" /><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4" /></svg>;
+
 export default function SmartSearch({ locale }: { locale: Locale }) {
   const programs = locale === "en" ? PROGRAMS_EN : PROGRAMS;
-  const chips =
-    locale === "en"
-      ? ["Rehabilitation Technologies", "Clinical Services", "Rehabilitation Programs"]
-      : ["تقنيات تأهيلية", "خدمات عيادية", "برامج تأهيلية"];
+  const chips = [
+    { key: "programs", label: pick(locale, "برامج تأهيلية", "Rehabilitation Programs"), icon: bookIcon },
+    { key: "clinical", label: pick(locale, "خدمات عيادية", "Clinical Services"), icon: stethoscopeIcon },
+    { key: "techniques", label: pick(locale, "تقنيات تأهيلية", "Rehabilitation Technologies"), icon: chipIcon },
+  ];
   return (
     <section className="bg-white py-20">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
@@ -76,12 +82,19 @@ export default function SmartSearch({ locale }: { locale: Locale }) {
 
         <ServiceSearchBar locale={locale} />
 
-        {/* Quick chips */}
+        {/* Quick chips — clickable, jump to the relevant services tab */}
         <div className="mt-4 flex flex-wrap items-center justify-start gap-2">
-          {chips.map((c, i) => (
-            <span key={c} className={`rounded-full px-4 py-1.5 text-sm font-medium ${i === 2 ? "bg-brand/10 text-brand-dark" : "bg-surface text-ink-muted"}`}>{c}</span>
-          ))}
           <span className="text-sm text-ink-soft">{pick(locale, "تصفح مباشرة:", "Browse directly:")}</span>
+          {chips.map((c) => (
+            <Link
+              key={c.key}
+              href={`/programs#${c.key}`}
+              className="flex items-center gap-2 rounded-full bg-surface px-4 py-1.5 text-sm font-medium text-ink-muted transition-colors hover:bg-brand/10 hover:text-brand-dark"
+            >
+              {c.label}
+              {c.icon}
+            </Link>
+          ))}
         </div>
 
         {/* Results */}
