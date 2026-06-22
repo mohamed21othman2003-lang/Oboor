@@ -86,13 +86,13 @@ const STORIES_EN: typeof STORIES = [
 function Story({ s, locale }: { s: (typeof STORIES)[number]; locale: Locale }) {
   return (
     <div className="flex h-full flex-col overflow-hidden rounded-2xl bg-white text-start shadow-lg">
-      <div className="relative h-48 shrink-0">
+      <div className="relative h-40 shrink-0">
         <Image src={s.img} alt={s.name} fill sizes="(max-width:768px) 100vw, 33vw" className="object-cover" />
         <span className="absolute right-3 top-3 rounded-full bg-brand px-3 py-1 text-[11px] font-semibold text-white">{s.program}</span>
-        <span className="absolute bottom-3 left-3 rounded-lg bg-black/55 px-3 py-1 text-[11px] font-medium text-white backdrop-blur">{s.duration}</span>
+        <span className="absolute bottom-3 left-3 rounded-lg bg-black/55 px-2.5 py-1 text-[10px] font-medium text-white backdrop-blur">{s.duration}</span>
       </div>
-      <div className="flex flex-1 flex-col p-5">
-        <h3 className="mb-4 text-base font-bold text-ink">{s.name} - {s.age}</h3>
+      <div className="flex flex-1 flex-col p-4">
+        <h3 className="mb-3 text-sm font-bold text-ink">{s.name} - {s.age}</h3>
         <div className="grid grid-cols-2 gap-3">
           <div className="rounded-lg bg-[#fdeced] p-3">
             <p className="mb-1 text-[11px] font-semibold text-[#c0392b]">{pick(locale, "قبل الالتحاق", "Before Enrollment")}</p>
@@ -144,23 +144,21 @@ export default function SuccessStories({ locale }: { locale: Locale }) {
     target = rtl ? Math.max(target, -max) : Math.min(target, max);
     el.scrollTo({ left: target, behavior: "smooth" });
   };
-  const arrowBtn = "flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/30 bg-white/10 text-white transition-colors hover:bg-brand hover:border-brand";
-
   return (
-    <section className="relative overflow-hidden bg-gradient-to-bl from-brand-deep to-[#0a2329] py-20">
+    <section className="relative overflow-hidden bg-gradient-to-b from-[#eef7f8] to-white py-20">
       <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
         {/* Header: title (start) + arrows (end) */}
         <div className="mb-10 flex flex-col items-start gap-6 sm:flex-row sm:items-end sm:justify-between">
           <div className="text-start">
-            <span className="rounded-full bg-brand/15 px-4 py-1.5 text-sm font-medium text-[#7ee8f0]">{pick(locale, "أبطال عبور", "Oboor Champions")}</span>
-            <h2 className="mt-4 text-3xl font-extrabold text-white sm:text-4xl">
+            <span className="rounded-full bg-brand/10 px-4 py-1.5 text-sm font-medium text-brand-dark">{pick(locale, "أبطال عبور", "Oboor Champions")}</span>
+            <h2 className="mt-4 text-3xl font-extrabold text-ink sm:text-4xl">
               {pick(
                 locale,
                 <>عبروا، <span className="text-brand">وعبّروا!</span></>,
                 <>They crossed barriers and found <span className="text-brand">their voice</span></>
               )}
             </h2>
-            <p className="mt-3 max-w-2xl text-sm text-white/70">
+            <p className="mt-3 max-w-2xl text-sm text-ink-muted">
               {pick(
                 locale,
                 "قصص لحياة تغيرت، وملامح طفولة استعادت بهجتها، نفخر بمسيرة رافقنا فيها أبطالنا من أول خطوة وحتى التمكين.",
@@ -169,19 +167,19 @@ export default function SuccessStories({ locale }: { locale: Locale }) {
             </p>
           </div>
           <div className="flex shrink-0 items-center gap-3">
-            <button onClick={() => scroll(-1)} aria-label={pick(locale, "السابق", "Previous")} className={arrowBtn}>
+            <button onClick={() => scroll(-1)} aria-label={pick(locale, "السابق", "Previous")} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-line bg-white text-ink-soft shadow-sm transition-colors hover:border-brand hover:text-brand">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M9 18l6-6-6-6" /></svg>
             </button>
-            <button onClick={() => scroll(1)} aria-label={pick(locale, "التالي", "Next")} className={arrowBtn}>
+            <button onClick={() => scroll(1)} aria-label={pick(locale, "التالي", "Next")} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand text-white shadow-sm transition-colors hover:bg-brand-dark">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M15 18l-6-6 6-6" /></svg>
             </button>
           </div>
         </div>
 
         {/* Horizontal RTL carousel */}
-        <div ref={trackRef} className="no-scrollbar flex snap-x snap-mandatory gap-6 overflow-x-auto pb-2">
+        <div ref={trackRef} className="no-scrollbar flex snap-x snap-mandatory gap-5 overflow-x-auto pb-2">
           {stories.map((s) => (
-            <div key={s.name} className="w-[85vw] shrink-0 snap-start sm:w-[60%] lg:w-[42%]">
+            <div key={s.name} className="w-[82vw] shrink-0 snap-start sm:w-[48%] lg:w-[31%]">
               <Story s={s} locale={locale} />
             </div>
           ))}
