@@ -1,4 +1,8 @@
+"use client";
+
 import Image from "next/image";
+import { useRef } from "react";
+// index-based scrolling for reliable RTL behaviour
 import { pick, type Locale } from "@/i18n/config";
 
 const STORIES = [
@@ -125,30 +129,61 @@ function Story({ s, locale }: { s: (typeof STORIES)[number]; locale: Locale }) {
 
 export default function SuccessStories({ locale }: { locale: Locale }) {
   const stories = locale === "en" ? STORIES_EN : STORIES;
+  const trackRef = useRef<HTMLDivElement>(null);
+  const idxRef = useRef(0);
+  const scroll = (dir: number) => {
+    const el = trackRef.current;
+    if (!el) return;
+    const card = el.children[0] as HTMLElement | undefined;
+    if (!card) return;
+    const step = card.offsetWidth + 24; // gap-6
+    const max = el.scrollWidth - el.clientWidth;
+    idxRef.current = Math.min(Math.max(idxRef.current + dir, 0), el.children.length - 1);
+    const rtl = getComputedStyle(el).direction === "rtl";
+    let target = idxRef.current * step * (rtl ? -1 : 1);
+    target = rtl ? Math.max(target, -max) : Math.min(target, max);
+    el.scrollTo({ left: target, behavior: "smooth" });
+  };
+  const arrowBtn = "flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/30 bg-white/10 text-white transition-colors hover:bg-brand hover:border-brand";
+
   return (
     <section className="relative overflow-hidden bg-gradient-to-bl from-brand-deep to-[#0a2329] py-20">
       <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
-        <div className="mb-12 text-center">
-          <span className="rounded-full bg-brand/15 px-4 py-1.5 text-sm font-medium text-[#7ee8f0]">{pick(locale, "أبطال عبور", "Oboor Champions")}</span>
-          <h2 className="mt-4 text-3xl font-extrabold text-white sm:text-4xl">
-            {pick(
-              locale,
-              <>عبروا، <span className="text-brand">وعبّروا!</span></>,
-              <>They crossed barriers and found <span className="text-brand">their voice</span></>
-            )}
-          </h2>
-          <p className="mx-auto mt-3 max-w-2xl text-sm text-white/70">
-            {pick(
-              locale,
-              "قصص لحياة تغيرت، وملامح طفولة استعادت بهجتها، نفخر بمسيرة رافقنا فيها أبطالنا من أول خطوة وحتى التمكين.",
-              "Stories of transformed lives and childhoods that have regained their joy. We take pride in the journeys we have accompanied — supporting our champions from their very first step to empowerment."
-            )}
-          </p>
+        {/* Header: title (start) + arrows (end) */}
+        <div className="mb-10 flex flex-col items-start gap-6 sm:flex-row sm:items-end sm:justify-between">
+          <div className="text-start">
+            <span className="rounded-full bg-brand/15 px-4 py-1.5 text-sm font-medium text-[#7ee8f0]">{pick(locale, "أبطال عبور", "Oboor Champions")}</span>
+            <h2 className="mt-4 text-3xl font-extrabold text-white sm:text-4xl">
+              {pick(
+                locale,
+                <>عبروا، <span className="text-brand">وعبّروا!</span></>,
+                <>They crossed barriers and found <span className="text-brand">their voice</span></>
+              )}
+            </h2>
+            <p className="mt-3 max-w-2xl text-sm text-white/70">
+              {pick(
+                locale,
+                "قصص لحياة تغيرت، وملامح طفولة استعادت بهجتها، نفخر بمسيرة رافقنا فيها أبطالنا من أول خطوة وحتى التمكين.",
+                "Stories of transformed lives and childhoods that have regained their joy. We take pride in the journeys we have accompanied — supporting our champions from their very first step to empowerment."
+              )}
+            </p>
+          </div>
+          <div className="flex shrink-0 items-center gap-3">
+            <button onClick={() => scroll(-1)} aria-label={pick(locale, "السابق", "Previous")} className={arrowBtn}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M9 18l6-6-6-6" /></svg>
+            </button>
+            <button onClick={() => scroll(1)} aria-label={pick(locale, "التالي", "Next")} className={arrowBtn}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M15 18l-6-6 6-6" /></svg>
+            </button>
+          </div>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {/* Horizontal RTL carousel */}
+        <div ref={trackRef} className="no-scrollbar flex snap-x snap-mandatory gap-6 overflow-x-auto pb-2">
           {stories.map((s) => (
-            <Story key={s.name} s={s} locale={locale} />
+            <div key={s.name} className="w-[85vw] shrink-0 snap-start sm:w-[60%] lg:w-[42%]">
+              <Story s={s} locale={locale} />
+            </div>
           ))}
         </div>
       </div>
