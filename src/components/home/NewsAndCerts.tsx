@@ -1,5 +1,8 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useRef } from "react";
 import { pick, type Locale } from "@/i18n/config";
 
 const NEWS = [
@@ -37,6 +40,21 @@ function NewsCard({ n, locale }: { n: (typeof NEWS)[number]; locale: Locale }) {
 
 export default function NewsAndCerts({ locale }: { locale: Locale }) {
   const news = locale === "en" ? NEWS_EN : NEWS;
+  const trackRef = useRef<HTMLDivElement>(null);
+  const idxRef = useRef(0);
+  const scroll = (dir: number) => {
+    const el = trackRef.current;
+    const card = el?.children[0] as HTMLElement | undefined;
+    if (!el || !card) return;
+    const step = card.offsetWidth + 20; // gap-5
+    const max = el.scrollWidth - el.clientWidth;
+    idxRef.current = Math.min(Math.max(idxRef.current + dir, 0), el.children.length - 1);
+    const rtl = getComputedStyle(el).direction === "rtl";
+    let target = idxRef.current * step * (rtl ? -1 : 1);
+    target = rtl ? Math.max(target, -max) : Math.min(target, max);
+    el.scrollTo({ left: target, behavior: "smooth" });
+  };
+  const navBtn = "flex h-10 w-10 items-center justify-center rounded-full border border-white/30 bg-white/10 text-white transition-colors hover:bg-white hover:text-brand-deep";
   return (
     <section className="relative overflow-hidden bg-gradient-to-bl from-brand to-brand-deep py-20">
       <div className="relative mx-auto grid max-w-7xl gap-10 px-6 lg:grid-cols-3 lg:px-8">
@@ -52,10 +70,21 @@ export default function NewsAndCerts({ locale }: { locale: Locale }) {
               <svg className="dir-flip" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M15 6l-6 6 6 6" /></svg>
             </Link>
           </div>
-          <div className="grid gap-5 sm:grid-cols-2">
+          <div ref={trackRef} className="no-scrollbar flex snap-x snap-mandatory gap-5 overflow-x-auto pb-2">
             {news.map((n) => (
-              <NewsCard key={n.title} n={n} locale={locale} />
+              <div key={n.title} className="w-[82%] shrink-0 snap-start sm:w-[47%]">
+                <NewsCard n={n} locale={locale} />
+              </div>
             ))}
+          </div>
+          {/* Carousel arrows */}
+          <div className="mt-5 flex items-center justify-center gap-3">
+            <button onClick={() => scroll(-1)} aria-label={pick(locale, "السابق", "Previous")} className={navBtn}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M9 18l6-6-6-6" /></svg>
+            </button>
+            <button onClick={() => scroll(1)} aria-label={pick(locale, "التالي", "Next")} className={navBtn}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M15 18l-6-6 6-6" /></svg>
+            </button>
           </div>
         </div>
 
