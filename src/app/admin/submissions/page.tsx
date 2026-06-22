@@ -5,16 +5,23 @@ export const dynamic = "force-dynamic";
 
 const LABELS: Record<string, string> = {
   name: "الاسم", phone: "الجوال", branch: "الفرع", type: "النوع", message: "الرسالة",
-  childName: "اسم الطفل", childAge: "العمر", gender: "الجنس", city: "المدينة",
+  childName: "اسم الطفل", childAge: "العمر", age: "العمر", gender: "الجنس", city: "المدينة",
   parentName: "ولي الأمر", email: "البريد", caseType: "الحالة", "prev-sessions": "جلسات سابقة", notes: "ملاحظات",
+  assessment: "نوع التقييم", level: "مستوى الحالة", score: "الدرجة",
 };
+
+// حقول لا نعرضها في الشبكة (تُعرض بشكل خاص أو مخفية)
+const HIDDEN = ["id", "createdAt", "answers", "assessmentSlug"];
+const LEVEL_AR: Record<string, string> = { high: "مرتفع", medium: "متوسط", low: "منخفض" };
 
 function fmtDate(iso: string) {
   try { return new Date(iso).toLocaleString("ar-EG", { dateStyle: "medium", timeStyle: "short" }); } catch { return iso; }
 }
 
 export default async function SubmissionsPage() {
-  const [contact, admission] = await Promise.all([getSubmissions("contact"), getSubmissions("admission")]);
+  const [contact, admission, assessment] = await Promise.all([
+    getSubmissions("contact"), getSubmissions("admission"), getSubmissions("assessment"),
+  ]);
 
   const Block = ({ title, icon, items }: { title: string; icon: string; items: Awaited<ReturnType<typeof getSubmissions>> }) => (
     <div className="mb-10">
@@ -34,10 +41,10 @@ export default async function SubmissionsPage() {
                 <span className="text-xs text-slate-400">{fmtDate(s.createdAt)}</span>
               </div>
               <div className="grid grid-cols-1 gap-x-6 gap-y-2 sm:grid-cols-2 lg:grid-cols-3">
-                {Object.entries(s).filter(([k]) => k !== "id" && k !== "createdAt").map(([k, v]) => (
+                {Object.entries(s).filter(([k]) => !HIDDEN.includes(k)).map(([k, v]) => (
                   <div key={k} className="text-sm">
                     <span className="font-semibold text-slate-500">{LABELS[k] || k}: </span>
-                    <span className="text-slate-800">{String(v) || "—"}</span>
+                    <span className="text-slate-800">{k === "level" ? (LEVEL_AR[String(v)] || String(v)) : (String(v) || "—")}</span>
                   </div>
                 ))}
               </div>
@@ -55,6 +62,7 @@ export default async function SubmissionsPage() {
         <p className="mt-1 text-sm text-slate-500">كل ما يصلك من نموذج «طلب الالتحاق» و«تواصل معنا» يظهر هنا مباشرةً.</p>
       </div>
       <Block title="طلبات الالتحاق" icon="clipboard" items={admission} />
+      <Block title="نتائج التقييم" icon="check-circle" items={assessment} />
       <Block title="رسائل التواصل" icon="phone" items={contact} />
     </div>
   );
