@@ -45,6 +45,10 @@ body {
   transform: scaleX(-1);
 }
 
+/* Hide scrollbar for horizontal carousels */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
 /* Printable documents (e.g. branch profile → save as PDF) */
 @media print {
   .no-print { display: none !important; }
