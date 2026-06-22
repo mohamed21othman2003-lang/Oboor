@@ -23,6 +23,15 @@ export default function AssessmentWizard({ locale }: { locale: Locale }) {
   const reset = () => { setStep(0); setActive(null); setAnswers({}); };
   const answeredAll = PRELIM_QUESTIONS.every((_, i) => answers[i]);
 
+  // مستوى الحالة محسوب من الإجابات: نعم=0، أحياناً=1، لا=2 (كلما زادت النقاط زادت الحاجة للمتابعة)
+  const score = PRELIM_QUESTIONS.reduce((s, _, i) => s + Math.max(0, ANSWER_OPTIONS.indexOf(answers[i])), 0);
+  const level = score >= 6 ? "high" : score >= 3 ? "medium" : "low";
+  const levelMeta = {
+    high: { label: pick(locale, "مرتفع", "High"), cls: "text-danger", desc: pick(locale, "بناءً على إجاباتك، يحتاج طفلك إلى متابعة تخصصية عاجلة. التدخل المبكر في هذه المرحلة له أثرٌ كبيرٌ جداً على مستقبله.", "Based on your answers, your child needs prompt specialized follow-up. Early intervention at this stage has a major impact on their future.") },
+    medium: { label: pick(locale, "متوسط", "Medium"), cls: "text-amber-600", desc: pick(locale, "بناءً على إجاباتك، يُنصح بإجراء تقييمٍ تخصصي للاطمئنان ووضع خطةٍ داعمةٍ مناسبة لطفلك.", "Based on your answers, a specialized assessment is recommended to be sure and to set a suitable support plan for your child.") },
+    low: { label: pick(locale, "منخفض", "Low"), cls: "text-brand-dark", desc: pick(locale, "نتائج طفلك مطمئنة في معظم المحاور. ننصح بالمتابعة الدورية والتواصل معنا عند ملاحظة أي تغيّر.", "Your child's results are reassuring across most areas. We recommend periodic follow-up and reaching out if you notice any change.") },
+  }[level];
+
   return (
     <div className="mx-auto max-w-4xl rounded-3xl border border-line bg-white p-6 shadow-lg sm:p-8">
       {/* Step indicator */}
@@ -96,13 +105,21 @@ export default function AssessmentWizard({ locale }: { locale: Locale }) {
 
       {/* Step 2: data */}
       {step === 2 && (
-        <form onSubmit={(e) => { e.preventDefault(); setStep(3); }} className="mx-auto max-w-xl">
-          <h3 className="mb-5 text-center text-lg font-extrabold text-ink">{pick(locale, "أضف بيانات التواصل", "Add Contact Details")}</h3>
+        <form onSubmit={(e) => { e.preventDefault(); setStep(3); }} className="mx-auto max-w-2xl">
+          <div className="mb-6 text-center">
+            <h3 className="text-lg font-extrabold text-ink">{pick(locale, "بيانات الطفل وولي الأمر", "Child & Parent Details")}</h3>
+            <p className="mt-1 text-sm text-ink-muted">{pick(locale, "نحتاج بعض المعلومات لعرض النتيجة الأولية والتواصل معكم عند الحاجة.", "We need a few details to show the preliminary result and contact you when needed.")}</p>
+          </div>
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label={pick(locale, "اسم الطفل", "Child's Name")} required placeholder={pick(locale, "اسم الطفل", "Child's name")} />
-            <Field label={pick(locale, "عمر الطفل", "Child's Age")} required placeholder={pick(locale, "مثال: 6 سنوات", "Example: 6 years")} />
             <Field label={pick(locale, "اسم ولي الأمر", "Parent's Name")} required placeholder={pick(locale, "الاسم الكامل", "Full name")} />
             <Field label={pick(locale, "رقم الجوال", "Mobile Number")} required type="tel" placeholder="05XXXXXXXX" />
+            <div className="sm:col-span-2">
+              <Field label={pick(locale, "البريد الإلكتروني", "Email")} type="email" placeholder="name@example.com" />
+            </div>
+            <Field label={pick(locale, "اسم الطفل", "Child's Name")} required placeholder={pick(locale, "اسم الطفل", "Child's name")} />
+            <Field label={pick(locale, "العمر", "Age")} required placeholder={pick(locale, "مثال: 6 سنوات", "Example: 6 years")} />
+            <Select label={pick(locale, "الجنس", "Gender")} placeholder={pick(locale, "اختر الجنس", "Select gender")} options={[pick(locale, "ذكر", "Male"), pick(locale, "أنثى", "Female")]} />
+            <Select label={pick(locale, "المدينة", "City")} placeholder={pick(locale, "اختر المدينة", "Select city")} options={[pick(locale, "الرياض", "Riyadh"), pick(locale, "جدة", "Jeddah"), pick(locale, "الشرقية", "Eastern Province"), pick(locale, "مكة المكرمة", "Makkah"), pick(locale, "المدينة المنورة", "Madinah")]} />
           </div>
           <div className="mt-6 flex items-center justify-between gap-3">
             <button type="submit" className="rounded-xl bg-brand px-8 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-dark">{pick(locale, "عرض النتيجة", "View Result")}</button>
@@ -113,21 +130,41 @@ export default function AssessmentWizard({ locale }: { locale: Locale }) {
 
       {/* Step 3: result */}
       {step === 3 && (
-        <div className="mx-auto max-w-xl py-4 text-center">
-          <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-brand/10 text-brand">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
-          </span>
-          <h3 className="mt-4 text-xl font-extrabold text-ink">{pick(locale, "تم إنجاز التقييم الأولي بنجاح", "Preliminary assessment completed successfully")}</h3>
-          <p className="mx-auto mt-3 max-w-md text-sm leading-7 text-ink-muted">
-            {pick(
-              locale,
-              <>شكراً لك. بناءً على إجاباتك في «{active?.title}»، يُوصى بإجراء تقييم متخصص مع أحد أخصائيينا لوضع خطة مناسبة لطفلك. سيتواصل معك فريقنا قريباً لتحديد موعد.</>,
-              <>Thank you. Based on your answers in &laquo;{active?.title}&raquo;, we recommend a specialized assessment with one of our specialists to set up a suitable plan for your child. Our team will contact you soon to schedule an appointment.</>
-            )}
-          </p>
+        <div className="mx-auto max-w-2xl py-2">
+          <div className="text-center">
+            <h3 className="text-xl font-extrabold text-ink sm:text-2xl">{pick(locale, "تم إعداد تقييمك الأولي", "Your preliminary assessment is ready")}</h3>
+            <p className="mx-auto mt-2 max-w-md text-sm text-ink-muted">{pick(locale, "شكراً لثقتك بنا، إليك نتيجة التقييم الأولي.", "Thank you for your trust — here is your preliminary result.")}</p>
+          </div>
+
+          {/* Result summary */}
+          <div className="mt-6 grid grid-cols-2 gap-4 rounded-2xl border border-line bg-surface/50 p-5 text-center">
+            <div>
+              <p className="text-xs text-ink-soft">{pick(locale, "المجالات المُقيّمة", "Assessed Area")}</p>
+              <p className="mt-1 text-base font-extrabold text-brand-dark">{active?.title}</p>
+            </div>
+            <div className="border-s border-line">
+              <p className="text-xs text-ink-soft">{pick(locale, "مستوى الحالة", "Severity Level")}</p>
+              <p className={`mt-1 flex items-center justify-center gap-1.5 text-base font-extrabold ${levelMeta.cls}`}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 3 14h7l-1 8 10-12h-7z" /></svg>
+                {levelMeta.label}
+              </p>
+            </div>
+          </div>
+
+          <p className="mt-5 text-center text-sm leading-7 text-ink-muted">{levelMeta.desc}</p>
+
+          {/* Disclaimer */}
+          <div className="mt-5 flex items-start gap-2 rounded-xl border border-brand/20 bg-brand/5 p-4 text-start">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="mt-0.5 shrink-0 text-brand"><circle cx="12" cy="12" r="10" /><path d="M12 8h.01M11 12h1v4h1" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            <p className="text-xs leading-6 text-ink-muted">
+              <span className="font-bold text-ink">{pick(locale, "تنبيه مهم: ", "Important: ")}</span>
+              {pick(locale, "هذه النتيجة أولية ولا تُعدّ تشخيصاً نهائياً، ويُنصح بالتقييم المتخصص عند الحاجة. بياناتك محمية وسرية تماماً.", "This is a preliminary result and not a final diagnosis; a specialized assessment is recommended when needed. Your data is fully protected and confidential.")}
+            </p>
+          </div>
+
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-            <a href="/admission" className="rounded-xl bg-brand px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-dark">{pick(locale, "طلب التحاق", "Apply Now")}</a>
-            <a href="https://wa.me/966920003452" target="_blank" rel="noopener noreferrer" className="rounded-xl bg-[#25D366] px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90">{pick(locale, "تواصل عبر الواتساب", "Contact via WhatsApp")}</a>
+            <a href="https://wa.me/966920003452" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 rounded-xl bg-brand px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-dark">{pick(locale, "تواصل مع خدمة العملاء", "Contact Customer Service")}</a>
+            <a href="/admission" className="rounded-xl border border-brand px-6 py-3 text-sm font-semibold text-brand transition-colors hover:bg-brand hover:text-white">{pick(locale, "طلب التحاق", "Apply Now")}</a>
             <button onClick={reset} className="rounded-xl border border-line px-6 py-3 text-sm font-semibold text-ink-muted transition-colors hover:bg-surface">{pick(locale, "تقييم جديد", "New Assessment")}</button>
           </div>
         </div>
@@ -151,6 +188,18 @@ function Field({ label, required, type = "text", placeholder }: { label: string;
     <div>
       <label className="block text-start text-sm font-semibold text-ink">{label} {required && <span className="text-danger">*</span>}</label>
       <input type={type} required={required} placeholder={placeholder} className="mt-1.5 w-full rounded-xl border border-line bg-white px-3 py-2.5 text-start text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-brand/30" />
+    </div>
+  );
+}
+
+function Select({ label, placeholder, options }: { label: string; placeholder: string; options: string[] }) {
+  return (
+    <div>
+      <label className="block text-start text-sm font-semibold text-ink">{label}</label>
+      <select defaultValue="" className="mt-1.5 w-full rounded-xl border border-line bg-white px-3 py-2.5 text-start text-sm text-ink focus:outline-none focus:ring-2 focus:ring-brand/30">
+        <option value="" disabled>{placeholder}</option>
+        {options.map((o) => <option key={o} value={o}>{o}</option>)}
+      </select>
     </div>
   );
 }
