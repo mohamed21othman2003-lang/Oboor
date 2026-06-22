@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { getAssessments, getPrelimQuestions, getAnswerOptions, type Assessment } from "@/lib/assessmentData";
+import { getAssessments, getQuestionsFor, getAnswerOptions, type Assessment } from "@/lib/assessmentData";
 import { pick, type Locale } from "@/i18n/config";
 
 export default function AssessmentWizard({ locale }: { locale: Locale }) {
@@ -12,16 +12,18 @@ export default function AssessmentWizard({ locale }: { locale: Locale }) {
     pick(locale, "النتيجة", "Result"),
   ];
   const ASSESSMENTS = getAssessments(locale);
-  const PRELIM_QUESTIONS = getPrelimQuestions(locale);
   const ANSWER_OPTIONS = getAnswerOptions(locale);
 
   const [step, setStep] = useState(0);
   const [active, setActive] = useState<Assessment | null>(null);
   const [answers, setAnswers] = useState<Record<number, string>>({});
 
-  const start = (a: Assessment) => { setActive(a); setStep(1); };
+  // أسئلة التقييم المختار (تختلف حسب نوع التقييم)
+  const PRELIM_QUESTIONS = active ? getQuestionsFor(active.slug, locale) : [];
+
+  const start = (a: Assessment) => { setActive(a); setAnswers({}); setStep(1); };
   const reset = () => { setStep(0); setActive(null); setAnswers({}); };
-  const answeredAll = PRELIM_QUESTIONS.every((_, i) => answers[i]);
+  const answeredAll = PRELIM_QUESTIONS.length > 0 && PRELIM_QUESTIONS.every((_, i) => answers[i]);
 
   // مستوى الحالة محسوب من الإجابات: نعم=0، أحياناً=1، لا=2 (كلما زادت النقاط زادت الحاجة للمتابعة)
   const score = PRELIM_QUESTIONS.reduce((s, _, i) => s + Math.max(0, ANSWER_OPTIONS.indexOf(answers[i])), 0);
