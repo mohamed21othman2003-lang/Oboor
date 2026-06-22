@@ -74,7 +74,7 @@ export default function SmartSearch({ locale }: { locale: Locale }) {
           </p>
         </div>
 
-        <ServiceSearchBar locale={locale} searchLabel={pick(locale, "اتخذ الخطوة الأولى الآن", "Take the First Step Now")} />
+        <ServiceSearchBar locale={locale} />
 
         {/* Quick chips */}
         <div className="mt-4 flex flex-wrap items-center justify-start gap-2">
