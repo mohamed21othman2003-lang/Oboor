@@ -69,11 +69,7 @@ export default function Gallery({ locale }: { locale: Locale }) {
               className={`group relative overflow-hidden rounded-2xl ${i === 0 ? "col-span-2 h-56 lg:h-auto" : "h-40 lg:h-auto"} ${CELL[i]}`}
             >
               <Image src={src} alt={alt(i)} fill sizes={i === 0 ? "(max-width:1024px) 100vw, 50vw" : "(max-width:1024px) 50vw, 25vw"} className="object-cover transition-transform duration-300 group-hover:scale-105" />
-              <span className="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors group-hover:bg-black/25">
-                <span className="flex h-11 w-11 scale-90 items-center justify-center rounded-full bg-white/90 text-brand-dark opacity-0 transition-all group-hover:scale-100 group-hover:opacity-100">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="7" /><path d="M21 21l-4-4M11 8v6M8 11h6" strokeLinecap="round" /></svg>
-                </span>
-              </span>
+              <span className="absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/15" />
             </button>
           ))}
         </div>
