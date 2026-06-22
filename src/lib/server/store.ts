@@ -17,7 +17,8 @@ let _ready: Promise<void> | null = null;
 async function getSql(): Promise<Sql> {
   if (!_sql) {
     const postgres = (await import("postgres")).default;
-    _sql = postgres(DATABASE_URL as string, { ssl: "require", max: 1 });
+    // prepare:false ليتوافق مع poolers (Supabase transaction pooler / pgbouncer) على الـ serverless
+    _sql = postgres(DATABASE_URL as string, { ssl: "require", max: 1, prepare: false });
   }
   if (!_ready) {
     _ready = _sql`
