@@ -1,61 +1,23 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
-import ProgramCard, { type Program } from "@/components/ProgramCard";
+import ProgramCard from "@/components/ProgramCard";
 import ServiceSearchBar from "@/components/ServiceSearchBar";
+import { serviceCategories, type ServiceCategoryKey } from "@/components/ServicesTabs";
 import { pick, type Locale } from "@/i18n/config";
-
-const PROGRAMS: Program[] = [
-  {
-    slug: "montaliq",
-    title: "برنامج منطلق",
-    desc: "برنامج متكامل لدعم الأطفال ذوي اضطراب طيف التوحد وتنمية مهاراتهم التواصلية والسلوكية.",
-    suits: "الأطفال ذوو اضطراب طيف التوحد",
-    age: "من سنتين إلى 12 سنة",
-    features: ["جلسات فردية وجماعية", "تقييم دوري للتقدم", "مشاركة الأسرة في الخطة العلاجية"],
-    regions: ["الرياض", "جدة", "الشرقية"],
-  },
-  {
-    slug: "girls",
-    title: "برنامج عبور لتأهيل الفتيات",
-    desc: "برنامج متكامل يراعي الاحتياجات التأهيلية الخاصة بالفتيات في بيئة داعمة وآمنة.",
-    suits: "الفتيات ذوات الإعاقة",
-    age: "من 15 سنة فأكثر",
-    features: ["تدريب على مهارات العمل", "أنشطة الاندماج المجتمعي", "برامج المهارات اليومية المستقلة"],
-    regions: ["الرياض", "جدة", "الشرقية"],
-  },
-];
-
-const PROGRAMS_EN: Program[] = [
-  {
-    slug: "montaliq",
-    title: "Montaliq Program",
-    desc: "An integrated program to support children with Autism Spectrum Disorder and develop their communication and behavioral skills.",
-    suits: "Children with Autism Spectrum Disorder",
-    age: "From 2 to 12 years",
-    features: ["Individual and group sessions", "Regular progress assessment", "Family involvement in the treatment plan"],
-    regions: ["Riyadh", "Jeddah", "Eastern Province"],
-  },
-  {
-    slug: "girls",
-    title: "Oboor Girls' Rehabilitation Program",
-    desc: "An integrated program that accommodates the specific rehabilitation needs of girls in a supportive and safe environment.",
-    suits: "Girls with disabilities",
-    age: "15 years and above",
-    features: ["Vocational skills training", "Community integration activities", "Independent daily living skills programs"],
-    regions: ["Riyadh", "Jeddah", "Eastern Province"],
-  },
-];
 
 const bookIcon = <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" /><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" /></svg>;
 const stethoscopeIcon = <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 3v6a5 5 0 0 0 10 0V3" /><path d="M4 3H2M14 3h-2M9 14v3a4 4 0 0 0 8 0v-1" /><circle cx="19" cy="13" r="2" /></svg>;
 const chipIcon = <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="6" y="6" width="12" height="12" rx="2" /><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4" /></svg>;
 
+const CHIP_ICON: Record<ServiceCategoryKey, React.ReactNode> = { programs: bookIcon, clinical: stethoscopeIcon, techniques: chipIcon };
+
 export default function SmartSearch({ locale }: { locale: Locale }) {
-  const programs = locale === "en" ? PROGRAMS_EN : PROGRAMS;
-  const chips = [
-    { key: "programs", label: pick(locale, "برامج تأهيلية", "Rehabilitation Programs"), icon: bookIcon },
-    { key: "clinical", label: pick(locale, "خدمات عيادية", "Clinical Services"), icon: stethoscopeIcon },
-    { key: "techniques", label: pick(locale, "تقنيات تأهيلية", "Rehabilitation Technologies"), icon: chipIcon },
-  ];
+  const cats = serviceCategories(locale);
+  const [active, setActive] = useState<ServiceCategoryKey>("programs");
+  const current = cats.find((c) => c.key === active)!;
+
   return (
     <section className="bg-white py-20">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
@@ -82,32 +44,35 @@ export default function SmartSearch({ locale }: { locale: Locale }) {
 
         <ServiceSearchBar locale={locale} />
 
-        {/* Quick chips — clickable, jump to the relevant services tab */}
-        <div className="mt-4 flex flex-wrap items-center justify-start gap-2">
+        {/* Quick chips — centered; switch the results below in-place */}
+        <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
           <span className="text-sm text-ink-soft">{pick(locale, "تصفح مباشرة:", "Browse directly:")}</span>
-          {chips.map((c) => (
-            <Link
-              key={c.key}
-              href={`/programs#${c.key}`}
-              className="flex items-center gap-2 rounded-full bg-surface px-4 py-1.5 text-sm font-medium text-ink-muted transition-colors hover:bg-brand/10 hover:text-brand-dark"
-            >
-              {c.label}
-              {c.icon}
-            </Link>
+          {cats.map((c) => {
+            const on = c.key === active;
+            return (
+              <button
+                key={c.key}
+                onClick={() => setActive(c.key)}
+                className={`flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${on ? "bg-brand text-white" : "bg-surface text-ink-muted hover:bg-brand/10 hover:text-brand-dark"}`}
+              >
+                {c.label}
+                {CHIP_ICON[c.key]}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Results — reflect the active chip, in-page */}
+        <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {current.items.map((p) => (
+            <ProgramCard key={p.title} p={p} locale={locale} />
           ))}
         </div>
 
-        {/* Results */}
-        <div className="mt-10">
-          <h3 className="mb-5 flex items-center justify-start gap-2 text-xl font-bold text-ink">
-            {pick(locale, "البرامج التأهيلية", "Rehabilitation Programs")}
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-brand"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" /><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" /></svg>
-          </h3>
-          <div className="grid gap-6 md:grid-cols-2">
-            {programs.map((p) => (
-              <ProgramCard key={p.title} p={p} locale={locale} />
-            ))}
-          </div>
+        <div className="mt-8 text-center">
+          <Link href={`/programs#${active}`} className="inline-block rounded-xl border border-brand px-10 py-3 text-sm font-semibold text-brand transition-colors hover:bg-brand hover:text-white">
+            {pick(locale, "المزيد", "View More")}
+          </Link>
         </div>
       </div>
     </section>
