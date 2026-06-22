@@ -23,6 +23,27 @@ export default function AssessmentWizard({ locale }: { locale: Locale }) {
 
   const start = (a: Assessment) => { setActive(a); setAnswers({}); setStep(1); };
   const reset = () => { setStep(0); setActive(null); setAnswers({}); };
+
+  function submitData(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    const payload = {
+      assessment: active?.title,
+      assessmentSlug: active?.slug,
+      level,
+      score,
+      answers: PRELIM_QUESTIONS.map((q, i) => ({ q, a: answers[i] })),
+      parentName: String(fd.get("parentName") || ""),
+      phone: String(fd.get("phone") || ""),
+      email: String(fd.get("email") || ""),
+      childName: String(fd.get("childName") || ""),
+      age: String(fd.get("age") || ""),
+      gender: String(fd.get("gender") || ""),
+      city: String(fd.get("city") || ""),
+    };
+    setStep(3); // النتيجة تظهر فورًا
+    fetch("/api/assessment", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) }).catch(() => {});
+  }
   const answeredAll = PRELIM_QUESTIONS.length > 0 && PRELIM_QUESTIONS.every((_, i) => answers[i]);
 
   // مستوى الحالة محسوب من الإجابات: نعم=0، أحياناً=1، لا=2 (كلما زادت النقاط زادت الحاجة للمتابعة)
@@ -107,21 +128,21 @@ export default function AssessmentWizard({ locale }: { locale: Locale }) {
 
       {/* Step 2: data */}
       {step === 2 && (
-        <form onSubmit={(e) => { e.preventDefault(); setStep(3); }} className="mx-auto max-w-2xl">
+        <form onSubmit={submitData} className="mx-auto max-w-2xl">
           <div className="mb-6 text-center">
             <h3 className="text-lg font-extrabold text-ink">{pick(locale, "بيانات الطفل وولي الأمر", "Child & Parent Details")}</h3>
             <p className="mt-1 text-sm text-ink-muted">{pick(locale, "نحتاج بعض المعلومات لعرض النتيجة الأولية والتواصل معكم عند الحاجة.", "We need a few details to show the preliminary result and contact you when needed.")}</p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label={pick(locale, "اسم ولي الأمر", "Parent's Name")} required placeholder={pick(locale, "الاسم الكامل", "Full name")} />
-            <Field label={pick(locale, "رقم الجوال", "Mobile Number")} required type="tel" placeholder="05XXXXXXXX" />
+            <Field name="parentName" label={pick(locale, "اسم ولي الأمر", "Parent's Name")} required placeholder={pick(locale, "الاسم الكامل", "Full name")} />
+            <Field name="phone" label={pick(locale, "رقم الجوال", "Mobile Number")} required type="tel" placeholder="05XXXXXXXX" />
             <div className="sm:col-span-2">
-              <Field label={pick(locale, "البريد الإلكتروني", "Email")} type="email" placeholder="name@example.com" />
+              <Field name="email" label={pick(locale, "البريد الإلكتروني", "Email")} type="email" placeholder="name@example.com" />
             </div>
-            <Field label={pick(locale, "اسم الطفل", "Child's Name")} required placeholder={pick(locale, "اسم الطفل", "Child's name")} />
-            <Field label={pick(locale, "العمر", "Age")} required placeholder={pick(locale, "مثال: 6 سنوات", "Example: 6 years")} />
-            <Select label={pick(locale, "الجنس", "Gender")} placeholder={pick(locale, "اختر الجنس", "Select gender")} options={[pick(locale, "ذكر", "Male"), pick(locale, "أنثى", "Female")]} />
-            <Select label={pick(locale, "المدينة", "City")} placeholder={pick(locale, "اختر المدينة", "Select city")} options={[pick(locale, "الرياض", "Riyadh"), pick(locale, "جدة", "Jeddah"), pick(locale, "الشرقية", "Eastern Province"), pick(locale, "مكة المكرمة", "Makkah"), pick(locale, "المدينة المنورة", "Madinah")]} />
+            <Field name="childName" label={pick(locale, "اسم الطفل", "Child's Name")} required placeholder={pick(locale, "اسم الطفل", "Child's name")} />
+            <Field name="age" label={pick(locale, "العمر", "Age")} required placeholder={pick(locale, "مثال: 6 سنوات", "Example: 6 years")} />
+            <Select name="gender" label={pick(locale, "الجنس", "Gender")} placeholder={pick(locale, "اختر الجنس", "Select gender")} options={[pick(locale, "ذكر", "Male"), pick(locale, "أنثى", "Female")]} />
+            <Select name="city" label={pick(locale, "المدينة", "City")} placeholder={pick(locale, "اختر المدينة", "Select city")} options={[pick(locale, "الرياض", "Riyadh"), pick(locale, "جدة", "Jeddah"), pick(locale, "الشرقية", "Eastern Province"), pick(locale, "مكة المكرمة", "Makkah"), pick(locale, "المدينة المنورة", "Madinah")]} />
           </div>
           <div className="mt-6 flex items-center justify-between gap-3">
             <button type="submit" className="rounded-xl bg-brand px-8 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-dark">{pick(locale, "عرض النتيجة", "View Result")}</button>
@@ -185,20 +206,20 @@ function Meta({ icon, label, value }: { icon: React.ReactNode; label: string; va
   );
 }
 
-function Field({ label, required, type = "text", placeholder }: { label: string; required?: boolean; type?: string; placeholder?: string }) {
+function Field({ label, name, required, type = "text", placeholder }: { label: string; name: string; required?: boolean; type?: string; placeholder?: string }) {
   return (
     <div>
       <label className="block text-start text-sm font-semibold text-ink">{label} {required && <span className="text-danger">*</span>}</label>
-      <input type={type} required={required} placeholder={placeholder} className="mt-1.5 w-full rounded-xl border border-line bg-white px-3 py-2.5 text-start text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-brand/30" />
+      <input name={name} type={type} required={required} placeholder={placeholder} className="mt-1.5 w-full rounded-xl border border-line bg-white px-3 py-2.5 text-start text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-brand/30" />
     </div>
   );
 }
 
-function Select({ label, placeholder, options }: { label: string; placeholder: string; options: string[] }) {
+function Select({ label, name, placeholder, options }: { label: string; name: string; placeholder: string; options: string[] }) {
   return (
     <div>
       <label className="block text-start text-sm font-semibold text-ink">{label}</label>
-      <select defaultValue="" className="mt-1.5 w-full rounded-xl border border-line bg-white px-3 py-2.5 text-start text-sm text-ink focus:outline-none focus:ring-2 focus:ring-brand/30">
+      <select name={name} defaultValue="" className="mt-1.5 w-full rounded-xl border border-line bg-white px-3 py-2.5 text-start text-sm text-ink focus:outline-none focus:ring-2 focus:ring-brand/30">
         <option value="" disabled>{placeholder}</option>
         {options.map((o) => <option key={o} value={o}>{o}</option>)}
       </select>
