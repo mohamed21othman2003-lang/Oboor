@@ -1,7 +1,9 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import ContactForm from "@/components/ContactForm";
-import BranchMap from "@/components/BranchMap";
+import BranchesMapSection from "@/components/BranchesMapSection";
+import { loadBranches } from "@/lib/server/branches";
+import { MAP_REGIONS, MAP_REGIONS_EN, type Branch } from "@/lib/branchesData";
 import { CONTACT } from "@/lib/site";
 import { getLocale } from "@/i18n/locale";
 import { pick, type Locale } from "@/i18n/config";
@@ -156,7 +158,7 @@ function FormSection({ locale }: { locale: Locale }) {
 }
 
 /* ---------- Branches map ---------- */
-function BranchesSection({ locale }: { locale: Locale }) {
+function BranchesSection({ locale, branches, regions }: { locale: Locale; branches: Branch[]; regions: { name: string; count: number; color: string }[] }) {
   return (
     <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
       <div className="mb-8 text-start">
@@ -169,7 +171,7 @@ function BranchesSection({ locale }: { locale: Locale }) {
           )}
         </p>
       </div>
-      <BranchMap locale={locale} />
+      <BranchesMapSection locale={locale} branches={branches} regions={regions} />
     </section>
   );
 }
@@ -221,12 +223,14 @@ function SocialSection({ locale }: { locale: Locale }) {
 
 export default async function ContactPage() {
   const locale = await getLocale();
+  const branches = await loadBranches(locale);
+  const mapRegions = locale === "en" ? MAP_REGIONS_EN : MAP_REGIONS;
   return (
     <>
       <Hero locale={locale} />
       <ContactCards locale={locale} />
       <FormSection locale={locale} />
-      <BranchesSection locale={locale} />
+      <BranchesSection locale={locale} branches={branches} regions={mapRegions} />
       <SocialSection locale={locale} />
     </>
   );
