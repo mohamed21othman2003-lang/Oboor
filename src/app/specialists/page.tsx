@@ -143,8 +143,8 @@ export default async function SpecialistsPage() {
           {/* Stats */}
           <div dir="ltr" className="mt-8 flex items-center justify-center gap-12">
             {stats.map((s, i) => (
-              <div key={s.label} className="flex flex-row-reverse items-center gap-3">
-                <div className="text-end">
+              <div key={s.label} className="flex items-center gap-3">
+                <div className="text-start">
                   <p className="text-2xl font-extrabold text-brand">{s.value}</p>
                   <p className="text-xs text-ink-muted">{s.label}</p>
                 </div>
