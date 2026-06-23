@@ -54,7 +54,11 @@ WSGI_APPLICATION = "config.wsgi.application"
 # Database — uses DATABASE_URL (Supabase Postgres) if set, else local SQLite for quick start.
 _db_url = os.environ.get("DATABASE_URL")
 if _db_url:
-    DATABASES = {"default": dj_database_url.parse(_db_url, conn_max_age=0, ssl_require=True)}
+    _db = dj_database_url.parse(_db_url, conn_max_age=0, ssl_require=True)
+    # pgbouncer/Supabase pooler safe: disable prepared statements (psycopg3)
+    _db.setdefault("OPTIONS", {})["prepare_threshold"] = None
+    DATABASES = {"default": _db}
+    DISABLE_SERVER_SIDE_CURSORS = True
 else:
     DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": BASE_DIR / "db.sqlite3"}}
 
