@@ -62,18 +62,23 @@ export default function LeafletMap({ locale, branches, regions }: { locale: Loca
               pathOptions={{ color: "#fff", weight: 2, fillColor: r.color, fillOpacity: 1 }}
               ref={(m) => { markerRefs.current[r.name] = m; }}
             >
-              <Popup>
-                <div className="min-w-[220px] text-start" dir={locale === "en" ? "ltr" : "rtl"}>
-                  <div className="mb-1.5 flex items-center justify-end gap-1.5">
-                    {b?.isNew && <span className="rounded-md bg-brand/10 px-2 py-0.5 text-[10px] font-bold text-brand">{pick(locale, "جديد", "New")}</span>}
-                    <span className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-bold" style={{ background: `${r.color}1a`, color: r.color }}>
-                      <span className="h-1.5 w-1.5 rounded-full" style={{ background: r.color }} />
-                      {r.name}
-                    </span>
+              <Popup className="oboor-popup" closeButton={false}>
+                <div className="w-[260px] max-w-[78vw] p-4 text-start" dir={locale === "en" ? "ltr" : "rtl"}>
+                  <div className="flex items-center justify-between gap-2">
+                    <button type="button" onClick={() => map?.closePopup()} className="text-ink-soft transition-colors hover:text-ink" aria-label={pick(locale, "إغلاق", "Close")}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
+                    </button>
+                    <div className="flex items-center gap-1.5">
+                      {b?.isNew && <span className="rounded-md bg-brand/10 px-2 py-0.5 text-[10px] font-bold text-brand">{pick(locale, "جديد", "New")}</span>}
+                      <span className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-bold" style={{ background: `${r.color}1a`, color: r.color }}>
+                        <span className="h-1.5 w-1.5 rounded-full" style={{ background: r.color }} />
+                        {r.name}
+                      </span>
+                    </div>
                   </div>
                   {b ? (
                     <>
-                      <p className="text-sm font-bold text-ink">{b.name}</p>
+                      <p className="mt-2 text-sm font-bold text-ink">{b.name}</p>
                       <p className="mt-1 flex items-start gap-1.5 text-xs leading-5 text-ink-muted"><PinIcon />{b.address}</p>
                       <p className="mt-1 flex items-center gap-1.5 text-xs text-ink-soft"><ClockIcon />{b.hours}</p>
                       <p className="mt-0.5 flex items-center gap-1.5 text-xs text-ink-soft" dir="ltr"><PhoneIcon />{b.phone}</p>
@@ -87,7 +92,7 @@ export default function LeafletMap({ locale, branches, regions }: { locale: Loca
                     </>
                   ) : (
                     <>
-                      <p className="text-sm font-bold text-ink">{pick(locale, `منطقة ${r.name}`, r.name)}</p>
+                      <p className="mt-2 text-sm font-bold text-ink">{pick(locale, `منطقة ${r.name}`, r.name)}</p>
                       <p className="mt-0.5 text-xs text-ink-muted">{pick(locale, `لدينا ${r.count} فرع في هذه المنطقة.`, `${r.count} branches in this region.`)}</p>
                       <button
                         type="button"
