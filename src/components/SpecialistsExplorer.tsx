@@ -135,10 +135,10 @@ function Dropdown({ icon, label, allLabel, value, onChange, options }: { icon: R
         <ChevDown className={open ? "rotate-180 transition-transform" : "transition-transform"} />
       </button>
       {open && (
-        <ul className="absolute z-30 mt-2 max-h-64 w-full min-w-[210px] overflow-auto rounded-xl border border-line bg-white py-1 text-start shadow-xl">
-          <Option active={!value} onClick={() => choose("")}>{allLabel}</Option>
+        <ul className="absolute z-30 mt-2 max-h-64 w-full min-w-[230px] overflow-y-auto rounded-2xl border border-line bg-white p-1.5 text-start shadow-xl ring-1 ring-black/5 [scrollbar-color:rgba(44,188,200,0.4)_transparent] [scrollbar-width:thin] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-brand/30 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-1.5">
+          <Option icon={icon} active={!value} onClick={() => choose("")}>{allLabel}</Option>
           {options.map((o) => (
-            <Option key={o} active={value === o} onClick={() => choose(o)}>{o}</Option>
+            <Option key={o} icon={icon} active={value === o} onClick={() => choose(o)}>{o}</Option>
           ))}
         </ul>
       )}
@@ -146,12 +146,13 @@ function Dropdown({ icon, label, allLabel, value, onChange, options }: { icon: R
   );
 }
 
-function Option({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
+function Option({ icon, active, onClick, children }: { icon?: React.ReactNode; active: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
     <li>
-      <button type="button" onClick={onClick} className={`flex w-full items-center gap-2 px-4 py-2 text-start text-sm transition-colors hover:bg-surface ${active ? "font-bold text-brand" : "text-ink"}`}>
+      <button type="button" onClick={onClick} className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-start text-sm transition-colors ${active ? "bg-brand/5 font-bold text-brand" : "text-ink hover:bg-surface"}`}>
+        <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${active ? "bg-brand/15 text-brand" : "bg-surface text-ink-soft"}`}>{icon}</span>
+        <span className="flex-1 truncate">{children}</span>
         {active && <CheckIcon />}
-        <span className={active ? "" : "pr-5"}>{children}</span>
       </button>
     </li>
   );
