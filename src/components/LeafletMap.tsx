@@ -4,7 +4,7 @@ import { useMemo, useRef, useState } from "react";
 import { MapContainer, TileLayer, CircleMarker, Popup } from "react-leaflet";
 import type { Map as LeafletMapType, CircleMarker as LeafletCircleMarker } from "leaflet";
 import "leaflet/dist/leaflet.css";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { pick, type Locale } from "@/i18n/config";
 import type { Branch } from "@/lib/branchesData";
 
@@ -24,6 +24,7 @@ const COORDS: Record<string, [number, number]> = {
 const norm = (s: string) => (s || "").replace(/جده/g, "جدة").replace(/المنطقة|المكرمة|المنورة/g, "").trim();
 
 export default function LeafletMap({ locale, branches, regions }: { locale: Locale; branches: Branch[]; regions: Region[] }) {
+  const router = useRouter();
   const [map, setMap] = useState<LeafletMapType | null>(null);
   const markerRefs = useRef<Record<string, LeafletCircleMarker | null>>({});
 
@@ -62,23 +63,39 @@ export default function LeafletMap({ locale, branches, regions }: { locale: Loca
               ref={(m) => { markerRefs.current[r.name] = m; }}
             >
               <Popup>
-                <div className="min-w-[200px] text-start" dir={locale === "en" ? "ltr" : "rtl"}>
-                  <span className="mb-1 inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-bold" style={{ background: `${r.color}1a`, color: r.color }}>
-                    <span className="h-1.5 w-1.5 rounded-full" style={{ background: r.color }} />
-                    {r.name}
-                  </span>
+                <div className="min-w-[220px] text-start" dir={locale === "en" ? "ltr" : "rtl"}>
+                  <div className="mb-1.5 flex items-center justify-end gap-1.5">
+                    {b?.isNew && <span className="rounded-md bg-brand/10 px-2 py-0.5 text-[10px] font-bold text-brand">{pick(locale, "جديد", "New")}</span>}
+                    <span className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-bold" style={{ background: `${r.color}1a`, color: r.color }}>
+                      <span className="h-1.5 w-1.5 rounded-full" style={{ background: r.color }} />
+                      {r.name}
+                    </span>
+                  </div>
                   {b ? (
                     <>
                       <p className="text-sm font-bold text-ink">{b.name}</p>
-                      <p className="mt-0.5 text-xs leading-5 text-ink-muted">{b.address}</p>
-                      <p className="mt-1 text-xs text-ink-soft">{b.hours}</p>
-                      <p className="mt-0.5 text-xs text-ink-soft" dir="ltr">{b.phone}</p>
-                      <Link href={`/branches/${b.slug}`} className="mt-2 inline-block rounded-lg bg-brand px-3 py-1.5 text-xs font-semibold text-white">{pick(locale, "عرض التفاصيل", "View Details")}</Link>
+                      <p className="mt-1 flex items-start gap-1.5 text-xs leading-5 text-ink-muted"><PinIcon />{b.address}</p>
+                      <p className="mt-1 flex items-center gap-1.5 text-xs text-ink-soft"><ClockIcon />{b.hours}</p>
+                      <p className="mt-0.5 flex items-center gap-1.5 text-xs text-ink-soft" dir="ltr"><PhoneIcon />{b.phone}</p>
+                      <button
+                        type="button"
+                        onClick={() => router.push(`/branches/${b.slug}`)}
+                        className="mt-3 w-full rounded-lg bg-brand py-2 text-center text-xs font-semibold text-white transition-colors hover:bg-brand-dark"
+                      >
+                        {pick(locale, "عرض التفاصيل", "View Details")}
+                      </button>
                     </>
                   ) : (
                     <>
                       <p className="text-sm font-bold text-ink">{pick(locale, `منطقة ${r.name}`, r.name)}</p>
                       <p className="mt-0.5 text-xs text-ink-muted">{pick(locale, `لدينا ${r.count} فرع في هذه المنطقة.`, `${r.count} branches in this region.`)}</p>
+                      <button
+                        type="button"
+                        onClick={() => router.push("/branches")}
+                        className="mt-3 w-full rounded-lg bg-brand py-2 text-center text-xs font-semibold text-white transition-colors hover:bg-brand-dark"
+                      >
+                        {pick(locale, "تصفّح كل الفروع", "Browse All Branches")}
+                      </button>
                     </>
                   )}
                 </div>
@@ -113,4 +130,14 @@ export default function LeafletMap({ locale, branches, regions }: { locale: Loca
       <span className="absolute bottom-4 left-4 z-[1000] rounded-lg bg-brand px-3 py-1.5 text-xs font-bold text-white shadow">{pick(locale, "42 فرع", "42 Branches")}</span>
     </div>
   );
+}
+
+function PinIcon() {
+  return <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mt-0.5 shrink-0 text-brand"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>;
+}
+function ClockIcon() {
+  return <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0 text-brand"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" strokeLinecap="round" /></svg>;
+}
+function PhoneIcon() {
+  return <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-brand"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z" /></svg>;
 }
