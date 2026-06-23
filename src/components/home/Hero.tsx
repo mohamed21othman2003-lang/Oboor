@@ -137,7 +137,7 @@ export default function Hero({ locale, slides: slidesProp }: { locale: Locale; s
       </div>
 
       {/* Bottom wave */}
-      <svg className="absolute bottom-0 left-0 w-full text-white" viewBox="0 0 1440 100" fill="currentColor" preserveAspectRatio="none">
+      <svg className="pointer-events-none absolute bottom-0 left-0 w-full text-white" viewBox="0 0 1440 100" fill="currentColor" preserveAspectRatio="none">
         <path d="M0 60 C 240 100 480 100 720 70 C 960 40 1200 40 1440 70 L 1440 100 L 0 100 Z" />
       </svg>
     </section>
