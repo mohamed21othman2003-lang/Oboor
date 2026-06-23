@@ -5,7 +5,7 @@ import { getSpecialistStats, getJoinCards, getContactPrompt, getSpecialists, typ
 import { getLocale } from "@/i18n/locale";
 import { pick, type Locale } from "@/i18n/config";
 import { fetchContent, fetchSections } from "@/lib/server/django";
-import SpecialistsGrid from "@/components/SpecialistsGrid";
+import SpecialistsExplorer from "@/components/SpecialistsExplorer";
 
 // الشكل اللي بيرجع من Django (content/specialists)
 type ApiSpecialist = {
@@ -143,30 +143,6 @@ export default async function SpecialistsPage() {
             ))}
           </div>
 
-          {/* Search bar */}
-          <div className="mt-8 flex flex-wrap items-center gap-2 rounded-2xl border border-line bg-white p-3 shadow-sm lg:flex-nowrap">
-            <SearchSelect icon={<BookIcon />} label={pick(locale, "التخصص", "Specialty")} value={pick(locale, "جميع التخصصات", "All Specialties")} />
-            <Divider />
-            <SearchSelect icon={<RibbonIcon small />} label={pick(locale, "الخبره", "Experience")} value={pick(locale, "جميع الخبرات", "All Experience Levels")} />
-            <Divider />
-            <SearchSelect icon={<PinIcon />} label={pick(locale, "المنطقة / الفرع", "Region / Branch")} value={pick(locale, "جميع الفروع", "All Branches")} />
-            <Divider />
-            <div className="relative min-w-[220px] flex-1">
-              <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-ink-soft"><SearchIcon /></span>
-              <input
-                type="text"
-                placeholder={pick(locale, "ابحث باسم الأخصائي أو التخصص...", "Search by specialist name or specialty...")}
-                className="w-full rounded-xl bg-surface py-2.5 pr-10 pl-3 text-start text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-brand/30"
-              />
-            </div>
-            <button className="flex shrink-0 items-center gap-2 rounded-xl bg-brand px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-dark">
-              <SearchIcon />
-              {pick(locale, "ابحث الآن", "Search Now")}
-            </button>
-            <button className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-ink-soft transition-colors hover:bg-surface" aria-label={pick(locale, "إعادة تعيين", "Reset")}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8" /><path d="M3 3v5h5" /></svg>
-            </button>
-          </div>
         </div>
       </section>
 
@@ -176,10 +152,9 @@ export default async function SpecialistsPage() {
           <div className="mb-10 flex items-center justify-between gap-4">
             <h2 className="shrink-0 text-2xl font-extrabold text-ink sm:text-3xl">{pick(locale, "روّادنا", "Our Pioneers")}</h2>
             <span className="h-px flex-1 bg-line" />
-            <span className="shrink-0 rounded-full bg-surface px-4 py-1.5 text-xs font-semibold text-ink-soft">{pick(locale, "16 نتائج", "16 results")}</span>
           </div>
 
-          <SpecialistsGrid locale={locale} specialists={specialists} contactPrompt={contactPrompt} />
+          <SpecialistsExplorer locale={locale} specialists={specialists} contactPrompt={contactPrompt} />
         </div>
       </section>
 
