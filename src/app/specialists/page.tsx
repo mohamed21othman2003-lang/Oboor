@@ -1,10 +1,51 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { getSpecialistStats, getJoinCards } from "@/lib/specialistsData";
+import { getSpecialistStats, getJoinCards, getContactPrompt, getSpecialists, type Specialist } from "@/lib/specialistsData";
 import { getLocale } from "@/i18n/locale";
-import { pick } from "@/i18n/config";
+import { pick, type Locale } from "@/i18n/config";
+import { fetchContent, fetchSections } from "@/lib/server/django";
 import SpecialistsGrid from "@/components/SpecialistsGrid";
+
+// الشكل اللي بيرجع من Django (content/specialists)
+type ApiSpecialist = {
+  slug: string; image: string; order: number;
+  name_ar: string; name_en: string;
+  specialty_ar: string; specialty_en: string;
+  desc_ar: string; desc_en: string;
+  days_ar: string; days_en: string;
+  branch_ar: string; branch_en: string;
+  experience_ar: string; experience_en: string;
+  hours_ar: string; hours_en: string;
+  branches_ar: string; branches_en: string;
+  about_ar: string; about_en: string;
+  qualifications_ar: string[]; qualifications_en: string[];
+};
+
+function toSpecialist(a: ApiSpecialist, locale: Locale): Specialist {
+  const en = locale === "en";
+  const tx = (ar: string, env: string | undefined | null) => (en ? (env ?? ar) : ar);
+  return {
+    slug: a.slug,
+    name: tx(a.name_ar, a.name_en),
+    specialty: tx(a.specialty_ar, a.specialty_en),
+    desc: tx(a.desc_ar, a.desc_en),
+    image: a.image,
+    days: tx(a.days_ar, a.days_en),
+    branch: tx(a.branch_ar, a.branch_en),
+    experience: tx(a.experience_ar, a.experience_en),
+    hours: tx(a.hours_ar, a.hours_en),
+    branches: tx(a.branches_ar, a.branches_en),
+    about: tx(a.about_ar, a.about_en),
+    qualifications: en ? (a.qualifications_en ?? a.qualifications_ar) : a.qualifications_ar,
+  };
+}
+
+// جلب الأخصائيين من Django مع fallback للبيانات الثابتة
+async function loadSpecialists(locale: Locale): Promise<Specialist[]> {
+  const rows = await fetchContent<ApiSpecialist[]>("specialists");
+  return rows && rows.length ? rows.map((r) => toSpecialist(r, locale)) : getSpecialists(locale);
+}
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
@@ -31,15 +72,43 @@ function ChevDown() {
 
 export default async function SpecialistsPage() {
   const locale = await getLocale();
-  const stats = getSpecialistStats(locale);
-  const joinCards = getJoinCards(locale);
+  const en = locale === "en";
+  const specialists = await loadSpecialists(locale);
+
+  // أقسام صفحة الأخصائيين من Django مع fallback للبيانات الثابتة
+  const sections = await fetchSections("specialists");
+
+  const stats = sections?.stats
+    ? sections.stats.map((row) => ({
+        value: en ? ((row.data_en as any)?.value ?? row.value) : row.value,
+        label: en ? (row.title_en || row.title_ar) : row.title_ar,
+      }))
+    : getSpecialistStats(locale);
+
+  const joinCards = sections?.join_cards
+    ? sections.join_cards.map((row) => ({
+        icon: row.icon,
+        title: en ? (row.title_en || row.title_ar) : row.title_ar,
+        desc: en ? (row.text_en || row.text_ar) : row.text_ar,
+      }))
+    : getJoinCards(locale);
+
+  const contactPrompt = sections?.contact_prompt?.[0]
+    ? (() => {
+        const r = sections.contact_prompt[0];
+        return {
+          title: en ? (r.title_en || r.title_ar) : r.title_ar,
+          subtitle: en ? (r.text_en || r.text_ar) : r.text_ar,
+        };
+      })()
+    : getContactPrompt(locale);
   return (
     <>
       {/* Hero */}
       <section className="bg-gradient-to-b from-[#ebf7f9] to-white">
         <div className="mx-auto max-w-7xl px-6 py-10 lg:px-8">
           <nav className="mb-8 flex items-center justify-start gap-2 text-sm text-ink-soft">
-            <span className="text-brand">{pick(locale, "الاخصائيين", "Specialists")}</span>
+            <span className="text-brand">{pick(locale, "روّادنا", "Our Pioneers")}</span>
             <Chev />
             <Link href="/" className="hover:text-brand">{pick(locale, "الرئيسية", "Home")}</Link>
           </nav>
@@ -49,7 +118,7 @@ export default async function SpecialistsPage() {
               {pick(locale, "فريق معتمد ومؤهل", "A certified and qualified team")}
               <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" className="text-brand"><polygon points="12 2 15 8.9 22.5 9.3 16.7 14 18.6 21.2 12 17.2 5.4 21.2 7.3 14 1.5 9.3 9 8.9" /></svg>
             </span>
-            <h1 className="mt-5 text-4xl font-extrabold text-ink sm:text-5xl">{pick(locale, "الأخصائيين", "Specialists")}</h1>
+            <h1 className="mt-5 text-4xl font-extrabold text-ink sm:text-5xl">{pick(locale, "روّادنا", "Our Pioneers")}</h1>
             <p className="mx-auto mt-5 max-w-2xl text-base leading-8 text-ink-muted">
               {pick(
                 locale,
@@ -105,12 +174,12 @@ export default async function SpecialistsPage() {
       <section className="bg-white py-14">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mb-10 flex items-center justify-between gap-4">
-            <h2 className="shrink-0 text-2xl font-extrabold text-ink sm:text-3xl">{pick(locale, "الأخصائيين", "Specialists")}</h2>
+            <h2 className="shrink-0 text-2xl font-extrabold text-ink sm:text-3xl">{pick(locale, "روّادنا", "Our Pioneers")}</h2>
             <span className="h-px flex-1 bg-line" />
             <span className="shrink-0 rounded-full bg-surface px-4 py-1.5 text-xs font-semibold text-ink-soft">{pick(locale, "16 نتائج", "16 results")}</span>
           </div>
 
-          <SpecialistsGrid locale={locale} />
+          <SpecialistsGrid locale={locale} specialists={specialists} contactPrompt={contactPrompt} />
         </div>
       </section>
 

@@ -9,7 +9,7 @@ import { pick, type Locale } from "@/i18n/config";
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
   return {
-    title: pick(locale, "من نحن | مركز عبور للرعاية والتأهيل", "About Us | Oboor Center for Care & Rehabilitation"),
+    title: pick(locale, "عن عبور | مركز عبور للرعاية والتأهيل", "About Us | Oboor Center for Care & Rehabilitation"),
     description: pick(
       locale,
       "تأسست مراكز عبور عام ٢٠٠٧ كأكبر سلسلة مراكز متخصصة في التشخيص والتقييم والتأهيل للأشخاص ذوي الإعاقة.",
@@ -53,7 +53,7 @@ export default async function AboutPage() {
       <section className="overflow-hidden bg-gradient-to-b from-[#ebf7f9] to-white">
         <div className="mx-auto max-w-7xl px-6 py-10 lg:px-8">
           <nav className="mb-8 flex items-center justify-start gap-2 text-sm text-ink-soft">
-            <span className="text-brand">{pick(locale, "من نحن", "About Us")}</span>
+            <span className="text-brand">{pick(locale, "عن عبور", "About Us")}</span>
             <Chev />
             <Link href="/" className="hover:text-brand">{pick(locale, "الرئيسية", "Home")}</Link>
           </nav>
@@ -76,7 +76,7 @@ export default async function AboutPage() {
             {/* Text (left) */}
             <div className="order-2 text-start">
               <TagLine>{pick(locale, "منذ عام ٢٠٠٧ — رائدون في التأهيل والرعاية", "Since 2007 — pioneers in rehabilitation and care")}</TagLine>
-              <h1 className="mt-4 text-4xl font-extrabold text-ink sm:text-5xl">{pick(locale, <>من <span className="text-brand">نحن</span></>, <>About <span className="text-brand">Us</span></>)}</h1>
+              <h1 className="mt-4 text-4xl font-extrabold text-ink sm:text-5xl">{pick(locale, <>عن <span className="text-brand">عبور</span></>, <>About <span className="text-brand">Oboor</span></>)}</h1>
               <p className="mt-5 text-base leading-8 text-ink-muted">
                 {pick(locale, "تأسست مراكز عبور عام ٢٠٠٧، وأصبحت اليوم من أكبر سلاسل المراكز المتخصصة في التشخيص والتقييم والتأهيل والتعليم للأشخاص ذوي الإعاقة في المملكة العربية السعودية، عبر شبكة فروع ممتدة وكوادر متخصصة رفيعة المستوى.", "Founded in 2007, Oboor Centers have grown into one of the largest chains specialized in the diagnosis, assessment, rehabilitation and education of people with disabilities in Saudi Arabia, through an extensive network of branches and highly qualified specialists.")}
               </p>

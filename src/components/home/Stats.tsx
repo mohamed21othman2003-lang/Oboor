@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { pick, type Locale } from "@/i18n/config";
 
 const users = (
@@ -28,6 +29,13 @@ const book = (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" /><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" /></svg>
 );
 
+// خريطة أسماء الأيقونات القادمة من الـ CMS إلى الـ SVG
+const ICONS: Record<string, ReactNode> = {
+  users, calendar, clipboard, heart, layers, document, pin, trophy, book,
+};
+
+export type StatItem = { icon: string; value: string; label: string; note: string };
+
 const STATS = [
   { icon: users, value: "+6,300", label: "مستفيد احتُضن بحب", note: "من مختلف أرجاء الوطن" },
   { icon: calendar, value: "+3,200,000", label: "جلسة علاجية تمت", note: "بأعلى معايير الإتقان والتفاني" },
@@ -52,8 +60,10 @@ const STATS_EN = [
   { icon: book, value: "+7", label: "Rehabilitation programs", note: "Across all stages and ages" },
 ];
 
-export default function Stats({ locale }: { locale: Locale }) {
-  const stats = locale === "en" ? STATS_EN : STATS;
+export default function Stats({ locale, items }: { locale: Locale; items?: StatItem[] }) {
+  const stats = items && items.length
+    ? items.map((s) => ({ ...s, icon: ICONS[s.icon] ?? users }))
+    : (locale === "en" ? STATS_EN : STATS);
   return (
     <section className="relative overflow-hidden bg-gradient-to-bl from-brand-deep to-[#0a2329] py-16">
       <div className="absolute -right-20 -top-20 h-72 w-72 rounded-full bg-brand/10 blur-3xl" />

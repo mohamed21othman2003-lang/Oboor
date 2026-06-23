@@ -1,9 +1,58 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { getSuccessStories, getSuccessStats } from "@/lib/successStoriesData";
+import {
+  getSuccessStories,
+  getSuccessStats,
+  getStoryHighlightsData,
+  type SuccessStory,
+  type StoryHighlightsData,
+} from "@/lib/successStoriesData";
 import { getLocale } from "@/i18n/locale";
-import { pick } from "@/i18n/config";
+import { pick, type Locale } from "@/i18n/config";
+import { fetchContent, fetchSections } from "@/lib/server/django";
 import SuccessStoryCard from "@/components/SuccessStoryCard";
+
+// الشكل اللي بيرجع من Django (content/success)
+type ApiSuccess = {
+  slug: string;
+  name_ar: string; name_en: string;
+  age_ar: string; age_en: string;
+  category_ar: string; category_en: string;
+  duration_label_ar: string; duration_label_en: string;
+  before_ar: string; before_en: string;
+  after_ar: string; after_en: string;
+  quote_ar: string; quote_en: string;
+  meta_duration_ar: string; meta_duration_en: string;
+  meta_age_ar: string; meta_age_en: string;
+  author_ar: string; author_en: string;
+  image: string; order: number;
+};
+
+function toStory(row: ApiSuccess, locale: Locale): SuccessStory {
+  const en = locale === "en";
+  const t = (ar: string, env: string) => (en ? env ?? ar : ar);
+  return {
+    slug: row.slug,
+    name: t(row.name_ar, row.name_en),
+    age: t(row.age_ar, row.age_en),
+    image: row.image,
+    category: t(row.category_ar, row.category_en),
+    durationLabel: t(row.duration_label_ar, row.duration_label_en),
+    before: t(row.before_ar, row.before_en),
+    after: t(row.after_ar, row.after_en),
+    quote: t(row.quote_ar, row.quote_en),
+    metaDuration: t(row.meta_duration_ar, row.meta_duration_en),
+    metaAge: t(row.meta_age_ar, row.meta_age_en),
+    author: t(row.author_ar, row.author_en),
+  };
+}
+
+// نجلب القصص من Django، ونرجع للبيانات الثابتة (fallback) لو فشل الطلب أو فاضي
+async function loadStories(locale: Locale): Promise<SuccessStory[]> {
+  const rows = await fetchContent<ApiSuccess[]>("success");
+  if (rows && rows.length) return rows.map((r) => toStory(r, locale));
+  return getSuccessStories(locale);
+}
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
@@ -32,17 +81,41 @@ const CTA_FEATURES: [string, string][] = [
   ["دعم الأسرة الكامل", "Full family support"],
 ];
 
+// شكل قاموس الـ highlights كما يُخزَّن في الـ CMS (journeyTemplate نص يحوي {name})
+type CmsHighlights = Omit<StoryHighlightsData, "journeyTemplate"> & { journeyTemplate?: string };
+
 export default async function SuccessStoriesPage() {
   const locale = await getLocale();
-  const stories = getSuccessStories(locale);
-  const stats = getSuccessStats(locale);
+  const en = locale === "en";
+  const stories = await loadStories(locale);
+  const sections = await fetchSections("success");
+
+  // STATS: من الـ CMS لو متاح، وإلا fallback للبيانات الثابتة
+  const stats = sections?.stats
+    ? sections.stats.map((row) => ({
+        value: en ? ((row.data_en as { value?: string } | null)?.value ?? row.value) : row.value,
+        label: en ? (row.title_en || row.title_ar) : row.title_ar,
+      }))
+    : getSuccessStats(locale);
+
+  // HIGHLIGHTS: من الـ CMS لو متاح، مع تحويل journeyTemplate (نص) إلى دالة
+  // ليبقى نداء h.journeyTemplate(name) في الواجهة بدون تغيير. وإلا fallback للثابت.
+  // journeyTemplate يبقى نصّاً (قابل للتسلسل) لتمريره لمكوّن العميل بأمان.
+  const highlightsRow = sections?.highlights?.[0];
+  const cmsHighlights = highlightsRow
+    ? ((en ? highlightsRow.data_en : highlightsRow.data_ar) as CmsHighlights | null)
+    : null;
+  const highlights: StoryHighlightsData = cmsHighlights
+    ? { ...cmsHighlights, journeyTemplate: cmsHighlights.journeyTemplate || "" }
+    : getStoryHighlightsData(locale);
+
   return (
     <>
       {/* Hero */}
       <section className="bg-gradient-to-b from-[#ebf7f9] to-white">
         <div className="mx-auto max-w-7xl px-6 py-10 lg:px-8">
           <nav className="mb-10 flex items-center justify-start gap-2 text-sm text-ink-soft">
-            <span className="text-brand">{pick(locale, "قصص النجاح", "Success Stories")}</span>
+            <span className="text-brand">{pick(locale, "أبطال عبور", "Oboor Champions")}</span>
             <Chev />
             <Link href="/" className="hover:text-brand">{pick(locale, "الرئيسية", "Home")}</Link>
           </nav>
@@ -92,7 +165,7 @@ export default async function SuccessStoriesPage() {
 
           <div className="grid gap-7 md:grid-cols-2 lg:grid-cols-3">
             {stories.map((story) => (
-              <SuccessStoryCard key={story.slug} story={story} locale={locale} />
+              <SuccessStoryCard key={story.slug} story={story} locale={locale} highlights={highlights} />
             ))}
           </div>
 

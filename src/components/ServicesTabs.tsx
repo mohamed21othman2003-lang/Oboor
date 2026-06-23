@@ -81,10 +81,17 @@ const bookIcon = <svg width="20" height="20" viewBox="0 0 24 24" fill="none" str
 const stethoscopeIcon = <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 3v6a5 5 0 0 0 10 0V3" /><path d="M4 3H2M14 3h-2M9 14v3a4 4 0 0 0 8 0v-1" /><circle cx="19" cy="13" r="2" /></svg>;
 const chipIcon = <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="6" y="6" width="12" height="12" rx="2" /><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4" /></svg>;
 
-export default function ServicesTabs({ locale = "ar" }: { locale?: Locale }) {
-  const PROGRAMS = locale === "en" ? PROGRAMS_EN : PROGRAMS_AR;
-  const CLINICAL = locale === "en" ? CLINICAL_EN : CLINICAL_AR;
-  const TECHNIQUES = locale === "en" ? TECHNIQUES_EN : TECHNIQUES_AR;
+export default function ServicesTabs({
+  locale = "ar",
+  cards,
+}: {
+  locale?: Locale;
+  cards?: { programs: Program[]; clinical: Program[]; techniques: Program[] };
+}) {
+  // لو وصلت بيانات من Django (CMS) نستخدمها، وإلا نرجع للبيانات الثابتة (fallback)
+  const PROGRAMS = cards ? cards.programs : locale === "en" ? PROGRAMS_EN : PROGRAMS_AR;
+  const CLINICAL = cards ? cards.clinical : locale === "en" ? CLINICAL_EN : CLINICAL_AR;
+  const TECHNIQUES = cards ? cards.techniques : locale === "en" ? TECHNIQUES_EN : TECHNIQUES_AR;
 
   const TABS = [
     { key: "programs", label: pick(locale, "البرامج التأهيلية", "Rehabilitation Programs"), heading: pick(locale, "برامجنا التأهيلية", "Our Rehabilitation Programs"), intro: pick(locale, "صُمِّمت كل برامجنا التأهيلية وفق معايير علمية معتمدة لخدمة فئات محددة من الأطفال وفق احتياجاتهم الدقيقة.", "All our rehabilitation programs are designed to accredited scientific standards to serve specific groups of children according to their precise needs."), icon: bookIcon, data: PROGRAMS },

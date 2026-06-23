@@ -245,8 +245,31 @@ export const STORY_HIGHLIGHTS = {
   },
 } as const;
 
-export function getStoryHighlights(locale: Locale = "ar") {
+// الشكل الموحّد الذي تتوقعه واجهة عرض القصة (journeyTemplate دالة دائماً)
+export type StoryHighlights = {
+  badge: string;
+  durationLabel: string;
+  ageLabel: string;
+  programLabel: string;
+  program: string;
+  specialistTitle: string;
+  journeyTitle: string;
+  journeyTemplate: (name: string) => string;
+  resultsTitle: string;
+  results: readonly string[];
+  storyTitle: string;
+};
+
+export function getStoryHighlights(locale: Locale = "ar"): StoryHighlights {
   return locale === "en" ? STORY_HIGHLIGHTS.en : STORY_HIGHLIGHTS.ar;
+}
+
+// نسخة قابلة للتسلسل (journeyTemplate نص يحوي {name}) — تُمرَّر من السيرفر لمكوّن العميل.
+export type StoryHighlightsData = Omit<StoryHighlights, "journeyTemplate"> & { journeyTemplate: string };
+
+export function getStoryHighlightsData(locale: Locale = "ar"): StoryHighlightsData {
+  const h = getStoryHighlights(locale);
+  return { ...h, journeyTemplate: h.journeyTemplate("{name}") };
 }
 
 export function getSuccessStats(locale: Locale = "ar") {

@@ -4,7 +4,14 @@ import { notFound } from "next/navigation";
 import { JOBS, getJob } from "@/lib/careersData";
 import CareerApplyForm from "@/components/CareerApplyForm";
 import { getLocale } from "@/i18n/locale";
-import { pick } from "@/i18n/config";
+import { pick, type Locale } from "@/i18n/config";
+import { fetchJobs } from "../page";
+
+// يجلب الوظيفة من Django حسب الـ slug؛ يرجّع fallback من البيانات الثابتة
+async function loadJob(slug: string, locale: Locale) {
+  const jobs = await fetchJobs(locale);
+  return jobs?.find((j) => j.slug === slug) ?? getJob(slug, locale);
+}
 
 export function generateStaticParams() {
   return JOBS.map((j) => ({ slug: j.slug }));
@@ -28,7 +35,7 @@ function Chev() {
 export default async function JobDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const locale = await getLocale();
-  const job = getJob(slug, locale);
+  const job = await loadJob(slug, locale);
   if (!job) notFound();
 
   const details = [

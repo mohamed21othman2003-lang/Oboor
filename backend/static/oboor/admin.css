@@ -1,0 +1,57 @@
+/* هوية مركز عبور داخل لوحة التحكّم — ألوان العلامة */
+:root {
+  --oboor: #2cbcc8;
+  --oboor-dark: #1796a3;
+  --oboor-deep: #0d3d45;
+  --oboor-surface: #f5f9fa;
+}
+
+/* الشريط الجانبي بلون العلامة الغامق */
+.main-sidebar,
+.brand-link {
+  background-color: var(--oboor-deep) !important;
+}
+.brand-link .brand-image { background: #fff; border-radius: 8px; padding: 2px; }
+
+/* عناصر الشريط الجانبي */
+.sidebar-dark-primary .nav-sidebar > .nav-item > .nav-link.active,
+.nav-sidebar .nav-treeview > .nav-item > .nav-link.active {
+  background-color: var(--oboor) !important;
+  color: #fff !important;
+  box-shadow: none;
+}
+.sidebar-dark-primary .nav-sidebar > .nav-item > .nav-link:hover {
+  background-color: rgba(44, 188, 200, 0.18) !important;
+}
+
+/* الأزرار والروابط الأساسية */
+.btn-primary,
+.bg-primary {
+  background-color: var(--oboor) !important;
+  border-color: var(--oboor) !important;
+}
+.btn-primary:hover { background-color: var(--oboor-dark) !important; border-color: var(--oboor-dark) !important; }
+a { color: var(--oboor-dark); }
+a:hover { color: var(--oboor); }
+
+/* روابط الإضافة/الحفظ في القوائم */
+.text-primary { color: var(--oboor-dark) !important; }
+.btn-outline-primary { color: var(--oboor-dark); border-color: var(--oboor); }
+.btn-outline-primary:hover { background-color: var(--oboor); border-color: var(--oboor); }
+
+/* رؤوس الجداول وعناوين الأقسام */
+.module h2, .module caption,
+table thead th { background-color: var(--oboor-deep); }
+
+/* بطاقات لوحة المعلومات */
+.card-primary:not(.card-outline) > .card-header { background-color: var(--oboor); }
+.callout.callout-info { border-left-color: var(--oboor); }
+
+/* حقول مركّز عليها */
+.form-control:focus, .select2-container--focus .select2-selection {
+  border-color: var(--oboor) !important;
+  box-shadow: 0 0 0 0.2rem rgba(44, 188, 200, 0.25) !important;
+}
+
+/* تكبير الخط قليلاً لسهولة القراءة لغير المتخصصين */
+body, .form-control, .nav-sidebar .nav-link p { font-size: 0.95rem; }

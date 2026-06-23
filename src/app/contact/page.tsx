@@ -160,7 +160,7 @@ function BranchesSection({ locale }: { locale: Locale }) {
   return (
     <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
       <div className="mb-8 text-start">
-        <h2 className="text-4xl font-extrabold text-ink">{pick(locale, "فروعنا", "Our Branches")}</h2>
+        <h2 className="text-4xl font-extrabold text-ink">{pick(locale, "مراكزنا", "Our Branches")}</h2>
         <p className="mt-3 text-sm text-ink-muted">
           {pick(
             locale,

@@ -1,25 +1,70 @@
-import Hero from "@/components/home/Hero";
+import Hero, { type HeroSlide } from "@/components/home/Hero";
 import About from "@/components/home/About";
 import SmartSearch from "@/components/home/SmartSearch";
-import Stats from "@/components/home/Stats";
-import WhyUs from "@/components/home/WhyUs";
+import Stats, { type StatItem } from "@/components/home/Stats";
+import WhyUs, { type FeatureItem } from "@/components/home/WhyUs";
 import SuccessStories from "@/components/home/SuccessStories";
 import Gallery from "@/components/home/Gallery";
 import NewsAndCerts from "@/components/home/NewsAndCerts";
 import { getLocale } from "@/i18n/locale";
-import { pick } from "@/i18n/config";
+import { pick, type Locale } from "@/i18n/config";
+import { fetchContent } from "@/lib/server/django";
+
+// أشكال الصفوف القادمة من Django CMS
+type ApiHero = { key: string; badge_ar: string; badge_en: string; heading_ar: string; heading_en: string; desc_ar: string; desc_en: string; cta_ar: string; cta_en: string; image: string; order: number };
+type ApiStat = { key: string; label_ar: string; label_en: string; note_ar: string; note_en: string; value: string; icon: string; order: number };
+type ApiFeature = { key: string; title_ar: string; title_en: string; note_ar: string; note_en: string; icon: string; order: number };
+type ApiGallery = { key: string; caption_ar: string; caption_en: string; image: string; order: number };
+
+// تختار النص حسب اللغة (إنجليزي مع fallback للعربي)
+const t = (en: boolean, ar: string, eng: string) => (en ? (eng ?? ar) : ar);
+
+// لودرز: ترجع null لو الجسر غير مفعّل/فشل → المكوّن يرجع للبيانات الثابتة
+async function loadHero(locale: Locale): Promise<HeroSlide[] | undefined> {
+  const rows = await fetchContent<ApiHero[]>("home/hero");
+  if (!rows || !rows.length) return undefined;
+  const en = locale === "en";
+  return rows.map((r) => ({ img: r.image, heading: t(en, r.heading_ar, r.heading_en), desc: t(en, r.desc_ar, r.desc_en) }));
+}
+
+async function loadStats(locale: Locale): Promise<StatItem[] | undefined> {
+  const rows = await fetchContent<ApiStat[]>("home/stats");
+  if (!rows || !rows.length) return undefined;
+  const en = locale === "en";
+  return rows.map((r) => ({ icon: r.icon, value: r.value, label: t(en, r.label_ar, r.label_en), note: t(en, r.note_ar, r.note_en) }));
+}
+
+async function loadFeatures(locale: Locale): Promise<FeatureItem[] | undefined> {
+  const rows = await fetchContent<ApiFeature[]>("home/features");
+  if (!rows || !rows.length) return undefined;
+  const en = locale === "en";
+  return rows.map((r) => ({ icon: r.icon, title: t(en, r.title_ar, r.title_en), note: t(en, r.note_ar, r.note_en) }));
+}
+
+async function loadGallery(locale: Locale): Promise<{ images: string[]; captions: string[] } | undefined> {
+  const rows = await fetchContent<ApiGallery[]>("gallery");
+  if (!rows || !rows.length) return undefined;
+  const en = locale === "en";
+  return { images: rows.map((r) => r.image), captions: rows.map((r) => t(en, r.caption_ar, r.caption_en)) };
+}
 
 export default async function Home() {
   const locale = await getLocale();
+  const [heroSlides, statItems, featureItems, gallery] = await Promise.all([
+    loadHero(locale),
+    loadStats(locale),
+    loadFeatures(locale),
+    loadGallery(locale),
+  ]);
   return (
     <>
-      <Hero locale={locale} />
+      <Hero locale={locale} slides={heroSlides} />
       <About locale={locale} />
       <SmartSearch locale={locale} />
-      <Stats locale={locale} />
-      <WhyUs locale={locale} />
+      <Stats locale={locale} items={statItems} />
+      <WhyUs locale={locale} items={featureItems} />
       <SuccessStories locale={locale} />
-      <Gallery locale={locale} />
+      <Gallery locale={locale} images={gallery?.images} captions={gallery?.captions} />
       <NewsAndCerts locale={locale} />
 
       {/* WhatsApp float */}

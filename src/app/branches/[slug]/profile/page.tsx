@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ALL_BRANCHES, getBranch, BRANCH_FEATURES, BRANCH_FEATURES_EN } from "@/lib/branchesData";
+import { loadBranch } from "@/lib/server/branches";
 import { getLocale } from "@/i18n/locale";
 import { pick } from "@/i18n/config";
 import { CONTACT } from "@/lib/site";
@@ -21,7 +22,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 export default async function BranchProfilePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const locale = await getLocale();
-  const b = getBranch(slug, locale);
+  const b = (await loadBranch(slug, locale)) ?? getBranch(slug, locale);
   if (!b) notFound();
 
   const rows = [

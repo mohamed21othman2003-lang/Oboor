@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { pick, type Locale } from "@/i18n/config";
 
 const team = <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" /></svg>;
@@ -6,6 +7,11 @@ const target = <svg width="22" height="22" viewBox="0 0 24 24" fill="none" strok
 const heart = <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z" /></svg>;
 const chat = <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>;
 const shield = <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2l8 3v6c0 5-3.4 8.6-8 11-4.6-2.4-8-6-8-11V5l8-3z" /><path d="M9 12l2 2 4-4" /></svg>;
+
+// خريطة أسماء الأيقونات القادمة من الـ CMS إلى الـ SVG
+const ICONS: Record<string, ReactNode> = { team, book, target, heart, chat, shield };
+
+export type FeatureItem = { icon: string; title: string; note: string };
 
 const FEATURES = [
   { icon: team, title: "فريقنا", note: "كفاءات تخصصية متكاملة (تربية خاصة، نطق، علاج وظيفي وطبيعي، ونفسي) تعمل بروح الجسد الواحد." },
@@ -25,8 +31,10 @@ const FEATURES_EN = [
   { icon: shield, title: "Our Environment", note: "Safe and stimulating spaces designed to provide comfort while enhancing your child's abilities." },
 ];
 
-export default function WhyUs({ locale }: { locale: Locale }) {
-  const features = locale === "en" ? FEATURES_EN : FEATURES;
+export default function WhyUs({ locale, items }: { locale: Locale; items?: FeatureItem[] }) {
+  const features = items && items.length
+    ? items.map((f) => ({ ...f, icon: ICONS[f.icon] ?? team }))
+    : (locale === "en" ? FEATURES_EN : FEATURES);
   return (
     <section className="bg-surface py-20">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">

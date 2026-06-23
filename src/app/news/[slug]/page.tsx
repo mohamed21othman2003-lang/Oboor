@@ -74,7 +74,7 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
           <nav className="mb-6 flex items-center justify-start gap-2 text-sm text-ink-soft">
             <span className="text-brand">{n.category}</span>
             <Chev />
-            <Link href="/news" className="hover:text-brand">{pick(locale, "اخبارنا", "News")}</Link>
+            <Link href="/news" className="hover:text-brand">{pick(locale, "إعلامنا", "News")}</Link>
             <Chev />
             <Link href="/" className="hover:text-brand">{pick(locale, "الرئيسية", "Home")}</Link>
           </nav>

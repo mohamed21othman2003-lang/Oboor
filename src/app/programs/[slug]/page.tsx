@@ -2,19 +2,80 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { PROGRAM_DETAILS, getProgram } from "@/lib/programsData";
+import { PROGRAM_DETAILS, getProgram, type ProgramDetail } from "@/lib/programsData";
 import { distinctIcons } from "@/lib/areaIcon";
 import { getLocale } from "@/i18n/locale";
-import { pick } from "@/i18n/config";
+import { pick, type Locale } from "@/i18n/config";
+import { fetchContent } from "@/lib/server/django";
 
 export function generateStaticParams() {
   return PROGRAM_DETAILS.map((p) => ({ slug: p.slug }));
 }
 
+// الشكل اللي بيرجع من Django (content/programs)
+type ApiProgram = {
+  slug: string;
+  title_ar: string; title_en: string;
+  subtitle_ar: string; subtitle_en: string;
+  about_ar: string[]; about_en: string[];
+  philosophy_intro_ar: string; philosophy_intro_en: string;
+  philosophy_ar: string[]; philosophy_en: string[];
+  methods_ar: { name: string; desc: string }[]; methods_en: { name: string; desc: string }[];
+  duration_ar: string; duration_en: string;
+  target_ar: string; target_en: string;
+  target_tags_ar: string[]; target_tags_en: string[];
+  training_intro_ar: string; training_intro_en: string;
+  training_areas_ar: { title: string; desc: string }[]; training_areas_en: { title: string; desc: string }[];
+  target_list_ar: string[]; target_list_en: string[];
+  stations_intro_ar: string; stations_intro_en: string;
+  stations_ar: string[]; stations_en: string[];
+  image: string; order: number;
+};
+
+// بنختار اللغة: لو إنجليزي والقيمة الإنجليزية موجودة نستخدمها، وإلا نرجّع العربي.
+function mapProgram(row: ApiProgram, locale: Locale): ProgramDetail {
+  const en = locale === "en";
+  const b = <T,>(ar: T, enVal: T): T =>
+    en && Array.isArray(enVal)
+      ? (enVal.length ? enVal : ar)
+      : en
+        ? (enVal ?? ar)
+        : ar;
+  return {
+    slug: row.slug,
+    title: b(row.title_ar, row.title_en),
+    subtitle: b(row.subtitle_ar, row.subtitle_en),
+    image: row.image,
+    about: b(row.about_ar, row.about_en),
+    philosophyIntro: b(row.philosophy_intro_ar, row.philosophy_intro_en),
+    philosophy: b(row.philosophy_ar, row.philosophy_en),
+    methods: b(row.methods_ar, row.methods_en),
+    duration: b(row.duration_ar, row.duration_en),
+    target: b(row.target_ar, row.target_en),
+    targetTags: b(row.target_tags_ar, row.target_tags_en),
+    trainingIntro: b(row.training_intro_ar, row.training_intro_en),
+    trainingAreas: b(row.training_areas_ar, row.training_areas_en),
+    targetList: b(row.target_list_ar, row.target_list_en),
+    stationsIntro: b(row.stations_intro_ar, row.stations_intro_en),
+    stations: b(row.stations_ar, row.stations_en),
+  };
+}
+
+// نجلب البرنامج من Django بالـ slug، ولو الجسر مش متاح أو الـ slug مش موجود
+// نرجع للبيانات الثابتة (fallback) من getProgram.
+async function loadProgram(slug: string, locale: Locale): Promise<ProgramDetail | undefined> {
+  const rows = await fetchContent<ApiProgram[]>("programs");
+  if (rows && rows.length) {
+    const row = rows.find((r) => r.slug === slug);
+    if (row) return mapProgram(row, locale);
+  }
+  return getProgram(slug, locale);
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const locale = await getLocale();
-  const p = getProgram(slug, locale);
+  const p = await loadProgram(slug, locale);
   return {
     title: p
       ? `${p.title} | ${pick(locale, "مركز عبور", "Oboor Center")}`
@@ -29,7 +90,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 export default async function ProgramDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const locale = await getLocale();
-  const p = getProgram(slug, locale);
+  const p = await loadProgram(slug, locale);
   if (!p) notFound();
 
   return (
@@ -42,12 +103,12 @@ export default async function ProgramDetailPage({ params }: { params: Promise<{ 
             <Chev />
             <Link href="/programs" className="hover:text-brand">{pick(locale, "البرامج التأهيلية", "Rehabilitation Programs")}</Link>
             <Chev />
-            <Link href="/programs" className="hover:text-brand">{pick(locale, "خدماتنا", "Services")}</Link>
+            <Link href="/programs" className="hover:text-brand">{pick(locale, "برامجنا التمكينية", "Services")}</Link>
             <Chev />
             <Link href="/" className="hover:text-brand">{pick(locale, "الرئيسية", "Home")}</Link>
           </nav>
           <div className="text-center">
-            <span className="rounded-full bg-white px-4 py-1.5 text-sm font-medium text-brand-dark shadow-sm ring-1 ring-line">{pick(locale, "خدماتنا في المملكة", "Our Services in Saudi Arabia")}</span>
+            <span className="rounded-full bg-white px-4 py-1.5 text-sm font-medium text-brand-dark shadow-sm ring-1 ring-line">{pick(locale, "برامجنا التمكينية في المملكة", "Our Services in Saudi Arabia")}</span>
             <h1 className="mt-5 text-3xl font-extrabold text-ink sm:text-4xl">{p.title}</h1>
             <p className="mx-auto mt-4 max-w-3xl text-base leading-8 text-ink-muted">{p.subtitle}</p>
           </div>

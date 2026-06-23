@@ -2,11 +2,11 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import type { SuccessStory } from "@/lib/successStoriesData";
-import { getStoryHighlights } from "@/lib/successStoriesData";
+import type { SuccessStory, StoryHighlightsData } from "@/lib/successStoriesData";
+import { getStoryHighlightsData } from "@/lib/successStoriesData";
 import { pick, type Locale } from "@/i18n/config";
 
-export default function SuccessStoryCard({ story, locale = "ar" }: { story: SuccessStory; locale?: Locale }) {
+export default function SuccessStoryCard({ story, locale = "ar", highlights }: { story: SuccessStory; locale?: Locale; highlights?: StoryHighlightsData }) {
   const [open, setOpen] = useState(false);
   return (
     <>
@@ -56,13 +56,13 @@ export default function SuccessStoryCard({ story, locale = "ar" }: { story: Succ
         </div>
       </article>
 
-      {open && <StoryModal story={story} locale={locale} onClose={() => setOpen(false)} />}
+      {open && <StoryModal story={story} locale={locale} highlights={highlights} onClose={() => setOpen(false)} />}
     </>
   );
 }
 
-function StoryModal({ story, locale, onClose }: { story: SuccessStory; locale: Locale; onClose: () => void }) {
-  const h = getStoryHighlights(locale);
+function StoryModal({ story, locale, highlights, onClose }: { story: SuccessStory; locale: Locale; highlights?: StoryHighlightsData; onClose: () => void }) {
+  const h = highlights ?? getStoryHighlightsData(locale);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     document.addEventListener("keydown", onKey);
@@ -143,7 +143,7 @@ function StoryModal({ story, locale, onClose }: { story: SuccessStory; locale: L
           {/* Journey */}
           <div>
             <SectionHeading>{h.journeyTitle}</SectionHeading>
-            <p className="mt-1.5 text-start text-[12px] leading-6 text-ink-muted">{h.journeyTemplate(story.name)}</p>
+            <p className="mt-1.5 text-start text-[12px] leading-6 text-ink-muted">{h.journeyTemplate.replace("{name}", story.name)}</p>
           </div>
 
           {/* Results */}

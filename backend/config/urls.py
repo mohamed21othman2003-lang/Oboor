@@ -10,6 +10,7 @@ admin.site.index_title = "الطلبات والمحتوى"
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", include("submissions.urls")),
+    path("api/content/", include("content.urls")),
 ]
 
 if settings.DEBUG:

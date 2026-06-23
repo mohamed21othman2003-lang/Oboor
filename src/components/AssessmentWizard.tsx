@@ -4,22 +4,35 @@ import { useState } from "react";
 import { getAssessments, getQuestionsFor, getAnswerOptions, type Assessment } from "@/lib/assessmentData";
 import { pick, type Locale } from "@/i18n/config";
 
-export default function AssessmentWizard({ locale }: { locale: Locale }) {
+export default function AssessmentWizard({
+  locale,
+  assessments,
+  questions,
+  prelimQuestions,
+  answerOptions,
+}: {
+  locale: Locale;
+  assessments?: Assessment[];
+  questions?: Record<string, string[]>;
+  prelimQuestions?: string[];
+  answerOptions?: string[];
+}) {
   const STEPS = [
     pick(locale, "اختر التقييم المناسب", "Choose the Assessment"),
     pick(locale, "اجب الأسئلة", "Answer Questions"),
     pick(locale, "اضف البيانات", "Add Details"),
     pick(locale, "النتيجة", "Result"),
   ];
-  const ASSESSMENTS = getAssessments(locale);
-  const ANSWER_OPTIONS = getAnswerOptions(locale);
+  // نستخدم بيانات الـ CMS الممرّرة كـ props، ونرجع للبيانات الثابتة لو مش متوفّرة
+  const ASSESSMENTS = assessments ?? getAssessments(locale);
+  const ANSWER_OPTIONS = answerOptions?.length ? answerOptions : getAnswerOptions(locale);
 
   const [step, setStep] = useState(0);
   const [active, setActive] = useState<Assessment | null>(null);
   const [answers, setAnswers] = useState<Record<number, string>>({});
 
   // أسئلة التقييم المختار (تختلف حسب نوع التقييم)
-  const PRELIM_QUESTIONS = active ? getQuestionsFor(active.slug, locale) : [];
+  const PRELIM_QUESTIONS = active ? (questions?.[active.slug] ?? (prelimQuestions?.length ? prelimQuestions : getQuestionsFor(active.slug, locale))) : [];
 
   const start = (a: Assessment) => { setActive(a); setAnswers({}); setStep(1); };
   const reset = () => { setStep(0); setActive(null); setAnswers({}); };

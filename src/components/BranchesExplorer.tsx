@@ -3,12 +3,13 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { BRANCHES, BRANCHES_EN, regionTabs, type Branch } from "@/lib/branchesData";
+import { BRANCHES, BRANCHES_EN, regionTabsFrom, type Branch } from "@/lib/branchesData";
 import { pick, type Locale } from "@/i18n/config";
 
-export default function BranchesExplorer({ locale }: { locale: Locale }) {
-  const tabs = regionTabs(locale);
-  const source = locale === "en" ? BRANCHES_EN : BRANCHES;
+export default function BranchesExplorer({ locale, branches }: { locale: Locale; branches?: Branch[] }) {
+  // قائمة الفروع من الـ props (CMS) مع fallback للبيانات الثابتة
+  const source = branches ?? (locale === "en" ? BRANCHES_EN : BRANCHES);
+  const tabs = regionTabsFrom(source, locale);
   const allLabel = pick(locale, "الكل", "All");
   const [region, setRegion] = useState(allLabel);
   const q = (useSearchParams().get("q") || "").trim().toLowerCase();

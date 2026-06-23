@@ -2,14 +2,16 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, type ReactNode } from "react";
 import { pick, type Locale } from "@/i18n/config";
 
-export default function Hero({ locale }: { locale: Locale }) {
+export type HeroSlide = { img: string; heading: ReactNode; desc: ReactNode };
+
+export default function Hero({ locale, slides: slidesProp }: { locale: Locale; slides?: HeroSlide[] }) {
   const badge = pick(locale, "نرعى نقاءهم، ونبني غدهم", "Nurturing Their Potential, Shaping Their Future");
   const cta = pick(locale, "من هنا، نُمكّنهم", "From Here, We Empower Them");
 
-  const slides = [
+  const staticSlides = [
     {
       img: "/figma/home/imgImageWithFallback.jpg",
       heading: pick(
@@ -50,6 +52,8 @@ export default function Hero({ locale }: { locale: Locale }) {
       ),
     },
   ];
+
+  const slides = slidesProp && slidesProp.length ? slidesProp : staticSlides;
 
   const n = slides.length;
   const [i, setI] = useState(0);
