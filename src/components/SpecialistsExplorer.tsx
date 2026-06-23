@@ -19,6 +19,7 @@ export default function SpecialistsExplorer({
   const [experience, setExperience] = useState("");
   const [region, setRegion] = useState("");
   const [query, setQuery] = useState("");
+  const resultsRef = useRef<HTMLDivElement>(null);
 
   // توحيد إملائي بسيط (جده → جدة) لتفادي التكرار
   const norm = (s: string) => (s || "").replace(/جده/g, "جدة").trim();
@@ -73,16 +74,26 @@ export default function SpecialistsExplorer({
             className="w-full rounded-xl bg-surface py-2.5 pr-10 pl-3 text-start text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-brand/30"
           />
         </div>
+        <button
+          type="button"
+          onClick={() => resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
+          className="flex shrink-0 items-center gap-2 rounded-xl bg-brand px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-dark"
+        >
+          <SearchIcon />
+          {pick(locale, "ابحث الآن", "Search Now")}
+        </button>
         <button type="button" onClick={reset} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-ink-soft transition-colors hover:bg-surface" aria-label={pick(locale, "إعادة تعيين", "Reset")}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8" /><path d="M3 3v5h5" /></svg>
         </button>
       </div>
 
-      {filtered.length > 0 ? (
-        <SpecialistsGrid specialists={filtered} locale={locale} contactPrompt={contactPrompt} />
-      ) : (
-        <p className="py-12 text-center text-sm text-ink-muted">{pick(locale, "لا يوجد أخصائيون مطابقون لبحثك.", "No specialists match your search.")}</p>
-      )}
+      <div ref={resultsRef} className="scroll-mt-24">
+        {filtered.length > 0 ? (
+          <SpecialistsGrid specialists={filtered} locale={locale} contactPrompt={contactPrompt} />
+        ) : (
+          <p className="py-12 text-center text-sm text-ink-muted">{pick(locale, "لا يوجد أخصائيون مطابقون لبحثك.", "No specialists match your search.")}</p>
+        )}
+      </div>
     </>
   );
 }
