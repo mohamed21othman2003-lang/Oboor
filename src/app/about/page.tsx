@@ -249,7 +249,7 @@ export default async function AboutPage() {
                 <p className="mt-0.5 text-sm text-ink-muted">{pick(locale, "هل تبحث عن فرع قريب منك؟ تواصل معنا لمعرفة أقرب مركز إلى موقعك.", "Looking for a branch near you? Contact us to find the nearest center to your location.")}</p>
               </div>
             </div>
-            <Link href="/contact" className="flex items-center gap-2 rounded-xl bg-brand px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-dark">{pick(locale, "تواصل معنا", "Contact Us")}<Chev /></Link>
+            <Link href="/contact" className="flex items-center gap-2 rounded-xl bg-brand px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-dark">{pick(locale, "خذ الخطوة لعبور", "Take the Step to Oboor")}<Chev /></Link>
           </div>
         </div>
       </section>
