@@ -168,12 +168,6 @@ export default async function SuccessStoriesPage() {
               <SuccessStoryCard key={story.slug} story={story} locale={locale} highlights={highlights} />
             ))}
           </div>
-
-          <div className="mt-12 flex justify-center">
-            <button className="rounded-xl border border-brand px-8 py-3 text-sm font-semibold text-brand-dark transition-colors hover:bg-brand hover:text-white">
-              {pick(locale, "عرض المزيد", "Load More")}
-            </button>
-          </div>
         </div>
       </section>
 
