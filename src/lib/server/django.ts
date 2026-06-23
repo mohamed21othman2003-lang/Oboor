@@ -21,3 +21,36 @@ export async function forwardForm(path: string, form: FormData): Promise<boolean
   if (!res.ok) throw new Error(`django ${path} ${res.status}`);
   return true;
 }
+
+// جلب محتوى الـ CMS من Django. يرجّع null لو الجسر غير مفعّل أو فشل الطلب،
+// عشان الصفحة ترجع للبيانات الثابتة (fallback) من غير ما تكسر.
+export async function fetchContent<T = unknown>(path: string): Promise<T | null> {
+  if (!DJANGO_API_URL) return null;
+  try {
+    const res = await fetch(`${DJANGO_API_URL}/content/${path}/`, {
+      // محتوى يتحدّث من لوحة الإدارة → نعيد التحقق كل دقيقة
+      next: { revalidate: 60 },
+    });
+    if (!res.ok) return null;
+    return (await res.json()) as T;
+  } catch {
+    return null;
+  }
+}
+
+// صفّ عنصر قسم عام كما يرجع من Django (content/sections/<page>)
+export type SectionRow = {
+  page: string; block: string; key: string; order: number;
+  icon: string; value: string; color: string;
+  title_ar: string; title_en: string; text_ar: string; text_en: string;
+  data_ar: unknown; data_en: unknown;
+};
+
+// يجلب عناصر أقسام صفحة معيّنة ويجمّعها حسب block. يرجّع null للسقوط للبيانات الثابتة.
+export async function fetchSections(page: string): Promise<Record<string, SectionRow[]> | null> {
+  const rows = await fetchContent<SectionRow[]>(`sections/${page}`);
+  if (!rows || !rows.length) return null;
+  const grouped: Record<string, SectionRow[]> = {};
+  for (const r of rows) (grouped[r.block] ??= []).push(r);
+  return grouped;
+}

@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ALL_BRANCHES, getBranch, BRANCH_FEATURES, BRANCH_FEATURES_EN } from "@/lib/branchesData";
+import { loadBranch } from "@/lib/server/branches";
 import { getSuccessStories } from "@/lib/successStoriesData";
 import ProgramCard, { type Program } from "@/components/ProgramCard";
 import SuccessStoryCard from "@/components/SuccessStoryCard";
@@ -68,7 +69,7 @@ const GALLERY = Array.from({ length: 8 }, (_, i) => `/figma/branch-gallery/b${i 
 export default async function BranchDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const locale = await getLocale();
-  const b = getBranch(slug, locale);
+  const b = (await loadBranch(slug, locale)) ?? getBranch(slug, locale);
   if (!b) notFound();
 
   const BRANCH_SERVICES = branchServices(locale);
@@ -91,7 +92,7 @@ export default async function BranchDetailPage({ params }: { params: Promise<{ s
           <nav className="mb-8 flex items-center justify-start gap-2 text-sm text-ink-soft">
             <span className="text-brand">{b.name}</span>
             <Chev />
-            <Link href="/branches" className="hover:text-brand">{pick(locale, "فروعنا", "Branches")}</Link>
+            <Link href="/branches" className="hover:text-brand">{pick(locale, "مراكزنا", "Branches")}</Link>
             <Chev />
             <Link href="/" className="hover:text-brand">{pick(locale, "الرئيسية", "Home")}</Link>
           </nav>

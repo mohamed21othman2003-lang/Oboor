@@ -9,10 +9,26 @@ import { getCommon } from "@/i18n/dict/common";
 import { pick, type Locale } from "@/i18n/config";
 import LangToggle from "@/components/LangToggle";
 
-export default function Navbar({ locale }: { locale: Locale }) {
+export default function Navbar({
+  locale,
+  logo,
+  navLinks,
+  cta,
+}: {
+  locale: Locale;
+  logo?: string;
+  navLinks?: { label: string; href: string }[];
+  cta?: { admission: string; contact: string };
+}) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const t = getCommon(locale);
+
+  // CMS-driven values with fallback to the static data.
+  const logoSrc = logo || "/figma/imgImage.png";
+  const links = navLinks?.length ? navLinks : NAV_LINKS.map((l) => ({ label: t.nav[l.key], href: l.href }));
+  const admissionLabel = cta?.admission || t.admission;
+  const contactLabel = cta?.contact || t.contact;
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-line bg-white/95 backdrop-blur">
@@ -20,7 +36,7 @@ export default function Navbar({ locale }: { locale: Locale }) {
         {/* Logo */}
         <Link href="/" className="flex shrink-0 items-center">
           <Image
-            src="/figma/imgImage.png"
+            src={logoSrc}
             alt={pick(locale, "مركز عبور للرعاية والتأهيل", "Oboor Center for Care & Rehabilitation")}
             width={120}
             height={70}
@@ -31,7 +47,7 @@ export default function Navbar({ locale }: { locale: Locale }) {
 
         {/* Desktop nav */}
         <nav className={`hidden items-center xl:flex ${locale === "en" ? "gap-0" : "gap-0.5 2xl:gap-2"}`}>
-          {NAV_LINKS.map((link) => {
+          {links.map((link) => {
             const active = pathname === link.href;
             return (
               <Link
@@ -45,7 +61,7 @@ export default function Navbar({ locale }: { locale: Locale }) {
                     : "text-ink-muted hover:text-brand hover:bg-surface"
                 }`}
               >
-                {t.nav[link.key]}
+                {link.label}
               </Link>
             );
           })}
@@ -58,13 +74,13 @@ export default function Navbar({ locale }: { locale: Locale }) {
             href="/admission"
             className="whitespace-nowrap rounded-lg border border-brand px-3 py-2 text-[13px] font-semibold text-brand transition-colors hover:bg-brand hover:text-white"
           >
-            {t.admission}
+            {admissionLabel}
           </Link>
           <Link
             href="/contact"
             className="whitespace-nowrap rounded-lg bg-brand px-3 py-2 text-[13px] font-semibold text-white transition-colors hover:bg-brand-dark"
           >
-            {t.contact}
+            {contactLabel}
           </Link>
         </div>
 
@@ -89,7 +105,7 @@ export default function Navbar({ locale }: { locale: Locale }) {
       {open && (
         <nav className="border-t border-line bg-white px-4 py-4 xl:hidden">
           <ul className="flex flex-col gap-1">
-            {NAV_LINKS.map((link) => (
+            {links.map((link) => (
               <li key={link.href}>
                 <Link
                   href={link.href}
@@ -100,17 +116,17 @@ export default function Navbar({ locale }: { locale: Locale }) {
                       : "text-ink-muted hover:bg-surface"
                   }`}
                 >
-                  {t.nav[link.key]}
+                  {link.label}
                 </Link>
               </li>
             ))}
           </ul>
           <div className="mt-4 flex flex-col gap-2">
             <Link href="/admission" className="rounded-lg border border-brand px-4 py-2 text-center text-sm font-semibold text-brand">
-              {t.admission}
+              {admissionLabel}
             </Link>
             <Link href="/contact" className="rounded-lg bg-brand px-4 py-2 text-center text-sm font-semibold text-white">
-              {t.contact}
+              {contactLabel}
             </Link>
             <LangToggle locale={locale} label={t.langLabel} className="justify-center" />
           </div>

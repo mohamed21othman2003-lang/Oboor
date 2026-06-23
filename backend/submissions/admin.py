@@ -1,10 +1,11 @@
 from django.contrib import admin
+from unfold.admin import ModelAdmin
 from django.utils.html import format_html
 from .models import ContactMessage, AdmissionRequest, AssessmentResult, JobApplication
 
 
 @admin.register(ContactMessage)
-class ContactMessageAdmin(admin.ModelAdmin):
+class ContactMessageAdmin(ModelAdmin):
     list_display = ("name", "phone", "type", "branch", "created_at")
     list_filter = ("type", "branch", "created_at")
     search_fields = ("name", "phone", "email", "message")
@@ -12,7 +13,7 @@ class ContactMessageAdmin(admin.ModelAdmin):
 
 
 @admin.register(AdmissionRequest)
-class AdmissionRequestAdmin(admin.ModelAdmin):
+class AdmissionRequestAdmin(ModelAdmin):
     list_display = ("child_name", "parent_name", "phone", "city", "branch", "created_at")
     list_filter = ("city", "branch", "gender", "created_at")
     search_fields = ("child_name", "parent_name", "phone", "email")
@@ -20,7 +21,7 @@ class AdmissionRequestAdmin(admin.ModelAdmin):
 
 
 @admin.register(AssessmentResult)
-class AssessmentResultAdmin(admin.ModelAdmin):
+class AssessmentResultAdmin(ModelAdmin):
     list_display = ("assessment", "child_name", "level", "score", "phone", "created_at")
     list_filter = ("assessment", "level", "created_at")
     search_fields = ("child_name", "parent_name", "phone", "email")
@@ -28,7 +29,7 @@ class AssessmentResultAdmin(admin.ModelAdmin):
 
 
 @admin.register(JobApplication)
-class JobApplicationAdmin(admin.ModelAdmin):
+class JobApplicationAdmin(ModelAdmin):
     list_display = ("name", "job", "phone", "city", "experience", "cv_link", "created_at")
     list_filter = ("job", "city", "experience", "created_at")
     search_fields = ("name", "phone", "email", "current_role")

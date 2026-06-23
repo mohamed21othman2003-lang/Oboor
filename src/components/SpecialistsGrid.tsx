@@ -5,9 +5,19 @@ import Image from "next/image";
 import { getSpecialists, getContactPrompt, type Specialist } from "@/lib/specialistsData";
 import { pick, type Locale } from "@/i18n/config";
 
-export default function SpecialistsGrid({ locale }: { locale: Locale }) {
+type ContactPrompt = { title: string; subtitle: string };
+
+export default function SpecialistsGrid({
+  locale,
+  specialists: specialistsProp,
+  contactPrompt,
+}: {
+  locale: Locale;
+  specialists?: Specialist[];
+  contactPrompt?: ContactPrompt;
+}) {
   const [active, setActive] = useState<Specialist | null>(null);
-  const specialists = getSpecialists(locale);
+  const specialists = specialistsProp ?? getSpecialists(locale);
 
   // فتح المودال عبر الرابط (?open=slug)
   useEffect(() => {
@@ -30,7 +40,7 @@ export default function SpecialistsGrid({ locale }: { locale: Locale }) {
         </button>
       </div>
 
-      {active && <Modal s={active} locale={locale} onClose={() => setActive(null)} />}
+      {active && <Modal s={active} locale={locale} contactPrompt={contactPrompt} onClose={() => setActive(null)} />}
     </>
   );
 }
@@ -74,7 +84,7 @@ function InfoItem({ icon, text }: { icon: React.ReactNode; text: string }) {
   );
 }
 
-function Modal({ s, locale, onClose }: { s: Specialist; locale: Locale; onClose: () => void }) {
+function Modal({ s, locale, contactPrompt: contactPromptProp, onClose }: { s: Specialist; locale: Locale; contactPrompt?: ContactPrompt; onClose: () => void }) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     document.addEventListener("keydown", onKey);
@@ -82,7 +92,7 @@ function Modal({ s, locale, onClose }: { s: Specialist; locale: Locale; onClose:
     return () => { document.removeEventListener("keydown", onKey); document.body.style.overflow = ""; };
   }, [onClose]);
 
-  const contactPrompt = getContactPrompt(locale);
+  const contactPrompt = contactPromptProp ?? getContactPrompt(locale);
   const experienceValue = pick(
     locale,
     s.experience.replace(" خبرة", ""),

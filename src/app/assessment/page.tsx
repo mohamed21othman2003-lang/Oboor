@@ -1,10 +1,52 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { getAssessStats, getAssessFeatures, getAssessSteps } from "@/lib/assessmentData";
+import { getAssessStats, getAssessFeatures, getAssessSteps, getAssessments, getQuestionsFor, PRELIM_QUESTIONS, PRELIM_QUESTIONS_EN, ANSWER_OPTIONS, ANSWER_OPTIONS_EN, type Assessment } from "@/lib/assessmentData";
 import AssessmentWizard from "@/components/AssessmentWizard";
 import { getLocale } from "@/i18n/locale";
-import { pick } from "@/i18n/config";
+import { pick, type Locale } from "@/i18n/config";
+import { fetchContent, fetchSections } from "@/lib/server/django";
+
+// الشكل اللي بيرجع من Django (content/assessment)
+type ApiAssessment = {
+  slug: string; key: string; icon: string;
+  title_ar: string; title_en: string;
+  duration_ar: string; duration_en: string;
+  questions_ar: string; questions_en: string;
+  age_range_ar: string; age_range_en: string;
+  desc_ar: string; desc_en: string;
+  question_list_ar: string[]; question_list_en: string[];
+  order: number;
+};
+
+type WizardData = { assessments: Assessment[]; questions: Record<string, string[]> };
+
+// نحوّل صفوف Django المسطّحة إلى كروت + خريطة أسئلة حسب اللغة
+function fromApi(rows: ApiAssessment[], locale: Locale): WizardData {
+  const en = locale === "en";
+  const assessments: Assessment[] = rows.map((r) => ({
+    slug: r.slug,
+    title: en ? (r.title_en ?? r.title_ar) : r.title_ar,
+    desc: en ? (r.desc_en ?? r.desc_ar) : r.desc_ar,
+    icon: r.icon,
+    duration: en ? (r.duration_en ?? r.duration_ar) : r.duration_ar,
+    questions: en ? (r.questions_en ?? r.questions_ar) : r.questions_ar,
+    ageRange: en ? (r.age_range_en ?? r.age_range_ar) : r.age_range_ar,
+  }));
+  const questions: Record<string, string[]> = {};
+  for (const r of rows) {
+    questions[r.slug] = en && r.question_list_en?.length ? r.question_list_en : r.question_list_ar;
+  }
+  return { assessments, questions };
+}
+
+// fallback للبيانات الثابتة لو Django مش متاح
+function staticData(locale: Locale): WizardData {
+  const assessments = getAssessments(locale);
+  const questions: Record<string, string[]> = {};
+  for (const a of assessments) questions[a.slug] = getQuestionsFor(a.slug, locale);
+  return { assessments, questions };
+}
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
@@ -28,16 +70,51 @@ function Chev() {
 
 export default async function AssessmentPage() {
   const locale = await getLocale();
-  const ASSESS_STATS = getAssessStats(locale);
-  const ASSESS_FEATURES = getAssessFeatures(locale);
-  const ASSESS_STEPS = getAssessSteps(locale);
+  const en = locale === "en";
+
+  // أقسام الصفحة من Django CMS مع سقوط للبيانات الثابتة
+  const sections = await fetchSections("assessment");
+
+  const ASSESS_STATS = sections?.stats
+    ? sections.stats.map((row) => ({
+        value: en ? ((row.data_en as { value?: string } | null)?.value ?? row.value) : row.value,
+        label: en ? (row.title_en || row.title_ar) : row.title_ar,
+      }))
+    : getAssessStats(locale);
+
+  const ASSESS_FEATURES = sections?.features
+    ? sections.features.map((row) => ({
+        icon: row.icon,
+        title: en ? (row.title_en || row.title_ar) : row.title_ar,
+        desc: en ? (row.text_en || row.text_ar) : row.text_ar,
+      }))
+    : getAssessFeatures(locale);
+
+  const ASSESS_STEPS = sections?.steps
+    ? sections.steps.map((row) => ({
+        icon: row.icon,
+        title: en ? (row.title_en || row.title_ar) : row.title_ar,
+        desc: en ? (row.text_en || row.text_ar) : row.text_ar,
+      }))
+    : getAssessSteps(locale);
+
+  const prelimQuestions: string[] = sections?.prelim_questions
+    ? sections.prelim_questions.map((row) => (en ? (row.title_en || row.title_ar) : row.title_ar))
+    : (en ? PRELIM_QUESTIONS_EN : PRELIM_QUESTIONS);
+
+  const answerOptions: string[] = sections?.answer_options
+    ? sections.answer_options.map((row) => (en ? (row.title_en || row.title_ar) : row.title_ar))
+    : (en ? ANSWER_OPTIONS_EN : ANSWER_OPTIONS);
+
+  const rows = await fetchContent<ApiAssessment[]>("assessment");
+  const { assessments, questions } = rows && rows.length ? fromApi(rows, locale) : staticData(locale);
   return (
     <>
       {/* Hero */}
       <section className="overflow-hidden bg-gradient-to-b from-[#ebf7f9] to-white">
         <div className="mx-auto max-w-7xl px-6 py-10 lg:px-8">
           <nav className="mb-8 flex items-center justify-start gap-2 text-sm text-ink-soft">
-            <span className="text-brand">{pick(locale, "قيّم ابنك", "Assess Your Child")}</span>
+            <span className="text-brand">{pick(locale, "التقييم", "Assessment")}</span>
             <Chev />
             <Link href="/" className="hover:text-brand">{pick(locale, "الرئيسية", "Home")}</Link>
           </nav>
@@ -126,7 +203,7 @@ export default async function AssessmentPage() {
             <h2 className="text-3xl font-extrabold text-ink sm:text-4xl">{pick(locale, "ابدأ تقييم طفلك الآن", "Start your child's assessment now")}</h2>
             <p className="mt-2 text-sm text-ink-muted">{pick(locale, "يستغرق التقييم أقل من ٣ دقائق ونتيجته فورية.", "The assessment takes less than 3 minutes and the result is instant.")}</p>
           </div>
-          <AssessmentWizard locale={locale} />
+          <AssessmentWizard locale={locale} assessments={assessments} questions={questions} prelimQuestions={prelimQuestions} answerOptions={answerOptions} />
         </div>
       </section>
     </>

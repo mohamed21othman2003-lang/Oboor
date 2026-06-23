@@ -7,11 +7,13 @@ import BranchesExplorer from "@/components/BranchesExplorer";
 import BranchSearch from "@/components/BranchSearch";
 import { getLocale } from "@/i18n/locale";
 import { pick } from "@/i18n/config";
+import { loadBranches } from "@/lib/server/branches";
+import { fetchSections } from "@/lib/server/django";
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
   return {
-    title: pick(locale, "فروعنا | مركز عبور للرعاية والتأهيل", "Branches | Oboor Center for Care & Rehabilitation"),
+    title: pick(locale, "مراكزنا | مركز عبور للرعاية والتأهيل", "Branches | Oboor Center for Care & Rehabilitation"),
     description: pick(
       locale,
       "ابحث عن أقرب فرع إليك واستكشف خدماتنا في مختلف مناطق المملكة العربية السعودية.",
@@ -38,15 +40,32 @@ const PINS = [
 
 export default async function BranchesPage() {
   const locale = await getLocale();
-  const mapRegions = locale === "en" ? MAP_REGIONS_EN : MAP_REGIONS;
-  const branchFeatures = locale === "en" ? BRANCH_FEATURES_EN : BRANCH_FEATURES;
+  const en = locale === "en";
+  const branches = await loadBranches(locale);
+  const sections = await fetchSections("branches");
+
+  const mapRegions = sections?.map_regions
+    ? sections.map_regions.map((row) => ({
+        name: en ? row.title_en || row.title_ar : row.title_ar,
+        count: Number(row.value) || 0,
+        color: row.color,
+      }))
+    : en ? MAP_REGIONS_EN : MAP_REGIONS;
+
+  const branchFeatures = sections?.features
+    ? sections.features.map((row) => ({
+        icon: row.icon,
+        title: en ? row.title_en || row.title_ar : row.title_ar,
+        desc: en ? row.text_en || row.text_ar : row.text_ar,
+      }))
+    : en ? BRANCH_FEATURES_EN : BRANCH_FEATURES;
   return (
     <>
       {/* Hero */}
       <section className="overflow-hidden bg-gradient-to-b from-[#ebf7f9] to-white">
         <div className="mx-auto max-w-7xl px-6 py-10 lg:px-8">
           <nav className="mb-8 flex items-center justify-start gap-2 text-sm text-ink-soft">
-            <span className="text-brand">{pick(locale, "فروعنا", "Branches")}</span>
+            <span className="text-brand">{pick(locale, "مراكزنا", "Branches")}</span>
             <Chev />
             <Link href="/" className="hover:text-brand">{pick(locale, "الرئيسية", "Home")}</Link>
           </nav>
@@ -54,7 +73,7 @@ export default async function BranchesPage() {
           <div className="mx-auto max-w-3xl text-center">
             <span className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-1.5 text-sm font-medium text-brand-dark shadow-sm ring-1 ring-line">
               <PinIconSm />
-              {pick(locale, "فروعنا في المملكة", "Our Branches Across the Kingdom")}
+              {pick(locale, "مراكزنا في المملكة", "Our Branches Across the Kingdom")}
             </span>
             <h1 className="mt-5 text-4xl font-extrabold text-ink sm:text-5xl"><span className="text-brand">{pick(locale, "مراكزنا", "Our Centers")}</span>{pick(locale, "، رعايةٌ تمتد من حولك", " — Care That Extends to You")}</h1>
             <p className="mx-auto mt-4 max-w-2xl text-base leading-8 text-ink-muted">
@@ -69,7 +88,7 @@ export default async function BranchesPage() {
 
       {/* Branches by region (interactive) */}
       <Suspense fallback={null}>
-        <BranchesExplorer locale={locale} />
+        <BranchesExplorer locale={locale} branches={branches} />
       </Suspense>
 
       {/* Map */}
@@ -148,7 +167,7 @@ export default async function BranchesPage() {
           <div className="mx-auto mb-12 max-w-3xl text-center">
             <h2 className="text-3xl font-extrabold text-ink">{pick(locale, "بيئتنا، ", "Our Environment — ")}<span className="text-brand">{pick(locale, "أمانٌ وتمكين", "Safety and Empowerment")}</span></h2>
             <p className="mt-3 text-sm leading-7 text-ink-muted">
-              {pick(locale, "في كل فروعنا، نحتضن طفلك برعاية متخصصة، لندعمه في رحلة نموّه، ونمكّنه ليشق طريقه باستقلالية.", "Across all our branches, we embrace your child with specialized care that supports their growth and empowers them to move forward with independence.")}
+              {pick(locale, "في كل مراكزنا، نحتضن طفلك برعاية متخصصة، لندعمه في رحلة نموّه، ونمكّنه ليشق طريقه باستقلالية.", "Across all our branches, we embrace your child with specialized care that supports their growth and empowers them to move forward with independence.")}
             </p>
           </div>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">

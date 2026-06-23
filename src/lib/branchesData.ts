@@ -75,13 +75,17 @@ export function getBranch(slug: string, locale: Locale = "ar"): Branch | undefin
   return source.find((b) => b.slug === slug);
 }
 
-// تبويبات تصفية المنطقة (تُحسب من الفروع)
-export function regionTabs(locale: Locale = "ar"): { name: string; count: number }[] {
-  const source = locale === "en" ? BRANCHES_EN : BRANCHES;
+// تبويبات تصفية المنطقة محسوبة من قائمة فروع مُمرّرة (CMS أو ثابتة)
+export function regionTabsFrom(source: Branch[], locale: Locale = "ar"): { name: string; count: number }[] {
   const allLabel = locale === "en" ? "All" : "الكل";
   const counts: Record<string, number> = {};
   for (const b of source) counts[b.region] = (counts[b.region] || 0) + 1;
   return [{ name: allLabel, count: source.length }, ...Object.entries(counts).map(([name, count]) => ({ name, count }))];
+}
+
+// تبويبات تصفية المنطقة (تُحسب من الفروع الثابتة)
+export function regionTabs(locale: Locale = "ar"): { name: string; count: number }[] {
+  return regionTabsFrom(locale === "en" ? BRANCHES_EN : BRANCHES, locale);
 }
 
 // مفتاح المناطق في الخريطة (أرقام تعريفية كما في الديزاين)

@@ -118,11 +118,11 @@ function FeaturedArticle({ item, locale }: { item: NewsItem; locale: Locale }) {
 export default function NewsBrowser({ locale, categories, workshopFeatured, workshops, centerNews, events, articleFeatured, articles }: {
   locale: Locale;
   categories: Cat[];
-  workshopFeatured: NewsItem;
+  workshopFeatured: NewsItem | null;
   workshops: NewsItem[];
   centerNews: NewsItem[];
   events: NewsItem[];
-  articleFeatured: NewsItem;
+  articleFeatured: NewsItem | null;
   articles: NewsItem[];
 }) {
   const [tab, setTab] = useState(0); // 0=all, 1=center, 2=events, 3=workshops, 4=articles
@@ -133,7 +133,7 @@ export default function NewsBrowser({ locale, categories, workshopFeatured, work
     <Section key="workshops">
       <SectionHead tag={pick(locale, "تعلّم واحتمل", "Learn & Grow")} title={pick(locale, "أحدث الورش التدريبية", "Latest Training Workshops")} linkText={pick(locale, "عرض جميع الورش", "View All Workshops")} onViewAll={() => setTab(3)} />
       <div className="space-y-6">
-        <WideCard item={workshopFeatured} cta={pick(locale, "عرض التفاصيل", "View Details")} locale={locale} />
+        {workshopFeatured && <WideCard item={workshopFeatured} cta={pick(locale, "عرض التفاصيل", "View Details")} locale={locale} />}
         <div className="grid gap-6 md:grid-cols-3">
           {workshops.map((w) => <NewsCard key={w.slug} item={w} locale={locale} />)}
         </div>
@@ -160,7 +160,7 @@ export default function NewsBrowser({ locale, categories, workshopFeatured, work
     <Section key="articles">
       <SectionHead tag={pick(locale, "ثقّف وابنِ الثقة", "Inform & Build Confidence")} title={pick(locale, "المحتوى التوعوي للأسر", "Awareness Content for Families")} linkText={pick(locale, "جميع المقالات", "All Articles")} onViewAll={() => setTab(4)} desc={pick(locale, "مقالات وأدلة متخصصة أُعدّت بعناية لمساعدة أسر المستفيدين على فهم الحالة ودعم أبنائهم.", "Specialized articles and guides carefully prepared to help families understand their child's condition and support them.")} />
       <div className="grid gap-6 lg:grid-cols-2">
-        <FeaturedArticle item={articleFeatured} locale={locale} />
+        {articleFeatured && <FeaturedArticle item={articleFeatured} locale={locale} />}
         <div className="space-y-4">
           {articles.map((a) => <ArticleRow key={a.slug} item={a} locale={locale} />)}
         </div>

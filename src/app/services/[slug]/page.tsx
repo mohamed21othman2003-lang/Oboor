@@ -2,13 +2,65 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { CLINICAL_SERVICES, getClinicalService, type ClinicalBlock } from "@/lib/clinicalData";
+import { CLINICAL_SERVICES, getClinicalService, type ClinicalBlock, type ClinicalService } from "@/lib/clinicalData";
 import { areaIcon, distinctIcons } from "@/lib/areaIcon";
 import { getLocale } from "@/i18n/locale";
-import { pick } from "@/i18n/config";
+import { pick, type Locale } from "@/i18n/config";
+import { fetchContent } from "@/lib/server/django";
 
 export function generateStaticParams() {
   return CLINICAL_SERVICES.map((s) => ({ slug: s.slug }));
+}
+
+// الشكل اللي بيرجع من Django (content/services)
+type ApiService = {
+  slug: string;
+  title_ar: string; title_en: string;
+  subtitle_ar: string; subtitle_en: string;
+  about_heading_ar: string; about_heading_en: string;
+  about_ar: string[]; about_en: string[];
+  about_list_ar: string[]; about_list_en: string[];
+  about_tag_ar: { heading: string; label: string } | null;
+  about_tag_en: { heading: string; label: string } | null;
+  blocks_ar: ClinicalBlock[]; blocks_en: ClinicalBlock[];
+  image: string;
+  order: number;
+};
+
+// لو القيمة بالإنجليزي موجودة وغير فاضية نستخدمها، وإلا نرجع للعربي
+function biStr(en: boolean, ar: string, eng: string): string {
+  return en && eng ? eng : ar;
+}
+function biArr<T>(en: boolean, ar: T[], eng: T[]): T[] {
+  return en && eng && eng.length ? eng : (ar ?? []);
+}
+function biObj<T>(en: boolean, ar: T | null, eng: T | null): T | undefined {
+  return (en && eng ? eng : ar) ?? undefined;
+}
+
+function toService(r: ApiService, locale: Locale): ClinicalService {
+  const en = locale === "en";
+  return {
+    slug: r.slug,
+    title: biStr(en, r.title_ar, r.title_en),
+    subtitle: biStr(en, r.subtitle_ar, r.subtitle_en),
+    image: r.image,
+    aboutHeading: biStr(en, r.about_heading_ar, r.about_heading_en),
+    about: biArr(en, r.about_ar, r.about_en),
+    aboutTag: biObj(en, r.about_tag_ar, r.about_tag_en),
+    aboutList: biArr(en, r.about_list_ar, r.about_list_en),
+    blocks: biArr(en, r.blocks_ar, r.blocks_en),
+  };
+}
+
+// نجلب من Django ونرجع للبيانات الثابتة لو فشل أو الـ slug مش موجود
+async function loadService(slug: string, locale: Locale): Promise<ClinicalService | undefined> {
+  const rows = await fetchContent<ApiService[]>("services");
+  if (rows && rows.length) {
+    const row = rows.find((r) => r.slug === slug);
+    if (row) return toService(row, locale);
+  }
+  return getClinicalService(slug, locale);
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
@@ -240,7 +292,7 @@ function Block({ b }: { b: ClinicalBlock }) {
 export default async function ClinicalDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const locale = await getLocale();
-  const s = getClinicalService(slug, locale);
+  const s = await loadService(slug, locale);
   if (!s) notFound();
 
   return (
@@ -253,7 +305,7 @@ export default async function ClinicalDetailPage({ params }: { params: Promise<{
             <Chev />
             <Link href="/programs#clinical" className="hover:text-brand">{pick(locale, "الخدمات العيادية", "Clinical Services")}</Link>
             <Chev />
-            <Link href="/programs" className="hover:text-brand">{pick(locale, "خدماتنا", "Services")}</Link>
+            <Link href="/programs" className="hover:text-brand">{pick(locale, "برامجنا التمكينية", "Services")}</Link>
             <Chev />
             <Link href="/" className="hover:text-brand">{pick(locale, "الرئيسية", "Home")}</Link>
           </nav>

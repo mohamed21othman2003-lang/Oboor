@@ -2,10 +2,65 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { TECHNIQUES, getTechnique } from "@/lib/techniquesData";
+import { TECHNIQUES, getTechnique, type Technique } from "@/lib/techniquesData";
 import { distinctIcons, iconByKey } from "@/lib/areaIcon";
+import { fetchContent } from "@/lib/server/django";
 import { getLocale } from "@/i18n/locale";
-import { pick } from "@/i18n/config";
+import { pick, type Locale } from "@/i18n/config";
+
+// الشكل اللي بيرجع من Django (content/techniques)
+type HelpSection = {
+  title: string; benefitsHeading: string; benefits: string[];
+  valueHeading: string; values: string[];
+};
+
+type ApiTechnique = {
+  slug: string;
+  title_ar: string; title_en: string;
+  badge_ar: string; badge_en: string;
+  about_ar: string[]; about_en: string[];
+  targets_ar: string[]; targets_en: string[];
+  offers_ar: string[]; offers_en: string[];
+  offer_icons: string[];
+  help_section_ar: Partial<HelpSection>; help_section_en: Partial<HelpSection>;
+  image: string; order: number;
+};
+
+// bilingual pick: استخدم الإنجليزي لو موجود وغير فارغ، وإلا ارجع للعربي
+function bi<T>(en: boolean, enVal: T[] | undefined, arVal: T[] | undefined): T[] {
+  return en ? (enVal?.length ? enVal : arVal ?? []) : arVal ?? [];
+}
+
+function isEmptyHelp(h: Partial<HelpSection> | undefined): boolean {
+  return !h || Object.keys(h).length === 0;
+}
+
+function toTechnique(row: ApiTechnique, locale: Locale): Technique {
+  const en = locale === "en";
+  const rawHelp = en ? row.help_section_en : row.help_section_ar;
+  const helpSection = isEmptyHelp(rawHelp) ? undefined : (rawHelp as HelpSection);
+  return {
+    slug: row.slug,
+    title: en ? row.title_en || row.title_ar : row.title_ar,
+    badge: en ? row.badge_en || row.badge_ar : row.badge_ar,
+    image: row.image,
+    about: bi(en, row.about_en, row.about_ar),
+    targets: bi(en, row.targets_en, row.targets_ar),
+    offers: bi(en, row.offers_en, row.offers_ar),
+    offerIcons: row.offer_icons?.length ? row.offer_icons : undefined,
+    helpSection,
+  };
+}
+
+// جلب التقنية من Django مع fallback للبيانات الثابتة
+async function loadTechnique(slug: string, locale: Locale): Promise<Technique | undefined> {
+  const rows = await fetchContent<ApiTechnique[]>("techniques");
+  if (rows && rows.length) {
+    const row = rows.find((r) => r.slug === slug);
+    if (row) return toTechnique(row, locale);
+  }
+  return getTechnique(slug, locale);
+}
 
 export function generateStaticParams() {
   return TECHNIQUES.map((t) => ({ slug: t.slug }));
@@ -14,7 +69,7 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const locale = await getLocale();
-  const t = getTechnique(slug, locale);
+  const t = await loadTechnique(slug, locale);
   const suffix = pick(locale, "مركز عبور", "Oboor Center");
   const fallback = pick(locale, "تقنية تأهيلية", "Rehabilitation Technology");
   return { title: t ? `${t.title} | ${suffix}` : `${fallback} | ${suffix}` };
@@ -27,7 +82,7 @@ function Chev() {
 export default async function TechniqueDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const locale = await getLocale();
-  const t = getTechnique(slug, locale);
+  const t = await loadTechnique(slug, locale);
   if (!t) notFound();
   const available = locale === "en"
     ? !t.badge.toLowerCase().includes("not")
@@ -45,7 +100,7 @@ export default async function TechniqueDetailPage({ params }: { params: Promise<
             <Chev />
             <Link href="/programs#techniques" className="hover:text-brand">{pick(locale, "التقنيات التأهيلية", "Rehabilitation Technologies")}</Link>
             <Chev />
-            <Link href="/programs" className="hover:text-brand">{pick(locale, "خدماتنا", "Services")}</Link>
+            <Link href="/programs" className="hover:text-brand">{pick(locale, "برامجنا التمكينية", "Services")}</Link>
             <Chev />
             <Link href="/" className="hover:text-brand">{pick(locale, "الرئيسية", "Home")}</Link>
           </nav>

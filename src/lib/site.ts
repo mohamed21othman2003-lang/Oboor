@@ -2,10 +2,10 @@
 // تابات النافبار مطابقة للديزاين (يمين ← شمال)
 export const NAV_LINKS = [
   { key: "home", label: "الرئيسية", href: "/" },
-  { key: "about", label: "من نحن", href: "/about" },
+  { key: "about", label: "عن عبور", href: "/about" },
   { key: "news", label: "إعلامنا", href: "/news" },
-  { key: "programs", label: "خدماتنا", href: "/programs" },
-  { key: "branches", label: "فروعنا", href: "/branches" },
+  { key: "programs", label: "برامجنا التمكينية", href: "/programs" },
+  { key: "branches", label: "مراكزنا", href: "/branches" },
   { key: "success", label: "قصص النجاح", href: "/success-stories" },
   { key: "specialists", label: "الاخصائيين", href: "/specialists" },
   { key: "careers", label: "الوظائف", href: "/careers" },

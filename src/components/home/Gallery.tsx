@@ -26,13 +26,15 @@ const CELL = [
   "lg:col-start-3 lg:col-span-2 lg:row-start-3",
 ];
 
-export default function Gallery({ locale }: { locale: Locale }) {
+export default function Gallery({ locale, images: imagesProp, captions }: { locale: Locale; images?: string[]; captions?: string[] }) {
+  const images = imagesProp && imagesProp.length ? imagesProp : IMAGES;
   const [open, setOpen] = useState<number | null>(null);
-  const alt = (i: number) => pick(locale, `صورة ${i + 1} من المركز`, `Photo ${i + 1} from the center`);
+  const alt = (i: number) =>
+    captions?.[i] ?? pick(locale, `صورة ${i + 1} من المركز`, `Photo ${i + 1} from the center`);
 
   const go = useCallback((dir: number) => {
-    setOpen((p) => (p === null ? p : (p + dir + IMAGES.length) % IMAGES.length));
-  }, []);
+    setOpen((p) => (p === null ? p : (p + dir + images.length) % images.length));
+  }, [images.length]);
 
   useEffect(() => {
     if (open === null) return;
@@ -61,12 +63,12 @@ export default function Gallery({ locale }: { locale: Locale }) {
         </div>
 
         <div className="grid grid-cols-2 gap-3 lg:h-[560px] lg:grid-cols-4 lg:grid-rows-3">
-          {IMAGES.map((src, i) => (
+          {images.map((src, i) => (
             <button
               key={src}
               onClick={() => setOpen(i)}
               aria-label={alt(i)}
-              className={`group relative overflow-hidden rounded-2xl ${i === 0 ? "col-span-2 h-56 lg:h-auto" : "h-40 lg:h-auto"} ${CELL[i]}`}
+              className={`group relative overflow-hidden rounded-2xl ${i === 0 ? "col-span-2 h-56 lg:h-auto" : "h-40 lg:h-auto"} ${CELL[i] ?? ""}`}
             >
               <Image src={src} alt={alt(i)} fill sizes={i === 0 ? "(max-width:1024px) 100vw, 50vw" : "(max-width:1024px) 50vw, 25vw"} className="object-cover transition-transform duration-300 group-hover:scale-105" />
               <span className="absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/15" />
@@ -88,9 +90,9 @@ export default function Gallery({ locale }: { locale: Locale }) {
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M15 18l-6-6 6-6" /></svg>
           </button>
           <div className="relative h-[82vh] w-[92vw] max-w-5xl" onClick={(e) => e.stopPropagation()}>
-            <Image src={IMAGES[open]} alt={alt(open)} fill sizes="92vw" className="object-contain" />
+            <Image src={images[open]} alt={alt(open)} fill sizes="92vw" className="object-contain" />
           </div>
-          <span className="absolute bottom-6 left-1/2 -translate-x-1/2 rounded-full bg-white/10 px-4 py-1.5 text-sm font-medium text-white" dir="ltr">{open + 1} / {IMAGES.length}</span>
+          <span className="absolute bottom-6 left-1/2 -translate-x-1/2 rounded-full bg-white/10 px-4 py-1.5 text-sm font-medium text-white" dir="ltr">{open + 1} / {images.length}</span>
         </div>
       )}
     </section>

@@ -58,3 +58,12 @@ next-env.d.ts
 /_py/
 /pyembed.zip
 /python-*.exe
+cloudflared.exe
+
+# logs & python/django runtime junk
+*.log
+__pycache__/
+*.pyc
+backend/media/
+backend/staticfiles/
+*.sqlite3

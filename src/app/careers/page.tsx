@@ -4,11 +4,55 @@ import type { Metadata } from "next";
 import { JOBS, JOBS_EN, CITIES, CITIES_EN, EMPLOYMENT_TYPES, EMPLOYMENT_TYPES_EN, type Job } from "@/lib/careersData";
 import { getLocale } from "@/i18n/locale";
 import { pick, type Locale } from "@/i18n/config";
+import { fetchContent, fetchSections } from "@/lib/server/django";
+
+// الشكل اللي بيرجع من Django (content/careers)
+type ApiJob = {
+  slug: string;
+  title_ar: string; title_en: string;
+  department_ar: string; department_en: string;
+  city_ar: string; city_en: string;
+  employment_ar: string; employment_en: string;
+  experience_ar: string; experience_en: string;
+  date_ar: string; date_en: string;
+  start_date_ar: string; start_date_en: string;
+  description_ar: string; description_en: string;
+  responsibilities_ar: string[]; responsibilities_en: string[];
+  requirements_ar: string[]; requirements_en: string[];
+  is_new: boolean; order: number;
+};
+
+// نحوّل صف Django المسطّح (ثنائي اللغة) إلى Job لكل لغة
+export function toJob(a: ApiJob, locale: Locale): Job {
+  const en = locale === "en";
+  const tr = <T,>(arVal: T, enVal: T): T => (en ? (enVal ?? arVal) : arVal);
+  return {
+    slug: a.slug,
+    title: tr(a.title_ar, a.title_en),
+    department: tr(a.department_ar, a.department_en),
+    city: tr(a.city_ar, a.city_en),
+    employment: tr(a.employment_ar, a.employment_en),
+    experience: tr(a.experience_ar, a.experience_en),
+    date: tr(a.date_ar, a.date_en),
+    startDate: tr(a.start_date_ar, a.start_date_en),
+    isNew: a.is_new,
+    description: tr(a.description_ar, a.description_en),
+    responsibilities: tr(a.responsibilities_ar, a.responsibilities_en),
+    requirements: tr(a.requirements_ar, a.requirements_en),
+  };
+}
+
+// يجلب الوظائف من Django ويحوّلها؛ يرجّع null لو الجسر غير متاح/فاضي → fallback
+export async function fetchJobs(locale: Locale): Promise<Job[] | null> {
+  const rows = await fetchContent<ApiJob[]>("careers");
+  if (!rows || !rows.length) return null;
+  return rows.map((r) => toJob(r, locale));
+}
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
   return {
-    title: pick(locale, "الوظائف | مركز عبور للرعاية والتأهيل", "Careers | Oboor Center for Care & Rehabilitation"),
+    title: pick(locale, "انضم إلينا | مركز عبور للرعاية والتأهيل", "Join Us | Oboor Center for Care & Rehabilitation"),
     description: pick(
       locale,
       "انضم إلى فريق عبور — وظائف تصنع فرقاً حقيقياً في حياة المستفيدين وأسرهم.",
@@ -23,9 +67,17 @@ function Chev() {
 
 export default async function CareersPage() {
   const locale = await getLocale();
-  const jobs = locale === "en" ? JOBS_EN : JOBS;
-  const cities = locale === "en" ? CITIES_EN : CITIES;
-  const employmentTypes = locale === "en" ? EMPLOYMENT_TYPES_EN : EMPLOYMENT_TYPES;
+  const en = locale === "en";
+  const fetched = await fetchJobs(locale);
+  const jobs = fetched ?? (en ? JOBS_EN : JOBS);
+
+  const sections = await fetchSections("careers");
+  const cities = sections?.cities
+    ? sections.cities.map((r) => (en ? r.title_en || r.title_ar : r.title_ar))
+    : en ? CITIES_EN : CITIES;
+  const employmentTypes = sections?.employment_types
+    ? sections.employment_types.map((r) => (en ? r.title_en || r.title_ar : r.title_ar))
+    : en ? EMPLOYMENT_TYPES_EN : EMPLOYMENT_TYPES;
 
   return (
     <>
@@ -33,7 +85,7 @@ export default async function CareersPage() {
       <section className="overflow-hidden bg-gradient-to-b from-[#ebf7f9] to-white">
         <div className="mx-auto max-w-7xl px-6 py-10 lg:px-8">
           <nav className="mb-8 flex items-center justify-start gap-2 text-sm text-ink-soft">
-            <span className="text-brand">{pick(locale, "الوظائف", "Careers")}</span>
+            <span className="text-brand">{pick(locale, "انضم إلينا", "Join Us")}</span>
             <Chev />
             <Link href="/" className="hover:text-brand">{pick(locale, "الرئيسية", "Home")}</Link>
           </nav>
