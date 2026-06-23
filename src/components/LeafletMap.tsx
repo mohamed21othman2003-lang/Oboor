@@ -65,9 +65,6 @@ export default function LeafletMap({ locale, branches, regions }: { locale: Loca
               <Popup className="oboor-popup" closeButton={false}>
                 <div className="w-[260px] max-w-[78vw] p-4 text-start" dir={locale === "en" ? "ltr" : "rtl"}>
                   <div className="flex items-center justify-between gap-2">
-                    <button type="button" onClick={() => map?.closePopup()} className="text-ink-soft transition-colors hover:text-ink" aria-label={pick(locale, "إغلاق", "Close")}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
-                    </button>
                     <div className="flex items-center gap-1.5">
                       {b?.isNew && <span className="rounded-md bg-brand/10 px-2 py-0.5 text-[10px] font-bold text-brand">{pick(locale, "جديد", "New")}</span>}
                       <span className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-bold" style={{ background: `${r.color}1a`, color: r.color }}>
@@ -75,6 +72,9 @@ export default function LeafletMap({ locale, branches, regions }: { locale: Loca
                         {r.name}
                       </span>
                     </div>
+                    <button type="button" onClick={() => map?.closePopup()} className="text-ink-soft transition-colors hover:text-ink" aria-label={pick(locale, "إغلاق", "Close")}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
+                    </button>
                   </div>
                   {b ? (
                     <>
