@@ -10,7 +10,7 @@ import {
 import { getLocale } from "@/i18n/locale";
 import { pick, type Locale } from "@/i18n/config";
 import { fetchContent, fetchSections } from "@/lib/server/django";
-import SuccessStoryCard from "@/components/SuccessStoryCard";
+import SuccessStoriesGrid from "@/components/SuccessStoriesGrid";
 
 // الشكل اللي بيرجع من Django (content/success)
 type ApiSuccess = {
@@ -163,11 +163,7 @@ export default async function SuccessStoriesPage() {
             <span className="shrink-0 rounded-full bg-surface px-4 py-1.5 text-xs font-semibold text-ink-soft">{pick(locale, "16 نتائج", "16 results")}</span>
           </div>
 
-          <div className="grid gap-7 md:grid-cols-2 lg:grid-cols-3">
-            {stories.map((story) => (
-              <SuccessStoryCard key={story.slug} story={story} locale={locale} highlights={highlights} />
-            ))}
-          </div>
+          <SuccessStoriesGrid stories={stories} highlights={highlights} locale={locale} />
         </div>
       </section>
 
