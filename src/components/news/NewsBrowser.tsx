@@ -25,7 +25,7 @@ function Divider() {
   return <div className="mx-auto max-w-3xl border-t border-line-soft" />;
 }
 
-function SectionHead({ tag, title, linkText, desc, onViewAll }: { tag: string; title: string; linkText: string; desc?: string; onViewAll: () => void }) {
+function SectionHead({ tag, title, linkText, desc, onViewAll, showLink = true }: { tag: string; title: string; linkText: string; desc?: string; onViewAll: () => void; showLink?: boolean }) {
   return (
     <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
       <div className="text-start">
@@ -36,7 +36,7 @@ function SectionHead({ tag, title, linkText, desc, onViewAll }: { tag: string; t
         <h2 className="mt-2 text-2xl font-extrabold text-ink sm:text-3xl">{title}</h2>
         {desc && <p className="mt-2 max-w-xl text-sm text-ink-muted">{desc}</p>}
       </div>
-      <button onClick={onViewAll} className="flex items-center gap-1 text-sm font-semibold text-brand hover:text-brand-dark">{linkText}<Chev /></button>
+      {showLink && <button onClick={onViewAll} className="flex items-center gap-1 text-sm font-semibold text-brand hover:text-brand-dark">{linkText}<Chev /></button>}
     </div>
   );
 }
@@ -127,11 +127,16 @@ export default function NewsBrowser({ locale, categories, workshopFeatured, work
 }) {
   const [tab, setTab] = useState(0); // 0=all, 1=center, 2=events, 3=workshops, 4=articles
   const show = (k: number) => tab === 0 || tab === k;
+  // "عرض الكل" → ينقل لتبويب القسم ويرجّع لأعلى التبويبات (تغذية بصرية)
+  const goToTab = (k: number) => {
+    setTab(k);
+    document.getElementById("news-tabs")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   const sections: React.ReactNode[] = [];
   if (show(3)) sections.push(
     <Section key="workshops">
-      <SectionHead tag={pick(locale, "تعلّم واحتمل", "Learn & Grow")} title={pick(locale, "أحدث الورش التدريبية", "Latest Training Workshops")} linkText={pick(locale, "عرض جميع الورش", "View All Workshops")} onViewAll={() => setTab(3)} />
+      <SectionHead tag={pick(locale, "تعلّم واحتمل", "Learn & Grow")} title={pick(locale, "أحدث الورش التدريبية", "Latest Training Workshops")} linkText={pick(locale, "عرض جميع الورش", "View All Workshops")} onViewAll={() => goToTab(3)} showLink={tab === 0} />
       <div className="space-y-6">
         {workshopFeatured && <WideCard item={workshopFeatured} cta={pick(locale, "عرض التفاصيل", "View Details")} locale={locale} />}
         <div className="grid gap-6 md:grid-cols-3">
@@ -142,7 +147,7 @@ export default function NewsBrowser({ locale, categories, workshopFeatured, work
   );
   if (show(1)) sections.push(
     <Section key="center">
-      <SectionHead tag={pick(locale, "من داخل عبور", "Inside Oboor")} title={pick(locale, "أخبار المراكز", "Center News")} linkText={pick(locale, "جميع الأخبار", "All News")} onViewAll={() => setTab(1)} />
+      <SectionHead tag={pick(locale, "من داخل عبور", "Inside Oboor")} title={pick(locale, "أخبار المراكز", "Center News")} linkText={pick(locale, "جميع الأخبار", "All News")} onViewAll={() => goToTab(1)} showLink={tab === 0} />
       <div className="grid gap-6 md:grid-cols-3">
         {centerNews.map((n) => <NewsCard key={n.slug} item={n} locale={locale} />)}
       </div>
@@ -150,7 +155,7 @@ export default function NewsBrowser({ locale, categories, workshopFeatured, work
   );
   if (show(2)) sections.push(
     <Section key="events">
-      <SectionHead tag={pick(locale, "شارك معنا", "Join Us")} title={pick(locale, "الفعاليات", "Events")} linkText={pick(locale, "جميع الفعاليات", "All Events")} onViewAll={() => setTab(2)} />
+      <SectionHead tag={pick(locale, "شارك معنا", "Join Us")} title={pick(locale, "الفعاليات", "Events")} linkText={pick(locale, "جميع الفعاليات", "All Events")} onViewAll={() => goToTab(2)} showLink={tab === 0} />
       <div className="grid gap-6 lg:grid-cols-2">
         {events.map((e) => <WideCard key={e.slug} item={e} cta={pick(locale, "عرض التفاصيل", "View Details")} locale={locale} />)}
       </div>
@@ -158,7 +163,7 @@ export default function NewsBrowser({ locale, categories, workshopFeatured, work
   );
   if (show(4)) sections.push(
     <Section key="articles">
-      <SectionHead tag={pick(locale, "ثقّف وابنِ الثقة", "Inform & Build Confidence")} title={pick(locale, "المحتوى التوعوي للأسر", "Awareness Content for Families")} linkText={pick(locale, "جميع المقالات", "All Articles")} onViewAll={() => setTab(4)} desc={pick(locale, "مقالات وأدلة متخصصة أُعدّت بعناية لمساعدة أسر المستفيدين على فهم الحالة ودعم أبنائهم.", "Specialized articles and guides carefully prepared to help families understand their child's condition and support them.")} />
+      <SectionHead tag={pick(locale, "ثقّف وابنِ الثقة", "Inform & Build Confidence")} title={pick(locale, "المحتوى التوعوي للأسر", "Awareness Content for Families")} linkText={pick(locale, "جميع المقالات", "All Articles")} onViewAll={() => goToTab(4)} showLink={tab === 0} desc={pick(locale, "مقالات وأدلة متخصصة أُعدّت بعناية لمساعدة أسر المستفيدين على فهم الحالة ودعم أبنائهم.", "Specialized articles and guides carefully prepared to help families understand their child's condition and support them.")} />
       <div className="grid gap-6 lg:grid-cols-2">
         {articleFeatured && <FeaturedArticle item={articleFeatured} locale={locale} />}
         <div className="space-y-4">
@@ -171,7 +176,7 @@ export default function NewsBrowser({ locale, categories, workshopFeatured, work
   return (
     <>
       {/* Category tabs */}
-      <div className="mx-auto max-w-7xl px-6 lg:px-8">
+      <div id="news-tabs" className="mx-auto max-w-7xl px-6 lg:px-8 scroll-mt-24">
         <div className="flex flex-wrap items-center justify-center gap-3 border-b border-line pb-px">
           {categories.map((c, i) => (
             <button key={c.label} onClick={() => setTab(i)} className={`-mb-px flex items-center gap-2 border-b-2 px-3 pb-3 text-sm font-bold transition-colors sm:text-base ${i === tab ? "border-brand text-brand" : "border-transparent text-ink-muted hover:text-brand"}`}>
