@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { addSubmission, saveFile } from "@/lib/server/store";
+import { DJANGO_API_URL, forwardForm } from "@/lib/server/django";
 
 export const runtime = "nodejs";
 const MAX = 5 * 1024 * 1024; // 5 MB
@@ -12,6 +13,22 @@ export async function POST(req: Request) {
     const phone = get("phone");
     if (!name || !phone) {
       return NextResponse.json({ ok: false, error: "الاسم ورقم الجوال مطلوبان" }, { status: 400 });
+    }
+
+    // forward to Django when configured (maps currentRole -> current_role, includes the CV file)
+    if (DJANGO_API_URL) {
+      const fd = new FormData();
+      fd.set("job", get("job")); fd.set("name", name); fd.set("phone", phone);
+      fd.set("email", get("email")); fd.set("city", get("city"));
+      fd.set("current_role", get("currentRole")); fd.set("experience", get("experience"));
+      fd.set("about", get("about"));
+      const cv = form.get("cv");
+      if (cv && cv instanceof File && cv.size > 0) {
+        if (cv.size > MAX) return NextResponse.json({ ok: false, error: "حجم الملف أكبر من 5 ميغابايت" }, { status: 400 });
+        fd.set("cv", cv, cv.name);
+      }
+      await forwardForm("career", fd);
+      return NextResponse.json({ ok: true });
     }
 
     let cvId = "";

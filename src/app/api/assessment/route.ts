@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { addSubmission } from "@/lib/server/store";
+import { forwardJson } from "@/lib/server/django";
 
 export async function POST(req: Request) {
   try {
@@ -8,6 +9,12 @@ export async function POST(req: Request) {
     if (!parentName || !phone) {
       return NextResponse.json({ ok: false, error: "اسم ولي الأمر ورقم الجوال مطلوبان" }, { status: 400 });
     }
+    if (await forwardJson("assessment", {
+      assessment: body.assessment || "", assessment_slug: body.assessmentSlug || "",
+      level: body.level || "", score: body.score || 0, answers: body.answers || [],
+      parent_name: parentName, phone, email: body.email || "", child_name: body.childName || "",
+      age: body.age || "", gender: body.gender || "", city: body.city || "",
+    })) return NextResponse.json({ ok: true });
     const entry = await addSubmission("assessment", body);
     return NextResponse.json({ ok: true, id: entry.id });
   } catch {
