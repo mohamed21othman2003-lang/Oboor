@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { pick, type Locale } from "@/i18n/config";
 import type { Specialist } from "@/lib/specialistsData";
 import SpecialistsGrid from "@/components/SpecialistsGrid";
@@ -20,20 +20,29 @@ export default function SpecialistsExplorer({
   const [region, setRegion] = useState("");
   const [query, setQuery] = useState("");
 
-  const uniq = (arr: string[]) => [...new Set(arr.map((x) => (x || "").trim()).filter(Boolean))];
+  // توحيد إملائي بسيط (جده → جدة) لتفادي التكرار
+  const norm = (s: string) => (s || "").replace(/جده/g, "جدة").trim();
+  const uniq = (arr: string[]) => [...new Set(arr.map(norm).filter(Boolean))];
+
   const specialties = useMemo(() => uniq(specialists.map((s) => s.specialty)), [specialists]);
   const experiences = useMemo(() => uniq(specialists.map((s) => s.experience)), [specialists]);
-  const regions = useMemo(
-    () => uniq(specialists.flatMap((s) => `${s.branches || ""} ${s.branch || ""}`.split(/[-،,/–]/))),
-    [specialists],
-  );
+  // الفروع: مدن نظيفة فقط (نشيل "الفرع الرئيسي")
+  const regions = useMemo(() => {
+    const tokens = specialists.flatMap((s) =>
+      `${s.branches || ""} - ${s.branch || ""}`
+        .split(/[-،,/–]/)
+        .map((t) => norm(t).replace(/الفرع الرئيسي|الرئيسي|فرع/g, "").trim())
+        .filter((t) => t.length > 1),
+    );
+    return [...new Set(tokens)];
+  }, [specialists]);
 
-  const q = query.trim().toLowerCase();
+  const q = norm(query).toLowerCase();
   const filtered = specialists.filter((s) => {
-    if (specialty && s.specialty !== specialty) return false;
-    if (experience && s.experience !== experience) return false;
-    if (region && !(`${s.branches || ""} ${s.branch || ""}`.includes(region))) return false;
-    if (q && !(`${s.name} ${s.specialty}`.toLowerCase().includes(q))) return false;
+    if (specialty && norm(s.specialty) !== specialty) return false;
+    if (experience && norm(s.experience) !== experience) return false;
+    if (region && !norm(`${s.branches || ""} ${s.branch || ""}`).includes(region)) return false;
+    if (q && !norm(`${s.name} ${s.specialty}`).toLowerCase().includes(q)) return false;
     return true;
   });
 
@@ -48,13 +57,13 @@ export default function SpecialistsExplorer({
     <>
       {/* Search / filter bar */}
       <div className="mb-10 flex flex-wrap items-center gap-2 rounded-2xl border border-line bg-white p-3 shadow-sm lg:flex-nowrap">
-        <FilterSelect icon={<BookIcon />} label={pick(locale, "التخصص", "Specialty")} allLabel={pick(locale, "جميع التخصصات", "All Specialties")} value={specialty} onChange={setSpecialty} options={specialties} />
+        <Dropdown icon={<BookIcon />} label={pick(locale, "التخصص", "Specialty")} allLabel={pick(locale, "جميع التخصصات", "All Specialties")} value={specialty} onChange={setSpecialty} options={specialties} />
         <Divider />
-        <FilterSelect icon={<RibbonIcon />} label={pick(locale, "الخبرة", "Experience")} allLabel={pick(locale, "جميع الخبرات", "All Experience")} value={experience} onChange={setExperience} options={experiences} />
+        <Dropdown icon={<RibbonIcon />} label={pick(locale, "الخبرة", "Experience")} allLabel={pick(locale, "جميع الخبرات", "All Experience")} value={experience} onChange={setExperience} options={experiences} />
         <Divider />
-        <FilterSelect icon={<PinIcon />} label={pick(locale, "المنطقة / الفرع", "Region / Branch")} allLabel={pick(locale, "جميع الفروع", "All Branches")} value={region} onChange={setRegion} options={regions} />
+        <Dropdown icon={<PinIcon />} label={pick(locale, "المنطقة / الفرع", "Region / Branch")} allLabel={pick(locale, "جميع الفروع", "All Branches")} value={region} onChange={setRegion} options={regions} />
         <Divider />
-        <div className="relative min-w-[220px] flex-1">
+        <div className="relative min-w-[200px] flex-1">
           <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-ink-soft"><SearchIcon /></span>
           <input
             type="text"
@@ -78,37 +87,75 @@ export default function SpecialistsExplorer({
   );
 }
 
-function FilterSelect({ icon, label, allLabel, value, onChange, options }: { icon: React.ReactNode; label: string; allLabel: string; value: string; onChange: (v: string) => void; options: string[] }) {
+/* Dropdown مخصّص: أيقونة + label + القيمة + سهم، يفتح بالضغط في أي مكان */
+function Dropdown({ icon, label, allLabel, value, onChange, options }: { icon: React.ReactNode; label: string; allLabel: string; value: string; onChange: (v: string) => void; options: string[] }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const choose = (v: string) => {
+    onChange(v);
+    setOpen(false);
+  };
+
   return (
-    <label className="flex min-w-[150px] items-center gap-2 rounded-xl px-3 py-1.5 transition-colors hover:bg-surface">
-      <span className="text-brand">{icon}</span>
-      <span className="flex flex-1 flex-col text-start">
-        <span className="text-[10px] font-medium text-ink-soft">{label}</span>
-        <select value={value} onChange={(e) => onChange(e.target.value)} className="cursor-pointer appearance-none bg-transparent text-sm font-bold text-ink focus:outline-none">
-          <option value="">{allLabel}</option>
-          {options.map((o) => <option key={o} value={o}>{o}</option>)}
-        </select>
-      </span>
-      <ChevDown />
-    </label>
+    <div ref={ref} className="relative min-w-[160px] shrink-0">
+      <button type="button" onClick={() => setOpen((o) => !o)} className="flex w-full items-center gap-2.5 rounded-xl px-2 py-1.5 transition-colors hover:bg-surface">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand/10 text-brand">{icon}</span>
+        <span className="flex-1 text-start">
+          <span className="block text-[11px] leading-none text-ink-soft">{label}</span>
+          <span className="mt-0.5 block truncate text-sm font-bold leading-tight text-ink">{value || allLabel}</span>
+        </span>
+        <ChevDown className={open ? "rotate-180 transition-transform" : "transition-transform"} />
+      </button>
+      {open && (
+        <ul className="absolute z-30 mt-2 max-h-64 w-full min-w-[210px] overflow-auto rounded-xl border border-line bg-white py-1 text-start shadow-xl">
+          <Option active={!value} onClick={() => choose("")}>{allLabel}</Option>
+          {options.map((o) => (
+            <Option key={o} active={value === o} onClick={() => choose(o)}>{o}</Option>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+function Option({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <li>
+      <button type="button" onClick={onClick} className={`flex w-full items-center gap-2 px-4 py-2 text-start text-sm transition-colors hover:bg-surface ${active ? "font-bold text-brand" : "text-ink"}`}>
+        {active && <CheckIcon />}
+        <span className={active ? "" : "pr-5"}>{children}</span>
+      </button>
+    </li>
   );
 }
 
 function Divider() {
-  return <span className="hidden h-8 w-px bg-line lg:block" />;
+  return <span className="hidden h-9 w-px bg-line lg:block" />;
 }
-function ChevDown() {
-  return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0 text-ink-soft"><path strokeLinecap="round" strokeLinejoin="round" d="M6 9l6 6 6-6" /></svg>;
+function ChevDown({ className = "" }: { className?: string }) {
+  return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={`shrink-0 text-ink-soft ${className}`}><path strokeLinecap="round" strokeLinejoin="round" d="M6 9l6 6 6-6" /></svg>;
+}
+function CheckIcon() {
+  return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-brand"><path d="M20 6L9 17l-5-5" /></svg>;
 }
 function SearchIcon() {
   return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><path d="M21 21l-4.3-4.3" /></svg>;
 }
 function BookIcon() {
-  return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" /></svg>;
+  return <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" /></svg>;
 }
 function RibbonIcon() {
-  return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="6" /><path d="M8.5 13.5L7 22l5-3 5 3-1.5-8.5" /></svg>;
+  return <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="6" /><path d="M8.5 13.5L7 22l5-3 5 3-1.5-8.5" /></svg>;
 }
 function PinIcon() {
-  return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>;
+  return <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>;
 }
