@@ -144,7 +144,7 @@ export default async function SpecialistsPage() {
           <div dir="ltr" className="mt-8 flex items-center justify-center gap-12">
             {stats.map((s, i) => (
               <div key={s.label} className="flex items-center gap-3">
-                <div className="text-start">
+                <div className="text-end">
                   <p className="text-2xl font-extrabold text-brand">{s.value}</p>
                   <p className="text-xs text-ink-muted">{s.label}</p>
                 </div>
