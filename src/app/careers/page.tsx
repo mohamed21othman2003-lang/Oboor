@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { JOBS, JOBS_EN, CITIES, CITIES_EN, EMPLOYMENT_TYPES, EMPLOYMENT_TYPES_EN, type Job } from "@/lib/careersData";
+import CareersExplorer from "@/components/CareersExplorer";
 import { getLocale } from "@/i18n/locale";
 import { pick, type Locale } from "@/i18n/config";
 import { fetchContent, fetchSections } from "@/lib/server/django";
@@ -142,43 +143,7 @@ export default async function CareersPage() {
             <h2 className="mt-2 text-3xl font-extrabold text-ink">{pick(locale, "الوظائف المتاحة", "Open Positions")}</h2>
           </div>
 
-          {/* Toolbar: search + sort */}
-          <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-            <div className="relative min-w-[260px] flex-1 sm:max-w-[350px]">
-              <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-ink-soft"><SearchIcon /></span>
-              <input type="text" placeholder={pick(locale, "ابحث عن وظيفة", "Search for a job")} className="w-full rounded-xl border border-line bg-white py-2.5 pr-10 pl-3 text-start text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-brand/30" />
-            </div>
-            <button className="flex items-center gap-2 rounded-xl border border-line bg-white px-4 py-2.5 text-sm font-medium text-ink-muted transition-colors hover:bg-surface">
-              <ChevDown />
-              {pick(locale, "الأحدث أولاً", "Newest first")}
-            </button>
-          </div>
-
-          {/* Filters */}
-          <div className="mb-8 space-y-3 rounded-2xl border border-line bg-surface/50 p-4">
-            <div className="flex items-center justify-start gap-1.5 text-sm font-bold text-ink">
-              <FilterIcon />
-              {pick(locale, "تصفية", "Filter")}
-            </div>
-            <FilterRow label={pick(locale, "المدينة:", "City:")} options={cities} />
-            <FilterRow label={pick(locale, "نوع الدوام:", "Employment type:")} options={employmentTypes} />
-          </div>
-
-          {/* Job list */}
-          <div className="space-y-4">
-            {jobs.map((job) => <JobCard key={job.slug} job={job} locale={locale} />)}
-          </div>
-
-          {/* Pagination */}
-          <div className="mt-10 flex items-center justify-center gap-2">
-            <PagerArrow dir="next" locale={locale} />
-            <PageBtn n="20" />
-            <span className="px-1 text-ink-soft">…</span>
-            <PageBtn n="3" />
-            <PageBtn n="2" />
-            <PageBtn n="1" active />
-            <PagerArrow dir="prev" locale={locale} />
-          </div>
+          <CareersExplorer jobs={jobs} cities={cities} employmentTypes={employmentTypes} locale={locale} />
         </div>
       </section>
     </>
