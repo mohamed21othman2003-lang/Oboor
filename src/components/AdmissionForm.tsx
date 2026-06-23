@@ -51,7 +51,7 @@ export default function AdmissionForm({ locale }: { locale: Locale }) {
     <form onSubmit={handleSubmit} className="mx-auto max-w-4xl rounded-3xl border border-line bg-white p-6 shadow-lg sm:p-8">
       <div className="mb-8 text-center">
         <h2 className="text-2xl font-extrabold text-ink">{pick(locale, "ابدأ التسجيل", "Start Registration")}</h2>
-        <p className="mx-auto mt-2 max-w-xl text-sm text-ink-muted">{pick(locale, "املأ النموذج أدناه لطلب التحاق طفلك بأحد فروعنا وسيتواصل معك أحد ممثلينا في أقرب وقت ممكن.", "Fill out the form below to apply for your child's enrollment at one of our branches, and one of our representatives will contact you as soon as possible.")}</p>
+        <p className="mx-auto mt-2 max-w-xl text-sm text-ink-muted">{pick(locale, "املأ النموذج أدناه لطلب التحاق طفلك بأحد مراكزنا وسيتواصل معك أحد ممثلينا في أقرب وقت ممكن.", "Fill out the form below to apply for your child's enrollment at one of our branches, and one of our representatives will contact you as soon as possible.")}</p>
       </div>
 
       {/* بيانات الطفل */}
