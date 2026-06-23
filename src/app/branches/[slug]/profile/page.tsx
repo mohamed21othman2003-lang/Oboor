@@ -161,7 +161,7 @@ export default async function BranchProfilePage({ params }: { params: Promise<{ 
 
         {/* Contact */}
         <section className="mt-8 rounded-xl bg-surface p-5">
-          <h2 className="mb-3 text-lg font-bold text-brand-deep">{pick(locale, "تواصل معنا", "Contact Us")}</h2>
+          <h2 className="mb-3 text-lg font-bold text-brand-deep">{pick(locale, "خذ الخطوة لعبور", "Take the Step to Oboor")}</h2>
           <div className="grid grid-cols-2 gap-y-2 text-sm text-ink">
             <p><span className="font-semibold text-ink-soft">{pick(locale, "الهاتف الموحّد: ", "Unified line: ")}</span>{CONTACT.unified}</p>
             <p><span className="font-semibold text-ink-soft">{pick(locale, "البريد: ", "Email: ")}</span>{CONTACT.email}</p>
