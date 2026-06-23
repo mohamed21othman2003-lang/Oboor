@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { MapContainer, TileLayer, CircleMarker, Popup, useMap } from "react-leaflet";
+import { useMemo, useRef, useState } from "react";
+import { MapContainer, TileLayer, CircleMarker, Popup } from "react-leaflet";
+import type { Map as LeafletMapType, CircleMarker as LeafletCircleMarker } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import Link from "next/link";
 import { pick, type Locale } from "@/i18n/config";
@@ -22,16 +23,9 @@ const COORDS: Record<string, [number, number]> = {
 
 const norm = (s: string) => (s || "").replace(/جده/g, "جدة").replace(/المنطقة|المكرمة|المنورة/g, "").trim();
 
-function FlyTo({ target }: { target: [number, number] | null }) {
-  const map = useMap();
-  useEffect(() => {
-    if (target) map.flyTo(target, 9, { duration: 1.2 });
-  }, [target, map]);
-  return null;
-}
-
 export default function LeafletMap({ locale, branches, regions }: { locale: Locale; branches: Branch[]; regions: Region[] }) {
-  const [flyTarget, setFlyTarget] = useState<[number, number] | null>(null);
+  const [map, setMap] = useState<LeafletMapType | null>(null);
+  const markerRefs = useRef<Record<string, LeafletCircleMarker | null>>({});
 
   const branchOf = useMemo(() => {
     return (regionName: string) => {
@@ -40,9 +34,17 @@ export default function LeafletMap({ locale, branches, regions }: { locale: Loca
     };
   }, [branches]);
 
+  // الضغط على المنطقة في الـlegend: يطيّر للمكان ويفتح كارد الفرع
+  const selectRegion = (name: string) => {
+    const c = COORDS[name];
+    const marker = markerRefs.current[name];
+    if (map && c) map.flyTo(c, 9, { duration: 1.2 });
+    if (marker) marker.openPopup();
+  };
+
   return (
     <div className="relative overflow-hidden rounded-3xl border border-line shadow-sm">
-      <MapContainer center={[24.5, 45]} zoom={5} scrollWheelZoom className="z-0 h-[520px] w-full">
+      <MapContainer ref={setMap} center={[24.5, 45]} zoom={5} scrollWheelZoom className="z-0 h-[520px] w-full">
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -52,7 +54,13 @@ export default function LeafletMap({ locale, branches, regions }: { locale: Loca
           if (!c) return null;
           const b = branchOf(r.name);
           return (
-            <CircleMarker key={r.name} center={c} radius={9} pathOptions={{ color: "#fff", weight: 2, fillColor: r.color, fillOpacity: 1 }}>
+            <CircleMarker
+              key={r.name}
+              center={c}
+              radius={9}
+              pathOptions={{ color: "#fff", weight: 2, fillColor: r.color, fillOpacity: 1 }}
+              ref={(m) => { markerRefs.current[r.name] = m; }}
+            >
               <Popup>
                 <div className="min-w-[200px] text-start" dir={locale === "en" ? "ltr" : "rtl"}>
                   <span className="mb-1 inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-bold" style={{ background: `${r.color}1a`, color: r.color }}>
@@ -78,10 +86,9 @@ export default function LeafletMap({ locale, branches, regions }: { locale: Loca
             </CircleMarker>
           );
         })}
-        <FlyTo target={flyTarget} />
       </MapContainer>
 
-      {/* Legend overlay — click flies to the region */}
+      {/* Legend overlay — click flies to the region AND opens its card */}
       <div className="absolute right-4 top-4 z-[1000] hidden w-48 rounded-xl bg-white/95 p-3 shadow-lg backdrop-blur sm:block">
         <p className="mb-2 border-b border-line pb-1.5 text-start text-xs font-bold text-ink">{pick(locale, "المناطق", "Regions")}</p>
         <ul className="space-y-0.5">
@@ -89,7 +96,7 @@ export default function LeafletMap({ locale, branches, regions }: { locale: Loca
             <li key={r.name}>
               <button
                 type="button"
-                onClick={() => COORDS[r.name] && setFlyTarget(COORDS[r.name])}
+                onClick={() => selectRegion(r.name)}
                 className="flex w-full items-center justify-between rounded-lg px-2 py-1 text-[11px] transition-colors hover:bg-surface"
               >
                 <span className="text-ink-soft">{r.count}</span>
