@@ -75,6 +75,18 @@ export default async function SpecialistsPage() {
   const en = locale === "en";
   const specialists = await loadSpecialists(locale);
 
+  // القائمة الكاملة لتخصصات وفروع عبور (تظهر في الفلتر حتى قبل إضافة كل الأخصائيين)
+  const specialtyOptions = pick(
+    locale,
+    ["علاج وظيفي", "تخاطب وتواصل", "تعديل سلوك", "علاج طبيعي", "تربية خاصة", "تكامل حسي", "تأهيل النطق واللغة", "علم النفس التربوي"],
+    ["Occupational Therapy", "Speech & Communication", "Behavior Modification", "Physical Therapy", "Special Education", "Sensory Integration", "Speech & Language Rehab", "Educational Psychology"],
+  );
+  const branchOptions = pick(
+    locale,
+    ["الرياض", "جدة", "مكة المكرمة", "المدينة المنورة", "المنطقة الشرقية", "القصيم", "عسير", "الطائف", "أبها", "الخرج"],
+    ["Riyadh", "Jeddah", "Makkah", "Madinah", "Eastern Province", "Qassim", "Asir", "Taif", "Abha", "Al-Kharj"],
+  );
+
   // أقسام صفحة الأخصائيين من Django مع fallback للبيانات الثابتة
   const sections = await fetchSections("specialists");
 
@@ -154,7 +166,7 @@ export default async function SpecialistsPage() {
             <span className="h-px flex-1 bg-line" />
           </div>
 
-          <SpecialistsExplorer locale={locale} specialists={specialists} contactPrompt={contactPrompt} />
+          <SpecialistsExplorer locale={locale} specialists={specialists} contactPrompt={contactPrompt} specialtyOptions={specialtyOptions} branchOptions={branchOptions} />
         </div>
       </section>
 

@@ -10,10 +10,14 @@ export default function SpecialistsExplorer({
   specialists,
   locale,
   contactPrompt,
+  specialtyOptions = [],
+  branchOptions = [],
 }: {
   specialists: Specialist[];
   locale: Locale;
   contactPrompt?: { title: string; subtitle: string };
+  specialtyOptions?: string[];
+  branchOptions?: string[];
 }) {
   const [specialty, setSpecialty] = useState("");
   const [experience, setExperience] = useState("");
@@ -25,18 +29,22 @@ export default function SpecialistsExplorer({
   const norm = (s: string) => (s || "").replace(/جده/g, "جدة").trim();
   const uniq = (arr: string[]) => [...new Set(arr.map(norm).filter(Boolean))];
 
-  const specialties = useMemo(() => uniq(specialists.map((s) => s.specialty)), [specialists]);
+  // القائمة الكاملة لتخصصات عبور + أي تخصص فعلي موجود (عشان الفلترة تشتغل دائماً)
+  const specialties = useMemo(
+    () => uniq([...specialists.map((s) => s.specialty), ...specialtyOptions]),
+    [specialists, specialtyOptions],
+  );
   const experiences = useMemo(() => uniq(specialists.map((s) => s.experience)), [specialists]);
-  // الفروع: مدن نظيفة فقط (نشيل "الفرع الرئيسي")
+  // الفروع: القائمة الكاملة لمدن عبور + أي مدينة فعلية (مدن نظيفة بدون "الفرع الرئيسي")
   const regions = useMemo(() => {
-    const tokens = specialists.flatMap((s) =>
+    const fromData = specialists.flatMap((s) =>
       `${s.branches || ""} - ${s.branch || ""}`
         .split(/[-،,/–]/)
         .map((t) => norm(t).replace(/الفرع الرئيسي|الرئيسي|فرع/g, "").trim())
         .filter((t) => t.length > 1),
     );
-    return [...new Set(tokens)];
-  }, [specialists]);
+    return uniq([...fromData, ...branchOptions]);
+  }, [specialists, branchOptions]);
 
   const q = norm(query).toLowerCase();
   const filtered = specialists.filter((s) => {
