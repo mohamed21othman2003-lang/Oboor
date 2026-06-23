@@ -103,7 +103,7 @@ export default function ContactForm({ locale }: { locale: Locale }) {
 
       <div className="mt-5">
         <label htmlFor="message" className={labelCls}>{pick(locale, "الرسالة", "Message")}</label>
-        <textarea id="message" name="message" rows={5} placeholder={pick(locale, "اكتب رسالتك هنا...", "Write your message here...")} className={`${field} resize-none`} />
+        <textarea id="message" name="message" required rows={5} placeholder={pick(locale, "اكتب رسالتك هنا...", "Write your message here...")} className={`${field} resize-none`} />
       </div>
 
       <button
