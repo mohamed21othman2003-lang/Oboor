@@ -6,6 +6,25 @@ import { pick, type Locale } from "@/i18n/config";
 
 export default function CareerApplyForm({ jobTitle, locale }: { jobTitle: string; locale: Locale }) {
   const [sent, setSent] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch("/api/career", { method: "POST", body: new FormData(e.currentTarget) });
+      const data = await res.json();
+      if (!res.ok || !data.ok) throw new Error(data.error || "");
+      setSent(true);
+    } catch {
+      setError(pick(locale, "حدث خطأ، حاول مرة أخرى.", "Something went wrong, please try again."));
+    } finally {
+      setLoading(false);
+    }
+  }
+
   const cityList = locale === "en" ? CITIES_EN : CITIES;
   const cities = cityList.filter((c) => c !== "الكل" && c !== "All");
   const experienceOptions = locale === "en"
@@ -47,22 +66,23 @@ export default function CareerApplyForm({ jobTitle, locale }: { jobTitle: string
           </div>
         ) : (
           <form
-            onSubmit={(e) => { e.preventDefault(); setSent(true); }}
+            onSubmit={handleSubmit}
             className="mt-8 rounded-2xl border border-line bg-white p-6 shadow-sm sm:p-8"
           >
             <input type="hidden" name="job" value={jobTitle} />
             <div className="grid gap-5 sm:grid-cols-2">
-              <Field label={pick(locale, "الاسم الكامل", "Full Name")} required placeholder={pick(locale, "أدخل اسمك الكامل", "Enter your full name")} />
-              <Field label={pick(locale, "رقم الجوال", "Mobile Number")} required type="tel" placeholder="05XXXXXXXX" />
-              <Field label={pick(locale, "البريد الإلكتروني", "Email")} required type="email" placeholder="example@gmail.com" />
-              <SelectField label={pick(locale, "المدينة", "City")} required options={cities} />
-              <Field label={pick(locale, "المسمى الوظيفي الحالي", "Current Job Title")} required placeholder={pick(locale, "مثال: أخصائي علاج نطق", "e.g. Speech Therapist")} />
-              <SelectField label={pick(locale, "سنوات الخبرة", "Years of Experience")} required options={experienceOptions} />
+              <Field name="name" label={pick(locale, "الاسم الكامل", "Full Name")} required placeholder={pick(locale, "أدخل اسمك الكامل", "Enter your full name")} />
+              <Field name="phone" label={pick(locale, "رقم الجوال", "Mobile Number")} required type="tel" placeholder="05XXXXXXXX" />
+              <Field name="email" label={pick(locale, "البريد الإلكتروني", "Email")} required type="email" placeholder="example@gmail.com" />
+              <SelectField name="city" label={pick(locale, "المدينة", "City")} required options={cities} />
+              <Field name="currentRole" label={pick(locale, "المسمى الوظيفي الحالي", "Current Job Title")} required placeholder={pick(locale, "مثال: أخصائي علاج نطق", "e.g. Speech Therapist")} />
+              <SelectField name="experience" label={pick(locale, "سنوات الخبرة", "Years of Experience")} required options={experienceOptions} />
             </div>
 
             <div className="mt-5">
               <Label required={false}>{pick(locale, "نبذة مختصرة عنك", "A Brief About Yourself")}</Label>
               <textarea
+                name="about"
                 rows={4}
                 placeholder={pick(
                   locale,
@@ -81,16 +101,19 @@ export default function CareerApplyForm({ jobTitle, locale }: { jobTitle: string
                 </span>
                 <span className="text-sm font-medium text-ink">{pick(locale, "اسحب ملفك هنا أو انقر للرفع", "Drag your file here or click to upload")}</span>
                 <span className="text-xs text-ink-soft">{pick(locale, "PDF, DOC, DOCX — بحد أقصى 5 ميغابايت", "PDF, DOC, DOCX — max 5 MB")}</span>
-                <input type="file" accept=".pdf,.doc,.docx" className="hidden" />
+                <input name="cv" type="file" accept=".pdf,.doc,.docx" className="hidden" />
               </label>
             </div>
 
+            {error && <p className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-center text-sm font-medium text-red-600">{error}</p>}
+
             <button
               type="submit"
-              className="mt-7 flex w-full items-center justify-center gap-2 rounded-xl bg-brand py-3.5 text-base font-bold text-white transition-colors hover:bg-brand-dark"
+              disabled={loading}
+              className="mt-7 flex w-full items-center justify-center gap-2 rounded-xl bg-brand py-3.5 text-base font-bold text-white transition-colors hover:bg-brand-dark disabled:opacity-60"
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z" /></svg>
-              {pick(locale, "إرسال الطلب", "Submit Request")}
+              {loading ? pick(locale, "جارٍ الإرسال...", "Sending...") : pick(locale, "إرسال الطلب", "Submit Request")}
             </button>
           </form>
         )}
@@ -107,11 +130,12 @@ function Label({ children, required }: { children: React.ReactNode; required?: b
   );
 }
 
-function Field({ label, required, type = "text", placeholder }: { label: string; required?: boolean; type?: string; placeholder?: string }) {
+function Field({ label, name, required, type = "text", placeholder }: { label: string; name: string; required?: boolean; type?: string; placeholder?: string }) {
   return (
     <div>
       <Label required={required}>{label}</Label>
       <input
+        name={name}
         type={type}
         required={required}
         placeholder={placeholder}
@@ -121,11 +145,12 @@ function Field({ label, required, type = "text", placeholder }: { label: string;
   );
 }
 
-function SelectField({ label, required, options }: { label: string; required?: boolean; options: string[] }) {
+function SelectField({ label, name, required, options }: { label: string; name: string; required?: boolean; options: string[] }) {
   return (
     <div>
       <Label required={required}>{label}</Label>
       <select
+        name={name}
         required={required}
         defaultValue=""
         className="mt-1.5 w-full rounded-xl border border-line bg-white px-3 py-2.5 text-start text-sm text-ink focus:outline-none focus:ring-2 focus:ring-brand/30"

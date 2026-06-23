@@ -8,10 +8,11 @@ const LABELS: Record<string, string> = {
   childName: "اسم الطفل", childAge: "العمر", age: "العمر", gender: "الجنس", city: "المدينة",
   parentName: "ولي الأمر", email: "البريد", caseType: "الحالة", "prev-sessions": "جلسات سابقة", notes: "ملاحظات",
   assessment: "نوع التقييم", level: "مستوى الحالة", score: "الدرجة",
+  job: "الوظيفة", currentRole: "المسمى الحالي", experience: "الخبرة", about: "نبذة",
 };
 
 // حقول لا نعرضها في الشبكة (تُعرض بشكل خاص أو مخفية)
-const HIDDEN = ["id", "createdAt", "answers", "assessmentSlug"];
+const HIDDEN = ["id", "createdAt", "answers", "assessmentSlug", "cvId", "cvName"];
 const LEVEL_AR: Record<string, string> = { high: "مرتفع", medium: "متوسط", low: "منخفض" };
 
 function fmtDate(iso: string) {
@@ -19,8 +20,8 @@ function fmtDate(iso: string) {
 }
 
 export default async function SubmissionsPage() {
-  const [contact, admission, assessment] = await Promise.all([
-    getSubmissions("contact"), getSubmissions("admission"), getSubmissions("assessment"),
+  const [contact, admission, assessment, career] = await Promise.all([
+    getSubmissions("contact"), getSubmissions("admission"), getSubmissions("assessment"), getSubmissions("career"),
   ]);
 
   const Block = ({ title, icon, items }: { title: string; icon: string; items: Awaited<ReturnType<typeof getSubmissions>> }) => (
@@ -48,6 +49,11 @@ export default async function SubmissionsPage() {
                   </div>
                 ))}
               </div>
+              {typeof s.cvId === "string" && s.cvId && (
+                <a href={`/api/career/cv/${s.cvId}`} target="_blank" rel="noopener noreferrer" className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-brand/10 px-3 py-1.5 text-xs font-bold text-brand-dark hover:bg-brand/20">
+                  <Icon name="image" size={14} /> {String(s.cvName) || "السيرة الذاتية"}
+                </a>
+              )}
             </div>
           ))}
         </div>
@@ -63,6 +69,7 @@ export default async function SubmissionsPage() {
       </div>
       <Block title="طلبات الالتحاق" icon="clipboard" items={admission} />
       <Block title="نتائج التقييم" icon="check-circle" items={assessment} />
+      <Block title="طلبات التوظيف" icon="users" items={career} />
       <Block title="رسائل التواصل" icon="phone" items={contact} />
     </div>
   );
