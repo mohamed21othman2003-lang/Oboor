@@ -22,7 +22,7 @@ QUICK = [
     ("برامجنا التمكينية", "Our Empowerment Programs", "/programs"),
     ("مراكزنا", "Our Centers", "/branches"),
     ("المدوّنة والمقالات", "Blog & Articles", "/news"),
-    ("تواصل معنا", "Contact Us", "/contact"),
+    ("خذ الخطوة لعبور", "Take the Step to Oboor", "/contact"),
 ]
 
 # خدمات الفوتر (label_ar, label_en)
@@ -69,7 +69,7 @@ class Command(BaseCommand):
             cta_contact_ar="خذ الخطوة لعبور", cta_contact_en="Take the Step to Oboor",
             footer_quick_title_ar="روابط سريعة", footer_quick_title_en="Quick Links",
             footer_services_title_ar="خدماتنا", footer_services_title_en="Our Services",
-            footer_contact_title_ar="تواصل معنا", footer_contact_title_en="Contact Us",
+            footer_contact_title_ar="خذ الخطوة لعبور", footer_contact_title_en="Take the Step to Oboor",
             privacy_label_ar="سياسة الخصوصية", privacy_label_en="Privacy Policy",
             copyright_ar="© 2026 مركز عبور للرعاية والتأهيل. جميع الحقوق محفوظة.",
             copyright_en="© 2026 Oboor Center for Care & Rehabilitation. All rights reserved.",
