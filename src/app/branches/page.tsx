@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { MAP_REGIONS, MAP_REGIONS_EN, BRANCH_FEATURES, BRANCH_FEATURES_EN } from "@/lib/branchesData";
 import { Suspense } from "react";
 import BranchesExplorer from "@/components/BranchesExplorer";
+import BranchesMapSection from "@/components/BranchesMapSection";
 import BranchSearch from "@/components/BranchSearch";
 import { getLocale } from "@/i18n/locale";
 import { pick } from "@/i18n/config";
@@ -99,65 +100,7 @@ export default async function BranchesPage() {
             <p className="mt-2 text-sm text-ink-muted">{pick(locale, "بضغطة على الخريطة، تجد أقرب فرع إليك، وكل ما تحتاجه للوصول إلينا.", "With a tap on the map, find the nearest branch and everything you need to reach us.")}</p>
           </div>
 
-          <div className="relative overflow-hidden rounded-3xl border border-line shadow-sm">
-            <div className="relative aspect-[1233/600] w-full">
-              <Image src="/figma/branches-map.png" alt={pick(locale, "خريطة فروع عبور في المملكة", "Map of Oboor branches across the Kingdom")} fill className="object-cover" sizes="100vw" />
-
-              {/* Pins */}
-              {PINS.map((p, i) => (
-                <span key={i} className="absolute -translate-x-1/2 -translate-y-1/2" style={{ top: p.top, left: p.left }}>
-                  <span className="block h-3.5 w-3.5 rounded-full border-2 border-white shadow" style={{ background: p.color }} />
-                </span>
-              ))}
-
-              {/* Zoom controls */}
-              <div className="absolute left-4 top-4 flex flex-col gap-2">
-                <ZoomBtn>+</ZoomBtn>
-                <ZoomBtn>−</ZoomBtn>
-                <ZoomBtn><ExpandIcon /></ZoomBtn>
-              </div>
-
-              {/* Legend */}
-              <div className="absolute right-4 top-4 hidden w-44 rounded-xl bg-white/95 p-3 shadow-lg backdrop-blur sm:block">
-                <p className="mb-2 border-b border-line pb-1.5 text-start text-xs font-bold text-ink">{pick(locale, "المناطق", "Regions")}</p>
-                <ul className="space-y-1.5">
-                  {mapRegions.map((r) => (
-                    <li key={r.name} className="flex items-center justify-between text-[11px]">
-                      <span className="font-semibold text-ink-soft">{r.count}</span>
-                      <span className="flex items-center gap-1.5 text-ink-muted">
-                        {r.name}
-                        <span className="h-2 w-2 rounded-full" style={{ background: r.color }} />
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* Branch popup */}
-              <div className="absolute left-1/2 top-1/2 w-[300px] max-w-[88%] -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-white p-4 shadow-2xl">
-                <div className="flex items-start justify-between">
-                  <button className="text-ink-soft hover:text-ink" aria-label={pick(locale, "إغلاق", "Close")}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
-                  </button>
-                  <div className="flex items-center gap-1.5">
-                    <span className="rounded-md bg-brand/10 px-2 py-0.5 text-[10px] font-bold text-brand">{pick(locale, "جديد", "New")}</span>
-                    <span className="flex items-center gap-1 rounded-md bg-danger/10 px-2 py-0.5 text-[10px] font-bold text-danger"><span className="h-1.5 w-1.5 rounded-full bg-danger" />{pick(locale, "مغلق", "Closed")}</span>
-                  </div>
-                </div>
-                <h3 className="mt-1 text-start text-base font-bold text-ink">{pick(locale, "فرع النرجس", "Al-Narjes Branch")}</h3>
-                <p className="mt-1 text-start text-xs leading-5 text-ink-muted">{pick(locale, "حي النرجس، طريق الأمير محمد بن سلمان، الرياض", "Al-Narjes District, Prince Mohammed Bin Salman Road, Riyadh")}</p>
-                <p className="mt-2 flex items-center justify-start gap-1.5 text-start text-xs text-ink-soft"><ClockIconSm />{pick(locale, "الأحد – الخميس: ٨ص – ٨م", "Sunday – Thursday: 8 AM – 8 PM")}</p>
-                <p className="mt-1 flex items-center justify-start gap-1.5 text-start text-xs text-ink-soft"><PhoneIconSm />0561000274</p>
-                <div className="mt-3 flex items-center gap-2">
-                  <Link href="/branches/narjes" className="flex-1 rounded-lg bg-brand py-2 text-center text-xs font-semibold text-white transition-colors hover:bg-brand-dark">{pick(locale, "عرض التفاصيل", "View Details")}</Link>
-                  <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(pick(locale, "مركز عبور - حي النرجس، طريق الأمير محمد بن سلمان، الرياض", "Oboor Center - Al-Narjes District, Prince Mohammed Bin Salman Road, Riyadh"))}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 rounded-lg border border-brand px-3 py-2 text-xs font-semibold text-brand transition-colors hover:bg-brand/5">{pick(locale, "الاتجاهات", "Directions")}<NavIconSm /></a>
-                </div>
-              </div>
-
-              {/* Count badge */}
-              <span className="absolute bottom-4 left-4 rounded-lg bg-brand px-3 py-1.5 text-xs font-bold text-white shadow">{pick(locale, "42 فرع", "42 Branches")}</span>
-            </div>
-          </div>
+          <BranchesMapSection locale={locale} branches={branches} regions={mapRegions} />
         </div>
       </section>
 
