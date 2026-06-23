@@ -9,7 +9,7 @@ import { pick, type Locale } from "@/i18n/config";
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
   return {
-    title: pick(locale, "تواصل معنا | مركز عبور", "Contact Us | Oboor Center"),
+    title: pick(locale, "خذ الخطوة لعبور | مركز عبور", "Take the Step to Oboor | Oboor Center"),
     description: pick(
       locale,
       "تواصل مع مركز عبور للرعاية والتأهيل",
@@ -26,7 +26,7 @@ function Hero({ locale }: { locale: Locale }) {
         <nav className="mb-6 flex items-center justify-center gap-2 text-sm text-ink-soft">
           <Link href="/" className="hover:text-brand">{pick(locale, "الرئيسية", "Home")}</Link>
           <span>/</span>
-          <span className="text-brand">{pick(locale, "تواصل معنا", "Contact Us")}</span>
+          <span className="text-brand">{pick(locale, "خذ الخطوة لعبور", "Take the Step to Oboor")}</span>
         </nav>
         <span className="inline-flex items-center gap-2 rounded-full bg-brand/10 px-4 py-1.5 text-sm font-medium text-brand-dark">
           <span className="h-2 w-2 rounded-full bg-brand" />
@@ -35,8 +35,8 @@ function Hero({ locale }: { locale: Locale }) {
         <h1 className="mt-5 text-4xl font-extrabold text-ink sm:text-5xl">
           {pick(
             locale,
-            <>تواصل <span className="text-brand">معنا</span></>,
-            <>Contact <span className="text-brand">Us</span></>,
+            <>خذ الخطوة <span className="text-brand">لعبور</span></>,
+            <>Take the Step <span className="text-brand">to Oboor</span></>,
           )}
         </h1>
         <p className="mx-auto mt-4 max-w-2xl text-base leading-8 text-ink-muted">
