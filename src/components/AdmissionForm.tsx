@@ -67,7 +67,7 @@ export default function AdmissionForm({ locale }: { locale: Locale }) {
       <Section title={pick(locale, "بيانات ولي الأمر", "Parent's Information")}>
         <Field name="parentName" label={pick(locale, "اسم ولي الأمر", "Parent's Name")} required placeholder={pick(locale, "الاسم الكامل", "Full name")} />
         <Field name="phone" label={pick(locale, "رقم الجوال", "Mobile Number")} required type="tel" placeholder={pick(locale, "ادخل رقم جوالك", "Enter your mobile number")} />
-        <Field name="email" label={pick(locale, "البريد الإلكتروني", "Email")} type="email" placeholder="example@gmail.com" />
+        <Field name="email" label={pick(locale, "البريد الإلكتروني", "Email")} required type="email" placeholder="example@gmail.com" />
       </Section>
 
       {/* معلومات إضافية */}
