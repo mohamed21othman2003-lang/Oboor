@@ -35,6 +35,7 @@ export default function BranchesMapSection({ locale, branches, regions }: { loca
 
   const branch = regionBranches[0];
   const colorOf = (name: string) => regions.find((r) => r.name === name)?.color ?? "#2cbcc8";
+  const countOf = (name: string) => regions.find((r) => r.name === name)?.count ?? 0;
 
   const pickRegion = (name: string) => {
     setSelected(name);
@@ -86,32 +87,43 @@ export default function BranchesMapSection({ locale, branches, regions }: { loca
           </ul>
         </div>
 
-        {/* Branch popup (dynamic) */}
-        {open && branch && (
+        {/* Branch popup (dynamic) — يظهر دائماً عند اختيار منطقة */}
+        {open && selected && (
           <div className="absolute left-1/2 top-1/2 w-[300px] max-w-[88%] -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-white p-4 shadow-2xl">
             <div className="flex items-start justify-between">
               <button type="button" onClick={() => setOpen(false)} className="text-ink-soft hover:text-ink" aria-label={pick(locale, "إغلاق", "Close")}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
               </button>
               <div className="flex items-center gap-1.5">
-                {branch.isNew && <span className="rounded-md bg-brand/10 px-2 py-0.5 text-[10px] font-bold text-brand">{pick(locale, "جديد", "New")}</span>}
+                {branch?.isNew && <span className="rounded-md bg-brand/10 px-2 py-0.5 text-[10px] font-bold text-brand">{pick(locale, "جديد", "New")}</span>}
                 <span className="flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-bold" style={{ background: `${colorOf(selected)}1a`, color: colorOf(selected) }}>
                   <span className="h-1.5 w-1.5 rounded-full" style={{ background: colorOf(selected) }} />
                   {selected}
                 </span>
               </div>
             </div>
-            <h3 className="mt-1 text-start text-base font-bold text-ink">{branch.name}</h3>
-            <p className="mt-1 text-start text-xs leading-5 text-ink-muted">{branch.address}</p>
-            <p className="mt-2 flex items-center justify-start gap-1.5 text-start text-xs text-ink-soft"><ClockIcon />{branch.hours}</p>
-            <p className="mt-1 flex items-center justify-start gap-1.5 text-start text-xs text-ink-soft" dir="ltr"><PhoneIcon />{branch.phone}</p>
-            {regionBranches.length > 1 && (
-              <p className="mt-1 text-start text-[11px] text-brand">{pick(locale, `+${regionBranches.length - 1} فرع آخر في ${selected}`, `+${regionBranches.length - 1} more in ${selected}`)}</p>
+
+            {branch ? (
+              <>
+                <h3 className="mt-1 text-start text-base font-bold text-ink">{branch.name}</h3>
+                <p className="mt-1 text-start text-xs leading-5 text-ink-muted">{branch.address}</p>
+                <p className="mt-2 flex items-center justify-start gap-1.5 text-start text-xs text-ink-soft"><ClockIcon />{branch.hours}</p>
+                <p className="mt-1 flex items-center justify-start gap-1.5 text-start text-xs text-ink-soft" dir="ltr"><PhoneIcon />{branch.phone}</p>
+                {regionBranches.length > 1 && (
+                  <p className="mt-1 text-start text-[11px] text-brand">{pick(locale, `+${regionBranches.length - 1} فرع آخر في ${selected}`, `+${regionBranches.length - 1} more in ${selected}`)}</p>
+                )}
+                <div className="mt-3 flex items-center gap-2">
+                  <Link href={`/branches/${branch.slug}`} className="flex-1 rounded-lg bg-brand py-2 text-center text-xs font-semibold text-white transition-colors hover:bg-brand-dark">{pick(locale, "عرض التفاصيل", "View Details")}</Link>
+                  <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${branch.name} ${branch.address}`)}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 rounded-lg border border-brand px-3 py-2 text-xs font-semibold text-brand transition-colors hover:bg-brand/5">{pick(locale, "الاتجاهات", "Directions")}<NavIcon /></a>
+                </div>
+              </>
+            ) : (
+              <>
+                <h3 className="mt-1 text-start text-base font-bold text-ink">{pick(locale, `منطقة ${selected}`, selected)}</h3>
+                <p className="mt-1 text-start text-xs leading-5 text-ink-muted">{pick(locale, `لدينا ${countOf(selected)} فرع في هذه المنطقة.`, `We have ${countOf(selected)} branches in this region.`)}</p>
+                <Link href="/branches" className="mt-3 flex items-center justify-center gap-1 rounded-lg bg-brand py-2 text-center text-xs font-semibold text-white transition-colors hover:bg-brand-dark">{pick(locale, "تصفّح كل الفروع", "Browse all branches")}</Link>
+              </>
             )}
-            <div className="mt-3 flex items-center gap-2">
-              <Link href={`/branches/${branch.slug}`} className="flex-1 rounded-lg bg-brand py-2 text-center text-xs font-semibold text-white transition-colors hover:bg-brand-dark">{pick(locale, "عرض التفاصيل", "View Details")}</Link>
-              <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${branch.name} ${branch.address}`)}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 rounded-lg border border-brand px-3 py-2 text-xs font-semibold text-brand transition-colors hover:bg-brand/5">{pick(locale, "الاتجاهات", "Directions")}<NavIcon /></a>
-            </div>
           </div>
         )}
 
