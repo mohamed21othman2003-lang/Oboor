@@ -3,6 +3,9 @@
 import os
 import sys
 
+# ensure the project directory is importable (needed for embeddable/zip Python)
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
 
 def main():
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")

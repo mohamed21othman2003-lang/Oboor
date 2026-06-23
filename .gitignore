@@ -53,3 +53,8 @@ next-env.d.ts
 
 # local Claude settings (may contain command logs)
 .claude/settings.local.json
+
+# local Python interpreter (embeddable) + installers
+/_py/
+/pyembed.zip
+/python-*.exe
