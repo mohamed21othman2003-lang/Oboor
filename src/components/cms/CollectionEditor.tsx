@@ -92,27 +92,25 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
   }
 
   // تجميع الحقول: أزواج عربي/إنجليزي في صف واحد، الباقي مفرد
-  type Row = { kind: "pair" | "single"; ar?: FieldSchema; en?: FieldSchema; f?: FieldSchema; advanced: boolean };
+  // (الترتيب مخفي — تتم إدارته بالأسهم في القائمة)
+  type Row = { kind: "pair" | "single"; ar?: FieldSchema; en?: FieldSchema; f?: FieldSchema };
   const rows = useMemo(() => {
     const out: Row[] = [];
     const done = new Set<string>();
     for (const f of fields) {
-      if (done.has(f.name)) continue;
+      if (done.has(f.name) || HIDDEN_IN_FORM.has(f.name)) continue;
       if (f.bilingual) {
         const ar = fields.find((x) => x.base === f.base && x.lang === "ar");
         const en = fields.find((x) => x.base === f.base && x.lang === "en");
         if (ar) done.add(ar.name);
         if (en) done.add(en.name);
-        out.push({ kind: "pair", ar, en, advanced: Boolean(ar?.advanced && en?.advanced) });
+        out.push({ kind: "pair", ar, en });
       } else {
-        out.push({ kind: "single", f, advanced: Boolean(f.advanced) });
+        out.push({ kind: "single", f });
       }
     }
     return out;
   }, [fields]);
-  const mainRows = rows.filter((r) => !r.advanced);
-  const advancedRows = rows.filter((r) => r.advanced);
-  const [advOpen, setAdvOpen] = useState(false);
 
   async function onSave() {
     setSaving(true);
@@ -209,22 +207,8 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
       {error && <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">{error}</p>}
 
       <div className="space-y-5 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-line">
-        {mainRows.map(renderRow)}
+        {rows.map(renderRow)}
       </div>
-
-      {/* إعدادات متقدمة (اختيارية) */}
-      {advancedRows.length > 0 && (
-        <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-line">
-          <button onClick={() => setAdvOpen((o) => !o)} className="flex w-full items-center justify-between gap-3 px-6 py-4 text-right transition-colors hover:bg-surface/60">
-            <div className="flex items-center gap-2">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-ink-soft"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z" /></svg>
-              <span className="font-bold text-ink">إعدادات متقدمة <span className="font-normal text-ink-soft">(اختيارية — لمستخدم متقدّم)</span></span>
-            </div>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={`shrink-0 text-ink-soft transition-transform ${advOpen ? "rotate-180" : ""}`}><path strokeLinecap="round" d="M6 9l6 6 6-6" /></svg>
-          </button>
-          {advOpen && <div className="space-y-5 border-t border-line p-6">{advancedRows.map(renderRow)}</div>}
-        </div>
-      )}
 
       {/* شريط الحفظ */}
       <div className="fixed bottom-0 left-0 right-0 z-20 border-t border-line bg-white/95 px-6 py-3 backdrop-blur lg:right-72">
@@ -308,6 +292,8 @@ const OBJECT_FIELDS: Record<string, { key: string; label: string }[]> = {
   ],
 };
 
+// حقول مخفية من الفورم (الترتيب يُدار بأسهم القائمة)
+const HIDDEN_IN_FORM = new Set(["order"]);
 // حقول مقفولة (تُعرض للاطلاع فقط؛ تغييرها يكسر مكان المحتوى)
 const LOCKED_FIELDS = new Set(["block"]);
 // قوائم بطاقات — كل عنصر كائن بخانات معنونة بسيطة (بدل JSON)
