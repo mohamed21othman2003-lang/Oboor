@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { listCollection, deleteItem, TYPE_LABELS, type CmsItem } from "@/lib/cms/api";
@@ -9,7 +9,10 @@ export default function CollectionList({ type }: { type: string }) {
   const router = useRouter();
   const [items, setItems] = useState<CmsItem[]>([]);
   const [titleField, setTitleField] = useState("title_ar");
+  const [groupBy, setGroupBy] = useState<string | null>(null);
+  const [groupDefs, setGroupDefs] = useState<{ value: string; label: string }[] | null>(null);
   const [readonly, setReadonly] = useState(false);
+  const [open, setOpen] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState<number | null>(null);
@@ -22,6 +25,8 @@ export default function CollectionList({ type }: { type: string }) {
       .then((d) => {
         setItems(d.items);
         setTitleField(d.title_field);
+        setGroupBy(d.group_by);
+        setGroupDefs(d.groups);
         setReadonly(d.readonly);
       })
       .catch((e) => setError(e.message))
@@ -43,13 +48,74 @@ export default function CollectionList({ type }: { type: string }) {
   }
 
   function titleOf(it: CmsItem): string {
-    const v = it[titleField] ?? it["title_ar"] ?? it["name_ar"] ?? it["label_ar"] ?? `#${it.id}`;
+    const v = it[titleField] ?? it["title_ar"] ?? it["name_ar"] ?? it["label_ar"] ?? it["value"] ?? it["key"] ?? `#${it.id}`;
     return String(v || `#${it.id}`);
   }
   function published(it: CmsItem): boolean | null {
     if ("published" in it) return Boolean(it.published);
     if ("is_active" in it) return Boolean(it.is_active);
     return null;
+  }
+  function subLabel(it: CmsItem): string {
+    const b = it["block"];
+    return b ? String(b) : "";
+  }
+
+  // تجميع العناصر حسب حقل التجميع
+  const grouped = useMemo(() => {
+    if (!groupBy) return null;
+    const labelMap = new Map((groupDefs || []).map((g) => [g.value, g.label]));
+    const buckets = new Map<string, { key: string; label: string; items: CmsItem[] }>();
+    // مهّد المجموعات المعرّفة مسبقاً لحفظ الترتيب
+    for (const g of groupDefs || []) buckets.set(g.value, { key: g.value, label: g.label, items: [] });
+    for (const it of items) {
+      const raw = it[groupBy];
+      const key = raw === null || raw === undefined || raw === "" ? "__other__" : String(raw);
+      if (!buckets.has(key)) buckets.set(key, { key, label: labelMap.get(key) || key || "أخرى", items: [] });
+      buckets.get(key)!.items.push(it);
+    }
+    return [...buckets.values()].filter((b) => b.items.length > 0);
+  }, [items, groupBy, groupDefs]);
+
+  function Row({ it }: { it: CmsItem }) {
+    const pub = published(it);
+    const sub = subLabel(it);
+    return (
+      <tr className="transition-colors hover:bg-surface/60">
+        <td className="px-5 py-3.5">
+          <p className="font-semibold text-ink">{titleOf(it)}</p>
+          {sub && <p className="mt-0.5 text-xs text-ink-soft">القسم: {sub}</p>}
+        </td>
+        <td className="px-5 py-3.5 w-28">
+          {pub === null ? <span className="text-ink-soft">—</span>
+            : pub ? <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">منشور</span>
+            : <span className="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700">مخفي</span>}
+        </td>
+        <td className="px-5 py-3.5 w-32">
+          <div className="flex items-center justify-end gap-2">
+            <button onClick={() => router.push(`/cms/content/${type}/${it.id}`)} className="rounded-lg bg-brand/10 px-3 py-1.5 text-xs font-semibold text-brand transition-colors hover:bg-brand hover:text-white">تعديل</button>
+            {!readonly && (
+              <button onClick={() => onDelete(it.id)} disabled={busy === it.id} className="rounded-lg bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-600 transition-colors hover:bg-red-600 hover:text-white disabled:opacity-50">
+                {busy === it.id ? "…" : "حذف"}
+              </button>
+            )}
+          </div>
+        </td>
+      </tr>
+    );
+  }
+
+  function Table({ list }: { list: CmsItem[] }) {
+    return (
+      <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-line">
+        <table className="w-full text-right text-sm">
+          <thead className="bg-surface text-xs font-semibold text-ink-soft">
+            <tr><th className="px-5 py-3">العنوان</th><th className="px-5 py-3 w-28">الحالة</th><th className="px-5 py-3 w-32"></th></tr>
+          </thead>
+          <tbody className="divide-y divide-line">{list.map((it) => <Row key={it.id} it={it} />)}</tbody>
+        </table>
+      </div>
+    );
   }
 
   return (
@@ -58,13 +124,10 @@ export default function CollectionList({ type }: { type: string }) {
         <div>
           <Link href="/cms" className="text-xs font-semibold text-brand hover:text-brand-dark">← لوحة التحكّم</Link>
           <h1 className="mt-1 text-2xl font-extrabold text-ink">{label}</h1>
-          <p className="mt-1 text-sm text-ink-soft">{items.length} عنصر</p>
+          <p className="mt-1 text-sm text-ink-soft">{items.length} عنصر{grouped ? ` في ${grouped.length} مجموعة` : ""}</p>
         </div>
         {!readonly && (
-          <Link
-            href={`/cms/content/${type}/new`}
-            className="inline-flex items-center gap-2 rounded-xl bg-brand px-4 py-2.5 text-sm font-bold text-white shadow-sm transition-colors hover:bg-brand-dark"
-          >
+          <Link href={`/cms/content/${type}/new`} className="inline-flex items-center gap-2 rounded-xl bg-brand px-4 py-2.5 text-sm font-bold text-white shadow-sm transition-colors hover:bg-brand-dark">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" d="M12 5v14M5 12h14" /></svg>
             إضافة جديد
           </Link>
@@ -72,62 +135,37 @@ export default function CollectionList({ type }: { type: string }) {
       </div>
 
       {error && <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">{error}</p>}
+
       {loading ? (
         <p className="text-ink-soft">جارٍ التحميل…</p>
       ) : items.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-line bg-white p-10 text-center text-ink-soft">
           لا توجد عناصر بعد. {!readonly && "اضغط «إضافة جديد» للبدء."}
         </div>
-      ) : (
-        <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-line">
-          <table className="w-full text-right text-sm">
-            <thead className="bg-surface text-xs font-semibold text-ink-soft">
-              <tr>
-                <th className="px-5 py-3">العنوان</th>
-                <th className="px-5 py-3 w-28">الحالة</th>
-                <th className="px-5 py-3 w-32"></th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-line">
-              {items.map((it) => {
-                const pub = published(it);
-                return (
-                  <tr key={it.id} className="transition-colors hover:bg-surface/60">
-                    <td className="px-5 py-3.5 font-semibold text-ink">{titleOf(it)}</td>
-                    <td className="px-5 py-3.5">
-                      {pub === null ? (
-                        <span className="text-ink-soft">—</span>
-                      ) : pub ? (
-                        <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">منشور</span>
-                      ) : (
-                        <span className="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700">مخفي</span>
-                      )}
-                    </td>
-                    <td className="px-5 py-3.5">
-                      <div className="flex items-center justify-end gap-2">
-                        <button
-                          onClick={() => router.push(`/cms/content/${type}/${it.id}`)}
-                          className="rounded-lg bg-brand/10 px-3 py-1.5 text-xs font-semibold text-brand transition-colors hover:bg-brand hover:text-white"
-                        >
-                          تعديل
-                        </button>
-                        {!readonly && (
-                          <button
-                            onClick={() => onDelete(it.id)}
-                            disabled={busy === it.id}
-                            className="rounded-lg bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-600 transition-colors hover:bg-red-600 hover:text-white disabled:opacity-50"
-                          >
-                            {busy === it.id ? "…" : "حذف"}
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+      ) : grouped ? (
+        <div className="space-y-3">
+          {grouped.map((g) => {
+            const isOpen = open[g.key] ?? false;
+            return (
+              <div key={g.key} className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-line">
+                <button onClick={() => setOpen((p) => ({ ...p, [g.key]: !isOpen }))} className="flex w-full items-center justify-between gap-3 px-5 py-4 text-right transition-colors hover:bg-surface/60">
+                  <div className="flex items-center gap-3">
+                    <span className="flex h-8 min-w-8 items-center justify-center rounded-full bg-brand/10 px-2 text-sm font-extrabold text-brand">{g.items.length}</span>
+                    <span className="font-bold text-ink">{g.label}</span>
+                  </div>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={`shrink-0 text-ink-soft transition-transform ${isOpen ? "rotate-180" : ""}`}><path strokeLinecap="round" d="M6 9l6 6 6-6" /></svg>
+                </button>
+                {isOpen && (
+                  <div className="border-t border-line p-3">
+                    <Table list={g.items} />
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
+      ) : (
+        <Table list={items} />
       )}
     </div>
   );

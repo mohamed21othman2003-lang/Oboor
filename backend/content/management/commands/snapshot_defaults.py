@@ -13,7 +13,7 @@ class Command(BaseCommand):
         from content.models import ContentSnapshot
         from content.cms_crud import snapshot_fields
         total = 0
-        for type_key, (Model, _title) in CONTENT.items():
+        for type_key, (Model, _title, *_rest) in CONTENT.items():
             for obj in Model.objects.all():
                 if opts["force"]:
                     ContentSnapshot.objects.update_or_create(
