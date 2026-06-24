@@ -85,6 +85,10 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
+# حدود رفع الملفات (السير الذاتية حتى 10 ميجا)
+DATA_UPLOAD_MAX_MEMORY_SIZE = 12 * 1024 * 1024
+FILE_UPLOAD_MAX_MEMORY_SIZE = 12 * 1024 * 1024
+
 # تخزين الصور المرفوعة:
 # - لو مفاتيح Supabase Storage (S3) موجودة في البيئة → الرفع يروح لـ Supabase (مناسب للنشر).
 # - وإلا → تخزين محلي على القرص (للتجربة المحلية). الصور القديمة (مسارات /figma) تظل تعمل في الحالتين.
