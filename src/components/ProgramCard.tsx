@@ -37,7 +37,7 @@ const defaultIcon = <svg width="20" height="20" viewBox="0 0 24 24" {...sw}><pat
 
 export default function ProgramCard({ p, locale = "ar" }: { p: Program; locale?: Locale }) {
   return (
-    <div className="flex flex-col rounded-2xl border border-line border-t-4 border-t-brand bg-white p-6 text-start shadow-sm">
+    <div className="flex h-full flex-col rounded-2xl border border-line border-t-4 border-t-brand bg-white p-6 text-start shadow-sm">
       {/* Header: icon (right) + badge (left) */}
       <div className="mb-3 flex items-start justify-between">
         <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand/[0.08] text-brand">
@@ -86,6 +86,9 @@ export default function ProgramCard({ p, locale = "ar" }: { p: Program; locale?:
           </span>
         ))}
       </div>
+
+      {/* فاصل مرن يدفع الزر لأسفل ليتحاذى في كل الكروت */}
+      <div className="grow" />
 
       <Link href={p.href || (p.slug ? `/programs/${p.slug}` : "/programs")} className="mt-5 flex items-center justify-center gap-1 rounded-xl bg-brand py-3.5 text-sm font-semibold text-white transition-colors hover:bg-brand-dark">
         {pick(locale, "عرض التفاصيل", "View Details")}
