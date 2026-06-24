@@ -158,7 +158,8 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
     }
     const f = row.f!;
     if (f.type === "image") {
-      return <ImageInput key={i} f={f} value={values[f.name]} type={type} id={id} isNew={isNew} onUploaded={(it) => { setValues(it as Record<string, unknown>); setBaseline(it as Record<string, unknown>); }} />;
+      const pathFallback = String(values.image ?? values.logo_path ?? values.image_path ?? "");
+      return <ImageInput key={i} f={f} value={values[f.name]} pathFallback={pathFallback} type={type} id={id} isNew={isNew} onUploaded={(it) => { setValues(it as Record<string, unknown>); setBaseline(it as Record<string, unknown>); }} />;
     }
     if (f.name === "icon") {
       return (
@@ -397,22 +398,36 @@ function ListEditor({ value, onChange, dir }: { value: (string | number)[]; onCh
   );
 }
 
-function ImageInput({ f, value, type, id, isNew, onUploaded }: { f: FieldSchema; value: unknown; type: string; id: string; isNew: boolean; onUploaded: (it: CmsItem) => void }) {
+// طبّع المسار ليكون قابلاً للعرض (روابط الموقع تبدأ بـ "/figma..."، روابط Django مطلقة)
+function resolveSrc(s: string): string {
+  if (!s) return "";
+  if (/^(https?:|data:|blob:|\/)/.test(s)) return s;
+  return "/" + s.replace(/^\/+/, "");
+}
+
+function ImageInput({ f, value, pathFallback, type, id, isNew, onUploaded }: { f: FieldSchema; value: unknown; pathFallback: string; type: string; id: string; isNew: boolean; onUploaded: (it: CmsItem) => void }) {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
-  const url = typeof value === "string" ? value : "";
+  const [localPreview, setLocalPreview] = useState("");
+
+  // أولوية العرض: معاينة فورية → ملف مرفوع → الصورة الحالية على الموقع (المسار)
+  const uploaded = typeof value === "string" ? value : "";
+  const current = resolveSrc(uploaded || pathFallback);
+  const src = localPreview || current;
 
   async function onFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.size > 5 * 1024 * 1024) { setErr("الحد الأقصى 5 ميجابايت."); return; }
     setErr("");
+    setLocalPreview(URL.createObjectURL(file)); // تظهر فوراً قبل اكتمال الرفع
     setBusy(true);
     try {
       const saved = await uploadField(type, id, f.name, file);
       onUploaded(saved);
     } catch (e) {
       setErr(e instanceof Error ? e.message : "تعذّر الرفع.");
+      setLocalPreview("");
     } finally {
       setBusy(false);
     }
@@ -421,20 +436,27 @@ function ImageInput({ f, value, type, id, isNew, onUploaded }: { f: FieldSchema;
   return (
     <div>
       <Label f={f} />
-      {isNew ? (
-        <p className="rounded-xl border border-dashed border-line bg-surface px-4 py-3 text-sm text-ink-soft">احفظ العنصر أولاً ثم ارفع الصورة.</p>
-      ) : (
-        <div className="flex items-center gap-4">
-          {url && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={url} alt="" className="h-20 w-20 rounded-xl object-cover ring-1 ring-line" />
+      <div className="flex items-center gap-4">
+        {src ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={src} alt="" className="h-24 w-24 rounded-xl object-cover ring-1 ring-line" />
+        ) : (
+          <div className="flex h-24 w-24 items-center justify-center rounded-xl bg-surface text-ink-soft ring-1 ring-dashed ring-line">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" /></svg>
+          </div>
+        )}
+        <div>
+          {isNew ? (
+            <p className="rounded-xl border border-dashed border-line bg-surface px-4 py-3 text-sm text-ink-soft">احفظ العنصر أولاً ثم ارفع الصورة.</p>
+          ) : (
+            <label className="inline-block cursor-pointer rounded-xl bg-brand/10 px-4 py-2.5 text-sm font-semibold text-brand transition-colors hover:bg-brand hover:text-white">
+              {busy ? "جارٍ الرفع…" : src ? "تغيير الصورة" : "رفع صورة"}
+              <input type="file" accept="image/*" onChange={onFile} disabled={busy} className="hidden" />
+            </label>
           )}
-          <label className="cursor-pointer rounded-xl bg-brand/10 px-4 py-2.5 text-sm font-semibold text-brand transition-colors hover:bg-brand hover:text-white">
-            {busy ? "جارٍ الرفع…" : url ? "تغيير الصورة" : "رفع صورة"}
-            <input type="file" accept="image/*" onChange={onFile} disabled={busy} className="hidden" />
-          </label>
+          {localPreview && !busy && <p className="mt-1.5 text-xs font-semibold text-emerald-600">تم رفع الصورة الجديدة ✓</p>}
         </div>
-      )}
+      </div>
       {err && <p className="mt-1 text-xs text-red-600">{err}</p>}
       <Help text={f.help} />
     </div>
