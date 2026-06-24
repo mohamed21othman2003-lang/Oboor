@@ -123,6 +123,12 @@ export function uploadField(type: string, pk: number | string, field: string, fi
   fd.append(field, file);
   return cmsFetch<CmsItem>(`/cms/collections/${type}/${pk}/`, { method: "PATCH", body: fd });
 }
+// رفع صورة عامّة (للمعارض) — تُرجِع رابطها العام
+export function uploadImage(file: File) {
+  const fd = new FormData();
+  fd.append("file", file);
+  return cmsFetch<{ url: string }>(`/cms/upload/`, { method: "POST", body: fd });
+}
 
 export const TYPE_LABELS: Record<string, string> = {
   news: "الأخبار والمقالات",

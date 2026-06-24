@@ -28,6 +28,8 @@ class Branch(models.Model):
     services_ar = models.JSONField("الخدمات (عربي)", default=list, blank=True)
     services_en = models.JSONField("الخدمات (إنجليزي)", default=list, blank=True)
 
+    gallery = models.JSONField("معرض صور الفرع", default=list, blank=True)
+
     is_new = models.BooleanField("فرع جديد", default=False)
 
     order = models.IntegerField("الترتيب", default=0)

@@ -16,6 +16,7 @@ type ApiBranch = {
   hours_ar: string; hours_en: string;
   phone: string;
   services_ar: string[]; services_en: string[];
+  gallery: string[];
   is_new: boolean;
   order: number;
 };
@@ -33,6 +34,7 @@ function toBranch(row: ApiBranch, locale: Locale): Branch {
     hours: f(row.hours_ar, row.hours_en),
     phone: row.phone,
     services: en ? (row.services_en ?? row.services_ar) : row.services_ar,
+    gallery: Array.isArray(row.gallery) ? row.gallery : [],
     isNew: row.is_new,
   };
 }

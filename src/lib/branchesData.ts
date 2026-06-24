@@ -13,6 +13,7 @@ export type Branch = {
   hours: string;
   phone: string;
   services: string[];
+  gallery?: string[];
   isNew?: boolean;
 };
 

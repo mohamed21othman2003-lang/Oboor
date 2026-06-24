@@ -189,7 +189,7 @@ export default async function BranchDetailPage({ params }: { params: Promise<{ s
       </section>
 
       {/* Gallery */}
-      <BranchGallery images={GALLERY} branchName={b.name} locale={locale} />
+      <BranchGallery images={b.gallery?.length ? b.gallery : GALLERY} branchName={b.name} locale={locale} />
     </>
   );
 }
