@@ -4,7 +4,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
-  getSchema, getItem, createItem, updateItem, uploadField, resetDefault,
+  getSchema, getItem, createItem, updateItem, uploadField, uploadImage, resetDefault,
   TYPE_LABELS, type FieldSchema, type CmsItem,
 } from "@/lib/cms/api";
 import { CMS_ICONS, ICON_LABELS, iconNamesFor } from "@/lib/cms/icons";
@@ -169,6 +169,15 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
           <Label f={f} />
           <IconPicker value={String(values[f.name] ?? "")} onChange={(v) => set(f.name, v)} names={iconNamesFor(type)} />
           <Help text={f.help} />
+        </div>
+      );
+    }
+    if (f.name === "gallery") {
+      return (
+        <div key={i}>
+          <Label f={f} />
+          <GalleryEditor value={values[f.name]} onChange={(v) => set(f.name, v)} />
+          <Help text="ارفع صور هذا الفرع الحقيقية — تظهر في معرض صفحة الفرع." />
         </div>
       );
     }
@@ -436,6 +445,76 @@ function IconPicker({ value, onChange, names }: { value: string; onChange: (v: s
       {value && !CMS_ICONS[value] && (
         <p className="mt-1 text-[11px] text-amber-600">الأيقونة «{value}» غير معروفة — اختر واحدة من الأعلى.</p>
       )}
+    </div>
+  );
+}
+
+// محرّر معرض صور — رفع متعدد + معاينة مصغّرة + حذف/ترتيب (يخزّن قائمة روابط)
+function GalleryEditor({ value, onChange }: { value: unknown; onChange: (v: unknown) => void }) {
+  const urls = (Array.isArray(value) ? value : []).filter((x) => typeof x === "string") as string[];
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
+
+  async function onFiles(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = [...(e.target.files || [])];
+    if (!files.length) return;
+    setBusy(true); setErr("");
+    const added: string[] = [];
+    try {
+      for (const f of files) {
+        if (f.size > 5 * 1024 * 1024) { setErr("بعض الصور أكبر من 5 ميجابايت — تم تخطّيها."); continue; }
+        const r = await uploadImage(f);
+        added.push(r.url);
+      }
+      if (added.length) onChange([...urls, ...added]);
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "تعذّر رفع بعض الصور.");
+    } finally {
+      setBusy(false);
+      e.target.value = "";
+    }
+  }
+  const remove = (i: number) => onChange(urls.filter((_, j) => j !== i));
+  const move = (i: number, dir: -1 | 1) => {
+    const j = i + dir;
+    if (j < 0 || j >= urls.length) return;
+    const a = [...urls];
+    [a[i], a[j]] = [a[j], a[i]];
+    onChange(a);
+  };
+
+  return (
+    <div>
+      <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
+        {urls.map((u, i) => (
+          <div key={u + i} className="group relative aspect-square overflow-hidden rounded-xl ring-1 ring-line">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={u} alt="" className="h-full w-full object-cover" />
+            <div className="absolute inset-x-0 bottom-0 flex items-center justify-between bg-black/45 px-1.5 py-1 opacity-0 transition-opacity group-hover:opacity-100">
+              <button type="button" onClick={() => move(i, -1)} disabled={i === 0} className="rounded p-0.5 text-white/90 hover:text-white disabled:opacity-30" title="لليمين">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" d="M9 6l6 6-6 6" /></svg>
+              </button>
+              <button type="button" onClick={() => remove(i)} className="rounded bg-red-500/90 px-1.5 py-0.5 text-[10px] font-bold text-white" title="حذف">حذف</button>
+              <button type="button" onClick={() => move(i, 1)} disabled={i === urls.length - 1} className="rounded p-0.5 text-white/90 hover:text-white disabled:opacity-30" title="لليسار">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" d="M15 6l-6 6 6 6" /></svg>
+              </button>
+            </div>
+          </div>
+        ))}
+        <label className={`flex aspect-square cursor-pointer flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed border-line text-ink-soft transition-colors hover:border-brand/50 hover:text-brand ${busy ? "opacity-60" : ""}`}>
+          {busy ? (
+            <span className="text-xs font-semibold">جارٍ الرفع…</span>
+          ) : (
+            <>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>
+              <span className="text-xs font-semibold">إضافة صور</span>
+            </>
+          )}
+          <input type="file" accept="image/*" multiple onChange={onFiles} disabled={busy} className="hidden" />
+        </label>
+      </div>
+      {urls.length === 0 && <p className="mt-2 text-xs text-ink-soft">لا توجد صور بعد — اضغط «إضافة صور» لرفع صور هذا الفرع.</p>}
+      {err && <p className="mt-1 text-xs text-red-600">{err}</p>}
     </div>
   );
 }

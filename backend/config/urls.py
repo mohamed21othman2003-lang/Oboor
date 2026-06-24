@@ -16,6 +16,7 @@ urlpatterns = [
     path("api/cms/login/", cms_api.login),
     path("api/cms/me/", cms_api.me),
     path("api/cms/stats/", cms_api.stats),
+    path("api/cms/upload/", cms_crud.upload),
     path("api/cms/collections/<str:type_key>/schema/", cms_crud.schema),
     path("api/cms/collections/<str:type_key>/reorder/", cms_crud.reorder),
     path("api/cms/collections/<str:type_key>/<int:pk>/reset/", cms_crud.reset_default),

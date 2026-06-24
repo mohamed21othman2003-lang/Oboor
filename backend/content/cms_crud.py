@@ -235,6 +235,26 @@ def item(request, type_key, pk):
     return Response(ser.data)
 
 
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def upload(request):
+    """رفع صورة عامّة (للمعارض) — تُخزَّن وتُرجِع رابطها العام."""
+    from django.core.files.storage import default_storage
+    from PIL import Image as PILImage
+    f = request.FILES.get("file")
+    if not f:
+        return Response({"detail": "لا يوجد ملف."}, status=400)
+    if f.size > 5 * 1024 * 1024:
+        return Response({"detail": "الحد الأقصى 5 ميجابايت."}, status=400)
+    try:
+        PILImage.open(f).verify()
+        f.seek(0)
+    except Exception:
+        return Response({"detail": "الملف ليس صورة صالحة."}, status=400)
+    path = default_storage.save(f"content/{f.name}", f)
+    return Response({"url": default_storage.url(path)})
+
+
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def schema(request, type_key):
