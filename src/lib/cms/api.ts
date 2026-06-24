@@ -74,6 +74,8 @@ export type FieldSchema = {
   label: string;
   type: "text" | "textarea" | "bool" | "number" | "select" | "json" | "image";
   required: boolean;
+  advanced: boolean;
+  help: string;
   bilingual: boolean;
   lang: "ar" | "en" | null;
   base: string;

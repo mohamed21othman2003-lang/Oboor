@@ -54,25 +54,15 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
     return false;
   }, [fields, values, baseline]);
 
-  // نسبة اكتمال المحتوى (الحقول غير الفارغة)
+  // نسبة الاكتمال = الحقول الإلزامية (المعلَّمة بنجمة) فقط
+  const isEmpty = (v: unknown) => v === null || v === undefined || v === "" || (Array.isArray(v) && v.length === 0);
+  const required = useMemo(() => fields.filter((f) => f.required && f.type !== "image"), [fields]);
   const completion = useMemo(() => {
-    const editable = fields.filter((f) => f.type !== "image" && f.type !== "bool");
-    if (!editable.length) return 100;
-    const filled = editable.filter((f) => {
-      const v = values[f.name];
-      if (v === null || v === undefined || v === "") return false;
-      if (Array.isArray(v) && v.length === 0) return false;
-      return true;
-    }).length;
-    return Math.round((filled / editable.length) * 100);
-  }, [fields, values]);
-
-  const missing = useMemo(() =>
-    fields.filter((f) => f.type !== "image" && f.type !== "bool" && (() => {
-      const v = values[f.name];
-      return v === null || v === undefined || v === "" || (Array.isArray(v) && v.length === 0);
-    })()).map((f) => f.label),
-  [fields, values]);
+    if (!required.length) return 100;
+    const filled = required.filter((f) => !isEmpty(values[f.name])).length;
+    return Math.round((filled / required.length) * 100);
+  }, [required, values]);
+  const missing = useMemo(() => required.filter((f) => isEmpty(values[f.name])).map((f) => f.label), [required, values]);
 
   function discard() {
     if (!dirty) return;
@@ -101,8 +91,9 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
   }
 
   // تجميع الحقول: أزواج عربي/إنجليزي في صف واحد، الباقي مفرد
+  type Row = { kind: "pair" | "single"; ar?: FieldSchema; en?: FieldSchema; f?: FieldSchema; advanced: boolean };
   const rows = useMemo(() => {
-    const out: { kind: "pair" | "single"; ar?: FieldSchema; en?: FieldSchema; f?: FieldSchema }[] = [];
+    const out: Row[] = [];
     const done = new Set<string>();
     for (const f of fields) {
       if (done.has(f.name)) continue;
@@ -111,13 +102,16 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
         const en = fields.find((x) => x.base === f.base && x.lang === "en");
         if (ar) done.add(ar.name);
         if (en) done.add(en.name);
-        out.push({ kind: "pair", ar, en });
+        out.push({ kind: "pair", ar, en, advanced: Boolean(ar?.advanced && en?.advanced) });
       } else {
-        out.push({ kind: "single", f });
+        out.push({ kind: "single", f, advanced: Boolean(f.advanced) });
       }
     }
     return out;
   }, [fields]);
+  const mainRows = rows.filter((r) => !r.advanced);
+  const advancedRows = rows.filter((r) => r.advanced);
+  const [advOpen, setAdvOpen] = useState(false);
 
   async function onSave() {
     setSaving(true);
@@ -129,9 +123,13 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
       for (const f of fields) {
         if (f.type === "image") continue;
         let v = values[f.name];
-        if (f.type === "json" && typeof v === "string") {
-          try { v = v.trim() ? JSON.parse(v) : (f.required ? [] : null); }
-          catch { throw new Error(`القيمة في «${f.label}» ليست JSON صحيحة.`); }
+        if (f.type === "json") {
+          if (typeof v === "string") {
+            try { v = v.trim() ? JSON.parse(v) : (f.required ? [] : null); }
+            catch { throw new Error(`القيمة في «${f.label}» ليست JSON صحيحة.`); }
+          }
+          // أزل عناصر القوائم الفارغة
+          if (Array.isArray(v)) v = v.filter((x) => !(typeof x === "string" && x.trim() === ""));
         }
         if (v !== undefined) payload[f.name] = v;
       }
@@ -146,6 +144,22 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
     } finally {
       setSaving(false);
     }
+  }
+
+  function renderRow(row: Row, i: number) {
+    if (row.kind === "pair") {
+      return (
+        <div key={i} className="grid gap-4 sm:grid-cols-2">
+          {row.ar && <FieldInput f={row.ar} value={values[row.ar.name]} onChange={(v) => set(row.ar!.name, v)} badge="عربي" />}
+          {row.en && <FieldInput f={row.en} value={values[row.en.name]} onChange={(v) => set(row.en!.name, v)} badge="English" dir="ltr" />}
+        </div>
+      );
+    }
+    const f = row.f!;
+    if (f.type === "image") {
+      return <ImageInput key={i} f={f} value={values[f.name]} type={type} id={id} isNew={isNew} onUploaded={(it) => { setValues(it as Record<string, unknown>); setBaseline(it as Record<string, unknown>); }} />;
+    }
+    return <FieldInput key={i} f={f} value={values[f.name]} onChange={(v) => set(f.name, v)} />;
   }
 
   if (loading) return <p className="text-ink-soft">جارٍ التحميل…</p>;
@@ -176,22 +190,22 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
       {error && <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">{error}</p>}
 
       <div className="space-y-5 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-line">
-        {rows.map((row, i) => {
-          if (row.kind === "pair") {
-            return (
-              <div key={i} className="grid gap-4 sm:grid-cols-2">
-                {row.ar && <FieldInput f={row.ar} value={values[row.ar.name]} onChange={(v) => set(row.ar!.name, v)} badge="عربي" />}
-                {row.en && <FieldInput f={row.en} value={values[row.en.name]} onChange={(v) => set(row.en!.name, v)} badge="English" dir="ltr" />}
-              </div>
-            );
-          }
-          const f = row.f!;
-          if (f.type === "image") {
-            return <ImageInput key={i} f={f} value={values[f.name]} type={type} id={id} isNew={isNew} onUploaded={(it) => setValues(it as Record<string, unknown>)} />;
-          }
-          return <FieldInput key={i} f={f} value={values[f.name]} onChange={(v) => set(f.name, v)} />;
-        })}
+        {mainRows.map(renderRow)}
       </div>
+
+      {/* إعدادات متقدمة (اختيارية) */}
+      {advancedRows.length > 0 && (
+        <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-line">
+          <button onClick={() => setAdvOpen((o) => !o)} className="flex w-full items-center justify-between gap-3 px-6 py-4 text-right transition-colors hover:bg-surface/60">
+            <div className="flex items-center gap-2">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-ink-soft"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z" /></svg>
+              <span className="font-bold text-ink">إعدادات متقدمة <span className="font-normal text-ink-soft">(اختيارية — لمستخدم متقدّم)</span></span>
+            </div>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={`shrink-0 text-ink-soft transition-transform ${advOpen ? "rotate-180" : ""}`}><path strokeLinecap="round" d="M6 9l6 6 6-6" /></svg>
+          </button>
+          {advOpen && <div className="space-y-5 border-t border-line p-6">{advancedRows.map(renderRow)}</div>}
+        </div>
+      )}
 
       {/* شريط الحفظ */}
       <div className="fixed bottom-0 left-0 right-0 z-20 border-t border-line bg-white/95 px-6 py-3 backdrop-blur lg:right-72">
@@ -243,13 +257,25 @@ function Label({ f, badge }: { f: FieldSchema; badge?: string }) {
 
 const INPUT = "w-full rounded-xl border border-line bg-surface px-4 py-2.5 text-sm text-ink outline-none transition-colors focus:border-brand focus:bg-white focus:ring-2 focus:ring-brand/20";
 
+const isSimpleArray = (v: unknown): v is (string | number)[] =>
+  Array.isArray(v) && v.every((x) => typeof x === "string" || typeof x === "number");
+
+function Help({ text }: { text?: string }) {
+  if (!text) return null;
+  return <p className="mt-1 text-[11px] text-ink-soft">{text}</p>;
+}
+
 function FieldInput({ f, value, onChange, badge, dir }: { f: FieldSchema; value: unknown; onChange: (v: unknown) => void; badge?: string; dir?: string }) {
+  const showHelp = badge !== "English"; // لا نكرّر الشرح على الجانب الإنجليزي
   if (f.type === "bool") {
     return (
-      <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-line bg-surface px-4 py-3">
-        <input type="checkbox" checked={Boolean(value)} onChange={(e) => onChange(e.target.checked)} className="h-5 w-5 accent-brand" />
-        <span className="text-sm font-semibold text-ink">{f.label}</span>
-      </label>
+      <div>
+        <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-line bg-surface px-4 py-3">
+          <input type="checkbox" checked={Boolean(value)} onChange={(e) => onChange(e.target.checked)} className="h-5 w-5 accent-brand" />
+          <span className="text-sm font-semibold text-ink">{f.label}</span>
+        </label>
+        {showHelp && <Help text={f.help} />}
+      </div>
     );
   }
   return (
@@ -258,14 +284,11 @@ function FieldInput({ f, value, onChange, badge, dir }: { f: FieldSchema; value:
       {f.type === "textarea" ? (
         <textarea value={String(value ?? "")} onChange={(e) => onChange(e.target.value)} rows={4} dir={dir} className={INPUT} />
       ) : f.type === "json" ? (
-        <textarea
-          value={typeof value === "string" ? value : JSON.stringify(value ?? [], null, 2)}
-          onChange={(e) => onChange(e.target.value)}
-          rows={6}
-          dir="ltr"
-          className={`${INPUT} font-mono text-xs`}
-          placeholder='["عنصر ١", "عنصر ٢"]'
-        />
+        isSimpleArray(value) || value == null ? (
+          <ListEditor value={isSimpleArray(value) ? value : []} onChange={onChange} dir={dir} />
+        ) : (
+          <textarea value={JSON.stringify(value, null, 2)} onChange={(e) => { try { onChange(JSON.parse(e.target.value)); } catch { onChange(e.target.value); } }} rows={6} dir="ltr" className={`${INPUT} font-mono text-xs`} />
+        )
       ) : f.type === "select" ? (
         <select value={String(value ?? "")} onChange={(e) => onChange(e.target.value)} className={INPUT}>
           <option value="">— اختر —</option>
@@ -276,7 +299,31 @@ function FieldInput({ f, value, onChange, badge, dir }: { f: FieldSchema; value:
       ) : (
         <input type="text" value={String(value ?? "")} onChange={(e) => onChange(e.target.value)} dir={dir} className={INPUT} />
       )}
-      {f.type === "json" && <p className="mt-1 text-[11px] text-ink-soft">قائمة بصيغة JSON (نص بين علامتي تنصيص، عناصر مفصولة بفاصلة).</p>}
+      {showHelp && <Help text={f.help} />}
+    </div>
+  );
+}
+
+// محرّر قوائم سهل — صفّ لكل عنصر مع زر حذف + زر إضافة (بدل JSON)
+function ListEditor({ value, onChange, dir }: { value: (string | number)[]; onChange: (v: unknown) => void; dir?: string }) {
+  const items = value.map(String);
+  const update = (i: number, v: string) => { const copy = [...items]; copy[i] = v; onChange(copy); };
+  const remove = (i: number) => onChange(items.filter((_, j) => j !== i));
+  const add = () => onChange([...items, ""]);
+  return (
+    <div className="space-y-2">
+      {items.length === 0 && <p className="rounded-xl border border-dashed border-line bg-surface px-4 py-2.5 text-xs text-ink-soft">لا توجد عناصر — اضغط «إضافة عنصر».</p>}
+      {items.map((it, i) => (
+        <div key={i} className="flex items-center gap-2">
+          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-surface text-[11px] font-bold text-ink-soft">{i + 1}</span>
+          <input value={it} onChange={(e) => update(i, e.target.value)} dir={dir} className={INPUT} />
+          <button type="button" onClick={() => remove(i)} className="shrink-0 rounded-lg bg-red-50 px-2.5 py-2 text-xs font-semibold text-red-600 transition-colors hover:bg-red-600 hover:text-white">حذف</button>
+        </div>
+      ))}
+      <button type="button" onClick={add} className="inline-flex items-center gap-1.5 rounded-lg bg-brand/10 px-3 py-1.5 text-xs font-semibold text-brand transition-colors hover:bg-brand hover:text-white">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path strokeLinecap="round" d="M12 5v14M5 12h14" /></svg>
+        إضافة عنصر
+      </button>
     </div>
   );
 }
@@ -320,6 +367,7 @@ function ImageInput({ f, value, type, id, isNew, onUploaded }: { f: FieldSchema;
         </div>
       )}
       {err && <p className="mt-1 text-xs text-red-600">{err}</p>}
+      <Help text={f.help} />
     </div>
   );
 }

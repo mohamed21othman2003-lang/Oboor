@@ -43,6 +43,21 @@ SUBMISSIONS = {
 # الحقول اللي ما تظهرش في الفورم
 HIDDEN = {"id", "created_at", "updated_at"}
 
+# حقول تقنية تُعرض داخل لوحة «إعدادات متقدمة» المطويّة (اختيارية لمستخدم غير تقني)
+ADVANCED = {"slug", "key", "order", "color", "icon", "href"}
+
+# شرح مبسّط للحقول التقنية (يُستخدم إن لم يكن للحقل help_text)
+HELP = {
+    "block": "المكان داخل الصفحة — اتركه كما هو إن لم تكن متأكداً.",
+    "section": "القسم الذي يظهر فيه العنصر.",
+    "slug": "معرّف تقني يُنشأ تلقائياً من العنوان — لا داعي لتعبئته.",
+    "key": "معرّف تقني — اتركه فارغاً ليُنشأ تلقائياً.",
+    "order": "ترتيب الظهور (الرقم الأصغر يظهر أولاً).",
+    "color": "لون اختياري (كود مثل ‎#2cbcc8‎).",
+    "icon": "اسم أيقونة اختياري.",
+    "href": "رابط مخصّص اختياري.",
+}
+
 
 def _serializer_for(Model):
     Meta = type("Meta", (), {"model": Model, "fields": "__all__"})
@@ -73,11 +88,17 @@ def _schema(Model):
         if f.name in HIDDEN or f.auto_created or not f.editable:
             continue
         name = f.name
+        # المعرّفات التقنية تُولَّد تلقائياً ⇒ ليست إلزامية على المستخدم
+        required = not f.blank and not f.null and f.default is djm.NOT_PROVIDED
+        if name in {"slug", "key"}:
+            required = False
         item = {
             "name": name,
             "label": str(getattr(f, "verbose_name", name)),
             "type": _field_type(f),
-            "required": not f.blank and not f.null and f.default is djm.NOT_PROVIDED,
+            "required": required,
+            "advanced": name in ADVANCED,
+            "help": str(f.help_text) if getattr(f, "help_text", "") else HELP.get(name, ""),
             "bilingual": name.endswith("_ar") or name.endswith("_en"),
             "lang": "ar" if name.endswith("_ar") else ("en" if name.endswith("_en") else None),
             "base": name[:-3] if (name.endswith("_ar") or name.endswith("_en")) else name,
@@ -86,6 +107,33 @@ def _schema(Model):
             item["choices"] = [{"value": c[0], "label": str(c[1])} for c in f.choices]
         fields.append(item)
     return fields
+
+
+def _autofill_identifiers(Model, data):
+    """توليد slug/key تلقائياً من العنوان إن تُرك فارغاً (للمستخدم غير التقني)."""
+    from django.utils.text import slugify
+    import uuid
+    field_names = {f.name for f in Model._meta.get_fields() if isinstance(f, djm.Field)}
+    for ident in ("slug", "key"):
+        if ident not in field_names:
+            continue
+        if str(data.get(ident) or "").strip():
+            continue
+        # معرّف ASCII صالح (يفضّل العنوان الإنجليزي، وإلا معرّف عشوائي)
+        base = ""
+        for src in ("title_en", "name_en", "heading_en", "label_en", "title_ar"):
+            base = slugify(str(data.get(src) or "").strip())  # ASCII فقط
+            if base:
+                break
+        if not base:
+            base = uuid.uuid4().hex[:8]
+        candidate = base
+        n = 2
+        while Model.objects.filter(**{ident: candidate}).exists():
+            candidate = f"{base}-{n}"
+            n += 1
+        data[ident] = candidate
+    return data
 
 
 def _resolve(type_key):
@@ -151,7 +199,9 @@ def collection(request, type_key):
     # POST (create) — للمحتوى فقط
     if is_sub:
         return Response({"detail": "غير مسموح."}, status=403)
-    ser = Ser(data=request.data, context={"request": request})
+    data = request.data.copy() if hasattr(request.data, "copy") else dict(request.data)
+    _autofill_identifiers(Model, data)
+    ser = Ser(data=data, context={"request": request})
     ser.is_valid(raise_exception=True)
     ser.save()
     return Response(ser.data, status=status.HTTP_201_CREATED)
