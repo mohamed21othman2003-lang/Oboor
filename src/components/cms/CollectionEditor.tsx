@@ -7,6 +7,7 @@ import {
   getSchema, getItem, createItem, updateItem, uploadField, resetDefault,
   TYPE_LABELS, type FieldSchema, type CmsItem,
 } from "@/lib/cms/api";
+import { CMS_ICONS, ICON_LABELS, iconNamesFor } from "@/lib/cms/icons";
 
 export default function CollectionEditor({ type, id }: { type: string; id: string }) {
   const router = useRouter();
@@ -159,6 +160,15 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
     if (f.type === "image") {
       return <ImageInput key={i} f={f} value={values[f.name]} type={type} id={id} isNew={isNew} onUploaded={(it) => { setValues(it as Record<string, unknown>); setBaseline(it as Record<string, unknown>); }} />;
     }
+    if (f.name === "icon") {
+      return (
+        <div key={i}>
+          <Label f={f} />
+          <IconPicker value={String(values[f.name] ?? "")} onChange={(v) => set(f.name, v)} names={iconNamesFor(type)} />
+          <Help text={f.help} />
+        </div>
+      );
+    }
     return <FieldInput key={i} f={f} value={values[f.name]} onChange={(v) => set(f.name, v)} />;
   }
 
@@ -300,6 +310,44 @@ function FieldInput({ f, value, onChange, badge, dir }: { f: FieldSchema; value:
         <input type="text" value={String(value ?? "")} onChange={(e) => onChange(e.target.value)} dir={dir} className={INPUT} />
       )}
       {showHelp && <Help text={f.help} />}
+    </div>
+  );
+}
+
+// منتقي أيقونات بصري — اختيار بدل كتابة الاسم
+function IconPicker({ value, onChange, names }: { value: string; onChange: (v: string) => void; names: string[] }) {
+  // اعرض القيمة الحالية دائماً حتى لو خارج المجموعة المقترحة
+  const display = value && CMS_ICONS[value] && !names.includes(value) ? [value, ...names] : names;
+  return (
+    <div>
+      <div className="grid grid-cols-4 gap-2 rounded-xl border border-line bg-surface p-3 sm:grid-cols-6">
+        <button
+          type="button"
+          onClick={() => onChange("")}
+          className={`flex flex-col items-center justify-center gap-1 rounded-lg border p-2 text-[10px] transition-colors ${value === "" ? "border-brand bg-brand/10 text-brand" : "border-line bg-white text-ink-soft hover:border-brand/40"}`}
+        >
+          <span className="flex h-6 w-6 items-center justify-center text-base">✕</span>
+          بدون
+        </button>
+        {display.map((name) => {
+          const active = value === name;
+          return (
+            <button
+              key={name}
+              type="button"
+              onClick={() => onChange(name)}
+              title={ICON_LABELS[name] || name}
+              className={`flex flex-col items-center justify-center gap-1 rounded-lg border p-2 text-[10px] transition-colors ${active ? "border-brand bg-brand/10 text-brand" : "border-line bg-white text-ink hover:border-brand/40"}`}
+            >
+              <span className="flex h-6 w-6 items-center justify-center">{CMS_ICONS[name]}</span>
+              <span className="truncate w-full text-center">{ICON_LABELS[name] || name}</span>
+            </button>
+          );
+        })}
+      </div>
+      {value && !CMS_ICONS[value] && (
+        <p className="mt-1 text-[11px] text-amber-600">الأيقونة «{value}» غير معروفة — اختر واحدة من الأعلى.</p>
+      )}
     </div>
   );
 }
