@@ -83,11 +83,13 @@ export default function SubmissionsList({ type }: { type: string }) {
                         const v = val(it, f.name);
                         if (!v) return null;
                         const isLink = f.type === "image" && v.startsWith("http");
+                        // القيم غير العربية (رقم/إيميل/رابط) تُعرض LTR حتى لا تنقلب
+                        const ltr = !/[؀-ۿ]/.test(v);
                         return (
                           <div key={f.name} className={f.type === "textarea" ? "sm:col-span-2" : ""}>
                             <dt className="text-xs font-semibold text-ink-soft">{f.label}</dt>
                             <dd className="mt-0.5 text-sm text-ink whitespace-pre-wrap break-words">
-                              {isLink ? <a href={v} target="_blank" rel="noopener" className="font-semibold text-brand underline">فتح الملف ↗</a> : v}
+                              {isLink ? <a href={v} target="_blank" rel="noopener" className="font-semibold text-brand underline">فتح الملف ↗</a> : <span dir={ltr ? "ltr" : undefined} className="inline-block">{v}</span>}
                             </dd>
                           </div>
                         );
