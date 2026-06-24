@@ -25,7 +25,7 @@ export default function Navbar({
   const t = getCommon(locale);
 
   // CMS-driven values with fallback to the static data.
-  const logoSrc = logo || "/figma/imgImage.png";
+  const logoSrc = logo || "/logo.png";
   const links = navLinks?.length ? navLinks : NAV_LINKS.map((l) => ({ label: t.nav[l.key], href: l.href }));
   const admissionLabel = cta?.admission || t.admission;
   const contactLabel = cta?.contact || t.contact;

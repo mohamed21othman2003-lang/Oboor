@@ -88,7 +88,7 @@ export default function Footer({
   const t = getCommon(locale).footer;
 
   // CMS-driven values with fallback to the static dictionary/site data.
-  const logoSrc = logo || "/figma/imgImage.png";
+  const logoSrc = logo || "/logo.png";
   const brandDesc = footer?.brandDesc || t.brandDesc;
   const quickTitle = footer?.quickTitle || t.quickLinks;
   const servicesTitle = footer?.servicesTitle || t.servicesTitle;

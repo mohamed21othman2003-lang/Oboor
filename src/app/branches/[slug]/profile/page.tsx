@@ -71,7 +71,7 @@ export default async function BranchProfilePage({ params }: { params: Promise<{ 
         {/* Header */}
         <header className="flex items-center justify-between gap-4 border-b-2 border-brand pb-6">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/figma/imgImage.png" alt={pick(locale, "مركز عبور", "Oboor Center")} className="h-14 w-auto" />
+          <img src="/logo.png" alt={pick(locale, "مركز عبور", "Oboor Center")} className="h-14 w-auto" />
           <div className="text-end">
             <p className="text-lg font-extrabold text-brand-deep">{pick(locale, "مركز عبور للرعاية والتأهيل", "Oboor Center for Care & Rehabilitation")}</p>
             <p className="text-sm text-ink-soft">{pick(locale, "بروفايل تعريفي للفرع", "Branch Profile")}</p>

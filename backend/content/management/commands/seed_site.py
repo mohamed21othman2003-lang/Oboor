@@ -49,7 +49,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **opts):
         SiteSettings.objects.update_or_create(pk=1, defaults=dict(
-            logo_path="/figma/imgImage.png",
+            logo_path="/logo.png",
             site_name_ar="مركز عبور للرعاية والتأهيل",
             site_name_en="Oboor Center for Care & Rehabilitation",
             brand_desc_ar="مركز عبور للرعاية والتأهيل — وجهتكم المتخصصة في دعم أطفالكم وتمكين أسرهم من خلال برامج تأهيلية شاملة.",

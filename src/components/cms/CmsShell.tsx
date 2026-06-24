@@ -80,7 +80,7 @@ export default function CmsShell({ children }: { children: React.ReactNode }) {
       <aside className={`fixed inset-y-0 right-0 z-40 w-72 transform overflow-y-auto bg-brand-deep text-white transition-transform lg:static lg:translate-x-0 ${open ? "translate-x-0" : "translate-x-full lg:translate-x-0"}`}>
         <div className="flex items-center gap-3 border-b border-white/10 px-6 py-5">
           <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-white p-1.5">
-            <Image src="/figma/imgImage.png" alt="عبور" width={40} height={40} className="h-full w-auto object-contain" />
+            <Image src="/logo.png" alt="عبور" width={40} height={40} className="h-full w-auto object-contain" />
           </span>
           <div>
             <p className="text-sm font-extrabold">مركز عبور</p>
