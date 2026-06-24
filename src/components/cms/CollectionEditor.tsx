@@ -129,8 +129,12 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
             try { v = v.trim() ? JSON.parse(v) : (f.required ? [] : null); }
             catch { throw new Error(`القيمة في «${f.label}» ليست JSON صحيحة.`); }
           }
-          // أزل عناصر القوائم الفارغة
-          if (Array.isArray(v)) v = v.filter((x) => !(typeof x === "string" && x.trim() === ""));
+          // أزل عناصر القوائم الفارغة (نصوص فارغة أو كائنات كل قيمها فارغة)
+          if (Array.isArray(v)) v = v.filter((x) => {
+            if (typeof x === "string") return x.trim() !== "";
+            if (x && typeof x === "object") return Object.values(x).some((val) => String(val ?? "").trim() !== "");
+            return true;
+          });
         }
         if (v !== undefined) payload[f.name] = v;
       }
@@ -306,8 +310,19 @@ const OBJECT_FIELDS: Record<string, { key: string; label: string }[]> = {
 
 // حقول مقفولة (تُعرض للاطلاع فقط؛ تغييرها يكسر مكان المحتوى)
 const LOCKED_FIELDS = new Set(["block"]);
+// قوائم بطاقات — كل عنصر كائن بخانات معنونة بسيطة (بدل JSON)
+const CARD_LIST_FIELDS: Record<string, { key: string; label: string }[]> = {
+  methods: [
+    { key: "name", label: "الاسم" },
+    { key: "desc", label: "الوصف" },
+  ],
+  training_areas: [
+    { key: "title", label: "العنوان" },
+    { key: "desc", label: "الوصف" },
+  ],
+};
 // حقول محتوى منظّم معقّد — للعرض فقط (تعديلها الخام يكسر الصفحة)
-const COMPLEX_JSON = new Set(["methods", "training_areas", "blocks"]);
+const COMPLEX_JSON = new Set(["blocks"]);
 const isComplexJson = (v: unknown) =>
   (v != null && typeof v === "object" && !Array.isArray(v) && Object.keys(v).length > 0) ||
   (Array.isArray(v) && v.some((x) => x != null && typeof x === "object"));
@@ -368,6 +383,8 @@ function FieldInput({ f, value, onChange, badge, dir }: { f: FieldSchema; value:
       ) : f.type === "json" ? (
         OBJECT_FIELDS[f.base] ? (
           <ObjectEditor value={value} onChange={onChange} fields={OBJECT_FIELDS[f.base]} dir={dir} />
+        ) : CARD_LIST_FIELDS[f.base] ? (
+          <CardListEditor value={value} onChange={onChange} fields={CARD_LIST_FIELDS[f.base]} dir={dir} />
         ) : COMPLEX_JSON.has(f.base) || isComplexJson(value) ? (
           <ReadOnlyJson f={f} value={value} />
         ) : isSimpleArray(value) || value == null ? (
@@ -446,6 +463,39 @@ function ObjectEditor({ value, onChange, fields, dir }: { value: unknown; onChan
         </div>
       ))}
       <p className="text-[11px] text-ink-soft">اتركها فارغة إن لم تكن الخدمة تحتاج بطاقة مميّزة.</p>
+    </div>
+  );
+}
+
+// محرّر قائمة بطاقات — كل عنصر كائن بخانات معنونة (بدل قائمة JSON مركّبة)
+function CardListEditor({ value, onChange, fields, dir }: { value: unknown; onChange: (v: unknown) => void; fields: { key: string; label: string }[]; dir?: string }) {
+  const items = (Array.isArray(value) ? value : []).filter((x) => x && typeof x === "object" && !Array.isArray(x)) as Record<string, unknown>[];
+  const update = (i: number, key: string, v: string) => onChange(items.map((it, j) => (j === i ? { ...it, [key]: v } : it)));
+  const remove = (i: number) => onChange(items.filter((_, j) => j !== i));
+  const add = () => onChange([...items, Object.fromEntries(fields.map((fl) => [fl.key, ""]))]);
+  return (
+    <div className="space-y-3">
+      {items.length === 0 && <p className="rounded-xl border border-dashed border-line bg-surface px-4 py-2.5 text-xs text-ink-soft">لا توجد عناصر — اضغط «إضافة عنصر».</p>}
+      {items.map((it, i) => (
+        <div key={i} className="rounded-xl border border-line bg-surface/50 p-3">
+          <div className="mb-2 flex items-center justify-between">
+            <span className="flex h-6 min-w-6 items-center justify-center rounded-full bg-brand/10 px-2 text-[11px] font-bold text-brand">عنصر {i + 1}</span>
+            <button type="button" onClick={() => remove(i)} className="rounded-lg bg-red-50 px-2.5 py-1.5 text-xs font-semibold text-red-600 transition-colors hover:bg-red-600 hover:text-white">حذف</button>
+          </div>
+          <div className="space-y-2">
+            {fields.map((fl) => (
+              <div key={fl.key}>
+                <p className="mb-1 text-xs font-semibold text-ink-soft">{fl.label}</p>
+                <AutoTextarea value={String(it[fl.key] ?? "")} onChange={(v) => update(i, fl.key, v)} dir={dir} className={INPUT + " bg-white"} />
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+      <button type="button" onClick={add} className="inline-flex items-center gap-1.5 rounded-lg bg-brand/10 px-3 py-1.5 text-xs font-semibold text-brand transition-colors hover:bg-brand hover:text-white">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path strokeLinecap="round" d="M12 5v14M5 12h14" /></svg>
+        إضافة عنصر
+      </button>
     </div>
   );
 }
