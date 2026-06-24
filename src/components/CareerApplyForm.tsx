@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { CITIES, CITIES_EN } from "@/lib/careersData";
 import { pick, type Locale } from "@/i18n/config";
+import { validateName, validatePhone } from "@/lib/validate";
 
 export default function CareerApplyForm({ jobTitle, locale }: { jobTitle: string; locale: Locale }) {
   const [sent, setSent] = useState(false);
@@ -28,6 +29,10 @@ export default function CareerApplyForm({ jobTitle, locale }: { jobTitle: string
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
+    const nameErr = validateName(String(fd.get("name") || ""), locale);
+    if (nameErr) { setError(nameErr); return; }
+    const phoneErr = validatePhone(String(fd.get("phone") || ""), locale);
+    if (phoneErr) { setError(phoneErr); return; }
     const cv = fd.get("cv");
     // السيرة الذاتية إجبارية فعلياً
     if (!(cv instanceof File) || cv.size === 0) {

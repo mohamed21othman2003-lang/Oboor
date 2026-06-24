@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { pick, type Locale } from "@/i18n/config";
+import { validateName, validatePhone } from "@/lib/validate";
 
 const BRANCHES: { ar: string; en: string }[] = [
   { ar: "الرياض — الفرع الرئيسي", en: "Riyadh — Main Branch" },
@@ -23,10 +24,15 @@ export default function ContactForm({ locale }: { locale: Locale }) {
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    const nameErr = validateName(String(fd.get("name") || ""), locale);
+    if (nameErr) { setError(nameErr); return; }
+    const phoneErr = validatePhone(String(fd.get("phone") || ""), locale);
+    if (phoneErr) { setError(phoneErr); return; }
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("/api/contact", { method: "POST", body: new FormData(e.currentTarget) });
+      const res = await fetch("/api/contact", { method: "POST", body: fd });
       const data = await res.json();
       if (!res.ok || !data.ok) throw new Error(data.error || "");
       setSent(true);
@@ -65,11 +71,11 @@ export default function ContactForm({ locale }: { locale: Locale }) {
     <form onSubmit={handleSubmit} className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-line sm:p-8">
       <div className="grid gap-5 sm:grid-cols-2">
         <div>
-          <label htmlFor="name" className={labelCls}>{pick(locale, "الاسم الكامل", "Full Name")}</label>
+          <label htmlFor="name" className={labelCls}>{pick(locale, "الاسم الكامل", "Full Name")} <span className="text-red-500">*</span></label>
           <input id="name" name="name" required placeholder={pick(locale, "أدخل اسمك الكامل", "Enter your full name")} className={field} />
         </div>
         <div>
-          <label htmlFor="phone" className={labelCls}>{pick(locale, "رقم الجوال", "Mobile Number")}</label>
+          <label htmlFor="phone" className={labelCls}>{pick(locale, "رقم الجوال", "Mobile Number")} <span className="text-red-500">*</span></label>
           <input id="phone" name="phone" required dir="ltr" placeholder="05XXXXXXXX" className={`${field} text-start`} />
         </div>
         <div>
@@ -102,7 +108,7 @@ export default function ContactForm({ locale }: { locale: Locale }) {
       </div>
 
       <div className="mt-5">
-        <label htmlFor="message" className={labelCls}>{pick(locale, "الرسالة", "Message")}</label>
+        <label htmlFor="message" className={labelCls}>{pick(locale, "الرسالة", "Message")} <span className="text-red-500">*</span></label>
         <textarea id="message" name="message" required rows={5} placeholder={pick(locale, "اكتب رسالتك هنا...", "Write your message here...")} className={`${field} resize-none`} />
       </div>
 

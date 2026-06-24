@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { pick, type Locale } from "@/i18n/config";
+import { validateName, validatePhone } from "@/lib/validate";
 
 const CITIES = ["الرياض", "جدة", "الدمام", "مكة المكرمة", "المدينة المنورة", "القصيم", "عسير"];
 const CITIES_EN = ["Riyadh", "Jeddah", "Dammam", "Makkah", "Madinah", "Qassim", "Asir"];
@@ -20,10 +21,15 @@ export default function AdmissionForm({ locale }: { locale: Locale }) {
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    const nameErr = validateName(String(fd.get("parentName") || ""), locale);
+    if (nameErr) { setError(nameErr); return; }
+    const phoneErr = validatePhone(String(fd.get("phone") || ""), locale);
+    if (phoneErr) { setError(phoneErr); return; }
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("/api/admission", { method: "POST", body: new FormData(e.currentTarget) });
+      const res = await fetch("/api/admission", { method: "POST", body: fd });
       const data = await res.json();
       if (!res.ok || !data.ok) throw new Error(data.error || "");
       setSent(true);
