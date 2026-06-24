@@ -14,6 +14,8 @@ export type Branch = {
   phone: string;
   services: string[];
   gallery?: string[];
+  lat?: number | null;
+  lng?: number | null;
   isNew?: boolean;
 };
 

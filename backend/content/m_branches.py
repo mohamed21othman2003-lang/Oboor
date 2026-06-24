@@ -30,6 +30,9 @@ class Branch(models.Model):
 
     gallery = models.JSONField("معرض صور الفرع", default=list, blank=True)
 
+    lat = models.FloatField("خط العرض (lat)", null=True, blank=True)
+    lng = models.FloatField("خط الطول (lng)", null=True, blank=True)
+
     is_new = models.BooleanField("فرع جديد", default=False)
 
     order = models.IntegerField("الترتيب", default=0)
