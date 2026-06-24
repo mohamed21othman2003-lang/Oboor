@@ -13,10 +13,10 @@ class ClinicalService(models.Model):
 
     about_ar = models.JSONField("النبذة (عربي)", default=list, blank=True)
     about_en = models.JSONField("النبذة (إنجليزي)", default=list, blank=True)
-    about_list_ar = models.JSONField("قائمة النبذة (عربي)", default=list, blank=True)
-    about_list_en = models.JSONField("قائمة النبذة (إنجليزي)", default=list, blank=True)
-    about_tag_ar = models.JSONField("وسم النبذة (عربي)", default=dict, blank=True)
-    about_tag_en = models.JSONField("وسم النبذة (إنجليزي)", default=dict, blank=True)
+    about_list_ar = models.JSONField("نقاط النبذة (عربي)", default=list, blank=True)
+    about_list_en = models.JSONField("نقاط النبذة (إنجليزي)", default=list, blank=True)
+    about_tag_ar = models.JSONField("بطاقة مميّزة (عربي)", default=dict, blank=True)
+    about_tag_en = models.JSONField("بطاقة مميّزة (إنجليزي)", default=dict, blank=True)
     blocks_ar = models.JSONField("المحتوى (عربي)", default=list, blank=True)
     blocks_en = models.JSONField("المحتوى (إنجليزي)", default=list, blank=True)
 
