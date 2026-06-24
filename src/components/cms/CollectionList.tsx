@@ -47,7 +47,9 @@ export default function CollectionList({ type }: { type: string }) {
     }
   }
 
-  const canReorder = items.length > 0 && "order" in items[0] && !readonly;
+  // أنواع زمنية (الأحدث أولاً) — لا تُرتَّب يدوياً
+  const TIME_ORDERED = new Set(["news", "careers"]);
+  const canReorder = items.length > 0 && "order" in items[0] && !readonly && !TIME_ORDERED.has(type);
 
   async function move(it: CmsItem, dir: -1 | 1) {
     const idx = items.findIndex((x) => x.id === it.id);
