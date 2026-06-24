@@ -14,7 +14,7 @@ export const SETTINGS: SettingsGroup[] = [
         key: "brand",
         label: "الشعار",
         fields: [{ key: "logo", label: "شعار المركز", type: "image", colSpan: 2 }],
-        value: { logo: "/figma/imgImage.png" },
+        value: { logo: "/logo.png" },
       },
       {
         key: "links",
@@ -61,7 +61,7 @@ export const SETTINGS: SettingsGroup[] = [
           { key: "logo", label: "الشعار", type: "image", colSpan: 2 },
           { key: "brandDesc", label: "وصف المركز", type: "textarea", bilingual: true, colSpan: 2 },
         ],
-        value: { logo: "/figma/imgImage.png", brandDesc: b("مركز عبور للرعاية والتأهيل — وجهتكم المتخصصة في دعم أطفالكم.", "Oboor Center for Care & Rehabilitation — your specialized destination.") },
+        value: { logo: "/logo.png", brandDesc: b("مركز عبور للرعاية والتأهيل — وجهتكم المتخصصة في دعم أطفالكم.", "Oboor Center for Care & Rehabilitation — your specialized destination.") },
       },
       {
         key: "titles",
@@ -103,7 +103,7 @@ export const SETTINGS: SettingsGroup[] = [
           { key: "logo", label: "الشعار الرئيسي", type: "image" },
           { key: "favicon", label: "أيقونة المتصفح (Favicon)", type: "image" },
         ],
-        value: { logo: "/figma/imgImage.png", favicon: "/favicon.ico" },
+        value: { logo: "/logo.png", favicon: "/favicon.ico" },
       },
       {
         key: "colors",

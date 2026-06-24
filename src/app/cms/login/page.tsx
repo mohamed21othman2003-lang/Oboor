@@ -32,7 +32,7 @@ export default function CmsLoginPage() {
       <div className="w-full max-w-md rounded-3xl bg-white p-8 shadow-2xl sm:p-10">
         <div className="flex flex-col items-center text-center">
           <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-brand/10 p-2">
-            <Image src="/figma/imgImage.png" alt="عبور" width={56} height={56} className="h-full w-auto object-contain" />
+            <Image src="/logo.png" alt="عبور" width={56} height={56} className="h-full w-auto object-contain" />
           </span>
           <h1 className="mt-4 text-2xl font-extrabold text-ink">لوحة تحكّم مركز عبور</h1>
           <p className="mt-1 text-sm text-ink-soft">سجّل دخولك لإدارة محتوى الموقع</p>

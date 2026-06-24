@@ -3,7 +3,7 @@ import Icon from "@/components/admin/icons";
 const MEDIA: { group: string; items: { src: string; label: string }[] }[] = [
   {
     group: "الهوية",
-    items: [{ src: "/figma/imgImage.png", label: "شعار المركز" }],
+    items: [{ src: "/logo.png", label: "شعار المركز" }],
   },
   {
     group: "الصفحة الرئيسية",

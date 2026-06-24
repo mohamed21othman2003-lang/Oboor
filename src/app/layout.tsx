@@ -52,7 +52,7 @@ export default async function RootLayout({
   const t = getCommon(locale);
 
   // Logo (fallback to static figma asset)
-  const logo = site?.logo_url || "/figma/imgImage.png";
+  const logo = site?.logo_url || "/logo.png";
 
   // Nav links (CMS → fallback NAV_LINKS + getCommon labels)
   const navLinks =
