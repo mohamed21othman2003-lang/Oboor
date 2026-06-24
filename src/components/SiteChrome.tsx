@@ -25,7 +25,7 @@ export default function SiteChrome({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  if (pathname?.startsWith("/admin") || pathname?.endsWith("/profile")) {
+  if (pathname?.startsWith("/admin") || pathname?.startsWith("/cms") || pathname?.endsWith("/profile")) {
     return <>{children}</>;
   }
   return (
