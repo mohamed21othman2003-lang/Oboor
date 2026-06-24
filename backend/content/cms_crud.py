@@ -40,8 +40,8 @@ SUBMISSIONS = {
     "assessment": (AssessmentResult, "name"),
 }
 
-# الحقول اللي ما تظهرش في الفورم
-HIDDEN = {"id", "created_at", "updated_at"}
+# الحقول اللي ما تظهرش في الفورم (معرّفات تقنية تُولَّد تلقائياً وتعديلها يكسر الروابط)
+HIDDEN = {"id", "created_at", "updated_at", "slug", "key"}
 
 # حقول تقنية تُعرض داخل لوحة «إعدادات متقدمة» المطويّة (اختيارية لمستخدم غير تقني)
 ADVANCED = {"slug", "key", "order", "color", "icon", "href"}
