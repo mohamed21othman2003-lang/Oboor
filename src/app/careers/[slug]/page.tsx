@@ -116,11 +116,11 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
               <div className="mt-4 overflow-hidden rounded-xl border border-line">
                 {details.map((d, i) => (
                   <div key={d.label} className={`flex items-center justify-between gap-4 px-4 py-3 text-sm ${i % 2 === 0 ? "bg-surface/60" : "bg-white"}`}>
-                    <span className="font-semibold text-ink">{d.value}</span>
                     <span className="flex items-center gap-2 text-ink-soft">
-                      {d.label}
                       <span className="text-brand">{d.icon}</span>
+                      {d.label}
                     </span>
+                    <span className="font-semibold text-ink">{d.value}</span>
                   </div>
                 ))}
               </div>
