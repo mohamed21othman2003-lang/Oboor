@@ -7,7 +7,11 @@ import { validateName, validatePhone } from "@/lib/validate";
 
 const OTHER = "__other__";
 
-export default function CareerApplyForm({ jobTitle, locale, roles = [] }: { jobTitle: string; locale: Locale; roles?: string[] }) {
+// تخصصات/مجالات مهنية للاختيار (الوظيفة الحالية للمتقدّم — مستقلة عن الوظيفة المُعلَنة)
+const SPECIALTIES = ["أخصائي نطق وتخاطب", "علاج وظيفي", "علاج طبيعي", "تحليل سلوك تطبيقي (ABA)", "أخصائي نفسي", "تربية خاصة", "تمريض", "إداري / منسّق", "طالب / خريّج جديد"];
+const SPECIALTIES_EN = ["Speech & Language Therapist", "Occupational Therapist", "Physical Therapist", "ABA Behavior Analyst", "Psychologist", "Special Education", "Nursing", "Administrative / Coordinator", "Student / New Graduate"];
+
+export default function CareerApplyForm({ jobTitle, locale }: { jobTitle: string; locale: Locale }) {
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -111,14 +115,14 @@ export default function CareerApplyForm({ jobTitle, locale, roles = [] }: { jobT
               <Field name="email" label={pick(locale, "البريد الإلكتروني", "Email")} required type="email" placeholder="example@gmail.com" />
               <SelectField name="city" label={pick(locale, "المدينة", "City")} required options={cities} />
               <div>
-                <Label required>{pick(locale, "المسمى الوظيفي الحالي", "Current Job Title")}</Label>
+                <Label required>{pick(locale, "تخصصك / مجالك الحالي", "Your current field / specialty")}</Label>
                 <select
                   value={role}
                   onChange={(e) => setRole(e.target.value)}
                   className="mt-1.5 w-full rounded-xl border border-line bg-white px-3 py-2.5 text-start text-sm text-ink focus:outline-none focus:ring-2 focus:ring-brand/30"
                 >
-                  <option value="" disabled>{pick(locale, "اختر المسمى…", "Select a title…")}</option>
-                  {roles.map((r) => <option key={r} value={r}>{r}</option>)}
+                  <option value="" disabled>{pick(locale, "اختر تخصصك…", "Select your specialty…")}</option>
+                  {(locale === "en" ? SPECIALTIES_EN : SPECIALTIES).map((r) => <option key={r} value={r}>{r}</option>)}
                   <option value={OTHER}>{pick(locale, "أخرى…", "Other…")}</option>
                 </select>
                 {role === OTHER && (
