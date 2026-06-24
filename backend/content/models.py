@@ -48,3 +48,19 @@ from .m_assessment import *    # noqa: E402,F401,F403
 from .m_home import *          # noqa: E402,F401,F403
 from .m_sections import *      # noqa: E402,F401,F403
 from .m_site import *          # noqa: E402,F401,F403
+
+
+class ContentSnapshot(models.Model):
+    """لقطة من المحتوى لاسترجاع «النسخة الافتراضية» لاحقاً."""
+    type_key = models.CharField(max_length=40)
+    obj_id = models.IntegerField()
+    data = models.JSONField(default=dict)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "لقطة محتوى افتراضية"
+        verbose_name_plural = "لقطات المحتوى الافتراضية"
+        unique_together = ("type_key", "obj_id")
+
+    def __str__(self):
+        return f"{self.type_key}#{self.obj_id}"
