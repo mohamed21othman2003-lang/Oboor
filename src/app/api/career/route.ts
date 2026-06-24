@@ -3,7 +3,7 @@ import { addSubmission, saveFile } from "@/lib/server/store";
 import { DJANGO_API_URL, forwardForm } from "@/lib/server/django";
 
 export const runtime = "nodejs";
-const MAX = 5 * 1024 * 1024; // 5 MB
+const MAX = 10 * 1024 * 1024; // 10 MB
 
 export async function POST(req: Request) {
   try {
@@ -24,7 +24,7 @@ export async function POST(req: Request) {
       fd.set("about", get("about"));
       const cv = form.get("cv");
       if (cv && cv instanceof File && cv.size > 0) {
-        if (cv.size > MAX) return NextResponse.json({ ok: false, error: "حجم الملف أكبر من 5 ميغابايت" }, { status: 400 });
+        if (cv.size > MAX) return NextResponse.json({ ok: false, error: "حجم الملف أكبر من 10 ميغابايت" }, { status: 400 });
         fd.set("cv", cv, cv.name);
       }
       await forwardForm("career", fd);
@@ -36,7 +36,7 @@ export async function POST(req: Request) {
     const cv = form.get("cv");
     if (cv && cv instanceof File && cv.size > 0) {
       if (cv.size > MAX) {
-        return NextResponse.json({ ok: false, error: "حجم الملف أكبر من 5 ميغابايت" }, { status: 400 });
+        return NextResponse.json({ ok: false, error: "حجم الملف أكبر من 10 ميغابايت" }, { status: 400 });
       }
       const buf = Buffer.from(await cv.arrayBuffer());
       cvName = cv.name;

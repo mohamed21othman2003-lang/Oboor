@@ -19,13 +19,13 @@ export default function CareerApplyForm({ jobTitle, locale }: { jobTitle: string
   const [role, setRole] = useState("");
   const [roleOther, setRoleOther] = useState("");
 
-  const MAX = 5 * 1024 * 1024; // 5MB
+  const MAX = 10 * 1024 * 1024; // 10MB
 
   function onFile(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0];
     if (!f) { setFileName(""); return; }
     if (f.size > MAX) {
-      setError(pick(locale, "حجم الملف أكبر من 5 ميغابايت.", "File exceeds 5 MB."));
+      setError(pick(locale, "حجم الملف أكبر من 10 ميغابايت.", "File exceeds 10 MB."));
       e.target.value = "";
       setFileName("");
       return;
@@ -50,12 +50,33 @@ export default function CareerApplyForm({ jobTitle, locale }: { jobTitle: string
       setError(pick(locale, "الرجاء رفع السيرة الذاتية (PDF أو DOC).", "Please upload your CV (PDF or DOC)."));
       return;
     }
+    if (cv.size > MAX) {
+      setError(pick(locale, "حجم الملف أكبر من 10 ميغابايت.", "File exceeds 10 MB."));
+      return;
+    }
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("/api/career", { method: "POST", body: fd });
-      const data = await res.json();
-      if (!res.ok || !data.ok) throw new Error(data.error || "");
+      const base = process.env.NEXT_PUBLIC_DJANGO_API_URL;
+      if (base) {
+        // رفع مباشر إلى Django (يتجاوز حد حجم دوال Vercel) — أسماء حقول Django
+        const dj = new FormData();
+        dj.set("job", jobTitle);
+        dj.set("name", String(fd.get("name") || ""));
+        dj.set("phone", String(fd.get("phone") || ""));
+        dj.set("email", String(fd.get("email") || ""));
+        dj.set("city", String(fd.get("city") || ""));
+        dj.set("current_role", finalRole);
+        dj.set("experience", String(fd.get("experience") || ""));
+        dj.set("about", String(fd.get("about") || ""));
+        dj.set("cv", cv, cv.name);
+        const res = await fetch(`${base}/career/`, { method: "POST", body: dj });
+        if (!res.ok) throw new Error("");
+      } else {
+        const res = await fetch("/api/career", { method: "POST", body: fd });
+        const data = await res.json();
+        if (!res.ok || !data.ok) throw new Error(data.error || "");
+      }
       setSent(true);
     } catch {
       setError(pick(locale, "حدث خطأ، حاول مرة أخرى.", "Something went wrong, please try again."));
@@ -167,7 +188,7 @@ export default function CareerApplyForm({ jobTitle, locale }: { jobTitle: string
                 ) : (
                   <>
                     <span className="text-sm font-medium text-ink">{pick(locale, "اسحب ملفك هنا أو انقر للرفع", "Drag your file here or click to upload")}</span>
-                    <span className="text-xs text-ink-soft">{pick(locale, "PDF, DOC, DOCX — بحد أقصى 5 ميغابايت", "PDF, DOC, DOCX — max 5 MB")}</span>
+                    <span className="text-xs text-ink-soft">{pick(locale, "PDF, DOC, DOCX — بحد أقصى 10 ميغابايت", "PDF, DOC, DOCX — max 10 MB")}</span>
                   </>
                 )}
                 <input name="cv" type="file" accept=".pdf,.doc,.docx" onChange={onFile} className="hidden" />
