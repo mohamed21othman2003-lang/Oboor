@@ -246,6 +246,25 @@ def schema(request, type_key):
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
+def reorder(request, type_key):
+    """إعادة ترتيب العناصر: يأخذ قائمة المعرّفات بالترتيب الجديد ويضبط حقل order."""
+    Model, is_sub = _resolve(type_key)
+    if Model is None or is_sub:
+        return Response({"detail": "غير مسموح."}, status=400)
+    if not any(f.name == "order" for f in Model._meta.get_fields() if isinstance(f, djm.Field)):
+        return Response({"detail": "هذا النوع لا يدعم الترتيب."}, status=400)
+    ids = request.data.get("ids", [])
+    objs = {o.pk: o for o in Model.objects.filter(pk__in=ids)}
+    for idx, pk in enumerate(ids):
+        o = objs.get(pk)
+        if o is not None and o.order != idx:
+            o.order = idx
+            o.save(update_fields=["order"])
+    return Response({"ok": True})
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
 def reset_default(request, type_key, pk):
     """استرجاع العنصر إلى نسخته الافتراضية (اللقطة المخزّنة)."""
     Model, is_sub = _resolve(type_key)
