@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { pick, type Locale } from "@/i18n/config";
+import AnimatedNumber from "./AnimatedNumber";
 
 const users = (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" /></svg>
@@ -89,7 +90,7 @@ export default function Stats({ locale, items }: { locale: Locale; items?: StatI
           {stats.map((s) => (
             <div key={s.label} className="flex flex-col items-center rounded-2xl border border-white/10 bg-white/5 p-8 text-center backdrop-blur">
               <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-brand/15 text-brand">{s.icon}</div>
-              <p className="text-4xl font-extrabold text-white" dir="ltr">{s.value}</p>
+              <p className="text-4xl font-extrabold text-white" dir="ltr"><AnimatedNumber value={s.value} /></p>
               <p className="mt-3 text-base font-bold text-white">{s.label}</p>
               <p className="mt-1 text-xs text-white/60">{s.note}</p>
             </div>
