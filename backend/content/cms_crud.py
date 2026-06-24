@@ -10,6 +10,7 @@ from content.models import (
     NewsArticle, ProgramDetail, ClinicalService, Technique, Branch,
     Specialist, JobOpening, SuccessStory, AssessmentCard,
     HeroSlide, StatItem, FeatureItem, GalleryImage, ServiceCard, SectionItem, SiteSettings,
+    ContentSnapshot,
 )
 
 # مفتاح النوع → (الموديل، حقل العنوان للعرض في القائمة)
@@ -95,6 +96,28 @@ def _resolve(type_key):
     return None, False
 
 
+def snapshot_fields(obj):
+    """قيم الحقول القابلة للتحرير بصيغة JSON-safe (نتجاهل ملفات الصور)."""
+    out = {}
+    for f in obj._meta.get_fields():
+        if not isinstance(f, djm.Field):
+            continue
+        if f.name in HIDDEN or f.auto_created or not f.editable:
+            continue
+        if isinstance(f, (djm.ImageField, djm.FileField)):
+            continue
+        out[f.name] = getattr(obj, f.name)
+    return out
+
+
+def capture_snapshot(type_key, obj):
+    """تخزين لقطة افتراضية لمرة واحدة (لا تُكتب فوق الموجودة)."""
+    ContentSnapshot.objects.get_or_create(
+        type_key=type_key, obj_id=obj.pk,
+        defaults={"data": snapshot_fields(obj)},
+    )
+
+
 @api_view(["GET", "POST"])
 @permission_classes([IsAuthenticated])
 def collection(request, type_key):
@@ -136,7 +159,10 @@ def item(request, type_key, pk):
     Ser = _serializer_for(Model)
 
     if request.method == "GET":
-        return Response(Ser(obj, context={"request": request}).data)
+        data = Ser(obj, context={"request": request}).data
+        if not is_sub:
+            data["_has_default"] = ContentSnapshot.objects.filter(type_key=type_key, obj_id=pk).exists()
+        return Response(data)
     if request.method == "DELETE":
         obj.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -155,3 +181,24 @@ def schema(request, type_key):
     if Model is None:
         return Response({"detail": "نوع غير معروف."}, status=404)
     return Response({"fields": _schema(Model), "readonly": is_sub})
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def reset_default(request, type_key, pk):
+    """استرجاع العنصر إلى نسخته الافتراضية (اللقطة المخزّنة)."""
+    Model, is_sub = _resolve(type_key)
+    if Model is None or is_sub:
+        return Response({"detail": "غير مسموح."}, status=400)
+    try:
+        obj = Model.objects.get(pk=pk)
+    except Model.DoesNotExist:
+        return Response({"detail": "غير موجود."}, status=404)
+    try:
+        snap = ContentSnapshot.objects.get(type_key=type_key, obj_id=pk)
+    except ContentSnapshot.DoesNotExist:
+        return Response({"detail": "لا توجد نسخة افتراضية محفوظة لهذا العنصر."}, status=404)
+    for name, value in snap.data.items():
+        setattr(obj, name, value)
+    obj.save()
+    return Response(_serializer_for(Model)(obj, context={"request": request}).data)

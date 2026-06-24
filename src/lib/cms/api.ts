@@ -100,6 +100,10 @@ export function updateItem(type: string, pk: number | string, data: Record<strin
 export function deleteItem(type: string, pk: number | string) {
   return cmsFetch(`/cms/collections/${type}/${pk}/`, { method: "DELETE" });
 }
+// استرجاع العنصر لنسخته الافتراضية
+export function resetDefault(type: string, pk: number | string) {
+  return cmsFetch<CmsItem>(`/cms/collections/${type}/${pk}/reset/`, { method: "POST" });
+}
 // رفع ملف (صورة) لحقل معيّن عبر multipart
 export function uploadField(type: string, pk: number | string, field: string, file: File) {
   const fd = new FormData();
