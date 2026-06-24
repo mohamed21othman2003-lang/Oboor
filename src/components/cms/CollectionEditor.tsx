@@ -170,6 +170,10 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
         </div>
       );
     }
+    // حقل مقفول (مكان المحتوى) — عرض فقط على العناصر الموجودة
+    if (LOCKED_FIELDS.has(f.name) && !isNew) {
+      return <ReadOnlyField key={i} f={f} value={String(values[f.name] ?? "")} note="هذا يحدّد مكان ظهور المحتوى في الصفحة — لا يُعدّل لتجنّب اختفائه." />;
+    }
     return <FieldInput key={i} f={f} value={values[f.name]} onChange={(v) => set(f.name, v)} />;
   }
 
@@ -300,9 +304,47 @@ const OBJECT_FIELDS: Record<string, { key: string; label: string }[]> = {
   ],
 };
 
+// حقول مقفولة (تُعرض للاطلاع فقط؛ تغييرها يكسر مكان المحتوى)
+const LOCKED_FIELDS = new Set(["block"]);
+// حقول محتوى منظّم معقّد — للعرض فقط (تعديلها الخام يكسر الصفحة)
+const COMPLEX_JSON = new Set(["methods", "training_areas", "blocks"]);
+const isComplexJson = (v: unknown) =>
+  (v != null && typeof v === "object" && !Array.isArray(v) && Object.keys(v).length > 0) ||
+  (Array.isArray(v) && v.some((x) => x != null && typeof x === "object"));
+
 function Help({ text }: { text?: string }) {
   if (!text) return null;
   return <p className="mt-1 text-[11px] text-ink-soft">{text}</p>;
+}
+
+const LOCK_ICON = (
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="inline-block"><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+);
+
+// حقل نصّي مقفول — عرض فقط
+function ReadOnlyField({ f, value, note }: { f: FieldSchema; value: string; note?: string }) {
+  return (
+    <div>
+      <label className="mb-1.5 flex items-center gap-1.5 text-sm font-semibold text-ink-soft">{LOCK_ICON} {f.label}</label>
+      <div className="w-full rounded-xl border border-line bg-surface px-4 py-2.5 text-sm text-ink-soft">{value || "—"}</div>
+      {note && <p className="mt-1 text-[11px] text-amber-600">{note}</p>}
+    </div>
+  );
+}
+
+// محتوى منظّم معقّد — عرض فقط (آمن من الكسر)
+function ReadOnlyJson({ f, value }: { f: FieldSchema; value: unknown }) {
+  const count = Array.isArray(value) ? value.length : value && typeof value === "object" ? Object.keys(value).length : 0;
+  return (
+    <div>
+      <label className="mb-1.5 flex items-center gap-1.5 text-sm font-semibold text-ink-soft">{LOCK_ICON} {f.label}</label>
+      <details className="rounded-xl border border-line bg-surface">
+        <summary className="cursor-pointer px-4 py-2.5 text-sm text-ink-soft">محتوى منظّم ({count} عنصر) — اضغط للعرض</summary>
+        <pre dir="ltr" className="max-h-60 overflow-auto border-t border-line p-3 text-[11px] leading-5 text-ink-soft">{JSON.stringify(value, null, 2)}</pre>
+      </details>
+      <p className="mt-1 text-[11px] text-amber-600">محتوى منظّم — للعرض فقط؛ لتعديله بأمان تواصل مع المطوّر.</p>
+    </div>
+  );
 }
 
 function FieldInput({ f, value, onChange, badge, dir }: { f: FieldSchema; value: unknown; onChange: (v: unknown) => void; badge?: string; dir?: string }) {
@@ -326,10 +368,12 @@ function FieldInput({ f, value, onChange, badge, dir }: { f: FieldSchema; value:
       ) : f.type === "json" ? (
         OBJECT_FIELDS[f.base] ? (
           <ObjectEditor value={value} onChange={onChange} fields={OBJECT_FIELDS[f.base]} dir={dir} />
+        ) : COMPLEX_JSON.has(f.base) || isComplexJson(value) ? (
+          <ReadOnlyJson f={f} value={value} />
         ) : isSimpleArray(value) || value == null ? (
           <ListEditor value={isSimpleArray(value) ? value : []} onChange={onChange} dir={dir} />
         ) : (
-          <textarea value={JSON.stringify(value, null, 2)} onChange={(e) => { try { onChange(JSON.parse(e.target.value)); } catch { onChange(e.target.value); } }} rows={6} dir="ltr" className={`${INPUT} font-mono text-xs`} />
+          <ReadOnlyJson f={f} value={value} />
         )
       ) : f.type === "select" ? (
         <select value={String(value ?? "")} onChange={(e) => onChange(e.target.value)} className={INPUT}>
