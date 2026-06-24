@@ -1,17 +1,28 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
 import { pick, type Locale } from "@/i18n/config";
 
 export default function BranchGallery({ images, branchName, locale = "ar" }: { images: string[]; branchName: string; locale?: Locale }) {
   const [index, setIndex] = useState(0);
   const [open, setOpen] = useState(false);
+  const [paused, setPaused] = useState(false);
+  const touchX = useRef<number | null>(null);
+  const multi = images.length > 1;
 
   const go = useCallback((dir: number) => {
     setIndex((i) => (i + dir + images.length) % images.length);
   }, [images.length]);
 
+  // تشغيل تلقائي (يتوقّف عند المرور بالماوس أو فتح العرض المكبّر)
+  useEffect(() => {
+    if (!multi || paused || open) return;
+    const id = setInterval(() => go(1), 5000);
+    return () => clearInterval(id);
+  }, [multi, paused, open, go]);
+
+  // لوحة المفاتيح داخل العرض المكبّر
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -24,18 +35,52 @@ export default function BranchGallery({ images, branchName, locale = "ar" }: { i
     return () => { document.removeEventListener("keydown", onKey); document.body.style.overflow = ""; };
   }, [open, go]);
 
+  // سحب باللمس
+  const onTouchStart = (e: React.TouchEvent) => { touchX.current = e.touches[0].clientX; };
+  const onTouchEnd = (e: React.TouchEvent) => {
+    if (touchX.current === null) return;
+    const dx = e.changedTouches[0].clientX - touchX.current;
+    if (Math.abs(dx) > 40) go(dx < 0 ? 1 : -1);
+    touchX.current = null;
+  };
+
   return (
     <section className="bg-white py-16">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <h2 className="mb-8 text-start text-3xl font-extrabold text-ink">{pick(locale, "صور من ", "Photos of the ")}<span className="text-brand">{pick(locale, "الفرع", "Branch")}</span></h2>
 
         {/* Featured */}
-        <div className="relative overflow-hidden rounded-2xl border border-line bg-surface">
-          <button onClick={() => setOpen(true)} className="relative block h-[300px] w-full sm:h-[440px]">
-            <Image src={images[index]} alt={pick(locale, `${branchName} - صورة ${index + 1}`, `${branchName} - photo ${index + 1}`)} fill className="object-contain" sizes="100vw" />
+        <div
+          className="group relative overflow-hidden rounded-2xl border border-line bg-surface"
+          onMouseEnter={() => setPaused(true)}
+          onMouseLeave={() => setPaused(false)}
+          onTouchStart={onTouchStart}
+          onTouchEnd={onTouchEnd}
+        >
+          <button onClick={() => setOpen(true)} className="relative block h-[300px] w-full sm:h-[440px]" aria-label={pick(locale, "تكبير الصورة", "Zoom image")}>
+            {images.map((src, i) => (
+              <Image
+                key={src + i}
+                src={src}
+                alt={pick(locale, `${branchName} - صورة ${i + 1}`, `${branchName} - photo ${i + 1}`)}
+                fill
+                priority={i === 0}
+                className={`object-contain transition-opacity duration-700 ${i === index ? "opacity-100" : "opacity-0"}`}
+                sizes="100vw"
+              />
+            ))}
+            <span className="absolute bottom-3 right-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-black/40 text-white opacity-0 transition-opacity group-hover:opacity-100">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3M11 8v6M8 11h6" /></svg>
+            </span>
           </button>
-          <Arrow dir="prev" onClick={() => go(-1)} locale={locale} />
-          <Arrow dir="next" onClick={() => go(1)} locale={locale} />
+
+          {multi && (
+            <>
+              <Arrow dir="prev" onClick={() => go(-1)} locale={locale} />
+              <Arrow dir="next" onClick={() => go(1)} locale={locale} />
+              <span dir="ltr" className="absolute left-3 top-3 z-10 rounded-full bg-black/50 px-2.5 py-1 text-xs font-bold text-white">{index + 1} / {images.length}</span>
+            </>
+          )}
         </div>
 
         {/* Thumbnails */}
