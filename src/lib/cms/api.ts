@@ -86,7 +86,14 @@ export function getSchema(type: string) {
   return cmsFetch<{ fields: FieldSchema[]; readonly: boolean }>(`/cms/collections/${type}/schema/`);
 }
 export function listCollection(type: string) {
-  return cmsFetch<{ items: CmsItem[]; title_field: string; readonly: boolean; count: number }>(`/cms/collections/${type}/`);
+  return cmsFetch<{
+    items: CmsItem[];
+    title_field: string;
+    group_by: string | null;
+    groups: { value: string; label: string }[] | null;
+    readonly: boolean;
+    count: number;
+  }>(`/cms/collections/${type}/`);
 }
 export function getItem(type: string, pk: number | string) {
   return cmsFetch<CmsItem>(`/cms/collections/${type}/${pk}/`);

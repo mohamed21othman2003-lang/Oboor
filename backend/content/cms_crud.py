@@ -13,24 +13,24 @@ from content.models import (
     ContentSnapshot,
 )
 
-# مفتاح النوع → (الموديل، حقل العنوان للعرض في القائمة)
+# مفتاح النوع → (الموديل، حقل العنوان للعرض، حقل التجميع الاختياري)
 CONTENT = {
-    "news": (NewsArticle, "title_ar"),
-    "programs": (ProgramDetail, "title_ar"),
-    "services": (ClinicalService, "title_ar"),
-    "techniques": (Technique, "title_ar"),
-    "branches": (Branch, "name_ar"),
-    "specialists": (Specialist, "name_ar"),
-    "success": (SuccessStory, "name_ar"),
-    "careers": (JobOpening, "title_ar"),
-    "assessment-cards": (AssessmentCard, "title_ar"),
-    "hero": (HeroSlide, "heading_ar"),
-    "stats": (StatItem, "label_ar"),
-    "features": (FeatureItem, "title_ar"),
-    "gallery": (GalleryImage, "caption_ar"),
-    "service-cards": (ServiceCard, "title_ar"),
-    "sections": (SectionItem, "title_ar"),
-    "site": (SiteSettings, "site_name_ar"),
+    "news": (NewsArticle, "title_ar", "section"),
+    "programs": (ProgramDetail, "title_ar", None),
+    "services": (ClinicalService, "title_ar", None),
+    "techniques": (Technique, "title_ar", None),
+    "branches": (Branch, "name_ar", "region_ar"),
+    "specialists": (Specialist, "name_ar", None),
+    "success": (SuccessStory, "name_ar", None),
+    "careers": (JobOpening, "title_ar", None),
+    "assessment-cards": (AssessmentCard, "title_ar", None),
+    "hero": (HeroSlide, "heading_ar", None),
+    "stats": (StatItem, "label_ar", None),
+    "features": (FeatureItem, "title_ar", None),
+    "gallery": (GalleryImage, "caption_ar", None),
+    "service-cards": (ServiceCard, "title_ar", "tab"),
+    "sections": (SectionItem, "title_ar", "page"),
+    "site": (SiteSettings, "site_name_ar", None),
 }
 # الطلبات (قراءة فقط + حذف)
 SUBMISSIONS = {
@@ -129,10 +129,21 @@ def collection(request, type_key):
     if request.method == "GET":
         qs = Model.objects.all()
         title_field = (SUBMISSIONS if is_sub else CONTENT)[type_key][1]
+        group_by = CONTENT[type_key][2] if (not is_sub and len(CONTENT[type_key]) > 2) else None
         data = Ser(qs, many=True, context={"request": request}).data
+        groups = None
+        if group_by:
+            try:
+                f = Model._meta.get_field(group_by)
+                if getattr(f, "choices", None):
+                    groups = [{"value": c[0], "label": str(c[1])} for c in f.choices]
+            except Exception:
+                pass
         return Response({
             "items": data,
             "title_field": title_field,
+            "group_by": group_by,
+            "groups": groups,  # ترتيب/تسميات المجموعات إن وُجدت قوائم اختيار
             "readonly": is_sub,
             "count": qs.count(),
         })
