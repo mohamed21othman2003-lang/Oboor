@@ -342,7 +342,7 @@ export default async function ClinicalDetailPage({ params }: { params: Promise<{
                 ))}
               </ul>
             )}
-            {s.aboutTag && (
+            {s.aboutTag?.heading && (
               <div className="mt-6">
                 <h3 className="mb-3 text-base font-bold text-ink">{s.aboutTag.heading}</h3>
                 <span className="inline-block rounded-full bg-brand-deep px-5 py-2.5 text-sm font-medium text-white">{s.aboutTag.label}</span>

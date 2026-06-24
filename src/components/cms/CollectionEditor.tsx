@@ -292,6 +292,14 @@ function AutoTextarea({ value, onChange, dir, className, minRows = 1 }: { value:
 const isSimpleArray = (v: unknown): v is (string | number)[] =>
   Array.isArray(v) && v.every((x) => typeof x === "string" || typeof x === "number");
 
+// حقول JSON من نوع كائن (object) — تُحرَّر كخانات بسيطة بدل كود JSON
+const OBJECT_FIELDS: Record<string, { key: string; label: string }[]> = {
+  about_tag: [
+    { key: "heading", label: "عنوان البطاقة (مثال: الفئات المستهدفة)" },
+    { key: "label", label: "نص البطاقة (مثال: الأفراد من ذوي الإعاقة)" },
+  ],
+};
+
 function Help({ text }: { text?: string }) {
   if (!text) return null;
   return <p className="mt-1 text-[11px] text-ink-soft">{text}</p>;
@@ -316,7 +324,9 @@ function FieldInput({ f, value, onChange, badge, dir }: { f: FieldSchema; value:
       {f.type === "textarea" ? (
         <AutoTextarea value={String(value ?? "")} onChange={onChange} dir={dir} minRows={3} />
       ) : f.type === "json" ? (
-        isSimpleArray(value) || value == null ? (
+        OBJECT_FIELDS[f.base] ? (
+          <ObjectEditor value={value} onChange={onChange} fields={OBJECT_FIELDS[f.base]} dir={dir} />
+        ) : isSimpleArray(value) || value == null ? (
           <ListEditor value={isSimpleArray(value) ? value : []} onChange={onChange} dir={dir} />
         ) : (
           <textarea value={JSON.stringify(value, null, 2)} onChange={(e) => { try { onChange(JSON.parse(e.target.value)); } catch { onChange(e.target.value); } }} rows={6} dir="ltr" className={`${INPUT} font-mono text-xs`} />
@@ -370,6 +380,28 @@ function IconPicker({ value, onChange, names }: { value: string; onChange: (v: s
       {value && !CMS_ICONS[value] && (
         <p className="mt-1 text-[11px] text-amber-600">الأيقونة «{value}» غير معروفة — اختر واحدة من الأعلى.</p>
       )}
+    </div>
+  );
+}
+
+// محرّر كائن — خانات بسيطة معنونة بدل كود JSON (مثل البطاقة المميّزة: عنوان + نص)
+function ObjectEditor({ value, onChange, fields, dir }: { value: unknown; onChange: (v: unknown) => void; fields: { key: string; label: string }[]; dir?: string }) {
+  const obj = (value && typeof value === "object" && !Array.isArray(value)) ? (value as Record<string, unknown>) : {};
+  const set = (k: string, v: string) => {
+    const next = { ...obj, [k]: v };
+    // إن كانت كل الخانات فارغة، احفظ كائناً فارغاً (لا تظهر بطاقة فاضية)
+    const allEmpty = fields.every((fl) => !String(next[fl.key] ?? "").trim());
+    onChange(allEmpty ? {} : next);
+  };
+  return (
+    <div className="space-y-3 rounded-xl border border-line bg-surface/50 p-3">
+      {fields.map((fl) => (
+        <div key={fl.key}>
+          <p className="mb-1 text-xs font-semibold text-ink-soft">{fl.label}</p>
+          <AutoTextarea value={String(obj[fl.key] ?? "")} onChange={(v) => set(fl.key, v)} dir={dir} className={INPUT + " bg-white"} />
+        </div>
+      ))}
+      <p className="text-[11px] text-ink-soft">اتركها فارغة إن لم تكن الخدمة تحتاج بطاقة مميّزة.</p>
     </div>
   );
 }
