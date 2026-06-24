@@ -398,7 +398,16 @@ function FieldInput({ f, value, onChange, badge, dir }: { f: FieldSchema; value:
           {f.choices?.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
         </select>
       ) : f.type === "number" ? (
-        <input type="number" value={value === null || value === undefined ? "" : String(value)} onChange={(e) => onChange(e.target.value === "" ? null : Number(e.target.value))} className={INPUT} />
+        <input
+          type="number"
+          min={f.name === "order" ? 0 : undefined}
+          value={value === null || value === undefined ? "" : String(value)}
+          onChange={(e) => {
+            const n = e.target.value === "" ? null : Number(e.target.value);
+            onChange(f.name === "order" && n !== null ? Math.max(0, n) : n);
+          }}
+          className={INPUT}
+        />
       ) : (
         <AutoTextarea value={String(value ?? "")} onChange={onChange} dir={dir} />
       )}
