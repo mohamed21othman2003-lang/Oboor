@@ -5,11 +5,15 @@ import { CITIES, CITIES_EN } from "@/lib/careersData";
 import { pick, type Locale } from "@/i18n/config";
 import { validateName, validatePhone } from "@/lib/validate";
 
-export default function CareerApplyForm({ jobTitle, locale }: { jobTitle: string; locale: Locale }) {
+const OTHER = "__other__";
+
+export default function CareerApplyForm({ jobTitle, locale, roles = [] }: { jobTitle: string; locale: Locale; roles?: string[] }) {
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [fileName, setFileName] = useState("");
+  const [role, setRole] = useState("");
+  const [roleOther, setRoleOther] = useState("");
 
   const MAX = 5 * 1024 * 1024; // 5MB
 
@@ -33,6 +37,9 @@ export default function CareerApplyForm({ jobTitle, locale }: { jobTitle: string
     if (nameErr) { setError(nameErr); return; }
     const phoneErr = validatePhone(String(fd.get("phone") || ""), locale);
     if (phoneErr) { setError(phoneErr); return; }
+    const finalRole = role === OTHER ? roleOther.trim() : role;
+    if (!finalRole) { setError(pick(locale, "الرجاء اختيار أو إدخال المسمى الوظيفي الحالي.", "Please select or enter your current job title.")); return; }
+    fd.set("currentRole", finalRole);
     const cv = fd.get("cv");
     // السيرة الذاتية إجبارية فعلياً
     if (!(cv instanceof File) || cv.size === 0) {
@@ -103,7 +110,26 @@ export default function CareerApplyForm({ jobTitle, locale }: { jobTitle: string
               <Field name="phone" label={pick(locale, "رقم الجوال", "Mobile Number")} required type="tel" placeholder="05XXXXXXXX" />
               <Field name="email" label={pick(locale, "البريد الإلكتروني", "Email")} required type="email" placeholder="example@gmail.com" />
               <SelectField name="city" label={pick(locale, "المدينة", "City")} required options={cities} />
-              <Field name="currentRole" label={pick(locale, "المسمى الوظيفي الحالي", "Current Job Title")} required placeholder={pick(locale, "مثال: أخصائي علاج نطق", "e.g. Speech Therapist")} />
+              <div>
+                <Label required>{pick(locale, "المسمى الوظيفي الحالي", "Current Job Title")}</Label>
+                <select
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
+                  className="mt-1.5 w-full rounded-xl border border-line bg-white px-3 py-2.5 text-start text-sm text-ink focus:outline-none focus:ring-2 focus:ring-brand/30"
+                >
+                  <option value="" disabled>{pick(locale, "اختر المسمى…", "Select a title…")}</option>
+                  {roles.map((r) => <option key={r} value={r}>{r}</option>)}
+                  <option value={OTHER}>{pick(locale, "أخرى…", "Other…")}</option>
+                </select>
+                {role === OTHER && (
+                  <input
+                    value={roleOther}
+                    onChange={(e) => setRoleOther(e.target.value)}
+                    placeholder={pick(locale, "اكتب مسمّاك الوظيفي", "Type your job title")}
+                    className="mt-2 w-full rounded-xl border border-line bg-white px-3 py-2.5 text-start text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-brand/30"
+                  />
+                )}
+              </div>
               <SelectField name="experience" label={pick(locale, "سنوات الخبرة", "Years of Experience")} required options={experienceOptions} />
             </div>
 

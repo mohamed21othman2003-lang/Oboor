@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { JOBS, getJob } from "@/lib/careersData";
+import { JOBS, JOBS_EN, getJob } from "@/lib/careersData";
 import CareerApplyForm from "@/components/CareerApplyForm";
 import { getLocale } from "@/i18n/locale";
 import { pick, type Locale } from "@/i18n/config";
@@ -37,6 +37,10 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
   const locale = await getLocale();
   const job = await loadJob(slug, locale);
   if (!job) notFound();
+
+  // قائمة المسميات للاختيار في فورم التقديم (من الوظائف المنشورة)
+  const allJobs = await fetchJobs(locale);
+  const roles = (allJobs && allJobs.length ? allJobs : (locale === "en" ? JOBS_EN : JOBS)).map((j) => j.title);
 
   const details = [
     { icon: <CalendarIcon />, label: pick(locale, "تاريخ طرح الوظيفة", "Posted date"), value: job.date },
@@ -150,7 +154,7 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
 
       {/* Apply form */}
       <div id="apply">
-        <CareerApplyForm jobTitle={job.title} locale={locale} />
+        <CareerApplyForm jobTitle={job.title} locale={locale} roles={roles} />
       </div>
     </>
   );
