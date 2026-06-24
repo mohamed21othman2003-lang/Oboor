@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { validateName, validatePhone } from "@/lib/validate";
 import { getAssessments, getQuestionsFor, getAnswerOptions, type Assessment } from "@/lib/assessmentData";
 import { pick, type Locale } from "@/i18n/config";
 
@@ -30,6 +31,7 @@ export default function AssessmentWizard({
   const [step, setStep] = useState(0);
   const [active, setActive] = useState<Assessment | null>(null);
   const [answers, setAnswers] = useState<Record<number, string>>({});
+  const [error, setError] = useState("");
 
   // أسئلة التقييم المختار (تختلف حسب نوع التقييم)
   const PRELIM_QUESTIONS = active ? (questions?.[active.slug] ?? (prelimQuestions?.length ? prelimQuestions : getQuestionsFor(active.slug, locale))) : [];
@@ -40,6 +42,11 @@ export default function AssessmentWizard({
   function submitData(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
+    const nameErr = validateName(String(fd.get("parentName") || ""), locale);
+    if (nameErr) { setError(nameErr); return; }
+    const phoneErr = validatePhone(String(fd.get("phone") || ""), locale);
+    if (phoneErr) { setError(phoneErr); return; }
+    setError("");
     const payload = {
       assessment: active?.title,
       assessmentSlug: active?.slug,
@@ -157,6 +164,7 @@ export default function AssessmentWizard({
             <Select name="gender" label={pick(locale, "الجنس", "Gender")} placeholder={pick(locale, "اختر الجنس", "Select gender")} options={[pick(locale, "ذكر", "Male"), pick(locale, "أنثى", "Female")]} />
             <Select name="city" label={pick(locale, "المدينة", "City")} placeholder={pick(locale, "اختر المدينة", "Select city")} options={[pick(locale, "الرياض", "Riyadh"), pick(locale, "جدة", "Jeddah"), pick(locale, "الشرقية", "Eastern Province"), pick(locale, "مكة المكرمة", "Makkah"), pick(locale, "المدينة المنورة", "Madinah")]} />
           </div>
+          {error && <p className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-center text-sm font-medium text-red-600">{error}</p>}
           <div className="mt-6 flex items-center justify-between gap-3">
             <button type="submit" className="rounded-xl bg-brand px-8 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-dark">{pick(locale, "عرض النتيجة", "View Result")}</button>
             <button type="button" onClick={() => setStep(1)} className="rounded-xl border border-line px-6 py-2.5 text-sm font-semibold text-ink-muted transition-colors hover:bg-surface">{pick(locale, "السابق", "Back")}</button>
