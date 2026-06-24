@@ -181,6 +181,15 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
         </div>
       );
     }
+    if (f.name === "lat") {
+      return (
+        <div key={i} className="sm:col-span-2">
+          <label className="mb-1.5 block text-sm font-semibold text-ink">موقع الفرع على الخريطة</label>
+          <LocationEditor lat={values.lat} lng={values.lng} onLat={(v) => set("lat", v)} onLng={(v) => set("lng", v)} />
+        </div>
+      );
+    }
+    if (f.name === "lng") return null;
     // حقل مقفول (مكان المحتوى) — عرض فقط على العناصر الموجودة
     if (LOCKED_FIELDS.has(f.name) && !isNew) {
       return <ReadOnlyField key={i} f={f} value={String(values[f.name] ?? "")} note="هذا يحدّد مكان ظهور المحتوى في الصفحة — لا يُعدّل لتجنّب اختفائه." />;
@@ -444,6 +453,42 @@ function IconPicker({ value, onChange, names }: { value: string; onChange: (v: s
       </div>
       {value && !CMS_ICONS[value] && (
         <p className="mt-1 text-[11px] text-amber-600">الأيقونة «{value}» غير معروفة — اختر واحدة من الأعلى.</p>
+      )}
+    </div>
+  );
+}
+
+// محرّر موقع — يلصق إحداثيات خرائط جوجل فتُقسَّم تلقائياً إلى خط عرض/طول
+function LocationEditor({ lat, lng, onLat, onLng }: { lat: unknown; lng: unknown; onLat: (v: number | null) => void; onLng: (v: number | null) => void }) {
+  const num = (v: unknown) => (v === null || v === undefined || v === "" ? "" : String(v));
+  const parsePaste = (s: string) => {
+    const m = s.match(/(-?\d+(?:\.\d+)?)\s*[,\s]\s*(-?\d+(?:\.\d+)?)/);
+    if (m) { onLat(parseFloat(m[1])); onLng(parseFloat(m[2])); }
+  };
+  return (
+    <div className="space-y-3 rounded-xl border border-line bg-surface/50 p-3">
+      <div>
+        <p className="mb-1 text-xs font-semibold text-ink-soft">الصق إحداثيات الموقع من خرائط جوجل</p>
+        <input
+          dir="ltr"
+          placeholder="مثال: 24.7136, 46.6753"
+          onChange={(e) => parsePaste(e.target.value)}
+          className={INPUT + " bg-white font-mono"}
+        />
+        <p className="mt-1 text-[11px] text-ink-soft">في خرائط جوجل: كليك يمين على موقع الفرع بالضبط ← انسخ أول سطر (الأرقام) ← الصقه هنا.</p>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <p className="mb-1 text-xs font-semibold text-ink-soft">خط العرض (lat)</p>
+          <input type="number" step="any" dir="ltr" value={num(lat)} onChange={(e) => onLat(e.target.value === "" ? null : Number(e.target.value))} className={INPUT + " bg-white"} />
+        </div>
+        <div>
+          <p className="mb-1 text-xs font-semibold text-ink-soft">خط الطول (lng)</p>
+          <input type="number" step="any" dir="ltr" value={num(lng)} onChange={(e) => onLng(e.target.value === "" ? null : Number(e.target.value))} className={INPUT + " bg-white"} />
+        </div>
+      </div>
+      {(num(lat) || num(lng)) && (
+        <a href={`https://www.google.com/maps/search/?api=1&query=${num(lat)},${num(lng)}`} target="_blank" rel="noopener" className="inline-block text-xs font-semibold text-brand hover:underline">معاينة الموقع على الخريطة ↗</a>
       )}
     </div>
   );
