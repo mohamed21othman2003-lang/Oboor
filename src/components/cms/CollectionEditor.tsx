@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -267,6 +267,27 @@ function Label({ f, badge }: { f: FieldSchema; badge?: string }) {
 
 const INPUT = "w-full rounded-xl border border-line bg-surface px-4 py-2.5 text-sm text-ink outline-none transition-colors focus:border-brand focus:bg-white focus:ring-2 focus:ring-brand/20";
 
+// منطقة نص تكبر تلقائياً لتعرض كامل المحتوى (بدل قصّ النص في سطر واحد)
+function AutoTextarea({ value, onChange, dir, className, minRows = 1 }: { value: string; onChange: (v: string) => void; dir?: string; className?: string; minRows?: number }) {
+  const ref = useRef<HTMLTextAreaElement>(null);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
+  }, [value]);
+  return (
+    <textarea
+      ref={ref}
+      rows={minRows}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      dir={dir}
+      className={`${className ?? INPUT} resize-none overflow-hidden`}
+    />
+  );
+}
+
 const isSimpleArray = (v: unknown): v is (string | number)[] =>
   Array.isArray(v) && v.every((x) => typeof x === "string" || typeof x === "number");
 
@@ -292,7 +313,7 @@ function FieldInput({ f, value, onChange, badge, dir }: { f: FieldSchema; value:
     <div>
       <Label f={f} badge={badge} />
       {f.type === "textarea" ? (
-        <textarea value={String(value ?? "")} onChange={(e) => onChange(e.target.value)} rows={4} dir={dir} className={INPUT} />
+        <AutoTextarea value={String(value ?? "")} onChange={onChange} dir={dir} minRows={3} />
       ) : f.type === "json" ? (
         isSimpleArray(value) || value == null ? (
           <ListEditor value={isSimpleArray(value) ? value : []} onChange={onChange} dir={dir} />
@@ -307,7 +328,7 @@ function FieldInput({ f, value, onChange, badge, dir }: { f: FieldSchema; value:
       ) : f.type === "number" ? (
         <input type="number" value={value === null || value === undefined ? "" : String(value)} onChange={(e) => onChange(e.target.value === "" ? null : Number(e.target.value))} className={INPUT} />
       ) : (
-        <input type="text" value={String(value ?? "")} onChange={(e) => onChange(e.target.value)} dir={dir} className={INPUT} />
+        <AutoTextarea value={String(value ?? "")} onChange={onChange} dir={dir} />
       )}
       {showHelp && <Help text={f.help} />}
     </div>
@@ -362,10 +383,10 @@ function ListEditor({ value, onChange, dir }: { value: (string | number)[]; onCh
     <div className="space-y-2">
       {items.length === 0 && <p className="rounded-xl border border-dashed border-line bg-surface px-4 py-2.5 text-xs text-ink-soft">لا توجد عناصر — اضغط «إضافة عنصر».</p>}
       {items.map((it, i) => (
-        <div key={i} className="flex items-center gap-2">
-          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-surface text-[11px] font-bold text-ink-soft">{i + 1}</span>
-          <input value={it} onChange={(e) => update(i, e.target.value)} dir={dir} className={INPUT} />
-          <button type="button" onClick={() => remove(i)} className="shrink-0 rounded-lg bg-red-50 px-2.5 py-2 text-xs font-semibold text-red-600 transition-colors hover:bg-red-600 hover:text-white">حذف</button>
+        <div key={i} className="flex items-start gap-2">
+          <span className="mt-2 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-surface text-[11px] font-bold text-ink-soft">{i + 1}</span>
+          <div className="flex-1"><AutoTextarea value={it} onChange={(v) => update(i, v)} dir={dir} /></div>
+          <button type="button" onClick={() => remove(i)} className="mt-1 shrink-0 rounded-lg bg-red-50 px-2.5 py-2 text-xs font-semibold text-red-600 transition-colors hover:bg-red-600 hover:text-white">حذف</button>
         </div>
       ))}
       <button type="button" onClick={add} className="inline-flex items-center gap-1.5 rounded-lg bg-brand/10 px-3 py-1.5 text-xs font-semibold text-brand transition-colors hover:bg-brand hover:text-white">
