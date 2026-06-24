@@ -113,6 +113,10 @@ export function deleteItem(type: string, pk: number | string) {
 export function resetDefault(type: string, pk: number | string) {
   return cmsFetch<CmsItem>(`/cms/collections/${type}/${pk}/reset/`, { method: "POST" });
 }
+// إعادة ترتيب العناصر (قائمة المعرّفات بالترتيب الجديد)
+export function reorderCollection(type: string, ids: number[]) {
+  return cmsFetch(`/cms/collections/${type}/reorder/`, { method: "POST", body: JSON.stringify({ ids }) });
+}
 // رفع ملف (صورة) لحقل معيّن عبر multipart
 export function uploadField(type: string, pk: number | string, field: string, file: File) {
   const fd = new FormData();

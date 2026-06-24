@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { listCollection, deleteItem, TYPE_LABELS, type CmsItem } from "@/lib/cms/api";
+import { listCollection, deleteItem, reorderCollection, TYPE_LABELS, type CmsItem } from "@/lib/cms/api";
 
 export default function CollectionList({ type }: { type: string }) {
   const router = useRouter();
@@ -47,6 +47,30 @@ export default function CollectionList({ type }: { type: string }) {
     }
   }
 
+  const canReorder = items.length > 0 && "order" in items[0] && !readonly;
+
+  async function move(it: CmsItem, dir: -1 | 1) {
+    const idx = items.findIndex((x) => x.id === it.id);
+    if (idx < 0) return;
+    const gk = groupBy ? String(it[groupBy] ?? "") : null;
+    // ابحث عن أقرب جار في نفس المجموعة بالاتجاه المطلوب
+    let t = idx + dir;
+    if (groupBy) while (t >= 0 && t < items.length && String(items[t][groupBy] ?? "") !== gk) t += dir;
+    if (t < 0 || t >= items.length) return;
+    if (groupBy && String(items[t][groupBy] ?? "") !== gk) return;
+    const prev = items;
+    const arr = [...items];
+    [arr[idx], arr[t]] = [arr[t], arr[idx]];
+    setItems(arr);
+    const setIds = (groupBy ? arr.filter((x) => String(x[groupBy] ?? "") === gk) : arr).map((x) => x.id);
+    try {
+      await reorderCollection(type, setIds);
+    } catch (e) {
+      setItems(prev); // تراجع عند الفشل
+      alert(e instanceof Error ? e.message : "تعذّر إعادة الترتيب.");
+    }
+  }
+
   function titleOf(it: CmsItem): string {
     const v = it[titleField] ?? it["title_ar"] ?? it["name_ar"] ?? it["label_ar"] ?? it["value"] ?? it["key"] ?? `#${it.id}`;
     return String(v || `#${it.id}`);
@@ -80,8 +104,24 @@ export default function CollectionList({ type }: { type: string }) {
   function Row({ it }: { it: CmsItem }) {
     const pub = published(it);
     const sub = subLabel(it);
+    // موضع العنصر داخل مجموعته (لتعطيل الأسهم عند الحواف)
+    const gk = groupBy ? String(it[groupBy] ?? "") : null;
+    const sameGroup = groupBy ? items.filter((x) => String(x[groupBy] ?? "") === gk) : items;
+    const posInGroup = sameGroup.findIndex((x) => x.id === it.id);
     return (
       <tr className="transition-colors hover:bg-surface/60">
+        {canReorder && (
+          <td className="px-2 py-3.5 w-12">
+            <div className="flex flex-col items-center gap-0.5">
+              <button onClick={() => move(it, -1)} disabled={posInGroup <= 0} title="تحريك لأعلى" className="rounded p-0.5 text-ink-soft transition-colors hover:bg-brand/10 hover:text-brand disabled:opacity-25 disabled:hover:bg-transparent">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M18 15l-6-6-6 6" /></svg>
+              </button>
+              <button onClick={() => move(it, 1)} disabled={posInGroup >= sameGroup.length - 1} title="تحريك لأسفل" className="rounded p-0.5 text-ink-soft transition-colors hover:bg-brand/10 hover:text-brand disabled:opacity-25 disabled:hover:bg-transparent">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M6 9l6 6 6-6" /></svg>
+              </button>
+            </div>
+          </td>
+        )}
         <td className="px-5 py-3.5">
           <p className="font-semibold text-ink">{titleOf(it)}</p>
           {sub && <p className="mt-0.5 text-xs text-ink-soft">القسم: {sub}</p>}
@@ -110,7 +150,7 @@ export default function CollectionList({ type }: { type: string }) {
       <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-line">
         <table className="w-full text-right text-sm">
           <thead className="bg-surface text-xs font-semibold text-ink-soft">
-            <tr><th className="px-5 py-3">العنوان</th><th className="px-5 py-3 w-28">الحالة</th><th className="px-5 py-3 w-32"></th></tr>
+            <tr>{canReorder && <th className="px-2 py-3 w-12"></th>}<th className="px-5 py-3">العنوان</th><th className="px-5 py-3 w-28">الحالة</th><th className="px-5 py-3 w-32"></th></tr>
           </thead>
           <tbody className="divide-y divide-line">{list.map((it) => <Row key={it.id} it={it} />)}</tbody>
         </table>
