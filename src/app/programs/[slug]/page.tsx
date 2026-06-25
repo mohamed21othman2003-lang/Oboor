@@ -139,7 +139,7 @@ export default async function ProgramDetailPage({ params }: { params: Promise<{ 
 
       {/* Philosophy */}
       {p.philosophy.length > 0 && (
-        <section className="bg-gradient-to-bl from-brand-deep to-[#0a2329] py-16 text-white">
+        <section className="bg-gradient-to-bl from-[#003333] via-[#0f4a54] to-[#174646] py-16 text-white">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="mb-10 text-start">
               <h2 className="text-3xl font-extrabold">{pick(locale, "فلسفة ", "Program ")}<span className="text-brand">{pick(locale, "البرنامج", "Philosophy")}</span></h2>
@@ -147,7 +147,7 @@ export default async function ProgramDetailPage({ params }: { params: Promise<{ 
             </div>
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
               {p.philosophy.map((card, i) => (
-                <div key={i} className="rounded-2xl border border-white/10 bg-white/5 p-6 text-start text-sm leading-7 text-white/85 backdrop-blur">
+                <div key={i} className="rounded-2xl border border-white/10 bg-[#124e5a] p-6 text-start text-sm leading-7 text-white/85">
                   {card}
                 </div>
               ))}
