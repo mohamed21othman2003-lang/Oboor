@@ -11,6 +11,7 @@ import { getLocale } from "@/i18n/locale";
 import { pick, type Locale } from "@/i18n/config";
 import { fetchContent, fetchSections } from "@/lib/server/django";
 import CtaSection from "@/components/CtaSection";
+import AnimatedNumber from "@/components/home/AnimatedNumber";
 import SuccessStoriesGrid from "@/components/SuccessStoriesGrid";
 
 // الشكل اللي بيرجع من Django (content/success)
@@ -139,7 +140,7 @@ export default async function SuccessStoriesPage() {
             <div dir="ltr" className="grid grid-cols-3 gap-6">
               {stats.map((s) => (
                 <div key={s.label} className="text-center">
-                  <p className="text-3xl font-extrabold text-brand sm:text-4xl">{s.value}</p>
+                  <p className="text-3xl font-extrabold text-brand sm:text-4xl"><AnimatedNumber value={s.value} /></p>
                   <p className="mt-1 text-xs text-ink-muted sm:text-sm">{s.label}</p>
                 </div>
               ))}
