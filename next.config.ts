@@ -3,6 +3,8 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   images: {
     qualities: [75, 90],
+    // السماح بالصور المحلية مع query string (نستخدم ?v=2 لكسر كاش الصور بعد تحديثها)
+    localPatterns: [{ pathname: "/**" }],
     remotePatterns: [
       // الصور المرفوعة على Supabase Storage (روابط القراءة العامة)
       { protocol: "https", hostname: "*.supabase.co", pathname: "/storage/v1/object/public/**" },
