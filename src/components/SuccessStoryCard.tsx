@@ -14,10 +14,8 @@ export default function SuccessStoryCard({ story, locale = "ar", highlights }: {
         {/* Image */}
         <div className="relative h-[220px] w-full">
           <Image src={story.image} alt={story.name} fill className="object-cover" sizes="(max-width: 768px) 100vw, 33vw" />
-          {/* category (top, teal) */}
-          {story.category && (
-            <span className="absolute right-3 top-3 rounded-lg bg-brand px-3 py-1.5 text-xs font-semibold text-white shadow-sm">{story.category}</span>
-          )}
+          {/* ملاحظة: شارة التصنيف (علاج النطق واللغة) مطبوعة داخل الصورة نفسها،
+              فلا نضيف شارة من الكود حتى لا تتكرّر. */}
           {/* duration (bottom, dark slate) */}
           <span className="absolute bottom-3 left-3 flex items-center gap-1.5 rounded-lg bg-[#36474d]/90 px-3 py-1.5 text-xs font-medium text-white backdrop-blur-sm">
             <ClockIcon />
@@ -44,9 +42,9 @@ export default function SuccessStoryCard({ story, locale = "ar", highlights }: {
             <QuoteIcon />
             <p className="mt-1 text-xs leading-6 text-ink-muted">{story.quote}</p>
             <div className="mt-3 flex items-center justify-between gap-2 border-t border-brand/10 pt-3 text-[11px] text-ink-soft">
-              <span className="flex items-center gap-1"><span className="text-brand"><ClockIcon /></span>{story.metaDuration}</span>
-              <span className="flex items-center gap-1"><span className="text-brand"><UsersIcon /></span>{story.metaAge}</span>
               <span className="flex items-center gap-1"><span className="text-brand"><UserIcon /></span>{story.author}</span>
+              <span className="flex items-center gap-1"><span className="text-brand"><UsersIcon /></span>{story.metaAge}</span>
+              <span className="flex items-center gap-1"><span className="text-brand"><ClockIcon /></span>{story.metaDuration}</span>
             </div>
           </div>
 
