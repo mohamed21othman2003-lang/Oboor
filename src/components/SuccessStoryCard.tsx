@@ -10,7 +10,7 @@ export default function SuccessStoryCard({ story, locale = "ar", highlights }: {
   const [open, setOpen] = useState(false);
   return (
     <>
-      <article className="flex flex-col overflow-hidden rounded-2xl border border-line bg-white shadow-sm transition-shadow hover:shadow-md">
+      <article className="flex flex-col overflow-hidden rounded-3xl border border-line bg-white shadow-[0_6px_24px_rgba(13,61,69,0.08)] transition-shadow hover:shadow-[0_12px_30px_rgba(13,61,69,0.13)]">
         {/* Image */}
         <div className="relative h-[220px] w-full">
           <Image src={story.image} alt={story.name} fill className="object-cover" sizes="(max-width: 768px) 100vw, 33vw" />
