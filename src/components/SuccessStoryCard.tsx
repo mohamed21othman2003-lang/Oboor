@@ -6,6 +6,9 @@ import type { SuccessStory, StoryHighlightsData } from "@/lib/successStoriesData
 import { getStoryHighlightsData } from "@/lib/successStoriesData";
 import { pick, type Locale } from "@/i18n/config";
 
+// كسر كاش الصور بعد تنظيف ملفات /figma (نفس المسار بمحتوى جديد)
+const bust = (src: string) => (src?.startsWith("/") ? `${src}?v=2` : src);
+
 export default function SuccessStoryCard({ story, locale = "ar", highlights }: { story: SuccessStory; locale?: Locale; highlights?: StoryHighlightsData }) {
   const [open, setOpen] = useState(false);
   return (
@@ -13,7 +16,7 @@ export default function SuccessStoryCard({ story, locale = "ar", highlights }: {
       <article className="flex flex-col overflow-hidden rounded-3xl border border-line bg-white shadow-[0_6px_24px_rgba(13,61,69,0.08)] transition-shadow hover:shadow-[0_12px_30px_rgba(13,61,69,0.13)]">
         {/* Image */}
         <div className="relative h-[220px] w-full">
-          <Image src={story.image} alt={story.name} fill className="object-cover" sizes="(max-width: 768px) 100vw, 33vw" />
+          <Image src={bust(story.image)} alt={story.name} fill className="object-cover" sizes="(max-width: 768px) 100vw, 33vw" />
           {/* category (top, teal) — مسافة بسيطة عن سقف الكارد */}
           {story.category && (
             <span className="absolute right-3 top-3 rounded-lg bg-brand px-3 py-1.5 text-xs font-semibold text-white shadow-sm">{story.category}</span>
@@ -101,7 +104,7 @@ function StoryModal({ story, locale, highlights, onClose }: { story: SuccessStor
           {/* framed photo */}
           <div className="absolute left-1/2 top-1/2 h-[126px] w-[118px] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-2xl bg-white p-1.5 shadow-[0_12px_30px_rgba(13,61,69,0.18)]">
             <div className="relative h-full w-full overflow-hidden rounded-xl">
-              <Image src={story.image} alt={story.name} fill className="object-cover" sizes="140px" />
+              <Image src={bust(story.image)} alt={story.name} fill className="object-cover" sizes="140px" />
             </div>
           </div>
           {/* Close */}
