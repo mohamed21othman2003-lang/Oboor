@@ -44,11 +44,13 @@ export default function SuccessStoryCard({ story, locale = "ar", highlights }: {
           </div>
 
           <div className="mt-4 rounded-xl border border-brand/15 bg-[#f7fcfd] p-4 text-start">
-            <div className="flex justify-end"><QuoteIcon /></div>
+            <QuoteIcon />
             <p className="mt-1 text-xs leading-6 text-ink-muted">{story.quote}</p>
             <div className="mt-3 flex items-center justify-between gap-2 border-t border-brand/10 pt-3 text-[11px] text-ink-soft">
-              <span className="flex items-center gap-1"><span className="text-brand"><UserIcon /></span>{story.author}</span>
-              <span className="flex items-center gap-1"><span className="text-brand"><UsersIcon /></span>{story.metaAge}</span>
+              <div className="flex items-center gap-3">
+                <span className="flex items-center gap-1"><span className="text-brand"><UserIcon /></span>{story.author}</span>
+                <span className="flex items-center gap-1"><span className="text-brand"><UsersIcon /></span>{story.metaAge}</span>
+              </div>
               <span className="flex items-center gap-1"><span className="text-brand"><ClockIcon /></span>{story.metaDuration}</span>
             </div>
           </div>
