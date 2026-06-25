@@ -14,7 +14,12 @@ export default function SuccessStoryCard({ story, locale = "ar", highlights }: {
         {/* Image */}
         <div className="relative h-[220px] w-full">
           <Image src={story.image} alt={story.name} fill className="object-cover" sizes="(max-width: 768px) 100vw, 33vw" />
-          <span className="absolute bottom-3 right-3 flex items-center gap-1.5 rounded-full bg-brand-deep/85 px-3 py-1 text-xs font-medium text-white backdrop-blur">
+          {/* category (top, teal) */}
+          {story.category && (
+            <span className="absolute right-3 top-3 rounded-lg bg-brand px-3 py-1.5 text-xs font-semibold text-white shadow-sm">{story.category}</span>
+          )}
+          {/* duration (bottom, dark slate) */}
+          <span className="absolute bottom-3 left-3 flex items-center gap-1.5 rounded-lg bg-[#36474d]/90 px-3 py-1.5 text-xs font-medium text-white backdrop-blur-sm">
             <ClockIcon />
             {story.durationLabel}
           </span>
@@ -35,15 +40,14 @@ export default function SuccessStoryCard({ story, locale = "ar", highlights }: {
             </div>
           </div>
 
-          <div className="mt-4 rounded-xl bg-surface p-4 text-start">
+          <div className="mt-4 rounded-xl border border-brand/15 bg-[#f7fcfd] p-4 text-start">
             <QuoteIcon />
-            <p className="mt-2 text-xs leading-6 text-ink-muted">{story.quote}</p>
-          </div>
-
-          <div className="mt-4 flex items-center justify-between gap-2 text-[11px] text-ink-soft">
-            <span className="flex items-center gap-1"><ClockIcon />{story.metaDuration}</span>
-            <span className="flex items-center gap-1"><UsersIcon />{story.metaAge}</span>
-            <span className="flex items-center gap-1"><UserIcon />{story.author}</span>
+            <p className="mt-1 text-xs leading-6 text-ink-muted">{story.quote}</p>
+            <div className="mt-3 flex items-center justify-between gap-2 border-t border-brand/10 pt-3 text-[11px] text-ink-soft">
+              <span className="flex items-center gap-1"><span className="text-brand"><ClockIcon /></span>{story.metaDuration}</span>
+              <span className="flex items-center gap-1"><span className="text-brand"><UsersIcon /></span>{story.metaAge}</span>
+              <span className="flex items-center gap-1"><span className="text-brand"><UserIcon /></span>{story.author}</span>
+            </div>
           </div>
 
           <button
