@@ -59,18 +59,10 @@ export default async function AboutPage() {
           </nav>
 
           <div className="grid items-center gap-12 lg:grid-cols-2">
-            {/* Image (right) */}
-            <div className="relative order-1 mx-auto h-[440px] w-full max-w-[480px]">
-              <div className="relative h-full w-full overflow-hidden rounded-3xl shadow-lg">
-                <Image src="/figma/about/hero-v2.jpg" alt={pick(locale, "مركز عبور", "Oboor Center")} fill className="object-cover" sizes="(max-width:1024px) 100vw, 480px" quality={90} priority />
-              </div>
-              <span className="absolute right-5 top-6 flex items-center gap-2 rounded-xl bg-white px-3 py-2 text-xs font-bold text-ink shadow-lg">
-                <CalIcon /> {pick(locale, "تأهيل شامل ومتكامل", "Comprehensive, integrated rehabilitation")}
-              </span>
-              <span className="absolute left-5 top-[13%] flex items-center gap-2 rounded-xl bg-white px-3 py-2 shadow-lg">
-                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand/10 text-brand"><CalIcon /></span>
-                <span className="text-start"><span className="block text-[10px] text-ink-soft">{pick(locale, "تأسس عام", "Established")}</span><span className="block text-sm font-extrabold text-brand">{pick(locale, "٢٠٠٧", "2007")}</span></span>
-              </span>
+            {/* Image (right) — صورة مُصمّمة كاملة + شارة «تأهيل شامل» فوقها */}
+            <div className="relative order-1 mx-auto w-full max-w-[480px]">
+              <Image src="/about-hero.png" alt={pick(locale, "مركز عبور للرعاية والتأهيل", "Oboor Center for Care & Rehabilitation")} width={511} height={560} className="h-auto w-full" quality={90} priority />
+              <Image src="/about-badge.png" alt={pick(locale, "تأهيل شامل ومتكامل", "Comprehensive, integrated rehabilitation")} width={302} height={130} className="absolute right-4 top-5 h-auto w-[58%] max-w-[270px] drop-shadow-lg" />
             </div>
 
             {/* Text (left) */}
@@ -265,9 +257,6 @@ const PROG_ICONS: Record<string, React.ReactNode> = {
   users: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" /></svg>,
 };
 
-function CalIcon() {
-  return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-brand"><rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" /></svg>;
-}
 function EyeIcon() {
   return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z" /><circle cx="12" cy="12" r="3" /></svg>;
 }
