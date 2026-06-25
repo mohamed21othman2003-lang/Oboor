@@ -110,7 +110,7 @@ function Block({ b }: { b: ClinicalBlock }) {
   }
   if (b.kind === "cards" && b.dark) {
     return (
-      <section className="bg-gradient-to-bl from-brand-deep to-[#0a2329] py-16 text-white">
+      <section className="bg-gradient-to-bl from-[#0d3d45] via-[#13505b] to-[#123749] py-16 text-white">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mb-10 text-center">
             <h2 className="text-3xl font-extrabold">{b.heading}</h2>
@@ -118,7 +118,7 @@ function Block({ b }: { b: ClinicalBlock }) {
           </div>
           <div className={`grid gap-5 sm:grid-cols-2 ${b.cols === 3 ? "lg:grid-cols-3" : ""}`}>
             {b.items.map((it, i) => (
-              <div key={i} className="rounded-2xl border border-white/10 bg-white/5 p-6 text-start backdrop-blur">
+              <div key={i} className="rounded-2xl border border-white/10 bg-gradient-to-br from-[#1c4e57] to-[#215d68] p-6 text-start">
                 <h3 className="text-lg font-bold text-white">{it.title}{it.sub && <span className="mr-2 text-sm font-medium text-brand"> {it.sub}</span>}</h3>
                 {it.desc && <p className="mt-2 text-sm leading-7 text-white/75">{it.desc}</p>}
                 {it.bullets && (
@@ -201,12 +201,12 @@ function Block({ b }: { b: ClinicalBlock }) {
     const colCls = b.cols === 4 ? "lg:grid-cols-4" : "lg:grid-cols-3";
     if (b.dark) {
       return (
-        <section className="bg-gradient-to-bl from-brand-deep to-[#0a2329] py-16 text-white">
+        <section className="bg-gradient-to-bl from-[#0d3d45] via-[#13505b] to-[#123749] py-16 text-white">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <h2 className="mb-10 text-center text-3xl font-extrabold">{b.heading}</h2>
             <div className={`grid gap-5 sm:grid-cols-2 ${colCls}`}>
               {b.items.map((it) => (
-                <div key={it} className="rounded-2xl border border-white/10 bg-white/5 p-6 text-center text-sm leading-7 text-white/85 backdrop-blur">{it}</div>
+                <div key={it} className="rounded-2xl border border-white/10 bg-gradient-to-br from-[#1c4e57] to-[#215d68] p-6 text-center text-sm leading-7 text-white/85">{it}</div>
               ))}
             </div>
           </div>
@@ -220,7 +220,7 @@ function Block({ b }: { b: ClinicalBlock }) {
           <h2 className="mb-10 text-center text-3xl font-extrabold text-ink">{first} <span className="text-brand">{rest.join(" ")}</span></h2>
           <div className={`grid gap-5 sm:grid-cols-2 ${colCls}`}>
             {b.items.map((it) => (
-              <div key={it} className="flex items-center justify-center rounded-2xl bg-brand-deep p-6 text-center text-sm font-semibold leading-7 text-white shadow-md">{it}</div>
+              <div key={it} className="flex items-center justify-center rounded-2xl bg-gradient-to-b from-brand-dark to-brand-deep p-6 text-center text-sm font-semibold leading-7 text-white shadow-md">{it}</div>
             ))}
           </div>
         </div>
@@ -232,12 +232,12 @@ function Block({ b }: { b: ClinicalBlock }) {
       const [first, ...rest] = (b.heading || "").split(" ");
       const odd = b.items.length % 2 === 1;
       return (
-        <section className="bg-gradient-to-bl from-brand-deep to-[#0a2329] py-16 text-white">
+        <section className="bg-gradient-to-bl from-[#0d3d45] via-[#13505b] to-[#123749] py-16 text-white">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             {b.heading && <h2 className="mb-10 text-center text-3xl font-extrabold">{first} <span className="text-brand">{rest.join(" ")}</span></h2>}
             <ul className="grid gap-4 sm:grid-cols-2">
               {b.items.map((it, i) => (
-                <li key={it} className={`flex items-start gap-3 rounded-2xl border border-white/10 bg-white/5 p-5 text-start text-sm leading-7 text-white/85 backdrop-blur ${odd && i === b.items.length - 1 ? "sm:col-span-2 sm:mx-auto sm:w-1/2" : ""}`}>
+                <li key={it} className={`flex items-start gap-3 rounded-2xl border border-white/10 bg-gradient-to-br from-[#1c4e57] to-[#215d68] p-5 text-start text-sm leading-7 text-white/85 ${odd && i === b.items.length - 1 ? "sm:col-span-2 sm:mx-auto sm:w-1/2" : ""}`}>
                   <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand/15 text-brand"><Check /></span>
                   <span>{it}</span>
                 </li>
@@ -296,6 +296,10 @@ export default async function ClinicalDetailPage({ params }: { params: Promise<{
   const s = await loadService(slug, locale);
   if (!s) notFound();
 
+  // العنوان: أول كلمة بلون داكن وباقي العنوان باللون التركوازي (مطابقة للتصميم)
+  const [titleFirst, ...titleRest] = s.title.split(" ");
+  const [aboutFirst, ...aboutRest] = (s.aboutHeading || "").split(" ");
+
   return (
     <>
       {/* Hero */}
@@ -311,8 +315,8 @@ export default async function ClinicalDetailPage({ params }: { params: Promise<{
             <Link href="/" className="hover:text-brand">{pick(locale, "الرئيسية", "Home")}</Link>
           </nav>
           <div className="text-center">
-            <span className="rounded-full bg-white px-4 py-1.5 text-sm font-medium text-brand-dark shadow-sm ring-1 ring-line">{pick(locale, "الخدمات العيادية", "Clinical Services")}</span>
-            <h1 className="mt-5 text-3xl font-extrabold text-ink sm:text-4xl">{s.title}</h1>
+            <span className="rounded-full bg-white px-4 py-1.5 text-sm font-medium text-brand-dark shadow-sm ring-1 ring-line">{pick(locale, "خدماتنا في المملكة", "Our Services in the Kingdom")}</span>
+            <h1 className="mt-5 text-3xl font-extrabold text-ink sm:text-4xl">{titleFirst} <span className="text-brand">{titleRest.join(" ")}</span></h1>
             <p className="mx-auto mt-4 max-w-3xl text-base leading-8 text-ink-muted">{s.subtitle}</p>
           </div>
         </div>
@@ -329,7 +333,7 @@ export default async function ClinicalDetailPage({ params }: { params: Promise<{
             </div>
           </div>
           <div className="order-2 text-start">
-            <h2 className="text-3xl font-extrabold text-ink">{s.aboutHeading}</h2>
+            <h2 className="text-3xl font-extrabold text-ink">{aboutFirst} <span className="text-brand">{aboutRest.join(" ")}</span></h2>
             <div className="mt-6 space-y-4">
               {s.about.map((para, i) => <p key={i} className="text-sm leading-8 text-ink-muted">{para}</p>)}
             </div>
