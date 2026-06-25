@@ -325,11 +325,11 @@ export default async function ClinicalDetailPage({ params }: { params: Promise<{
       {/* About */}
       <section className="bg-white py-16">
         <div className="mx-auto grid max-w-7xl items-center gap-12 px-6 lg:grid-cols-2 lg:px-8">
-          <div className="relative order-1 h-[420px]">
+          <div className="relative order-1 mx-auto aspect-[3/4] w-full max-w-md lg:max-w-none">
             <div className="absolute -right-4 -top-4 h-24 w-24 rounded-2xl bg-brand/10" />
             <div className="absolute -bottom-4 left-8 h-20 w-20 rounded-full bg-brand/10" />
             <div className="relative h-full w-full overflow-hidden rounded-3xl shadow-lg">
-              <Image src={s.image} alt={s.title} fill className="object-cover" />
+              <Image src={s.image} alt={s.title} fill className="object-cover object-center" />
             </div>
           </div>
           <div className="order-2 text-start">
@@ -350,7 +350,7 @@ export default async function ClinicalDetailPage({ params }: { params: Promise<{
             {s.aboutTag?.heading && (
               <div className="mt-6">
                 <h3 className="mb-3 text-base font-bold text-ink">{s.aboutTag.heading}</h3>
-                <span className="inline-block rounded-full bg-gradient-to-br from-brand-dark to-brand-deep px-5 py-2.5 text-sm font-medium text-white shadow-md">{s.aboutTag.label}</span>
+                <span className="inline-block rounded-2xl bg-gradient-to-b from-brand-dark to-brand-deep px-8 py-3.5 text-sm font-semibold text-white shadow-md ring-1 ring-white/30">{s.aboutTag.label}</span>
               </div>
             )}
           </div>
