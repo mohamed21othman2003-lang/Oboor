@@ -7,6 +7,7 @@ import { areaIcon, distinctIcons } from "@/lib/areaIcon";
 import { getLocale } from "@/i18n/locale";
 import { pick, type Locale } from "@/i18n/config";
 import { fetchContent } from "@/lib/server/django";
+import CtaSection from "@/components/CtaSection";
 
 export function generateStaticParams() {
   return CLINICAL_SERVICES.map((s) => ({ slug: s.slug }));
@@ -355,21 +356,11 @@ export default async function ClinicalDetailPage({ params }: { params: Promise<{
       {s.blocks.map((b, i) => <Block key={i} b={b} />)}
 
       {/* CTA */}
-      <section className="relative overflow-hidden bg-gradient-to-bl from-brand-deep to-[#0a2329]">
-        <div className="relative mx-auto max-w-7xl px-6 py-14 text-center lg:px-8">
-          <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-sm font-medium text-white/90">
-            <span className="h-2 w-2 rounded-full bg-success" />
-            {pick(locale, "خدمة العملاء متاحة على مدار الساعة", "Customer service available around the clock")}
-          </span>
-          <h2 className="mt-5 text-3xl font-extrabold text-white sm:text-4xl">{pick(locale, "هل ترغب في تسجيل طفلك في ", "Would you like to enroll your child in ")}<span className="text-brand">{pick(locale, "خدمات عبور العيادية", "Oboor's Clinical Services")}</span>{pick(locale, " ؟", "?")}</h2>
-          <p className="mx-auto mt-3 max-w-2xl text-sm text-white/75">{pick(locale, "يمكنك التواصل معنا لمساعدتك في اختيار البرنامج أو الخدمة الأنسب وفق احتياجات طفلك.", "Get in touch and we'll help you choose the program or service that best fits your child's needs.")}</p>
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-            <Link href="/admission" className="rounded-xl bg-brand px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-dark">{pick(locale, "طلب التحاق", "Apply Now")}</Link>
-            <a href="https://wa.me/966920003452" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 rounded-xl bg-[#25D366] px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90">{pick(locale, "تواصل عبر الواتساب", "Contact via WhatsApp")}</a>
-            <Link href="/branches" className="rounded-xl bg-white px-6 py-3 text-sm font-semibold text-ink transition-colors hover:bg-surface">{pick(locale, "اعثر على أقرب فرع", "Find Nearest Branch")}</Link>
-          </div>
-        </div>
-      </section>
+      <CtaSection
+        locale={locale}
+        title={<>{pick(locale, "هل ترغب في تسجيل طفلك في ", "Would you like to enroll your child in ")}<span className="text-brand">{pick(locale, "خدمات عبور العيادية", "Oboor's Clinical Services")}</span>{pick(locale, " ؟", "?")}</>}
+        subtitle={pick(locale, "يمكنك التواصل معنا لمساعدتك في اختيار البرنامج أو الخدمة الأنسب وفق احتياجات طفلك.", "Get in touch and we'll help you choose the program or service that best fits your child's needs.")}
+      />
     </>
   );
 }

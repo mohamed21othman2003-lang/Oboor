@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { TECHNIQUES, getTechnique, type Technique } from "@/lib/techniquesData";
 import { distinctIcons, iconByKey } from "@/lib/areaIcon";
+import CtaSection from "@/components/CtaSection";
 import { fetchContent } from "@/lib/server/django";
 import { getLocale } from "@/i18n/locale";
 import { pick, type Locale } from "@/i18n/config";
@@ -120,7 +121,7 @@ export default async function TechniqueDetailPage({ params }: { params: Promise<
                 <span className={`h-2 w-2 rounded-full ${available ? "bg-success" : "bg-ink-soft"}`} />
                 {t.badge}
               </span>
-              <h1 className="mt-4 text-4xl font-extrabold text-ink">{t.title}</h1>
+              <h1 className="mt-4 text-4xl font-extrabold text-brand">{t.title}</h1>
               <div className="mt-5 space-y-4">
                 {t.about.map((p, i) => <p key={i} className="text-sm leading-8 text-ink-muted">{p}</p>)}
               </div>
@@ -128,7 +129,10 @@ export default async function TechniqueDetailPage({ params }: { params: Promise<
                 <h2 className="mb-3 text-base font-bold text-ink">{pick(locale, "الفئات المستهدفة", "Target Groups")}</h2>
                 <div className="flex flex-wrap gap-2">
                   {t.targets.map((tg) => (
-                    <span key={tg} className="rounded-full bg-brand-deep px-4 py-2 text-xs font-medium text-white">{tg}</span>
+                    <span key={tg} className="inline-flex items-center gap-2 rounded-full border border-brand/30 bg-brand/5 px-4 py-2 text-xs font-medium text-brand-dark">
+                      <span className="h-1.5 w-1.5 rounded-full bg-brand" />
+                      {tg}
+                    </span>
                   ))}
                 </div>
               </div>
@@ -138,13 +142,13 @@ export default async function TechniqueDetailPage({ params }: { params: Promise<
       </section>
 
       {/* Offers */}
-      <section className="bg-gradient-to-bl from-brand-deep to-[#0a2329] py-16 text-white">
+      <section className="bg-white py-16">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <h2 className="mb-10 text-center text-3xl font-extrabold">{pick(locale, "ماذا يقدم ", "What ")}<span className="text-brand">{t.title}</span>{pick(locale, "", " offers")}</h2>
+          <h2 className="mb-10 text-center text-3xl font-extrabold text-ink">{pick(locale, "ماذا يقدم ", "What ")}<span className="text-brand">{t.title}</span>{pick(locale, "", " offers")}</h2>
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {t.offers.map((o, i) => (
-              <div key={o} className="flex flex-col items-center gap-4 rounded-2xl border border-white/10 bg-white/5 p-7 text-center backdrop-blur">
-                <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand/15 text-brand">{offerIcons[i]}</span>
+              <div key={o} className="flex flex-col items-center gap-4 rounded-2xl bg-gradient-to-bl from-brand to-brand-deep p-7 text-center shadow-lg">
+                <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 text-white">{offerIcons[i]}</span>
                 <p className="text-base font-bold text-white">{o}</p>
               </div>
             ))}
@@ -188,21 +192,11 @@ export default async function TechniqueDetailPage({ params }: { params: Promise<
       )}
 
       {/* CTA */}
-      <section className="relative overflow-hidden bg-gradient-to-bl from-brand-deep to-[#0a2329]">
-        <div className="relative mx-auto max-w-7xl px-6 py-14 text-center lg:px-8">
-          <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-sm font-medium text-white/90">
-            <span className="h-2 w-2 rounded-full bg-success" />
-            {pick(locale, "خدمة العملاء متاحة على مدار الساعة", "Customer service available around the clock")}
-          </span>
-          <h2 className="mt-5 text-3xl font-extrabold text-white sm:text-4xl">{pick(locale, "هل ترغب في تسجيل طفلك في ", "Would you like to enroll your child in ")}<span className="text-brand">{pick(locale, "هذه التقنية", "this technology")}</span>{pick(locale, " ؟", "?")}</h2>
-          <p className="mx-auto mt-3 max-w-2xl text-sm text-white/75">{pick(locale, "يمكنك التواصل معنا لمساعدتك في اختيار البرنامج أو الخدمة أو التقنية الأنسب وفق احتياجات طفلك.", "You can reach out to us for help choosing the program, service, or technology best suited to your child's needs.")}</p>
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-            <Link href="/admission" className="rounded-xl bg-brand px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-dark">{pick(locale, "طلب التحاق", "Apply Now")}</Link>
-            <a href="https://wa.me/966920003452" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 rounded-xl bg-[#25D366] px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90">{pick(locale, "تواصل عبر الواتساب", "Contact via WhatsApp")}</a>
-            <Link href="/branches" className="rounded-xl bg-white px-6 py-3 text-sm font-semibold text-ink transition-colors hover:bg-surface">{pick(locale, "اعثر على أقرب فرع", "Find Nearest Branch")}</Link>
-          </div>
-        </div>
-      </section>
+      <CtaSection
+        locale={locale}
+        title={<>{pick(locale, "هل ترغب في تسجيل طفلك في ", "Would you like to enroll your child in ")}<span className="text-brand">{pick(locale, "هذه التقنية", "this technology")}</span>{pick(locale, " ؟", "?")}</>}
+        subtitle={pick(locale, "يمكنك التواصل معنا لمساعدتك في اختيار البرنامج أو الخدمة أو التقنية الأنسب وفق احتياجات طفلك.", "You can reach out to us for help choosing the program, service, or technology best suited to your child's needs.")}
+      />
     </>
   );
 }
