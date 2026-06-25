@@ -83,20 +83,20 @@ function Check({ className = "" }: { className?: string }) {
 
 function Block({ b }: { b: ClinicalBlock }) {
   if (b.kind === "agePrograms") {
-    const chip = "rounded-lg bg-white/10 px-4 py-2 text-center text-xs font-medium text-white";
+    const chip = "rounded-lg bg-white px-4 py-2 text-center text-xs font-medium text-brand-dark";
     return (
-      <section className="bg-gradient-to-bl from-brand-deep to-[#0a2329] py-16 text-white">
+      <section className="bg-gradient-to-bl from-[#0d3d45] via-[#13505b] to-[#123749] py-16 text-white">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <h2 className="mb-10 text-center text-3xl font-extrabold">{b.heading}</h2>
           <div className="grid gap-5 sm:grid-cols-2">
             {/* Adult */}
-            <div className="flex flex-col items-center rounded-2xl border border-white/15 bg-white/5 p-7 text-center backdrop-blur">
+            <div className="flex flex-col items-center rounded-2xl border border-white/10 bg-gradient-to-br from-[#1c4e57] to-[#215d68] p-7 text-center">
               <h3 className="text-lg font-bold text-white">{b.adult.title}</h3>
               <p className="mt-1 text-sm text-white/70">{b.adult.sub}</p>
               <span className={`mt-4 ${chip}`}>{b.adult.label}</span>
             </div>
             {/* Child */}
-            <div className="flex flex-col items-center rounded-2xl border border-white/15 bg-white/5 p-7 text-center backdrop-blur">
+            <div className="flex flex-col items-center rounded-2xl border border-white/10 bg-gradient-to-br from-[#1c4e57] to-[#215d68] p-7 text-center">
               <h3 className="text-lg font-bold text-white">{b.child.title}</h3>
               <p className="mt-1 text-sm text-white/70">{b.child.label}</p>
               <div className="mt-4 grid w-full max-w-xs grid-cols-2 gap-2">
