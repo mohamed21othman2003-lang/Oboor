@@ -10,6 +10,7 @@ import { getLocale } from "@/i18n/locale";
 import { pick } from "@/i18n/config";
 import { loadBranches } from "@/lib/server/branches";
 import { fetchSections } from "@/lib/server/django";
+import CtaSection from "@/components/CtaSection";
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
@@ -126,22 +127,12 @@ export default async function BranchesPage() {
       </section>
 
       {/* CTA */}
-      <section className="relative overflow-hidden bg-gradient-to-bl from-brand-deep to-[#0a2329]">
-        <div className="relative mx-auto max-w-7xl px-6 py-14 text-center lg:px-8">
-          <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-sm font-medium text-white/90">
-            <span className="h-2 w-2 rounded-full bg-success" />
-            {pick(locale, "فريقنا معك، في كل وقت", "Our team is with you at all times.")}
-          </span>
-          <h2 className="mt-5 text-3xl font-extrabold text-white sm:text-4xl">{pick(locale, "أتحتاجنا بجانبك لاختيار الوجهة؟", "Need help choosing the right option?")}</h2>
-          <p className="mx-auto mt-3 max-w-2xl text-sm text-white/75">{pick(locale, "نحن هنا لنكون بوصلتك؛ نختار معًا الفرع الأقرب لروح طفلك، والأنسب لتحقيق طموحه.", "We are here to guide you in finding the most suitable branch for your child's needs and potential, ensuring the best path toward their goals.")}</p>
-          <div className="mt-8 flex justify-center">
-            <a href="https://wa.me/966920003452" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 rounded-xl bg-[#25D366] px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90">
-              <WhatsappIcon />
-              {pick(locale, "تواصل عبر الواتساب", "Contact via WhatsApp")}
-            </a>
-          </div>
-        </div>
-      </section>
+      <CtaSection
+        locale={locale}
+        badge={pick(locale, "فريقنا معك، في كل وقت", "Our team is with you at all times.")}
+        title={pick(locale, "أتحتاجنا بجانبك لاختيار الوجهة؟", "Need help choosing the right option?")}
+        subtitle={pick(locale, "نحن هنا لنكون بوصلتك؛ نختار معًا الفرع الأقرب لروح طفلك، والأنسب لتحقيق طموحه.", "We are here to guide you in finding the most suitable branch for your child's needs and potential, ensuring the best path toward their goals.")}
+      />
     </>
   );
 }
@@ -172,7 +163,4 @@ function PhoneIconSm() {
 }
 function NavIconSm() {
   return <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11" /></svg>;
-}
-function WhatsappIcon() {
-  return <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.5 15.3L2 22l4.8-1.5A10 10 0 1 0 12 2zm0 18a8 8 0 0 1-4.1-1.1l-.3-.2-2.8.9.9-2.7-.2-.3A8 8 0 1 1 12 20zm4.4-6c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1l-.7.9c-.1.2-.3.2-.5.1a6.5 6.5 0 0 1-3.2-2.8c-.2-.4.2-.4.6-1.2.1-.2 0-.3 0-.5l-.8-1.8c-.2-.5-.4-.4-.5-.4h-.5a1 1 0 0 0-.7.3c-.2.3-.9.9-.9 2.2s.9 2.5 1 2.7c.1.2 1.8 2.8 4.4 3.9 1.6.7 2.3.8 3.1.7.5-.1 1.4-.6 1.6-1.1.2-.6.2-1 .1-1.1z" /></svg>;
 }
