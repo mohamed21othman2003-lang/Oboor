@@ -62,7 +62,7 @@ export default async function AboutPage() {
             {/* Image (right) */}
             <div className="relative order-1 mx-auto h-[440px] w-full max-w-[480px]">
               <div className="relative h-full w-full overflow-hidden rounded-3xl shadow-lg">
-                <Image src="/figma/about/hero-v2.jpg" alt={pick(locale, "مركز عبور", "Oboor Center")} fill className="object-cover" sizes="(max-width:1024px) 100vw, 480px" priority />
+                <Image src="/figma/about/hero-v2.jpg" alt={pick(locale, "مركز عبور", "Oboor Center")} fill className="object-cover" sizes="(max-width:1024px) 100vw, 480px" quality={90} priority />
               </div>
               <span className="absolute right-5 top-6 flex items-center gap-2 rounded-xl bg-white px-3 py-2 text-xs font-bold text-ink shadow-lg">
                 <CalIcon /> {pick(locale, "تأهيل شامل ومتكامل", "Comprehensive, integrated rehabilitation")}
@@ -101,7 +101,7 @@ export default async function AboutPage() {
           {/* Image (left) */}
           <div className="relative order-1 h-[420px] lg:order-2">
             <div className="relative h-full w-full overflow-hidden rounded-3xl shadow-lg">
-              <Image src="/figma/about/intro.jpg" alt={pick(locale, "جلسة تأهيل", "Rehabilitation session")} fill className="object-cover" sizes="(max-width:1024px) 100vw, 50vw" />
+              <Image src="/figma/about/intro.jpg" alt={pick(locale, "جلسة تأهيل", "Rehabilitation session")} fill className="object-cover" sizes="(max-width:1024px) 100vw, 50vw" quality={90} />
             </div>
           </div>
         </div>
@@ -165,7 +165,7 @@ export default async function AboutPage() {
             {/* Image (left) */}
             <div className="relative order-1 h-[480px] lg:order-2">
               <div className="relative h-full w-full overflow-hidden rounded-3xl shadow-lg">
-                <Image src="/figma/about/programs.jpg" alt={pick(locale, "برامج عبور", "Oboor programs")} fill className="object-cover" sizes="(max-width:1024px) 100vw, 50vw" />
+                <Image src="/figma/about/programs.jpg" alt={pick(locale, "برامج عبور", "Oboor programs")} fill className="object-cover" sizes="(max-width:1024px) 100vw, 50vw" quality={90} />
               </div>
             </div>
           </div>
