@@ -19,7 +19,7 @@ export default function CtaSection({
   badge?: string;
 }) {
   return (
-    <section className="relative overflow-hidden bg-gradient-to-bl from-brand-deep to-[#0a2329]">
+    <section className="relative overflow-hidden bg-gradient-to-br from-[#0e4048] via-[#1a6c75] to-[#0e4048]">
       <div className="relative mx-auto max-w-7xl px-6 py-14 text-center lg:px-8">
         <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-sm font-medium text-white/90">
           <span className="h-2 w-2 rounded-full bg-success" />
@@ -32,7 +32,7 @@ export default function CtaSection({
             <FormIcon />
             {pick(locale, "طلب التحاق", "Apply Now")}
           </Link>
-          <a href="https://wa.me/966920003452" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 rounded-xl bg-[#25D366] px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90">
+          <a href="https://wa.me/966920003452" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 rounded-xl bg-[#2ba73e] px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90">
             <WhatsappIcon />
             {pick(locale, "تواصل عبر الواتساب", "Contact via WhatsApp")}
           </a>
