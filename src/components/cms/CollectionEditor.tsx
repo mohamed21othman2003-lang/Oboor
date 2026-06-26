@@ -356,12 +356,12 @@ const LOCKED_FIELDS = new Set(["block"]);
 // قوائم بطاقات — كل عنصر كائن بخانات معنونة بسيطة (بدل JSON)
 const CARD_LIST_FIELDS: Record<string, { key: string; label: string }[]> = {
   methods: [
-    { key: "name", label: "الاسم" },
-    { key: "desc", label: "الوصف" },
+    { key: "name", label: "اسم الأسلوب/المنهج (عنوان عريض — اختياري)" },
+    { key: "desc", label: "وصف الأسلوب" },
   ],
   training_areas: [
-    { key: "title", label: "العنوان" },
-    { key: "desc", label: "الوصف" },
+    { key: "title", label: "اسم المجال (عنوان عريض)" },
+    { key: "desc", label: "وصف المجال" },
   ],
 };
 // حقول محتوى منظّم معقّد — للعرض فقط (تعديلها الخام يكسر الصفحة)
