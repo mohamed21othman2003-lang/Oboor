@@ -48,13 +48,42 @@ async function loadGallery(locale: Locale): Promise<{ images: string[]; captions
   return { images: rows.map((r) => r.image), captions: rows.map((r) => t(en, r.caption_ar, r.caption_en)) };
 }
 
+// قصص النجاح في الرئيسية — من نفس بيانات الـCMS (بدل قائمة ثابتة منفصلة)
+type ApiSuccess = { image: string; name_ar: string; name_en: string; age_ar: string; age_en: string; category_ar: string; category_en: string; duration_label_ar: string; duration_label_en: string; before_ar: string; before_en: string; after_ar: string; after_en: string; quote_ar: string; quote_en: string; meta_duration_ar: string; meta_duration_en: string; author_ar: string; author_en: string };
+async function loadSuccessHome(locale: Locale) {
+  const rows = await fetchContent<ApiSuccess[]>("success");
+  if (!rows || !rows.length) return undefined;
+  const en = locale === "en";
+  return rows.map((r) => ({
+    img: r.image, program: t(en, r.category_ar, r.category_en), duration: t(en, r.duration_label_ar, r.duration_label_en),
+    name: t(en, r.name_ar, r.name_en), age: t(en, r.age_ar, r.age_en),
+    before: t(en, r.before_ar, r.before_en), after: t(en, r.after_ar, r.after_en),
+    quote: t(en, r.quote_ar, r.quote_en), period: t(en, r.meta_duration_ar, r.meta_duration_en),
+    parent: t(en, r.author_ar, r.author_en),
+  }));
+}
+
+// أخبار الرئيسية — من نفس بيانات الـCMS (أحدث 6)
+type ApiNewsHome = { image: string; title_ar: string; title_en: string; desc_ar: string; desc_en: string; category_ar: string; category_en: string };
+async function loadNewsHome(locale: Locale) {
+  const rows = await fetchContent<ApiNewsHome[]>("news");
+  if (!rows || !rows.length) return undefined;
+  const en = locale === "en";
+  return rows.slice(0, 6).map((r) => ({
+    img: r.image, badge: t(en, r.category_ar, r.category_en),
+    title: t(en, r.title_ar, r.title_en), desc: t(en, r.desc_ar, r.desc_en),
+  }));
+}
+
 export default async function Home() {
   const locale = await getLocale();
-  const [heroSlides, statItems, featureItems, gallery] = await Promise.all([
+  const [heroSlides, statItems, featureItems, gallery, successHome, newsHome] = await Promise.all([
     loadHero(locale),
     loadStats(locale),
     loadFeatures(locale),
     loadGallery(locale),
+    loadSuccessHome(locale),
+    loadNewsHome(locale),
   ]);
   return (
     <>
@@ -63,9 +92,9 @@ export default async function Home() {
       <SmartSearch locale={locale} />
       <Stats locale={locale} items={statItems} />
       <WhyUs locale={locale} items={featureItems} />
-      <SuccessStories locale={locale} />
+      <SuccessStories locale={locale} stories={successHome} />
       <Gallery locale={locale} images={gallery?.images} captions={gallery?.captions} />
-      <NewsAndCerts locale={locale} />
+      <NewsAndCerts locale={locale} news={newsHome} />
 
       {/* WhatsApp float */}
       <a

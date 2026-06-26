@@ -38,8 +38,8 @@ function NewsCard({ n, locale }: { n: (typeof NEWS)[number]; locale: Locale }) {
   );
 }
 
-export default function NewsAndCerts({ locale }: { locale: Locale }) {
-  const news = locale === "en" ? NEWS_EN : NEWS;
+export default function NewsAndCerts({ locale, news: newsProp }: { locale: Locale; news?: (typeof NEWS)[number][] }) {
+  const news = newsProp?.length ? newsProp : (locale === "en" ? NEWS_EN : NEWS);
   const trackRef = useRef<HTMLDivElement>(null);
   const idxRef = useRef(0);
   const scroll = (dir: number) => {
