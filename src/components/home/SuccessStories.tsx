@@ -127,8 +127,8 @@ function Story({ s, locale }: { s: (typeof STORIES)[number]; locale: Locale }) {
   );
 }
 
-export default function SuccessStories({ locale }: { locale: Locale }) {
-  const stories = locale === "en" ? STORIES_EN : STORIES;
+export default function SuccessStories({ locale, stories: storiesProp }: { locale: Locale; stories?: (typeof STORIES)[number][] }) {
+  const stories = storiesProp?.length ? storiesProp : (locale === "en" ? STORIES_EN : STORIES);
   const trackRef = useRef<HTMLDivElement>(null);
   const idxRef = useRef(0);
   const scroll = (dir: number) => {
