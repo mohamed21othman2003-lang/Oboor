@@ -114,6 +114,8 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
     { icon: <UsersIcon />, label: pick(locale, "الفئة المستهدفة", "Target Audience"), value: n.audience },
     { icon: <SeatIcon />, label: pick(locale, "عدد المقاعد", "Seats Available"), value: n.seats },
   ].filter((it) => it.value);
+  // كارت/إطار الفعالية يظهر فقط للفعاليات والورش (التي بها بيانات فعالية)
+  const hasEvent = Boolean(n.time || n.location || n.audience || n.seats || n.regStatus);
 
   return (
     <>
@@ -147,12 +149,12 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
             <Image src={n.image} alt={n.title} fill className="object-cover" sizes="100vw" priority />
           </div>
 
-          <div className="grid gap-8 lg:grid-cols-[1fr_340px]">
+          <div className={hasEvent ? "grid gap-8 lg:grid-cols-[1fr_340px]" : ""}>
             {/* Main (right) */}
-            <article className="order-2 space-y-5 text-start lg:order-1">
+            <article className={`space-y-5 text-start ${hasEvent ? "order-2 lg:order-1" : "mx-auto max-w-4xl"}`}>
               {n.body.map((p, i) => <p key={i} className="text-sm leading-8 text-ink-muted">{p}</p>)}
 
-              {n.learn.length > 0 && (
+              {hasEvent && n.learn.length > 0 && (
                 <div className="rounded-2xl border border-line bg-surface/50 p-6">
                   <h2 className="text-lg font-extrabold text-ink">{pick(locale, "ما الذي ستتعلمه في هذه الفعالية؟", "What will you learn at this event?")}</h2>
                   <ul className="mt-4 space-y-3">
@@ -167,7 +169,8 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
               )}
             </article>
 
-            {/* Sidebar (left) */}
+            {/* Sidebar (left) — للفعاليات والورش فقط */}
+            {hasEvent && (
             <aside className="order-1 lg:order-2">
               <div className="sticky top-6 overflow-hidden rounded-2xl border border-line bg-white shadow-sm">
                 <h3 className="bg-gradient-to-bl from-brand to-brand-dark px-5 py-4 text-center text-base font-bold text-white">{pick(locale, "تفاصيل الفعالية", "Event Details")}</h3>
@@ -194,6 +197,7 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
                 </div>
               </div>
             </aside>
+            )}
           </div>
         </div>
       </section>
