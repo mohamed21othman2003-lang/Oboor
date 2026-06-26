@@ -140,6 +140,12 @@ export default function CmsShell({ children }: { children: React.ReactNode }) {
             <button onClick={() => setOpen((v) => !v)} className="rounded-lg p-2 text-[#0F6C73] hover:bg-[#1FA6A8]/10 lg:hidden" aria-label="القائمة">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 6h18M3 12h18M3 18h18" strokeLinecap="round" /></svg>
             </button>
+            {pathname !== "/cms" && (
+              <button onClick={() => router.back()} className="flex items-center gap-1.5 rounded-xl border border-[#e6eff0] px-3 py-2 text-xs font-semibold text-[#0F6C73] transition-colors hover:bg-[#1FA6A8]/10" aria-label="رجوع للصفحة السابقة" title="رجوع للصفحة السابقة">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+                رجوع
+              </button>
+            )}
             <a href="/" target="_blank" rel="noreferrer" className="flex items-center gap-1.5 rounded-xl border border-[#e6eff0] px-3 py-2 text-xs font-semibold text-[#0F6C73] transition-colors hover:bg-[#1FA6A8]/10">
               معاينة الموقع
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3" /></svg>
