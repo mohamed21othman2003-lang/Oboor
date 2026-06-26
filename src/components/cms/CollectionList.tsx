@@ -5,6 +5,18 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { listCollection, deleteItem, reorderCollection, TYPE_LABELS, type CmsItem } from "@/lib/cms/api";
 
+// أسماء ودّية لأقسام الصفحات (block) — لتجميع العناصر تحت قسمها بدل خلطها
+const BLOCK_LABELS: Record<string, string> = {
+  hero: "المقدمة العلوية", intro: "نبذة تعريفية", about: "نبذة", mission: "الرسالة", vision: "الرؤية",
+  programs: "عنوان قسم البرامج", program_item: "قائمة البرامج", services: "الخدمات",
+  specialists: "قسم الأخصائيين", branches: "قسم الفروع", cta: "شريط الدعوة للتواصل",
+  stats: "الأرقام", features: "المميزات", categories: "التصنيفات", map_regions: "مناطق الخريطة",
+  join_cards: "بطاقات الانضمام", contact_prompt: "دعوة التواصل", steps: "خطوات", highlights: "أبرز النقاط",
+  prelim_questions: "أسئلة أولية", answer_options: "خيارات الإجابة", cities: "المدن", employment_types: "أنواع الدوام",
+  quick_links: "روابط سريعة", social: "روابط التواصل", nav: "روابط القائمة",
+};
+const blockLabel = (b: string) => BLOCK_LABELS[b] || b;
+
 export default function CollectionList({ type }: { type: string }) {
   const router = useRouter();
   const [items, setItems] = useState<CmsItem[]>([]);
@@ -103,9 +115,22 @@ export default function CollectionList({ type }: { type: string }) {
     return [...buckets.values()].filter((b) => b.items.length > 0);
   }, [items, groupBy, groupDefs]);
 
-  function Row({ it }: { it: CmsItem }) {
+  // تجميع عناصر صفحة فرعيًا حسب القسم (block) مع الحفاظ على الترتيب
+  function blockGroups(list: CmsItem[]) {
+    if (!list.length || !("block" in list[0])) return null;
+    const order: string[] = [];
+    const map = new Map<string, CmsItem[]>();
+    for (const it of list) {
+      const b = String(it["block"] ?? "");
+      if (!map.has(b)) { map.set(b, []); order.push(b); }
+      map.get(b)!.push(it);
+    }
+    return order.map((b) => ({ block: b, items: map.get(b)! }));
+  }
+
+  function Row({ it, hideSub }: { it: CmsItem; hideSub?: boolean }) {
     const pub = published(it);
-    const sub = subLabel(it);
+    const sub = hideSub ? "" : subLabel(it);
     // موضع العنصر داخل مجموعته (لتعطيل الأسهم عند الحواف)
     const gk = groupBy ? String(it[groupBy] ?? "") : null;
     const sameGroup = groupBy ? items.filter((x) => String(x[groupBy] ?? "") === gk) : items;
@@ -147,14 +172,14 @@ export default function CollectionList({ type }: { type: string }) {
     );
   }
 
-  function Table({ list }: { list: CmsItem[] }) {
+  function Table({ list, hideSub }: { list: CmsItem[]; hideSub?: boolean }) {
     return (
       <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-line">
         <table className="w-full text-right text-sm">
           <thead className="bg-surface text-xs font-semibold text-ink-soft">
             <tr>{canReorder && <th className="px-2 py-3 w-12"></th>}<th className="px-5 py-3">العنوان</th><th className="px-5 py-3 w-28">الحالة</th><th className="px-5 py-3 w-32"></th></tr>
           </thead>
-          <tbody className="divide-y divide-line">{list.map((it) => <Row key={it.id} it={it} />)}</tbody>
+          <tbody className="divide-y divide-line">{list.map((it) => <Row key={it.id} it={it} hideSub={hideSub} />)}</tbody>
         </table>
       </div>
     );
@@ -197,11 +222,22 @@ export default function CollectionList({ type }: { type: string }) {
                   </div>
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={`shrink-0 text-ink-soft transition-transform ${isOpen ? "rotate-180" : ""}`}><path strokeLinecap="round" d="M6 9l6 6 6-6" /></svg>
                 </button>
-                {isOpen && (
-                  <div className="border-t border-line p-3">
-                    <Table list={g.items} />
-                  </div>
-                )}
+                {isOpen && (() => {
+                  const bg = blockGroups(g.items);
+                  return (
+                    <div className="space-y-4 border-t border-line p-3">
+                      {bg ? bg.map((sg) => (
+                        <div key={sg.block}>
+                          <p className="mb-2 flex items-center gap-2 px-1 text-xs font-bold text-brand-dark">
+                            <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-brand/10 px-1.5 text-[11px]">{sg.items.length}</span>
+                            {blockLabel(sg.block)}
+                          </p>
+                          <Table list={sg.items} hideSub />
+                        </div>
+                      )) : <Table list={g.items} />}
+                    </div>
+                  );
+                })()}
               </div>
             );
           })}

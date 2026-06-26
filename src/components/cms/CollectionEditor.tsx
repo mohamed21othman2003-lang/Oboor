@@ -313,7 +313,7 @@ const OBJECT_FIELDS: Record<string, { key: string; label: string }[]> = {
 };
 
 // حقول مخفية من الفورم (الترتيب يُدار بأسهم القائمة)
-const HIDDEN_IN_FORM = new Set(["order"]);
+const HIDDEN_IN_FORM = new Set(["order", "page"]);
 // حقول تقنية/اختيارية تُخفى إن كانت فارغة (تقليل التشويش لمن لا يحتاجها)
 const HIDE_IF_EMPTY = new Set(["icon", "value", "color", "href", "data_ar", "data_en"]);
 // حقول مقفولة (تُعرض للاطلاع فقط؛ تغييرها يكسر مكان المحتوى)
