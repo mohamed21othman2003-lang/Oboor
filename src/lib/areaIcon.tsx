@@ -33,6 +33,9 @@ const PATHS: Record<string, string> = {
   check: '<circle cx="12" cy="12" r="9"/><path d="M8.5 12l2.2 2.2L15.5 9.5"/>',
 };
 
+// قائمة مفاتيح الأيقونات المتاحة (لمنتقي الأيقونات في لوحة التحكّم)
+export const OFFER_ICON_KEYS = Object.keys(PATHS);
+
 const I = (key: string) => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" dangerouslySetInnerHTML={{ __html: PATHS[key] || PATHS.check }} />
 );
