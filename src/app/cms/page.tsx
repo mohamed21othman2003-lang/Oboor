@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { getStats, type DashboardStats } from "@/lib/cms/api";
+import { getStats, type DashboardStats, TYPE_LABELS } from "@/lib/cms/api";
 
 // ===== خريطة الأيقونات =====
 function I({ children }: { children: React.ReactNode }) {
@@ -81,7 +81,7 @@ export default function CmsDashboard() {
 
   // كل عناصر المحتوى مفهرسة بالمفتاح + بطاقة الإعدادات
   const byKey: Record<string, { key: string; label: string; count: number }> = {};
-  [...stats.content, ...stats.home].forEach((c) => (byKey[c.key] = c));
+  [...stats.content, ...stats.home].forEach((c) => (byKey[c.key] = { ...c, label: TYPE_LABELS[c.key] ?? c.label }));
   byKey["settings"] = { key: "settings", label: "إعدادات الموقع", count: stats.totals.site_configured ? 1 : 0 };
 
   const maxSub = Math.max(1, ...stats.submissions.map((s) => s.count));
