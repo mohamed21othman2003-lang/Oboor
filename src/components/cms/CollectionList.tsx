@@ -8,7 +8,7 @@ import { listCollection, deleteItem, reorderCollection, TYPE_LABELS, type CmsIte
 // أسماء ودّية لأقسام الصفحات (block) — لتجميع العناصر تحت قسمها بدل خلطها
 const BLOCK_LABELS: Record<string, string> = {
   hero: "المقدمة العلوية", intro: "نبذة تعريفية", about: "نبذة", mission: "الرسالة", vision: "الرؤية",
-  programs: "عنوان قسم البرامج", program_item: "قائمة البرامج", services: "الخدمات",
+  programs: "قسم البرامج (العنوان + القائمة)", services: "الخدمات",
   specialists: "قسم الأخصائيين", branches: "قسم الفروع", cta: "شريط الدعوة للتواصل",
   stats: "الأرقام", features: "المميزات", categories: "التصنيفات", map_regions: "مناطق الخريطة",
   join_cards: "بطاقات الانضمام", contact_prompt: "دعوة التواصل", steps: "خطوات", highlights: "أبرز النقاط",

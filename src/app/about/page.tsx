@@ -68,9 +68,10 @@ export default async function AboutPage() {
   const aText = (b: string, ar: string, e: string) => { const r = blk(b); const v = r && (en ? r.text_en || r.text_ar : r.text_ar); return v || pick(locale, ar, e); };
   const aList = (b: string, ar: string[], e: string[]) => { const r = blk(b); const d = r && (en ? r.data_en : r.data_ar) as unknown; const arr = Array.isArray(d) ? (d as string[]) : []; return arr.length ? arr : (en ? e : ar); };
 
-  // قائمة البرامج: صفوف program_item من الـCMS (مع fallback للقائمة الثابتة)
-  const programItems = about?.program_item?.length
-    ? about.program_item.map((r) => ({ icon: r.icon, title: en ? r.title_en || r.title_ar : r.title_ar, desc: en ? r.text_en || r.text_ar : r.text_ar }))
+  // قائمة البرامج: عناصر قسم «البرامج» التي لها أيقونة (العنوان بلا أيقونة) — مع fallback ثابت
+  const progRows = (about?.programs ?? []).filter((r) => r.icon);
+  const programItems = progRows.length
+    ? progRows.map((r) => ({ icon: r.icon, title: en ? r.title_en || r.title_ar : r.title_ar, desc: en ? r.text_en || r.text_ar : r.text_ar }))
     : PROGRAMS.map((p) => ({ icon: p.icon, title: en ? p.title_en : p.title, desc: en ? p.desc_en : p.desc }));
 
   return (
