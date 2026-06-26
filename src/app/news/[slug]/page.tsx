@@ -13,7 +13,7 @@ export function generateStaticParams() {
 
 // الشكل اللي بيرجع من Django (content/news)
 type ApiNews = {
-  slug: string; title_ar: string; title_en: string;
+  slug: string; section: string; title_ar: string; title_en: string;
   desc_ar: string; desc_en: string; category_ar: string; category_en: string;
   date_ar: string; date_en: string; image: string;
   body_ar: string[]; body_en: string[]; learn_ar: string[]; learn_en: string[];
@@ -26,6 +26,7 @@ type NewsDetail = {
   title: string; desc: string; date: string; category: string; image: string;
   body: string[]; learn: string[];
   time: string; location: string; audience: string; seats: string; regStatus: string;
+  isEvent: boolean; // فعالية/ورشة ⇒ يظهر كارت التفاصيل دائماً
 };
 
 // نصوص افتراضية (تُستخدم فقط عند تعذّر الوصول لـ Django)
@@ -73,6 +74,7 @@ async function loadNews(slug: string, locale: Locale): Promise<NewsDetail | null
       time: s(row.time_ar, row.time_en), location: s(row.location_ar, row.location_en),
       audience: s(row.audience_ar, row.audience_en), seats: s(row.seats_ar, row.seats_en),
       regStatus: s(row.reg_status_ar, row.reg_status_en),
+      isEvent: ["events", "workshops"].includes(row.section),
     };
   }
   // fallback: البيانات الثابتة + نصوص افتراضية
@@ -86,6 +88,7 @@ async function loadNews(slug: string, locale: Locale): Promise<NewsDetail | null
     audience: pick(locale, "أولياء الأمور والأسر", "Parents and families"),
     seats: pick(locale, "٢٠ مقعداً", "20 seats"),
     regStatus: pick(locale, "التسجيل مفتوح - مقاعد محدودة", "Registration open - limited seats"),
+    isEvent: true,
   };
 }
 
@@ -114,8 +117,8 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
     { icon: <UsersIcon />, label: pick(locale, "الفئة المستهدفة", "Target Audience"), value: n.audience },
     { icon: <SeatIcon />, label: pick(locale, "عدد المقاعد", "Seats Available"), value: n.seats },
   ].filter((it) => it.value);
-  // كارت/إطار الفعالية يظهر فقط للفعاليات والورش (التي بها بيانات فعالية)
-  const hasEvent = Boolean(n.time || n.location || n.audience || n.seats || n.regStatus);
+  // كارت الفعالية يظهر للفعاليات والورش (أو لأي عنصر عُبّئت له بيانات فعالية)
+  const hasEvent = n.isEvent || Boolean(n.time || n.location || n.audience || n.seats || n.regStatus);
 
   return (
     <>
