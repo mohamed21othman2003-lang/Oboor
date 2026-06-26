@@ -270,8 +270,8 @@ function InfoCard({ title, icon, children }: { title: string; icon: React.ReactN
   return (
     <div className="rounded-2xl border border-line border-t-4 border-t-brand bg-white p-6 shadow-sm">
       <div className="mb-4 flex items-center justify-start gap-3 border-b border-line pb-4">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand/10 text-brand">{icon}</span>
         <h3 className="text-lg font-bold text-ink">{title}</h3>
-        <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand/10 text-brand">{icon}</span>
       </div>
       {children}
     </div>
