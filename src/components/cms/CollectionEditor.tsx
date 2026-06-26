@@ -166,6 +166,20 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
 
   function renderRow(row: Row, i: number) {
     if (row.kind === "pair") {
+      // أقسام صفحة الخدمة (blocks) — محرّر منظّم بعرض كامل (عربي + إنجليزي معاً)
+      if (row.ar?.base === "blocks" || row.en?.base === "blocks") {
+        return (
+          <div key={i}>
+            <label className="mb-1.5 block text-sm font-semibold text-ink">أقسام محتوى الصفحة</label>
+            <BlocksEditor
+              ar={Array.isArray(values.blocks_ar) ? (values.blocks_ar as unknown[]) : []}
+              en={Array.isArray(values.blocks_en) ? (values.blocks_en as unknown[]) : []}
+              onChange={(a, e) => { set("blocks_ar", a); set("blocks_en", e); }}
+            />
+            <Help text="كل قسم من أقسام الصفحة (عناوين، بطاقات، قوائم، مربّعات…). عدّل النص العربي على اليمين والإنجليزي على اليسار. نوع القسم وشكله ثابتان للحفاظ على التصميم." />
+          </div>
+        );
+      }
       return (
         <div key={i} className="grid gap-4 sm:grid-cols-2">
           {row.ar && <FieldInput f={row.ar} value={values[row.ar.name]} onChange={(v) => set(row.ar!.name, v)} badge="عربي" />}
@@ -685,6 +699,207 @@ function ListEditor({ value, onChange, dir }: { value: (string | number)[]; onCh
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path strokeLinecap="round" d="M12 5v14M5 12h14" /></svg>
         إضافة عنصر
       </button>
+    </div>
+  );
+}
+
+// ===================== محرّر أقسام صفحة الخدمة (blocks) =====================
+// كل خدمة عيادية لها قائمة «أقسام» (blocks) بأنواع مختلفة. نعرضها بمحرّر منظّم
+// يتيح تعديل كل النصوص (عربي/إنجليزي) مع الحفاظ على النوع والشكل (التصميم ثابت).
+type Rec = Record<string, unknown>;
+const blkStr = (v: unknown): string => (typeof v === "string" ? v : v == null ? "" : String(v));
+const blkArr = (v: unknown): unknown[] => (Array.isArray(v) ? v : []);
+const blkStrArr = (v: unknown): string[] => blkArr(v).map((x) => blkStr(x));
+const blkObj = (v: unknown): Rec => (v && typeof v === "object" && !Array.isArray(v) ? (v as Rec) : {});
+const blkObjArr = (v: unknown): Rec[] => blkArr(v).map((x) => blkObj(x));
+
+const BLOCK_KIND_LABEL: Record<string, string> = {
+  cards: "بطاقات (عنوان + وصف لكل بطاقة)",
+  prose: "فقرات نصّية",
+  agePrograms: "برامج حسب الفئة العمرية",
+  pills: "وسوم (أزرار صغيرة)",
+  tiles: "مربّعات",
+  checklist: "قائمة بعلامات صح ✓",
+  areas: "مجالات (عنوان + وصف لكل مجال)",
+};
+
+function blockSkeleton(kind: string): Rec {
+  if (kind === "prose") return { kind, heading: "", paragraphs: [] };
+  if (kind === "agePrograms") return { kind, heading: "", adult: { title: "", sub: "", label: "" }, child: { title: "", label: "", levels: [] } };
+  return { kind, heading: "", intro: "", items: [] };
+}
+
+// حقل نصّي ثنائي اللغة (عربي يمين / إنجليزي يسار)
+function BiScalar({ label, a, e, onA, onE }: { label: string; a: string; e: string; onA: (v: string) => void; onE: (v: string) => void }) {
+  return (
+    <div>
+      <p className="mb-1 text-xs font-semibold text-ink-soft">{label}</p>
+      <div className="grid gap-2 sm:grid-cols-2">
+        <div className="relative">
+          <span className="absolute -top-0 left-2 hidden">ع</span>
+          <AutoTextarea value={a} onChange={onA} className={INPUT + " bg-white"} />
+        </div>
+        <AutoTextarea value={e} onChange={onE} dir="ltr" className={INPUT + " bg-white"} />
+      </div>
+    </div>
+  );
+}
+
+// قائمة نصوص ثنائية اللغة (صفّ لكل عنصر: عربي + إنجليزي + حذف)
+function BiStrList({ a, e, onChange }: { a: string[]; e: string[]; onChange: (a: string[], e: string[]) => void }) {
+  const n = Math.max(a.length, e.length);
+  const norm = (arr: string[]) => { const c = [...arr]; while (c.length < n) c.push(""); return c; };
+  const setRow = (i: number, av: string, ev: string) => { const na = norm(a); const ne = norm(e); na[i] = av; ne[i] = ev; onChange(na, ne); };
+  const removeRow = (i: number) => onChange(norm(a).filter((_, j) => j !== i), norm(e).filter((_, j) => j !== i));
+  const add = () => onChange([...a, ""], [...e, ""]);
+  return (
+    <div className="space-y-2">
+      {n === 0 && <p className="rounded-xl border border-dashed border-line bg-surface px-3 py-2 text-[11px] text-ink-soft">لا توجد عناصر — اضغط «إضافة عنصر».</p>}
+      {Array.from({ length: n }, (_, i) => (
+        <div key={i} className="flex items-start gap-2">
+          <span className="mt-2 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-surface text-[10px] font-bold text-ink-soft">{i + 1}</span>
+          <div className="grid flex-1 gap-2 sm:grid-cols-2">
+            <AutoTextarea value={a[i] ?? ""} onChange={(v) => setRow(i, v, e[i] ?? "")} className={INPUT + " bg-white"} />
+            <AutoTextarea value={e[i] ?? ""} onChange={(v) => setRow(i, a[i] ?? "", v)} dir="ltr" className={INPUT + " bg-white"} />
+          </div>
+          <button type="button" onClick={() => removeRow(i)} className="mt-1 shrink-0 rounded-lg bg-red-50 px-2 py-1.5 text-[11px] font-semibold text-red-600 hover:bg-red-600 hover:text-white">حذف</button>
+        </div>
+      ))}
+      <button type="button" onClick={add} className="inline-flex items-center gap-1 rounded-lg bg-brand/10 px-2.5 py-1 text-[11px] font-semibold text-brand hover:bg-brand hover:text-white">+ إضافة عنصر</button>
+    </div>
+  );
+}
+
+// محرّر قائمة بطاقات/مجالات ثنائي اللغة (كل عنصر كائن بخاناته)
+function ObjItemsEditor({ a, e, onChange, schema, addLabel }: { a: Rec[]; e: Rec[]; onChange: (a: Rec[], e: Rec[]) => void; schema: { key: string; label: string; list?: boolean }[]; addLabel: string }) {
+  const n = Math.max(a.length, e.length);
+  const norm = (arr: Rec[]) => { const c = arr.map(blkObj); while (c.length < n) c.push({}); return c; };
+  const patch = (i: number, av: Rec, ev: Rec) => { const na = norm(a); const ne = norm(e); na[i] = av; ne[i] = ev; onChange(na, ne); };
+  const removeAt = (i: number) => onChange(norm(a).filter((_, j) => j !== i), norm(e).filter((_, j) => j !== i));
+  const blank = () => Object.fromEntries(schema.map((s) => [s.key, s.list ? [] : ""])) as Rec;
+  const add = () => onChange([...a.map(blkObj), blank()], [...e.map(blkObj), blank()]);
+  return (
+    <div className="space-y-2">
+      {n === 0 && <p className="rounded-xl border border-dashed border-line bg-surface px-3 py-2 text-[11px] text-ink-soft">لا توجد عناصر — اضغط «{addLabel}».</p>}
+      {Array.from({ length: n }, (_, i) => {
+        const ia = blkObj(a[i]); const ie = blkObj(e[i] ?? a[i]);
+        return (
+          <div key={i} className="rounded-xl border border-line bg-white p-3">
+            <div className="mb-2 flex items-center justify-between">
+              <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-brand/10 px-2 text-[10px] font-bold text-brand">عنصر {i + 1}</span>
+              <button type="button" onClick={() => removeAt(i)} className="rounded-lg bg-red-50 px-2 py-1 text-[11px] font-semibold text-red-600 hover:bg-red-600 hover:text-white">حذف</button>
+            </div>
+            <div className="space-y-2">
+              {schema.map((s) => s.list ? (
+                <div key={s.key}>
+                  <p className="mb-1 text-xs font-semibold text-ink-soft">{s.label}</p>
+                  <BiStrList a={blkStrArr(ia[s.key])} e={blkStrArr(ie[s.key])} onChange={(av, ev) => patch(i, { ...ia, [s.key]: av }, { ...ie, [s.key]: ev })} />
+                </div>
+              ) : (
+                <BiScalar key={s.key} label={s.label} a={blkStr(ia[s.key])} e={blkStr(ie[s.key])} onA={(v) => patch(i, { ...ia, [s.key]: v }, { ...ie })} onE={(v) => patch(i, { ...ia }, { ...ie, [s.key]: v })} />
+              ))}
+            </div>
+          </div>
+        );
+      })}
+      <button type="button" onClick={add} className="inline-flex items-center gap-1 rounded-lg bg-brand/10 px-2.5 py-1 text-[11px] font-semibold text-brand hover:bg-brand hover:text-white">+ {addLabel}</button>
+    </div>
+  );
+}
+
+function BlocksEditor({ ar, en, onChange }: { ar: unknown[]; en: unknown[]; onChange: (ar: Rec[], en: Rec[]) => void }) {
+  const [addKind, setAddKind] = useState("cards");
+  const n = Math.max(ar.length, en.length);
+  const pairs = Array.from({ length: n }, (_, i) => ({ a: blkObj(ar[i]), e: blkObj(en[i] ?? ar[i]) }));
+  const commit = (next: { a: Rec; e: Rec }[]) => onChange(next.map((p) => p.a), next.map((p) => p.e));
+  const patch = (i: number, av: Rec, ev: Rec) => commit(pairs.map((p, j) => (j === i ? { a: av, e: ev } : p)));
+  const move = (i: number, dir: -1 | 1) => { const j = i + dir; if (j < 0 || j >= n) return; const next = [...pairs]; [next[i], next[j]] = [next[j], next[i]]; commit(next); };
+  const removeAt = (i: number) => commit(pairs.filter((_, j) => j !== i));
+  const add = () => commit([...pairs, { a: blockSkeleton(addKind), e: blockSkeleton(addKind) }]);
+
+  return (
+    <div className="space-y-4">
+      {n === 0 && <p className="rounded-xl border border-dashed border-line bg-surface px-4 py-3 text-xs text-ink-soft">لا توجد أقسام بعد — أضف قسماً من الأسفل.</p>}
+      {pairs.map((p, i) => {
+        const kind = blkStr(p.a.kind || p.e.kind);
+        const sc = (key: string, label: string) => (
+          <BiScalar key={key} label={label} a={blkStr(p.a[key])} e={blkStr(p.e[key])}
+            onA={(v) => patch(i, { ...p.a, [key]: v }, { ...p.e })} onE={(v) => patch(i, { ...p.a }, { ...p.e, [key]: v })} />
+        );
+        const strList = (key: string, label: string) => (
+          <div key={key}>
+            <p className="mb-1 text-xs font-semibold text-ink-soft">{label}</p>
+            <BiStrList a={blkStrArr(p.a[key])} e={blkStrArr(p.e[key])} onChange={(av, ev) => patch(i, { ...p.a, [key]: av }, { ...p.e, [key]: ev })} />
+          </div>
+        );
+        const objList = (key: string, schema: { key: string; label: string; list?: boolean }[], addLabel: string) => (
+          <div key={key}>
+            <ObjItemsEditor a={blkObjArr(p.a[key])} e={blkObjArr(p.e[key])} schema={schema} addLabel={addLabel}
+              onChange={(av, ev) => patch(i, { ...p.a, [key]: av }, { ...p.e, [key]: ev })} />
+          </div>
+        );
+        const nestScalar = (objKey: string, key: string, label: string) => (
+          <BiScalar key={objKey + key} label={label} a={blkStr(blkObj(p.a[objKey])[key])} e={blkStr(blkObj(p.e[objKey])[key])}
+            onA={(v) => patch(i, { ...p.a, [objKey]: { ...blkObj(p.a[objKey]), [key]: v } }, { ...p.e })}
+            onE={(v) => patch(i, { ...p.a }, { ...p.e, [objKey]: { ...blkObj(p.e[objKey]), [key]: v } })} />
+        );
+
+        let body: React.ReactNode;
+        if (kind === "prose") body = <>{sc("heading", "العنوان")}{strList("paragraphs", "الفقرات")}</>;
+        else if (kind === "pills") body = <>{sc("heading", "العنوان")}{sc("intro", "مقدمة (اختياري)")}{strList("items", "الوسوم")}</>;
+        else if (kind === "tiles") body = <>{sc("heading", "العنوان")}{sc("intro", "مقدمة (اختياري)")}{strList("items", "المربّعات")}</>;
+        else if (kind === "checklist") body = <>{sc("heading", "العنوان (اختياري)")}{sc("intro", "مقدمة (اختياري)")}{strList("items", "عناصر القائمة")}</>;
+        else if (kind === "areas") body = <>{sc("heading", "العنوان")}{sc("intro", "مقدمة (اختياري)")}{objList("items", [{ key: "title", label: "العنوان" }, { key: "desc", label: "الوصف" }], "إضافة مجال")}</>;
+        else if (kind === "cards") body = <>{sc("heading", "العنوان")}{sc("intro", "مقدمة (اختياري)")}{objList("items", [{ key: "title", label: "عنوان البطاقة" }, { key: "sub", label: "نص جانبي (اختياري)" }, { key: "desc", label: "الوصف (اختياري)" }, { key: "bullets", label: "نقاط (اختياري)", list: true }, { key: "tags", label: "وسوم (اختياري)", list: true }], "إضافة بطاقة")}</>;
+        else if (kind === "agePrograms") body = (
+          <>
+            {sc("heading", "العنوان")}
+            <div className="rounded-xl border border-line bg-white p-3">
+              <p className="mb-2 text-xs font-bold text-ink">بطاقة الكبار</p>
+              <div className="space-y-2">{nestScalar("adult", "title", "العنوان")}{nestScalar("adult", "sub", "الوصف")}{nestScalar("adult", "label", "الوسم")}</div>
+            </div>
+            <div className="rounded-xl border border-line bg-white p-3">
+              <p className="mb-2 text-xs font-bold text-ink">بطاقة الأطفال</p>
+              <div className="space-y-2">
+                {nestScalar("child", "title", "العنوان")}{nestScalar("child", "label", "الوصف")}
+                <div>
+                  <p className="mb-1 text-xs font-semibold text-ink-soft">المستويات</p>
+                  <BiStrList a={blkStrArr(blkObj(p.a.child).levels)} e={blkStrArr(blkObj(p.e.child).levels)}
+                    onChange={(av, ev) => patch(i, { ...p.a, child: { ...blkObj(p.a.child), levels: av } }, { ...p.e, child: { ...blkObj(p.e.child), levels: ev } })} />
+                </div>
+              </div>
+            </div>
+          </>
+        );
+        else body = sc("heading", "العنوان");
+
+        return (
+          <div key={i} className="rounded-2xl border border-line bg-surface/40 p-4">
+            <div className="mb-3 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <span className="flex h-6 min-w-6 items-center justify-center rounded-full bg-brand px-2 text-[11px] font-bold text-white">قسم {i + 1}</span>
+                <span className="rounded-lg bg-brand/10 px-2 py-1 text-[11px] font-bold text-brand">{BLOCK_KIND_LABEL[kind] || kind}</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <button type="button" onClick={() => move(i, -1)} disabled={i === 0} className="rounded-lg border border-line bg-white px-2 py-1 text-xs font-bold text-ink-soft hover:border-brand hover:text-brand disabled:opacity-30" title="أعلى">↑</button>
+                <button type="button" onClick={() => move(i, 1)} disabled={i === n - 1} className="rounded-lg border border-line bg-white px-2 py-1 text-xs font-bold text-ink-soft hover:border-brand hover:text-brand disabled:opacity-30" title="أسفل">↓</button>
+                <button type="button" onClick={() => removeAt(i)} className="rounded-lg bg-red-50 px-2.5 py-1 text-[11px] font-semibold text-red-600 hover:bg-red-600 hover:text-white">حذف القسم</button>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2 px-1 pb-2 text-[10px] font-bold text-ink-soft">
+              <span>عربي</span><span dir="ltr">English</span>
+            </div>
+            <div className="space-y-3">{body}</div>
+          </div>
+        );
+      })}
+      <div className="flex flex-wrap items-center gap-2 border-t border-line pt-3">
+        <span className="text-xs font-semibold text-ink-soft">إضافة قسم جديد:</span>
+        <select value={addKind} onChange={(e) => setAddKind(e.target.value)} className="rounded-lg border border-line bg-white px-2 py-1.5 text-xs text-ink">
+          {Object.entries(BLOCK_KIND_LABEL).map(([k, l]) => <option key={k} value={k}>{l}</option>)}
+        </select>
+        <button type="button" onClick={add} className="inline-flex items-center gap-1 rounded-lg bg-brand px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-dark">+ إضافة القسم</button>
+      </div>
     </div>
   );
 }
