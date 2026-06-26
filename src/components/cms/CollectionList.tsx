@@ -17,6 +17,9 @@ const BLOCK_LABELS: Record<string, string> = {
 };
 const blockLabel = (b: string) => BLOCK_LABELS[b] || b;
 
+// صفحات لها كيان مستقل في السايد بار ⇒ تُستبعد من قائمة «أقسام الصفحات» العامة
+const DEDICATED_PAGES = new Set(["about"]);
+
 export default function CollectionList({ type }: { type: string }) {
   const router = useRouter();
   const sp = useSearchParams();
@@ -108,14 +111,16 @@ export default function CollectionList({ type }: { type: string }) {
     const buckets = new Map<string, { key: string; label: string; items: CmsItem[] }>();
     // مهّد المجموعات المعرّفة مسبقاً لحفظ الترتيب
     for (const g of groupDefs || []) buckets.set(g.value, { key: g.value, label: g.label, items: [] });
-    for (const it of items) {
+    // استبعد الصفحات التي لها كيان مستقل من القائمة العامة
+    const src = type === "sections" ? items.filter((it) => !DEDICATED_PAGES.has(String(it.page ?? ""))) : items;
+    for (const it of src) {
       const raw = it[groupBy];
       const key = raw === null || raw === undefined || raw === "" ? "__other__" : String(raw);
       if (!buckets.has(key)) buckets.set(key, { key, label: labelMap.get(key) || key || "أخرى", items: [] });
       buckets.get(key)!.items.push(it);
     }
     return [...buckets.values()].filter((b) => b.items.length > 0);
-  }, [items, groupBy, groupDefs]);
+  }, [items, groupBy, groupDefs, type]);
 
   // وضع «صفحة واحدة» (مثل عن عبور) — نعرض أقسام صفحة بعينها فقط
   const pageLabel = pageFilter ? (groupDefs?.find((g) => g.value === pageFilter)?.label || pageFilter) : null;
@@ -197,7 +202,7 @@ export default function CollectionList({ type }: { type: string }) {
         <div>
           <Link href="/cms" className="text-xs font-semibold text-brand hover:text-brand-dark">← لوحة التحكّم</Link>
           <h1 className="mt-1 text-2xl font-extrabold text-ink">{pageFilter ? pageLabel : label}</h1>
-          <p className="mt-1 text-sm text-ink-soft">{(pageFilter ? pageItems.length : items.length)} عنصر</p>
+          <p className="mt-1 text-sm text-ink-soft">{(pageFilter ? pageItems.length : grouped ? grouped.reduce((n, g) => n + g.items.length, 0) : items.length)} عنصر</p>
         </div>
         {!readonly && (
           <Link href={pageFilter ? `/cms/content/${type}/new?page=${pageFilter}` : `/cms/content/${type}/new`} className="inline-flex items-center gap-2 rounded-xl bg-brand px-4 py-2.5 text-sm font-bold text-white shadow-sm transition-colors hover:bg-brand-dark">
