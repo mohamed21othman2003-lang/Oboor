@@ -28,8 +28,9 @@ export async function fetchContent<T = unknown>(path: string): Promise<T | null>
   if (!DJANGO_API_URL) return null;
   try {
     const res = await fetch(`${DJANGO_API_URL}/content/${path}/`, {
-      // محتوى يتحدّث من لوحة الإدارة → نعيد التحقق كل دقيقة
-      next: { revalidate: 60 },
+      // محتوى يتحدّث من لوحة الإدارة → نعيد التحقق كل دقيقة كحدّ أقصى،
+      // مع وسم cache-content حتى يبطله الحفظ فورًا (on-demand revalidation).
+      next: { revalidate: 60, tags: ["cms-content"] },
     });
     if (!res.ok) return null;
     return (await res.json()) as T;
