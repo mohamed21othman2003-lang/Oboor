@@ -25,6 +25,9 @@ class Branch(models.Model):
 
     phone = models.CharField("رقم الهاتف", max_length=40, blank=True)
 
+    rating = models.CharField("التقييم (مثل 4.8 — اتركه فارغاً لإخفائه)", max_length=10, blank=True)
+    reviews_count = models.CharField("عدد التقييمات (اتركه فارغاً لإخفائه)", max_length=20, blank=True)
+
     services_ar = models.JSONField("الخدمات (عربي)", default=list, blank=True)
     services_en = models.JSONField("الخدمات (إنجليزي)", default=list, blank=True)
 
