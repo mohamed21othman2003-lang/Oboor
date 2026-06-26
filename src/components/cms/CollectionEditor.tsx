@@ -745,6 +745,16 @@ function BiScalar({ label, a, e, onA, onE }: { label: string; a: string; e: stri
   );
 }
 
+// حقل نصّي اختياري — يُخفى إن كان فارغاً ويظهر زر صغير لإضافته (تقليل التشويش)
+function OptionalScalar({ label, addLabel, a, e, onA, onE }: { label: string; addLabel: string; a: string; e: string; onA: (v: string) => void; onE: (v: string) => void }) {
+  const has = a.trim() !== "" || e.trim() !== "";
+  const [show, setShow] = useState(false);
+  if (!has && !show) {
+    return <button type="button" onClick={() => setShow(true)} className="text-[11px] font-semibold text-brand hover:underline">+ {addLabel}</button>;
+  }
+  return <BiScalar label={label} a={a} e={e} onA={onA} onE={onE} />;
+}
+
 // قائمة نصوص ثنائية اللغة (صفّ لكل عنصر: عربي + إنجليزي + حذف)
 function BiStrList({ a, e, onChange }: { a: string[]; e: string[]; onChange: (a: string[], e: string[]) => void }) {
   const n = Math.max(a.length, e.length);
@@ -770,38 +780,58 @@ function BiStrList({ a, e, onChange }: { a: string[]; e: string[]; onChange: (a:
   );
 }
 
+type ItemFieldSchema = { key: string; label: string; list?: boolean; optional?: boolean };
+
+// عنصر واحد داخل قائمة البطاقات/المجالات — يُظهر الحقول الأساسية فقط،
+// والحقول الاختيارية الفارغة تُخفى خلف زر صغير لتقليل التشويش
+function ObjItem({ index, ia, ie, schema, onChange, onRemove }: { index: number; ia: Rec; ie: Rec; schema: ItemFieldSchema[]; onChange: (av: Rec, ev: Rec) => void; onRemove: () => void }) {
+  const hasVal = (s: ItemFieldSchema) => s.list
+    ? (blkStrArr(ia[s.key]).length > 0 || blkStrArr(ie[s.key]).length > 0)
+    : (blkStr(ia[s.key]).trim() !== "" || blkStr(ie[s.key]).trim() !== "");
+  const [showExtra, setShowExtra] = useState(false);
+  const hiddenExtras = schema.filter((s) => s.optional && !hasVal(s));
+  const visible = schema.filter((s) => !s.optional || hasVal(s) || showExtra);
+  return (
+    <div className="rounded-xl border border-line bg-white p-3">
+      <div className="mb-2 flex items-center justify-between">
+        <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-brand/10 px-2 text-[10px] font-bold text-brand">عنصر {index + 1}</span>
+        <button type="button" onClick={onRemove} className="rounded-lg bg-red-50 px-2 py-1 text-[11px] font-semibold text-red-600 hover:bg-red-600 hover:text-white">حذف</button>
+      </div>
+      <div className="space-y-2">
+        {visible.map((s) => s.list ? (
+          <div key={s.key}>
+            <p className="mb-1 text-xs font-semibold text-ink-soft">{s.label}</p>
+            <BiStrList a={blkStrArr(ia[s.key])} e={blkStrArr(ie[s.key])} onChange={(av, ev) => onChange({ ...ia, [s.key]: av }, { ...ie, [s.key]: ev })} />
+          </div>
+        ) : (
+          <BiScalar key={s.key} label={s.label} a={blkStr(ia[s.key])} e={blkStr(ie[s.key])} onA={(v) => onChange({ ...ia, [s.key]: v }, { ...ie })} onE={(v) => onChange({ ...ia }, { ...ie, [s.key]: v })} />
+        ))}
+      </div>
+      {hiddenExtras.length > 0 && (
+        <button type="button" onClick={() => setShowExtra((s) => !s)} className="mt-2 text-[11px] font-semibold text-brand hover:underline">
+          {showExtra ? "إخفاء الحقول الإضافية" : `+ حقول إضافية اختيارية (${hiddenExtras.length})`}
+        </button>
+      )}
+    </div>
+  );
+}
+
 // محرّر قائمة بطاقات/مجالات ثنائي اللغة (كل عنصر كائن بخاناته)
-function ObjItemsEditor({ a, e, onChange, schema, addLabel }: { a: Rec[]; e: Rec[]; onChange: (a: Rec[], e: Rec[]) => void; schema: { key: string; label: string; list?: boolean }[]; addLabel: string }) {
+function ObjItemsEditor({ a, e, onChange, schema, addLabel }: { a: Rec[]; e: Rec[]; onChange: (a: Rec[], e: Rec[]) => void; schema: ItemFieldSchema[]; addLabel: string }) {
   const n = Math.max(a.length, e.length);
   const norm = (arr: Rec[]) => { const c = arr.map(blkObj); while (c.length < n) c.push({}); return c; };
   const patch = (i: number, av: Rec, ev: Rec) => { const na = norm(a); const ne = norm(e); na[i] = av; ne[i] = ev; onChange(na, ne); };
   const removeAt = (i: number) => onChange(norm(a).filter((_, j) => j !== i), norm(e).filter((_, j) => j !== i));
-  const blank = () => Object.fromEntries(schema.map((s) => [s.key, s.list ? [] : ""])) as Rec;
+  // عنصر جديد يبدأ بالحقول الأساسية فقط (غير الاختيارية)
+  const blank = () => Object.fromEntries(schema.filter((s) => !s.optional).map((s) => [s.key, s.list ? [] : ""])) as Rec;
   const add = () => onChange([...a.map(blkObj), blank()], [...e.map(blkObj), blank()]);
   return (
     <div className="space-y-2">
       {n === 0 && <p className="rounded-xl border border-dashed border-line bg-surface px-3 py-2 text-[11px] text-ink-soft">لا توجد عناصر — اضغط «{addLabel}».</p>}
-      {Array.from({ length: n }, (_, i) => {
-        const ia = blkObj(a[i]); const ie = blkObj(e[i] ?? a[i]);
-        return (
-          <div key={i} className="rounded-xl border border-line bg-white p-3">
-            <div className="mb-2 flex items-center justify-between">
-              <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-brand/10 px-2 text-[10px] font-bold text-brand">عنصر {i + 1}</span>
-              <button type="button" onClick={() => removeAt(i)} className="rounded-lg bg-red-50 px-2 py-1 text-[11px] font-semibold text-red-600 hover:bg-red-600 hover:text-white">حذف</button>
-            </div>
-            <div className="space-y-2">
-              {schema.map((s) => s.list ? (
-                <div key={s.key}>
-                  <p className="mb-1 text-xs font-semibold text-ink-soft">{s.label}</p>
-                  <BiStrList a={blkStrArr(ia[s.key])} e={blkStrArr(ie[s.key])} onChange={(av, ev) => patch(i, { ...ia, [s.key]: av }, { ...ie, [s.key]: ev })} />
-                </div>
-              ) : (
-                <BiScalar key={s.key} label={s.label} a={blkStr(ia[s.key])} e={blkStr(ie[s.key])} onA={(v) => patch(i, { ...ia, [s.key]: v }, { ...ie })} onE={(v) => patch(i, { ...ia }, { ...ie, [s.key]: v })} />
-              ))}
-            </div>
-          </div>
-        );
-      })}
+      {Array.from({ length: n }, (_, i) => (
+        <ObjItem key={i} index={i} ia={blkObj(a[i])} ie={blkObj(e[i] ?? a[i])} schema={schema}
+          onChange={(av, ev) => patch(i, av, ev)} onRemove={() => removeAt(i)} />
+      ))}
       <button type="button" onClick={add} className="inline-flex items-center gap-1 rounded-lg bg-brand/10 px-2.5 py-1 text-[11px] font-semibold text-brand hover:bg-brand hover:text-white">+ {addLabel}</button>
     </div>
   );
@@ -832,7 +862,12 @@ function BlocksEditor({ ar, en, onChange }: { ar: unknown[]; en: unknown[]; onCh
             <BiStrList a={blkStrArr(p.a[key])} e={blkStrArr(p.e[key])} onChange={(av, ev) => patch(i, { ...p.a, [key]: av }, { ...p.e, [key]: ev })} />
           </div>
         );
-        const objList = (key: string, schema: { key: string; label: string; list?: boolean }[], addLabel: string) => (
+        const introField = (key: string) => (
+          <OptionalScalar key={key} label="مقدمة (سطر تعريفي تحت العنوان)" addLabel="إضافة مقدمة"
+            a={blkStr(p.a[key])} e={blkStr(p.e[key])}
+            onA={(v) => patch(i, { ...p.a, [key]: v }, { ...p.e })} onE={(v) => patch(i, { ...p.a }, { ...p.e, [key]: v })} />
+        );
+        const objList = (key: string, schema: ItemFieldSchema[], addLabel: string) => (
           <div key={key}>
             <ObjItemsEditor a={blkObjArr(p.a[key])} e={blkObjArr(p.e[key])} schema={schema} addLabel={addLabel}
               onChange={(av, ev) => patch(i, { ...p.a, [key]: av }, { ...p.e, [key]: ev })} />
@@ -846,11 +881,11 @@ function BlocksEditor({ ar, en, onChange }: { ar: unknown[]; en: unknown[]; onCh
 
         let body: React.ReactNode;
         if (kind === "prose") body = <>{sc("heading", "العنوان")}{strList("paragraphs", "الفقرات")}</>;
-        else if (kind === "pills") body = <>{sc("heading", "العنوان")}{sc("intro", "مقدمة (اختياري)")}{strList("items", "الوسوم")}</>;
-        else if (kind === "tiles") body = <>{sc("heading", "العنوان")}{sc("intro", "مقدمة (اختياري)")}{strList("items", "المربّعات")}</>;
-        else if (kind === "checklist") body = <>{sc("heading", "العنوان (اختياري)")}{sc("intro", "مقدمة (اختياري)")}{strList("items", "عناصر القائمة")}</>;
-        else if (kind === "areas") body = <>{sc("heading", "العنوان")}{sc("intro", "مقدمة (اختياري)")}{objList("items", [{ key: "title", label: "العنوان" }, { key: "desc", label: "الوصف" }], "إضافة مجال")}</>;
-        else if (kind === "cards") body = <>{sc("heading", "العنوان")}{sc("intro", "مقدمة (اختياري)")}{objList("items", [{ key: "title", label: "عنوان البطاقة" }, { key: "sub", label: "نص جانبي (اختياري)" }, { key: "desc", label: "الوصف (اختياري)" }, { key: "bullets", label: "نقاط (اختياري)", list: true }, { key: "tags", label: "وسوم (اختياري)", list: true }], "إضافة بطاقة")}</>;
+        else if (kind === "pills") body = <>{sc("heading", "العنوان")}{introField("intro")}{strList("items", "الوسوم")}</>;
+        else if (kind === "tiles") body = <>{sc("heading", "العنوان")}{introField("intro")}{strList("items", "المربّعات")}</>;
+        else if (kind === "checklist") body = <>{sc("heading", "العنوان (اختياري)")}{introField("intro")}{strList("items", "عناصر القائمة")}</>;
+        else if (kind === "areas") body = <>{sc("heading", "العنوان")}{introField("intro")}{objList("items", [{ key: "title", label: "العنوان" }, { key: "desc", label: "الوصف" }], "إضافة مجال")}</>;
+        else if (kind === "cards") body = <>{sc("heading", "العنوان")}{introField("intro")}{objList("items", [{ key: "title", label: "عنوان البطاقة" }, { key: "desc", label: "الوصف" }, { key: "sub", label: "نص جانبي صغير", optional: true }, { key: "bullets", label: "نقاط", list: true, optional: true }, { key: "tags", label: "وسوم", list: true, optional: true }], "إضافة بطاقة")}</>;
         else if (kind === "agePrograms") body = (
           <>
             {sc("heading", "العنوان")}
