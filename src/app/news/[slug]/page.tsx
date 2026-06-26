@@ -147,9 +147,9 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
       {/* Body */}
       <section className="bg-white pb-16">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          {/* Featured image */}
-          <div className="relative mb-10 h-[300px] w-full overflow-hidden rounded-3xl shadow-lg sm:h-[440px]">
-            <Image src={n.image} alt={n.title} fill className="object-cover" sizes="100vw" priority />
+          {/* Featured image — إطار متوازن متمركز يحافظ على الوجوه ويناسب الصور الطولية والعرضية */}
+          <div className="relative mx-auto mb-10 aspect-[3/2] w-full max-w-4xl overflow-hidden rounded-3xl bg-surface shadow-lg">
+            <Image src={n.image} alt={n.title} fill className="object-cover object-top" sizes="(max-width:896px) 100vw, 896px" priority />
           </div>
 
           <div className={hasEvent ? "grid gap-8 lg:grid-cols-[1fr_340px]" : ""}>
