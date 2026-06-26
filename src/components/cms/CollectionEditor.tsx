@@ -101,6 +101,11 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
       if (done.has(f.name) || HIDDEN_IN_FORM.has(f.name)) continue;
       // أخفِ الحقول التقنية الاختيارية الفارغة (icon/value/color/href) لتقليل التشويش
       if (HIDE_IF_EMPTY.has(f.name) && isEmpty(baseline[f.name])) continue;
+      // أقسام الصفحات: المسار النصّي يُدار عبر الرافع؛ والرافع يظهر فقط للأقسام التي بها صورة
+      if (type === "sections") {
+        if (f.name === "image") continue;
+        if (f.name === "image_file" && isEmpty(baseline.image) && isEmpty(baseline.image_file)) continue;
+      }
       if (f.bilingual) {
         const ar = fields.find((x) => x.base === f.base && x.lang === "ar");
         const en = fields.find((x) => x.base === f.base && x.lang === "en");
@@ -112,7 +117,7 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
       }
     }
     return out;
-  }, [fields, baseline]);
+  }, [fields, baseline, type]);
 
   async function onSave() {
     setSaving(true);

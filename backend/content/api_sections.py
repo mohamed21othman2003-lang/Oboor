@@ -1,12 +1,13 @@
 from rest_framework import generics, serializers
 from .m_sections import SectionItem, ServiceCard
+from .image_utils import ResolvedImageMixin
 
 
-class SectionItemSerializer(serializers.ModelSerializer):
+class SectionItemSerializer(ResolvedImageMixin):
     class Meta:
         model = SectionItem
         fields = ["page", "block", "key", "order", "icon", "value", "color",
-                  "title_ar", "title_en", "text_ar", "text_en", "data_ar", "data_en"]
+                  "title_ar", "title_en", "text_ar", "text_en", "data_ar", "data_en", "image"]
 
 
 class SectionByPage(generics.ListAPIView):

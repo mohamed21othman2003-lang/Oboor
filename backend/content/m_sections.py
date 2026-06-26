@@ -35,6 +35,9 @@ class SectionItem(models.Model):
     data_ar = models.JSONField("بيانات إضافية (عربي)", default=list, blank=True)
     data_en = models.JSONField("بيانات إضافية (إنجليزي)", default=list, blank=True)
 
+    image = models.CharField("مسار الصورة", max_length=300, blank=True)
+    image_file = models.ImageField("صورة القسم", upload_to="content/", blank=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
