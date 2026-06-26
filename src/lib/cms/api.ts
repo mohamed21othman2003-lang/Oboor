@@ -1,5 +1,7 @@
 "use client";
 
+import { bustContentCache } from "@/app/actions/cache";
+
 // عميل الـCMS — يتكلّم مع Django مباشرة من المتصفح بتوكن المصادقة.
 const BASE = process.env.NEXT_PUBLIC_DJANGO_API_URL || "http://127.0.0.1:8000/api";
 const TOKEN_KEY = "oboor_cms_token";
@@ -84,6 +86,15 @@ export type FieldSchema = {
 
 export type CmsItem = Record<string, unknown> & { id: number };
 
+// إبطال كاش الموقع فورًا بعد الحفظ حتى تظهر التعديلات بدون انتظار
+async function bumpSiteCache() {
+  try {
+    await bustContentCache();
+  } catch {
+    /* تجاهل: الموقع سيتحدّث خلال دقيقة على أبعد تقدير */
+  }
+}
+
 export function getSchema(type: string) {
   return cmsFetch<{ fields: FieldSchema[]; readonly: boolean }>(`/cms/collections/${type}/schema/`);
 }
@@ -100,28 +111,40 @@ export function listCollection(type: string) {
 export function getItem(type: string, pk: number | string) {
   return cmsFetch<CmsItem>(`/cms/collections/${type}/${pk}/`);
 }
-export function createItem(type: string, data: Record<string, unknown>) {
-  return cmsFetch<CmsItem>(`/cms/collections/${type}/`, { method: "POST", body: JSON.stringify(data) });
+export async function createItem(type: string, data: Record<string, unknown>) {
+  const r = await cmsFetch<CmsItem>(`/cms/collections/${type}/`, { method: "POST", body: JSON.stringify(data) });
+  await bumpSiteCache();
+  return r;
 }
-export function updateItem(type: string, pk: number | string, data: Record<string, unknown>) {
-  return cmsFetch<CmsItem>(`/cms/collections/${type}/${pk}/`, { method: "PATCH", body: JSON.stringify(data) });
+export async function updateItem(type: string, pk: number | string, data: Record<string, unknown>) {
+  const r = await cmsFetch<CmsItem>(`/cms/collections/${type}/${pk}/`, { method: "PATCH", body: JSON.stringify(data) });
+  await bumpSiteCache();
+  return r;
 }
-export function deleteItem(type: string, pk: number | string) {
-  return cmsFetch(`/cms/collections/${type}/${pk}/`, { method: "DELETE" });
+export async function deleteItem(type: string, pk: number | string) {
+  const r = await cmsFetch(`/cms/collections/${type}/${pk}/`, { method: "DELETE" });
+  await bumpSiteCache();
+  return r;
 }
 // استرجاع العنصر لنسخته الافتراضية
-export function resetDefault(type: string, pk: number | string) {
-  return cmsFetch<CmsItem>(`/cms/collections/${type}/${pk}/reset/`, { method: "POST" });
+export async function resetDefault(type: string, pk: number | string) {
+  const r = await cmsFetch<CmsItem>(`/cms/collections/${type}/${pk}/reset/`, { method: "POST" });
+  await bumpSiteCache();
+  return r;
 }
 // إعادة ترتيب العناصر (قائمة المعرّفات بالترتيب الجديد)
-export function reorderCollection(type: string, ids: number[]) {
-  return cmsFetch(`/cms/collections/${type}/reorder/`, { method: "POST", body: JSON.stringify({ ids }) });
+export async function reorderCollection(type: string, ids: number[]) {
+  const r = await cmsFetch(`/cms/collections/${type}/reorder/`, { method: "POST", body: JSON.stringify({ ids }) });
+  await bumpSiteCache();
+  return r;
 }
 // رفع ملف (صورة) لحقل معيّن عبر multipart
-export function uploadField(type: string, pk: number | string, field: string, file: File) {
+export async function uploadField(type: string, pk: number | string, field: string, file: File) {
   const fd = new FormData();
   fd.append(field, file);
-  return cmsFetch<CmsItem>(`/cms/collections/${type}/${pk}/`, { method: "PATCH", body: fd });
+  const r = await cmsFetch<CmsItem>(`/cms/collections/${type}/${pk}/`, { method: "PATCH", body: fd });
+  await bumpSiteCache();
+  return r;
 }
 // رفع صورة عامّة (للمعارض) — تُرجِع رابطها العام
 export function uploadImage(file: File) {
