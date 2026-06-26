@@ -281,11 +281,28 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
   );
 }
 
+// شارة «الدور» — توضّح للمحرّر كيف يظهر هذا الحقل في الموقع (عنوان كبير/فرعي/قائمة…)
+const ROLE_BY_BASE: Record<string, { t: string; c: string }> = {
+  title: { t: "عنوان رئيسي", c: "bg-brand/15 text-brand-dark" },
+  name: { t: "عنوان رئيسي", c: "bg-brand/15 text-brand-dark" },
+  heading: { t: "عنوان رئيسي", c: "bg-brand/15 text-brand-dark" },
+  subtitle: { t: "عنوان فرعي", c: "bg-amber-100 text-amber-700" },
+  about_heading: { t: "عنوان فرعي", c: "bg-amber-100 text-amber-700" },
+  badge: { t: "وسم صغير", c: "bg-violet-100 text-violet-700" },
+};
+function roleFor(f: FieldSchema): { t: string; c: string } | null {
+  if (f.type === "json") return { t: "قائمة / بطاقات", c: "bg-sky-100 text-sky-700" };
+  if (f.type === "textarea") return { t: "نص فقرة", c: "bg-slate-100 text-slate-600" };
+  return ROLE_BY_BASE[f.base] || null;
+}
+
 function Label({ f, badge }: { f: FieldSchema; badge?: string }) {
+  const role = badge === "English" ? null : roleFor(f); // الشارة مرة واحدة (الجانب العربي)
   return (
-    <label className="mb-1.5 flex items-center gap-2 text-sm font-semibold text-ink">
+    <label className="mb-1.5 flex flex-wrap items-center gap-2 text-sm font-semibold text-ink">
       {f.label}
       {f.required && <span className="text-red-500">*</span>}
+      {role && <span className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${role.c}`}>{role.t}</span>}
       {badge && <span className="rounded bg-surface px-1.5 py-0.5 text-[10px] font-bold text-ink-soft">{badge}</span>}
     </label>
   );
