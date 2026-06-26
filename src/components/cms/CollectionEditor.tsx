@@ -367,6 +367,7 @@ const HIDE_IF_EMPTY = new Set([
   "stations_intro_ar", "stations_intro_en",
   "stations_ar", "stations_en",
   "about_tag_ar", "about_tag_en",  // البطاقة المميّزة — تظهر فقط للخدمات التي تستخدمها
+  "help_section_ar", "help_section_en",  // قسم المساعدة في التقنيات — يظهر فقط لمن يستخدمه
 ]);
 // حقول كارت الفعالية (في الأخبار) — تظهر فقط للفعاليات والورش
 const EVENT_FIELDS = new Set([
