@@ -17,6 +17,8 @@ export type Branch = {
   lat?: number | null;
   lng?: number | null;
   isNew?: boolean;
+  rating?: string;
+  reviewsCount?: string;
 };
 
 const HOURS = "الأحد – الخميس: ٨ص – ٨م";

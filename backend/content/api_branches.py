@@ -9,7 +9,8 @@ class BranchSerializer(serializers.ModelSerializer):
         fields = ["slug", "name_ar", "name_en", "area_ar", "area_en",
                   "city_ar", "city_en", "region_ar", "region_en",
                   "address_ar", "address_en", "hours_ar", "hours_en",
-                  "phone", "services_ar", "services_en", "gallery", "lat", "lng", "is_new", "order"]
+                  "phone", "rating", "reviews_count",
+                  "services_ar", "services_en", "gallery", "lat", "lng", "is_new", "order"]
 
 
 class BranchList(generics.ListAPIView):

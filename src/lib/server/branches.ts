@@ -15,6 +15,7 @@ type ApiBranch = {
   address_ar: string; address_en: string;
   hours_ar: string; hours_en: string;
   phone: string;
+  rating: string; reviews_count: string;
   services_ar: string[]; services_en: string[];
   gallery: string[];
   lat: number | null; lng: number | null;
@@ -34,6 +35,8 @@ function toBranch(row: ApiBranch, locale: Locale): Branch {
     address: f(row.address_ar, row.address_en),
     hours: f(row.hours_ar, row.hours_en),
     phone: row.phone,
+    rating: row.rating || "",
+    reviewsCount: row.reviews_count || "",
     services: en ? (row.services_en ?? row.services_ar) : row.services_ar,
     gallery: Array.isArray(row.gallery) ? row.gallery : [],
     lat: row.lat ?? null,

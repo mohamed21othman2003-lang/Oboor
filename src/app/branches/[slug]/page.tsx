@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ALL_BRANCHES, getBranch, BRANCH_FEATURES, BRANCH_FEATURES_EN } from "@/lib/branchesData";
 import { loadBranch } from "@/lib/server/branches";
+import { fetchSections } from "@/lib/server/django";
 import { getSuccessStories } from "@/lib/successStoriesData";
 import ProgramCard, { type Program } from "@/components/ProgramCard";
 import SuccessStoryCard from "@/components/SuccessStoryCard";
@@ -72,9 +73,14 @@ export default async function BranchDetailPage({ params }: { params: Promise<{ s
   const b = (await loadBranch(slug, locale)) ?? getBranch(slug, locale);
   if (!b) notFound();
 
+  const en = locale === "en";
   const BRANCH_SERVICES = branchServices(locale);
   const successStories = getSuccessStories(locale);
-  const branchFeatures = locale === "en" ? BRANCH_FEATURES_EN : BRANCH_FEATURES;
+  // المميزات من الـCMS (نفس مصدر صفحة الفروع) مع fallback للبيانات الثابتة
+  const sections = await fetchSections("branches");
+  const branchFeatures = sections?.features
+    ? sections.features.map((r) => ({ icon: r.icon, title: en ? r.title_en || r.title_ar : r.title_ar, desc: en ? r.text_en || r.text_ar : r.text_ar }))
+    : (en ? BRANCH_FEATURES_EN : BRANCH_FEATURES);
 
   const info = [
     { icon: <PhoneIcon />, label: pick(locale, "رقم الهاتف", "Phone Number"), value: b.phone },
@@ -137,13 +143,15 @@ export default async function BranchDetailPage({ params }: { params: Promise<{ s
             <div className="order-1 text-start">
               <h1 className="text-4xl font-extrabold text-ink">{b.name}</h1>
               <p className="mt-2 text-lg text-brand">{pick(locale, `${b.city} ، السعودية`, `${b.city}, Saudi Arabia`)}</p>
-              <div className="mt-3 flex items-center justify-start gap-2">
-                <span className="text-sm text-ink-soft">{pick(locale, "(124 تقييم)", "(124 reviews)")}</span>
-                <span className="text-sm font-bold text-ink">4.8</span>
-                <span className="flex">
-                  {Array.from({ length: 5 }).map((_, i) => <StarIcon key={i} />)}
-                </span>
-              </div>
+              {(b.rating || b.reviewsCount) && (
+                <div className="mt-3 flex items-center justify-start gap-2">
+                  {b.reviewsCount && <span className="text-sm text-ink-soft">{pick(locale, `(${b.reviewsCount} تقييم)`, `(${b.reviewsCount} reviews)`)}</span>}
+                  {b.rating && <span className="text-sm font-bold text-ink">{b.rating}</span>}
+                  <span className="flex">
+                    {Array.from({ length: 5 }).map((_, i) => <StarIcon key={i} />)}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </div>
