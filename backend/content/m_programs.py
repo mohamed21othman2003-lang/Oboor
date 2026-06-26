@@ -6,39 +6,39 @@ class ProgramDetail(models.Model):
 
     title_ar = models.CharField("العنوان (عربي)", max_length=300)
     title_en = models.CharField("العنوان (إنجليزي)", max_length=300, blank=True)
-    subtitle_ar = models.TextField("العنوان الفرعي (عربي)")
+    subtitle_ar = models.TextField("العنوان الفرعي (عربي)", help_text="سطر تحت العنوان في أعلى صفحة البرنامج (الهيرو).")
     subtitle_en = models.TextField("العنوان الفرعي (إنجليزي)", blank=True)
 
-    about_ar = models.JSONField("نبذة (عربي)", default=list, blank=True)
+    about_ar = models.JSONField("نبذة (عربي)", default=list, blank=True, help_text="فقرات النبذة التعريفية أعلى الصفحة (قسم «عن البرنامج»).")
     about_en = models.JSONField("نبذة (إنجليزي)", default=list, blank=True)
 
-    philosophy_intro_ar = models.TextField("مقدمة الفلسفة (عربي)", blank=True)
+    philosophy_intro_ar = models.TextField("مقدمة الفلسفة (عربي)", blank=True, help_text="جملة تمهيدية لقسم «فلسفة البرنامج».")
     philosophy_intro_en = models.TextField("مقدمة الفلسفة (إنجليزي)", blank=True)
-    philosophy_ar = models.JSONField("الفلسفة (عربي)", default=list, blank=True)
+    philosophy_ar = models.JSONField("الفلسفة (عربي)", default=list, blank=True, help_text="بطاقات فلسفة البرنامج (تظهر في القسم الغامق).")
     philosophy_en = models.JSONField("الفلسفة (إنجليزي)", default=list, blank=True)
 
-    methods_ar = models.JSONField("المنهج العلمي (عربي)", default=list, blank=True)
+    methods_ar = models.JSONField("المنهج العلمي (عربي)", default=list, blank=True, help_text="أساليب/مناهج علمية — كارت «المنهج العلمي» (لكل عنصر: اسم عريض اختياري + وصف).")
     methods_en = models.JSONField("المنهج العلمي (إنجليزي)", default=list, blank=True)
 
-    duration_ar = models.TextField("مدة البرنامج (عربي)", blank=True)
+    duration_ar = models.TextField("مدة البرنامج (عربي)", blank=True, help_text="نص يظهر في كارت «مدة البرنامج».")
     duration_en = models.TextField("مدة البرنامج (إنجليزي)", blank=True)
 
-    target_ar = models.TextField("الفئة المستهدفة (عربي)", blank=True)
+    target_ar = models.TextField("الفئة المستهدفة (عربي)", blank=True, help_text="وصف الفئة المستهدفة — يظهر في كارت «الفئة المستهدفة».")
     target_en = models.TextField("الفئة المستهدفة (إنجليزي)", blank=True)
-    target_tags_ar = models.JSONField("وسوم الفئة المستهدفة (عربي)", default=list, blank=True)
+    target_tags_ar = models.JSONField("وسوم الفئة المستهدفة (عربي)", default=list, blank=True, help_text="وسوم صغيرة تظهر أسفل وصف الفئة المستهدفة.")
     target_tags_en = models.JSONField("وسوم الفئة المستهدفة (إنجليزي)", default=list, blank=True)
 
-    training_intro_ar = models.TextField("مقدمة مجالات التدريب (عربي)", blank=True)
+    training_intro_ar = models.TextField("مقدمة مجالات التدريب (عربي)", blank=True, help_text="جملة تمهيدية لقسم «مجالات التدريب».")
     training_intro_en = models.TextField("مقدمة مجالات التدريب (إنجليزي)", blank=True)
-    training_areas_ar = models.JSONField("مجالات التدريب (عربي)", default=list, blank=True)
+    training_areas_ar = models.JSONField("مجالات التدريب (عربي)", default=list, blank=True, help_text="بطاقات مجالات التدريب (لكل مجال: اسم + وصف).")
     training_areas_en = models.JSONField("مجالات التدريب (إنجليزي)", default=list, blank=True)
 
-    target_list_ar = models.JSONField("قائمة الفئة المستهدفة (عربي)", default=list, blank=True)
+    target_list_ar = models.JSONField("قائمة الفئة المستهدفة (عربي)", default=list, blank=True, help_text="نقاط تفصيلية تظهر كقائمة داخل كارت «الفئة المستهدفة» (اتركها فارغة إن لم تكن مطلوبة).")
     target_list_en = models.JSONField("قائمة الفئة المستهدفة (إنجليزي)", default=list, blank=True)
 
-    stations_intro_ar = models.TextField("مقدمة المحطات (عربي)", blank=True)
+    stations_intro_ar = models.TextField("مقدمة المحطات (عربي)", blank=True, help_text="جملة تمهيدية لقسم «المحطات التطبيقية».")
     stations_intro_en = models.TextField("مقدمة المحطات (إنجليزي)", blank=True)
-    stations_ar = models.JSONField("المحطات التطبيقية (عربي)", default=list, blank=True)
+    stations_ar = models.JSONField("المحطات التطبيقية (عربي)", default=list, blank=True, help_text="قائمة المحطات/الخطوات التطبيقية — القسم يظهر فقط إذا أضفت عناصر.")
     stations_en = models.JSONField("المحطات التطبيقية (إنجليزي)", default=list, blank=True)
 
     image = models.CharField("مسار الصورة", max_length=300, blank=True)
