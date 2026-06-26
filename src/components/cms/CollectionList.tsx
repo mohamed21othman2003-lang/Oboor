@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { listCollection, deleteItem, reorderCollection, TYPE_LABELS, type CmsItem } from "@/lib/cms/api";
 
 // أسماء ودّية لأقسام الصفحات (block) — لتجميع العناصر تحت قسمها بدل خلطها
@@ -19,6 +19,8 @@ const blockLabel = (b: string) => BLOCK_LABELS[b] || b;
 
 export default function CollectionList({ type }: { type: string }) {
   const router = useRouter();
+  const sp = useSearchParams();
+  const pageFilter = type === "sections" ? sp.get("page") : null;
   const [items, setItems] = useState<CmsItem[]>([]);
   const [titleField, setTitleField] = useState("title_ar");
   const [groupBy, setGroupBy] = useState<string | null>(null);
@@ -115,6 +117,10 @@ export default function CollectionList({ type }: { type: string }) {
     return [...buckets.values()].filter((b) => b.items.length > 0);
   }, [items, groupBy, groupDefs]);
 
+  // وضع «صفحة واحدة» (مثل عن عبور) — نعرض أقسام صفحة بعينها فقط
+  const pageLabel = pageFilter ? (groupDefs?.find((g) => g.value === pageFilter)?.label || pageFilter) : null;
+  const pageItems = pageFilter ? items.filter((it) => String(it.page ?? "") === pageFilter) : items;
+
   // تجميع عناصر صفحة فرعيًا حسب القسم (block) مع الحفاظ على الترتيب
   function blockGroups(list: CmsItem[]) {
     if (!list.length || !("block" in list[0])) return null;
@@ -190,11 +196,11 @@ export default function CollectionList({ type }: { type: string }) {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <Link href="/cms" className="text-xs font-semibold text-brand hover:text-brand-dark">← لوحة التحكّم</Link>
-          <h1 className="mt-1 text-2xl font-extrabold text-ink">{label}</h1>
-          <p className="mt-1 text-sm text-ink-soft">{items.length} عنصر{grouped ? ` في ${grouped.length} مجموعة` : ""}</p>
+          <h1 className="mt-1 text-2xl font-extrabold text-ink">{pageFilter ? pageLabel : label}</h1>
+          <p className="mt-1 text-sm text-ink-soft">{(pageFilter ? pageItems.length : items.length)} عنصر</p>
         </div>
         {!readonly && (
-          <Link href={`/cms/content/${type}/new`} className="inline-flex items-center gap-2 rounded-xl bg-brand px-4 py-2.5 text-sm font-bold text-white shadow-sm transition-colors hover:bg-brand-dark">
+          <Link href={pageFilter ? `/cms/content/${type}/new?page=${pageFilter}` : `/cms/content/${type}/new`} className="inline-flex items-center gap-2 rounded-xl bg-brand px-4 py-2.5 text-sm font-bold text-white shadow-sm transition-colors hover:bg-brand-dark">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" d="M12 5v14M5 12h14" /></svg>
             إضافة جديد
           </Link>
@@ -205,9 +211,23 @@ export default function CollectionList({ type }: { type: string }) {
 
       {loading ? (
         <p className="text-ink-soft">جارٍ التحميل…</p>
-      ) : items.length === 0 ? (
+      ) : (pageFilter ? pageItems.length === 0 : items.length === 0) ? (
         <div className="rounded-2xl border border-dashed border-line bg-white p-10 text-center text-ink-soft">
           لا توجد عناصر بعد. {!readonly && "اضغط «إضافة جديد» للبدء."}
+        </div>
+      ) : pageFilter ? (
+        <div className="space-y-4">
+          {(blockGroups(pageItems) ?? [{ block: "", items: pageItems }]).map((sg) => (
+            <div key={sg.block}>
+              {sg.block && (
+                <p className="mb-2 flex items-center gap-2 px-1 text-xs font-bold text-brand-dark">
+                  <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-brand/10 px-1.5 text-[11px]">{sg.items.length}</span>
+                  {blockLabel(sg.block)}
+                </p>
+              )}
+              <Table list={sg.items} hideSub />
+            </div>
+          ))}
         </div>
       ) : grouped ? (
         <div className="space-y-3">
