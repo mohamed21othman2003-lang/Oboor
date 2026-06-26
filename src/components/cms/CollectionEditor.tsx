@@ -112,6 +112,8 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
         if (f.name === "image") continue;
         if (f.name === "image_file" && isEmpty(baseline.image) && isEmpty(baseline.image_file)) continue;
       }
+      // الأخبار: حقول كارت الفعالية تظهر فقط للفعاليات والورش
+      if (type === "news" && EVENT_FIELDS.has(f.name) && !["events", "workshops"].includes(String(values.section ?? ""))) continue;
       if (f.bilingual) {
         const ar = fields.find((x) => x.base === f.base && x.lang === "ar");
         const en = fields.find((x) => x.base === f.base && x.lang === "en");
@@ -123,7 +125,7 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
       }
     }
     return out;
-  }, [fields, baseline, type]);
+  }, [fields, baseline, type, values.section]);
 
   async function onSave() {
     setSaving(true);
@@ -327,6 +329,11 @@ const OBJECT_FIELDS: Record<string, { key: string; label: string }[]> = {
 const HIDDEN_IN_FORM = new Set(["order", "page"]);
 // حقول تقنية/اختيارية تُخفى إن كانت فارغة (تقليل التشويش لمن لا يحتاجها)
 const HIDE_IF_EMPTY = new Set(["icon", "value", "color", "href", "data_ar", "data_en"]);
+// حقول كارت الفعالية (في الأخبار) — تظهر فقط للفعاليات والورش
+const EVENT_FIELDS = new Set([
+  "time_ar", "time_en", "location_ar", "location_en", "audience_ar", "audience_en",
+  "seats_ar", "seats_en", "reg_status_ar", "reg_status_en",
+]);
 // حقول مقفولة (تُعرض للاطلاع فقط؛ تغييرها يكسر مكان المحتوى)
 const LOCKED_FIELDS = new Set(["block"]);
 // قوائم بطاقات — كل عنصر كائن بخانات معنونة بسيطة (بدل JSON)
