@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Fragment, useState } from "react";
+import { Fragment } from "react";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { pick, type Locale } from "@/i18n/config";
 import type { NewsItem } from "@/lib/newsData";
 
@@ -125,11 +126,23 @@ export default function NewsBrowser({ locale, categories, workshopFeatured, work
   articleFeatured: NewsItem | null;
   articles: NewsItem[];
 }) {
-  const [tab, setTab] = useState(0); // 0=all, 1=center, 2=events, 3=workshops, 4=articles
+  // التبويب النشط مصدره الـURL (?tab=) حتى يثبت بعد الريفريش ويعمل مع زرّي رجوع/تقدّم
+  // 0=all, 1=center, 2=events, 3=workshops, 4=articles
+  const sp = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+  const raw = Number(sp.get("tab"));
+  const tab = Number.isInteger(raw) && raw > 0 && raw < categories.length ? raw : 0;
+  const selectTab = (k: number) => {
+    const params = new URLSearchParams(sp.toString());
+    if (k === 0) params.delete("tab"); else params.set("tab", String(k));
+    const qs = params.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+  };
   const show = (k: number) => tab === 0 || tab === k;
   // "عرض الكل" → ينقل لتبويب القسم ويرجّع لأعلى التبويبات (تغذية بصرية)
   const goToTab = (k: number) => {
-    setTab(k);
+    selectTab(k);
     document.getElementById("news-tabs")?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
@@ -179,7 +192,7 @@ export default function NewsBrowser({ locale, categories, workshopFeatured, work
       <div id="news-tabs" className="mx-auto max-w-7xl px-6 lg:px-8 scroll-mt-24">
         <div className="flex flex-wrap items-center justify-center gap-3 border-b border-line pb-px">
           {categories.map((c, i) => (
-            <button key={c.label} onClick={() => setTab(i)} className={`-mb-px flex items-center gap-2 border-b-2 px-3 pb-3 text-sm font-bold transition-colors sm:text-base ${i === tab ? "border-brand text-brand" : "border-transparent text-ink-muted hover:text-brand"}`}>
+            <button key={c.label} onClick={() => selectTab(i)} className={`-mb-px flex items-center gap-2 border-b-2 px-3 pb-3 text-sm font-bold transition-colors sm:text-base ${i === tab ? "border-brand text-brand" : "border-transparent text-ink-muted hover:text-brand"}`}>
               {c.count !== undefined && <span className={`flex h-5 min-w-[20px] items-center justify-center rounded-full px-1 text-xs ${i === tab ? "bg-brand text-white" : "bg-surface text-ink-soft"}`}>{c.count}</span>}
               {c.label}
             </button>
