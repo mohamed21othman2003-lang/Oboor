@@ -8,6 +8,7 @@ import {
   TYPE_LABELS, type FieldSchema, type CmsItem,
 } from "@/lib/cms/api";
 import { CMS_ICONS, ICON_LABELS, iconNamesFor } from "@/lib/cms/icons";
+import { iconByKey, OFFER_ICON_KEYS } from "@/lib/areaIcon";
 
 export default function CollectionEditor({ type, id }: { type: string; id: string }) {
   const router = useRouter();
@@ -447,7 +448,9 @@ function FieldInput({ f, value, onChange, badge, dir }: { f: FieldSchema; value:
       {f.type === "textarea" ? (
         <AutoTextarea value={String(value ?? "")} onChange={onChange} dir={dir} minRows={3} />
       ) : f.type === "json" ? (
-        OBJECT_FIELDS[f.base] ? (
+        f.base === "offer_icons" ? (
+          <IconListEditor value={value} onChange={onChange} />
+        ) : OBJECT_FIELDS[f.base] ? (
           <ObjectEditor value={value} onChange={onChange} fields={OBJECT_FIELDS[f.base]} dir={dir} />
         ) : CARD_LIST_FIELDS[f.base] ? (
           <CardListEditor value={value} onChange={onChange} fields={CARD_LIST_FIELDS[f.base]} dir={dir} />
@@ -937,6 +940,59 @@ function BlocksEditor({ ar, en, onChange }: { ar: unknown[]; en: unknown[]; onCh
         </select>
         <button type="button" onClick={add} className="inline-flex items-center gap-1 rounded-lg bg-brand px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-dark">+ إضافة القسم</button>
       </div>
+    </div>
+  );
+}
+
+// صفّ أيقونة واحدة — معاينة + اختيار بصري من شبكة الأيقونات
+function IconRow({ index, value, onChange, onRemove, onUp, onDown, canUp, canDown }: { index: number; value: string; onChange: (k: string) => void; onRemove: () => void; onUp: () => void; onDown: () => void; canUp: boolean; canDown: boolean }) {
+  const [pick, setPick] = useState(false);
+  return (
+    <div className="rounded-xl border border-line bg-surface/50 p-3">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-surface text-[11px] font-bold text-ink-soft">{index + 1}</span>
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand/10 text-brand">{iconByKey(value)}</span>
+          <button type="button" onClick={() => setPick((p) => !p)} className="rounded-lg bg-brand/10 px-3 py-1.5 text-[11px] font-semibold text-brand hover:bg-brand hover:text-white">{pick ? "إغلاق" : "تغيير الأيقونة"}</button>
+        </div>
+        <div className="flex items-center gap-1">
+          <button type="button" onClick={onUp} disabled={!canUp} className="rounded-lg border border-line bg-white px-2 py-1 text-xs font-bold text-ink-soft hover:border-brand hover:text-brand disabled:opacity-30" title="أعلى">↑</button>
+          <button type="button" onClick={onDown} disabled={!canDown} className="rounded-lg border border-line bg-white px-2 py-1 text-xs font-bold text-ink-soft hover:border-brand hover:text-brand disabled:opacity-30" title="أسفل">↓</button>
+          <button type="button" onClick={onRemove} className="rounded-lg bg-red-50 px-2.5 py-1 text-[11px] font-semibold text-red-600 hover:bg-red-600 hover:text-white">حذف</button>
+        </div>
+      </div>
+      {pick && (
+        <div className="mt-3 grid grid-cols-6 gap-2 sm:grid-cols-10">
+          {OFFER_ICON_KEYS.map((k) => (
+            <button key={k} type="button" onClick={() => { onChange(k); setPick(false); }} title={k}
+              className={`flex items-center justify-center rounded-lg border p-2 transition-colors ${value === k ? "border-brand bg-brand/10 text-brand" : "border-line bg-white text-ink-soft hover:border-brand/40 hover:text-brand"}`}>
+              {iconByKey(k)}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// محرّر قائمة أيقونات بصري — لكل بطاقة أيقونة تُختار من شبكة (بدل كتابة الاسم)
+function IconListEditor({ value, onChange }: { value: unknown; onChange: (v: unknown) => void }) {
+  const items = (Array.isArray(value) ? value : []).map((x) => String(x ?? ""));
+  const update = (i: number, k: string) => { const c = [...items]; c[i] = k; onChange(c); };
+  const remove = (i: number) => onChange(items.filter((_, j) => j !== i));
+  const move = (i: number, dir: -1 | 1) => { const j = i + dir; if (j < 0 || j >= items.length) return; const c = [...items]; [c[i], c[j]] = [c[j], c[i]]; onChange(c); };
+  const add = () => onChange([...items, "check"]);
+  return (
+    <div className="space-y-2">
+      <p className="text-[11px] text-ink-soft">لكل بطاقة في القسم أيقونة — بنفس ترتيب البطاقات. اختر الأيقونة بصرياً.</p>
+      {items.length === 0 && <p className="rounded-xl border border-dashed border-line bg-surface px-3 py-2 text-xs text-ink-soft">لا توجد أيقونات — اضغط «إضافة أيقونة».</p>}
+      {items.map((k, i) => (
+        <IconRow key={i} index={i} value={k} onChange={(nk) => update(i, nk)} onRemove={() => remove(i)} onUp={() => move(i, -1)} onDown={() => move(i, 1)} canUp={i > 0} canDown={i < items.length - 1} />
+      ))}
+      <button type="button" onClick={add} className="inline-flex items-center gap-1.5 rounded-lg bg-brand/10 px-3 py-1.5 text-xs font-semibold text-brand hover:bg-brand hover:text-white">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path strokeLinecap="round" d="M12 5v14M5 12h14" /></svg>
+        إضافة أيقونة
+      </button>
     </div>
   );
 }
