@@ -2,10 +2,14 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { getSpecialists } from "@/lib/specialistsData";
-import { REGION_BRANCHES, REGION_BRANCHES_EN } from "@/lib/branchesData";
-import { fetchSections } from "@/lib/server/django";
+import { REGION_BRANCHES, REGION_BRANCHES_EN, type Branch } from "@/lib/branchesData";
+import { loadBranches } from "@/lib/server/branches";
+import { fetchSections, fetchContent } from "@/lib/server/django";
 import { getLocale } from "@/i18n/locale";
 import { pick, type Locale } from "@/i18n/config";
+
+// الأخصائيون كما يرجع من Django
+type ApiSpec = { slug: string; name_ar: string; name_en: string; specialty_ar: string; specialty_en: string; desc_ar: string; desc_en: string; image: string };
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
@@ -45,9 +49,16 @@ const SMALL_BRANCH_SLUGS = ["kharj", "wadi-dawasir", "qassim", "majmaah", "sharq
 export default async function AboutPage() {
   const locale = await getLocale();
   const en = locale === "en";
-  const branches = locale === "en" ? REGION_BRANCHES_EN : REGION_BRANCHES;
-  const SMALL_BRANCHES = SMALL_BRANCH_SLUGS.map((s) => branches.find((b) => b.slug === s)!);
-  const specialists = getSpecialists(locale);
+  // الفروع والأخصائيون من الـCMS (مع fallback للبيانات الثابتة)
+  const staticBranches = locale === "en" ? REGION_BRANCHES_EN : REGION_BRANCHES;
+  const cmsBranches = await loadBranches(locale);
+  const SMALL_BRANCHES = SMALL_BRANCH_SLUGS
+    .map((s) => cmsBranches.find((b) => b.slug === s) ?? staticBranches.find((b) => b.slug === s))
+    .filter(Boolean) as Branch[];
+  const specRows = await fetchContent<ApiSpec[]>("specialists");
+  const specialists = specRows?.length
+    ? specRows.map((r) => ({ slug: r.slug, name: en ? r.name_en || r.name_ar : r.name_ar, specialty: en ? r.specialty_en || r.specialty_ar : r.specialty_ar, desc: en ? r.desc_en || r.desc_ar : r.desc_ar, image: r.image }))
+    : getSpecialists(locale);
 
   // نصوص الصفحة من الـCMS (أقسام صفحة about) مع fallback للنص الحالي
   const about = await fetchSections("about");
