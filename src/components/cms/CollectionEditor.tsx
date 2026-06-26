@@ -2,7 +2,7 @@
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   getSchema, getItem, createItem, updateItem, uploadField, uploadImage, resetDefault,
   TYPE_LABELS, type FieldSchema, type CmsItem,
@@ -11,6 +11,7 @@ import { CMS_ICONS, ICON_LABELS, iconNamesFor } from "@/lib/cms/icons";
 
 export default function CollectionEditor({ type, id }: { type: string; id: string }) {
   const router = useRouter();
+  const sp = useSearchParams();
   const isNew = id === "new";
   const [fields, setFields] = useState<FieldSchema[]>([]);
   const [values, setValues] = useState<Record<string, unknown>>({});
@@ -36,8 +37,13 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
       setBaseline(v);
       setHasDefault(Boolean(v._has_default));
     }));
+    else {
+      // عنصر جديد ضمن صفحة محدّدة (مثل عن عبور) — اضبط الصفحة تلقائياً
+      const pg = sp.get("page");
+      if (pg) setValues((v) => ({ ...v, page: pg }));
+    }
     Promise.all(tasks).catch((e) => setError(e.message)).finally(() => setLoading(false));
-  }, [type, id, isNew]);
+  }, [type, id, isNew, sp]);
 
   function set(name: string, v: unknown) {
     setValues((prev) => ({ ...prev, [name]: v }));
