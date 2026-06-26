@@ -43,6 +43,18 @@ SUBMISSIONS = {
 # الحقول اللي ما تظهرش في الفورم (معرّفات تقنية تُولَّد تلقائياً وتعديلها يكسر الروابط)
 HIDDEN = {"id", "created_at", "updated_at", "slug", "key"}
 
+# حقول موجودة في الموديل لكن لا أثر لها على أي صفحة في الموقع ⇒ تُخفى من المحرّر
+# (تبقى في قاعدة البيانات؛ مجرّد إخفاء من واجهة CMS لتقليل التشويش)
+HIDDEN_PER_MODEL = {
+    SiteSettings: {
+        "site_name_ar", "site_name_en",  # غير مستخدم في أي صفحة
+        "logo_path",                      # الموقع يقرأ logo_url من حقل اللوجو
+        "whatsapp", "website",            # غير مقروءة في أي مكان
+        "whatsapp_url",                   # السوشيال في الفوتر تُدار من أقسام الصفحات
+        "youtube_url", "snapchat_url",    # غير معروضة في صفحة التواصل
+    },
+}
+
 # حقول تقنية تُعرض داخل لوحة «إعدادات متقدمة» المطويّة (اختيارية لمستخدم غير تقني)
 ADVANCED = {"slug", "key", "order", "color", "icon", "href"}
 
@@ -82,10 +94,11 @@ def _field_type(f):
 
 def _schema(Model):
     fields = []
+    extra_hidden = HIDDEN_PER_MODEL.get(Model, frozenset())
     for f in Model._meta.get_fields():
         if not isinstance(f, djm.Field):
             continue
-        if f.name in HIDDEN or f.auto_created or not f.editable:
+        if f.name in HIDDEN or f.name in extra_hidden or f.auto_created or not f.editable:
             continue
         name = f.name
         # المعرّفات التقنية تُولَّد تلقائياً ⇒ ليست إلزامية على المستخدم
