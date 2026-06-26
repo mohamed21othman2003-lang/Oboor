@@ -40,7 +40,7 @@ class SectionItem(models.Model):
     class Meta:
         verbose_name = "عنصر قسم"
         verbose_name_plural = "عناصر أقسام الصفحات"
-        ordering = ["page", "block", "order", "id"]
+        ordering = ["page", "order", "id"]
 
     def __str__(self):
         return f"{self.page}/{self.block}: {self.title_ar or self.value or self.key}"

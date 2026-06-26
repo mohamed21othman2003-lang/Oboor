@@ -99,6 +99,8 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
     const done = new Set<string>();
     for (const f of fields) {
       if (done.has(f.name) || HIDDEN_IN_FORM.has(f.name)) continue;
+      // أخفِ الحقول التقنية الاختيارية الفارغة (icon/value/color/href) لتقليل التشويش
+      if (HIDE_IF_EMPTY.has(f.name) && isEmpty(baseline[f.name])) continue;
       if (f.bilingual) {
         const ar = fields.find((x) => x.base === f.base && x.lang === "ar");
         const en = fields.find((x) => x.base === f.base && x.lang === "en");
@@ -110,7 +112,7 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
       }
     }
     return out;
-  }, [fields]);
+  }, [fields, baseline]);
 
   async function onSave() {
     setSaving(true);
@@ -312,6 +314,8 @@ const OBJECT_FIELDS: Record<string, { key: string; label: string }[]> = {
 
 // حقول مخفية من الفورم (الترتيب يُدار بأسهم القائمة)
 const HIDDEN_IN_FORM = new Set(["order"]);
+// حقول تقنية اختيارية تُخفى إن كانت فارغة (تقليل التشويش لمن لا يحتاجها)
+const HIDE_IF_EMPTY = new Set(["icon", "value", "color", "href"]);
 // حقول مقفولة (تُعرض للاطلاع فقط؛ تغييرها يكسر مكان المحتوى)
 const LOCKED_FIELDS = new Set(["block"]);
 // قوائم بطاقات — كل عنصر كائن بخانات معنونة بسيطة (بدل JSON)
