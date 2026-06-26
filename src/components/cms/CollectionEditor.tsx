@@ -345,7 +345,14 @@ const OBJECT_FIELDS: Record<string, { key: string; label: string }[]> = {
 // حقول مخفية من الفورم (الترتيب يُدار بأسهم القائمة)
 const HIDDEN_IN_FORM = new Set(["order", "page"]);
 // حقول تقنية/اختيارية تُخفى إن كانت فارغة (تقليل التشويش لمن لا يحتاجها)
-const HIDE_IF_EMPTY = new Set(["icon", "value", "color", "href", "data_ar", "data_en"]);
+// تشمل حقول البرامج الشرطية (قائمة الفئة المستهدفة + المحطات التطبيقية):
+// تظهر فقط في البرامج التي تستخدمها فعلاً على الصفحة، وتختفي في غيرها.
+const HIDE_IF_EMPTY = new Set([
+  "icon", "value", "color", "href", "data_ar", "data_en",
+  "target_list_ar", "target_list_en",
+  "stations_intro_ar", "stations_intro_en",
+  "stations_ar", "stations_en",
+]);
 // حقول كارت الفعالية (في الأخبار) — تظهر فقط للفعاليات والورش
 const EVENT_FIELDS = new Set([
   "time_ar", "time_en", "location_ar", "location_en", "audience_ar", "audience_en",
