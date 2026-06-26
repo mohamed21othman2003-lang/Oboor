@@ -3,11 +3,90 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ALL_NEWS, getNewsItem } from "@/lib/newsData";
+import { fetchContent } from "@/lib/server/django";
 import { getLocale } from "@/i18n/locale";
-import { pick } from "@/i18n/config";
+import { pick, type Locale } from "@/i18n/config";
 
 export function generateStaticParams() {
   return ALL_NEWS.map((n) => ({ slug: n.slug }));
+}
+
+// الشكل اللي بيرجع من Django (content/news)
+type ApiNews = {
+  slug: string; title_ar: string; title_en: string;
+  desc_ar: string; desc_en: string; category_ar: string; category_en: string;
+  date_ar: string; date_en: string; image: string;
+  body_ar: string[]; body_en: string[]; learn_ar: string[]; learn_en: string[];
+  time_ar: string; time_en: string; location_ar: string; location_en: string;
+  audience_ar: string; audience_en: string; seats_ar: string; seats_en: string;
+  reg_status_ar: string; reg_status_en: string;
+};
+
+type NewsDetail = {
+  title: string; desc: string; date: string; category: string; image: string;
+  body: string[]; learn: string[];
+  time: string; location: string; audience: string; seats: string; regStatus: string;
+};
+
+// نصوص افتراضية (تُستخدم فقط عند تعذّر الوصول لـ Django)
+const BODY_AR = [
+  'تُنظّم مراكز عبور للتأهيل والرعاية فعالية متخصصة موجَّهة للأسر التي يُعاني أطفالها من صعوبات في التواصل والتفاعل. وتأتي هذه الفعالية في إطار الالتزام المستمر بتمكين الأسر وتزويدها بالأدوات العملية اللازمة لدعم أبنائها في البيئة المنزلية.',
+  "تُقدَّم من قِبل نخبة من الأخصائيين المعتمدين في المراكز، وتتضمن عروضاً تقديمية تفاعلية، وأنشطة تطبيقية عملية، وجلسات نقاش مفتوحة تُتيح للمشاركين طرح الأسئلة والاستفسارات. كما تتضمن مواد مرجعية مطبوعة يحتفظ بها المشاركون بعد انتهائها.",
+  "نُركّز على توفير بيئة تعليمية آمنة وداعمة، حيث يُشجَّع الآباء والأمهات على مشاركة تجاربهم وتساؤلاتهم. ويلتزم المدربون بتقديم المحتوى بأسلوب مُبسَّط وعملي يسهل تطبيقه في الحياة اليومية.",
+  "في النهاية، سيتمكّن المشاركون من فهم المفاهيم الأساسية المتعلقة بالموضوع، واكتساب مهارات جديدة يمكن تطبيقها فوراً في المنزل، مما يُعزّز مسيرة التأهيل ويُسرّع من تحقيق الأهداف العلاجية.",
+];
+const BODY_EN = [
+  "Oboor Centers for Care & Rehabilitation are hosting a specialized event for families whose children face difficulties with communication and interaction. This event reflects our ongoing commitment to empowering families and equipping them with the practical tools they need to support their children at home.",
+  "It is delivered by a select group of the centers' certified specialists and includes interactive presentations, hands-on practical activities, and open discussion sessions that give participants the chance to ask questions. It also includes printed reference materials that participants keep afterward.",
+  "We focus on providing a safe and supportive learning environment, where parents are encouraged to share their experiences and questions. Our trainers are committed to presenting the content in a simple, practical way that is easy to apply in everyday life.",
+  "By the end, participants will understand the key concepts related to the topic and gain new skills they can apply at home right away, strengthening the rehabilitation journey and helping reach therapeutic goals faster.",
+];
+const LEARN_AR = [
+  "فهم الأسس النظرية المتعلقة بالموضوع بشكل مُبسَّط وعملي",
+  "اكتساب مهارات تطبيقية يمكن توظيفها مباشرةً في البيئة المنزلية",
+  "التواصل مع أخصائيين متخصصين وطرح الأسئلة والاستفسارات",
+  "الحصول على مواد مرجعية ومطبوعات تعليمية للاستخدام المنزلي",
+];
+const LEARN_EN = [
+  "Understand the theoretical foundations of the topic in a simple, practical way",
+  "Gain practical skills you can apply directly at home",
+  "Connect with specialized professionals and ask your questions",
+  "Receive reference materials and educational handouts for use at home",
+];
+
+// يجلب تفاصيل الخبر من Django (مصدر الحقيقة) مع fallback للبيانات الثابتة
+async function loadNews(slug: string, locale: Locale): Promise<NewsDetail | null> {
+  const en = locale === "en";
+  const rows = await fetchContent<ApiNews[]>("news");
+  const row = rows?.find((r) => r.slug === slug);
+  if (row) {
+    const s = (ar: string, e: string) => (en ? e || ar : ar);
+    const a = (ar: string[], e: string[]) => (en ? (e?.length ? e : ar) : ar) ?? [];
+    const body = a(row.body_ar, row.body_en);
+    return {
+      title: s(row.title_ar, row.title_en), desc: s(row.desc_ar, row.desc_en),
+      date: s(row.date_ar, row.date_en), category: s(row.category_ar, row.category_en),
+      image: row.image,
+      // المتن أساسي: لو فاضي (مثلاً قبل تحديث الباك إند) نرجع للنص الافتراضي حتى لا تظهر الصفحة فارغة
+      body: body.length ? body : (en ? BODY_EN : BODY_AR),
+      learn: a(row.learn_ar, row.learn_en),
+      time: s(row.time_ar, row.time_en), location: s(row.location_ar, row.location_en),
+      audience: s(row.audience_ar, row.audience_en), seats: s(row.seats_ar, row.seats_en),
+      regStatus: s(row.reg_status_ar, row.reg_status_en),
+    };
+  }
+  // fallback: البيانات الثابتة + نصوص افتراضية
+  const n = getNewsItem(slug, locale);
+  if (!n) return null;
+  return {
+    title: n.title, desc: n.desc, date: n.date, category: n.category, image: n.image,
+    body: en ? BODY_EN : BODY_AR, learn: en ? LEARN_EN : LEARN_AR,
+    time: pick(locale, "٩:٠٠ صباحاً - ١٢:٠٠ ظهراً", "9:00 AM - 12:00 PM"),
+    location: pick(locale, "قاعة التدريب الرئيسية - مركز عبور، الرياض", "Main Training Hall - Oboor Center, Riyadh"),
+    audience: pick(locale, "أولياء الأمور والأسر", "Parents and families"),
+    seats: pick(locale, "٢٠ مقعداً", "20 seats"),
+    regStatus: pick(locale, "التسجيل مفتوح - مقاعد محدودة", "Registration open - limited seats"),
+  };
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
@@ -21,50 +100,20 @@ function Chev() {
   return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="dir-flip"><path strokeLinecap="round" strokeLinejoin="round" d="M15 18l-6-6 6-6" /></svg>;
 }
 
-const BODY_AR = [
-  'تُنظّم مراكز عبور للتأهيل والرعاية فعالية متخصصة موجَّهة للأسر التي يُعاني أطفالها من صعوبات في التواصل والتفاعل. وتأتي هذه الفعالية في إطار الالتزام المستمر بتمكين الأسر وتزويدها بالأدوات العملية اللازمة لدعم أبنائها في البيئة المنزلية.',
-  "تُقدَّم من قِبل نخبة من الأخصائيين المعتمدين في المراكز، وتتضمن عروضاً تقديمية تفاعلية، وأنشطة تطبيقية عملية، وجلسات نقاش مفتوحة تُتيح للمشاركين طرح الأسئلة والاستفسارات. كما تتضمن مواد مرجعية مطبوعة يحتفظ بها المشاركون بعد انتهائها.",
-  "نُركّز على توفير بيئة تعليمية آمنة وداعمة، حيث يُشجَّع الآباء والأمهات على مشاركة تجاربهم وتساؤلاتهم. ويلتزم المدربون بتقديم المحتوى بأسلوب مُبسَّط وعملي يسهل تطبيقه في الحياة اليومية.",
-  "في النهاية، سيتمكّن المشاركون من فهم المفاهيم الأساسية المتعلقة بالموضوع، واكتساب مهارات جديدة يمكن تطبيقها فوراً في المنزل، مما يُعزّز مسيرة التأهيل ويُسرّع من تحقيق الأهداف العلاجية.",
-];
-
-const BODY_EN = [
-  "Oboor Centers for Care & Rehabilitation are hosting a specialized event for families whose children face difficulties with communication and interaction. This event reflects our ongoing commitment to empowering families and equipping them with the practical tools they need to support their children at home.",
-  "It is delivered by a select group of the centers' certified specialists and includes interactive presentations, hands-on practical activities, and open discussion sessions that give participants the chance to ask questions. It also includes printed reference materials that participants keep afterward.",
-  "We focus on providing a safe and supportive learning environment, where parents are encouraged to share their experiences and questions. Our trainers are committed to presenting the content in a simple, practical way that is easy to apply in everyday life.",
-  "By the end, participants will understand the key concepts related to the topic and gain new skills they can apply at home right away, strengthening the rehabilitation journey and helping reach therapeutic goals faster.",
-];
-
-const LEARN_AR = [
-  "فهم الأسس النظرية المتعلقة بالموضوع بشكل مُبسَّط وعملي",
-  "اكتساب مهارات تطبيقية يمكن توظيفها مباشرةً في البيئة المنزلية",
-  "التواصل مع أخصائيين متخصصين وطرح الأسئلة والاستفسارات",
-  "الحصول على مواد مرجعية ومطبوعات تعليمية للاستخدام المنزلي",
-];
-
-const LEARN_EN = [
-  "Understand the theoretical foundations of the topic in a simple, practical way",
-  "Gain practical skills you can apply directly at home",
-  "Connect with specialized professionals and ask your questions",
-  "Receive reference materials and educational handouts for use at home",
-];
-
 export default async function NewsDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const locale = await getLocale();
-  const n = getNewsItem(slug, locale);
+  const n = await loadNews(slug, locale);
   if (!n) notFound();
 
-  const BODY = locale === "en" ? BODY_EN : BODY_AR;
-  const LEARN = locale === "en" ? LEARN_EN : LEARN_AR;
-
+  // صفوف كارت التفاصيل — تظهر فقط لو الحقل مُعبّأ
   const info = [
     { icon: <CalIcon />, label: pick(locale, "التاريخ", "Date"), value: n.date },
-    { icon: <ClockIcon />, label: pick(locale, "الوقت", "Time"), value: pick(locale, "٩:٠٠ صباحاً - ١٢:٠٠ ظهراً", "9:00 AM - 12:00 PM") },
-    { icon: <PinIcon />, label: pick(locale, "المكان", "Location"), value: pick(locale, "قاعة التدريب الرئيسية - مركز عبور، الرياض", "Main Training Hall - Oboor Center, Riyadh") },
-    { icon: <UsersIcon />, label: pick(locale, "الفئة المستهدفة", "Target Audience"), value: pick(locale, "أولياء الأمور والأسر", "Parents and families") },
-    { icon: <SeatIcon />, label: pick(locale, "عدد المقاعد", "Seats Available"), value: pick(locale, "٢٠ مقعداً", "20 seats") },
-  ];
+    { icon: <ClockIcon />, label: pick(locale, "الوقت", "Time"), value: n.time },
+    { icon: <PinIcon />, label: pick(locale, "المكان", "Location"), value: n.location },
+    { icon: <UsersIcon />, label: pick(locale, "الفئة المستهدفة", "Target Audience"), value: n.audience },
+    { icon: <SeatIcon />, label: pick(locale, "عدد المقاعد", "Seats Available"), value: n.seats },
+  ].filter((it) => it.value);
 
   return (
     <>
@@ -101,19 +150,21 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
           <div className="grid gap-8 lg:grid-cols-[1fr_340px]">
             {/* Main (right) */}
             <article className="order-2 space-y-5 text-start lg:order-1">
-              {BODY.map((p, i) => <p key={i} className="text-sm leading-8 text-ink-muted">{p}</p>)}
+              {n.body.map((p, i) => <p key={i} className="text-sm leading-8 text-ink-muted">{p}</p>)}
 
-              <div className="rounded-2xl border border-line bg-surface/50 p-6">
-                <h2 className="text-lg font-extrabold text-ink">{pick(locale, "ما الذي ستتعلمه في هذه الفعالية؟", "What will you learn at this event?")}</h2>
-                <ul className="mt-4 space-y-3">
-                  {LEARN.map((l) => (
-                    <li key={l} className="flex items-start justify-start gap-2.5 text-sm leading-7 text-ink-muted">
-                      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="mt-0.5 shrink-0 text-brand"><circle cx="12" cy="12" r="9" /><path d="M8.5 12l2.2 2.2L15.5 9.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                      <span>{l}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              {n.learn.length > 0 && (
+                <div className="rounded-2xl border border-line bg-surface/50 p-6">
+                  <h2 className="text-lg font-extrabold text-ink">{pick(locale, "ما الذي ستتعلمه في هذه الفعالية؟", "What will you learn at this event?")}</h2>
+                  <ul className="mt-4 space-y-3">
+                    {n.learn.map((l) => (
+                      <li key={l} className="flex items-start justify-start gap-2.5 text-sm leading-7 text-ink-muted">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="mt-0.5 shrink-0 text-brand"><circle cx="12" cy="12" r="9" /><path d="M8.5 12l2.2 2.2L15.5 9.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                        <span>{l}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </article>
 
             {/* Sidebar (left) */}
@@ -130,10 +181,12 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
                       </div>
                     </div>
                   ))}
-                  <div className="flex items-center justify-center gap-2 rounded-xl bg-[#eef9fa] py-2.5 text-xs font-bold text-brand-dark">
-                    <span className="h-2 w-2 rounded-full bg-success" />
-                    {pick(locale, "التسجيل مفتوح - مقاعد محدودة", "Registration open - limited seats")}
-                  </div>
+                  {n.regStatus && (
+                    <div className="flex items-center justify-center gap-2 rounded-xl bg-[#eef9fa] py-2.5 text-xs font-bold text-brand-dark">
+                      <span className="h-2 w-2 rounded-full bg-success" />
+                      {n.regStatus}
+                    </div>
+                  )}
                   <a href="https://wa.me/966920003452" target="_blank" rel="noopener noreferrer" className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-dark">
                     <PhoneIcon />
                     {pick(locale, "تواصل معنا للتسجيل", "Contact us to register")}
