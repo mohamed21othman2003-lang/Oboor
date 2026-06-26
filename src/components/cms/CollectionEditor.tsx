@@ -62,7 +62,7 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
   }, [fields, values, baseline]);
 
   // نسبة الاكتمال = الحقول الإلزامية (المعلَّمة بنجمة) فقط
-  const isEmpty = (v: unknown) => v === null || v === undefined || v === "" || (Array.isArray(v) && v.length === 0);
+  const isEmpty = (v: unknown) => v === null || v === undefined || v === "" || (Array.isArray(v) && v.length === 0) || (typeof v === "object" && v !== null && !Array.isArray(v) && Object.keys(v as object).length === 0);
   const required = useMemo(() => fields.filter((f) => f.required && f.type !== "image"), [fields]);
   const completion = useMemo(() => {
     if (!required.length) return 100;
@@ -366,6 +366,7 @@ const HIDE_IF_EMPTY = new Set([
   "target_list_ar", "target_list_en",
   "stations_intro_ar", "stations_intro_en",
   "stations_ar", "stations_en",
+  "about_tag_ar", "about_tag_en",  // البطاقة المميّزة — تظهر فقط للخدمات التي تستخدمها
 ]);
 // حقول كارت الفعالية (في الأخبار) — تظهر فقط للفعاليات والورش
 const EVENT_FIELDS = new Set([
