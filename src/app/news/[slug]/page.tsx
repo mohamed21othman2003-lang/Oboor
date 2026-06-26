@@ -147,9 +147,9 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
       {/* Body */}
       <section className="bg-white pb-16">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          {/* Featured image — إطار عريض بعرض الصفحة؛ نقطة القص أسفل المنتصف قليلاً لإظهار الأشخاص أسفل الصورة */}
-          <div className="relative mb-10 h-[320px] w-full overflow-hidden rounded-3xl bg-surface shadow-lg sm:h-[470px]">
-            <Image src={n.image} alt={n.title} fill className="object-cover object-[50%_60%]" sizes="100vw" priority />
+          {/* Featured image — حجم متمركز (أوضح للصور صغيرة الدقة) + قص يُظهر الأشخاص في المنتصف */}
+          <div className="relative mx-auto mb-10 aspect-[4/3] w-full max-w-3xl overflow-hidden rounded-3xl bg-surface shadow-lg">
+            <Image src={n.image} alt={n.title} fill className="object-cover object-center" sizes="(max-width:768px) 100vw, 768px" priority />
           </div>
 
           <div className={hasEvent ? "grid gap-8 lg:grid-cols-[1fr_340px]" : ""}>
