@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { getSpecialists } from "@/lib/specialistsData";
 import { REGION_BRANCHES, REGION_BRANCHES_EN } from "@/lib/branchesData";
+import { fetchSections } from "@/lib/server/django";
 import { getLocale } from "@/i18n/locale";
 import { pick, type Locale } from "@/i18n/config";
 
@@ -43,9 +44,17 @@ const SMALL_BRANCH_SLUGS = ["kharj", "wadi-dawasir", "qassim", "majmaah", "sharq
 
 export default async function AboutPage() {
   const locale = await getLocale();
+  const en = locale === "en";
   const branches = locale === "en" ? REGION_BRANCHES_EN : REGION_BRANCHES;
   const SMALL_BRANCHES = SMALL_BRANCH_SLUGS.map((s) => branches.find((b) => b.slug === s)!);
   const specialists = getSpecialists(locale);
+
+  // نصوص الصفحة من الـCMS (أقسام صفحة about) مع fallback للنص الحالي
+  const about = await fetchSections("about");
+  const blk = (b: string) => about?.[b]?.[0];
+  const aTitle = (b: string, ar: string, e: string) => { const r = blk(b); const v = r && (en ? r.title_en || r.title_ar : r.title_ar); return v || pick(locale, ar, e); };
+  const aText = (b: string, ar: string, e: string) => { const r = blk(b); const v = r && (en ? r.text_en || r.text_ar : r.text_ar); return v || pick(locale, ar, e); };
+  const aList = (b: string, ar: string[], e: string[]) => { const r = blk(b); const d = r && (en ? r.data_en : r.data_ar) as unknown; const arr = Array.isArray(d) ? (d as string[]) : []; return arr.length ? arr : (en ? e : ar); };
 
   return (
     <>
@@ -67,10 +76,10 @@ export default async function AboutPage() {
 
             {/* Text (left) */}
             <div className="order-2 text-start">
-              <TagLine>{pick(locale, "منذ عام ٢٠٠٧ — رائدون في التأهيل والرعاية", "Since 2007 — pioneers in rehabilitation and care")}</TagLine>
+              <TagLine>{aTitle("hero", "منذ عام ٢٠٠٧ — رائدون في التأهيل والرعاية", "Since 2007 — pioneers in rehabilitation and care")}</TagLine>
               <h1 className="mt-4 text-4xl font-extrabold text-ink sm:text-5xl">{pick(locale, <>عن <span className="text-brand">عبور</span></>, <>About <span className="text-brand">Oboor</span></>)}</h1>
               <p className="mt-5 text-base leading-8 text-ink-muted">
-                {pick(locale, "تأسست مراكز عبور عام ٢٠٠٧، وأصبحت اليوم من أكبر سلاسل المراكز المتخصصة في التشخيص والتقييم والتأهيل والتعليم للأشخاص ذوي الإعاقة في المملكة العربية السعودية، عبر شبكة فروع ممتدة وكوادر متخصصة رفيعة المستوى.", "Founded in 2007, Oboor Centers have grown into one of the largest chains specialized in the diagnosis, assessment, rehabilitation and education of people with disabilities in Saudi Arabia, through an extensive network of branches and highly qualified specialists.")}
+                {aText("hero", "تأسست مراكز عبور عام ٢٠٠٧، وأصبحت اليوم من أكبر سلاسل المراكز المتخصصة في التشخيص والتقييم والتأهيل والتعليم للأشخاص ذوي الإعاقة في المملكة العربية السعودية، عبر شبكة فروع ممتدة وكوادر متخصصة رفيعة المستوى.", "Founded in 2007, Oboor Centers have grown into one of the largest chains specialized in the diagnosis, assessment, rehabilitation and education of people with disabilities in Saudi Arabia, through an extensive network of branches and highly qualified specialists.")}
               </p>
             </div>
           </div>
@@ -83,11 +92,12 @@ export default async function AboutPage() {
           {/* Text (right) */}
           <div className="order-2 text-start lg:order-1">
             <TagLine>{pick(locale, "تعرّف علينا", "Get to know us")}</TagLine>
-            <h2 className="mt-4 text-3xl font-extrabold text-ink">{pick(locale, <>تعرّف على مركز <span className="text-brand">عبور</span></>, <>Get to know <span className="text-brand">Oboor</span> Center</>)}</h2>
+            <h2 className="mt-4 text-3xl font-extrabold text-ink">{aTitle("intro", "تعرّف على مركز عبور", "Get to know Oboor Center")}</h2>
             <div className="mt-5 space-y-4 text-sm leading-8 text-ink-muted">
-              <p>{pick(locale, "تأسست مراكز عبور عام ٢٠٠٧ كأكبر سلسلة مراكز متخصصة في تقديم وتطوير خدمات التشخيص والتقييم والتأهيل والتعليم للأشخاص ذوي الإعاقة في المملكة العربية السعودية.", "Oboor Centers were founded in 2007 as the largest chain specialized in providing and developing diagnosis, assessment, rehabilitation and education services for people with disabilities in Saudi Arabia.")}</p>
-              <p>{pick(locale, "نهدف إلى تمكين الأشخاص ذوي الإعاقة من حياة أكثر جودة واستقلالية من خلال منظومة متكاملة من البرامج التأهيلية والتعليمية وكوادر بشرية مؤهلة وبيئات علاجية مجهزة بأحدث التقنيات.", "We aim to empower people with disabilities to live with greater quality and independence through an integrated system of rehabilitation and educational programs, qualified staff, and therapeutic environments equipped with the latest technologies.")}</p>
-              <p>{pick(locale, "تمتد خدماتنا عبر شبكة فروع واسعة تغطي مناطق رئيسية في المملكة، مما يُمكّن الأسر من الوصول إلى الرعاية المتخصصة بيسر وسهولة وضمان الاستمرارية في مسيرة التأهيل.", "Our services extend across a wide network of branches covering major regions of the Kingdom, enabling families to access specialized care easily and ensuring continuity throughout the rehabilitation journey.")}</p>
+              {aList("intro",
+                ["تأسست مراكز عبور عام ٢٠٠٧ كأكبر سلسلة مراكز متخصصة في تقديم وتطوير خدمات التشخيص والتقييم والتأهيل والتعليم للأشخاص ذوي الإعاقة في المملكة العربية السعودية.", "نهدف إلى تمكين الأشخاص ذوي الإعاقة من حياة أكثر جودة واستقلالية من خلال منظومة متكاملة من البرامج التأهيلية والتعليمية وكوادر بشرية مؤهلة وبيئات علاجية مجهزة بأحدث التقنيات.", "تمتد خدماتنا عبر شبكة فروع واسعة تغطي مناطق رئيسية في المملكة، مما يُمكّن الأسر من الوصول إلى الرعاية المتخصصة بيسر وسهولة وضمان الاستمرارية في مسيرة التأهيل."],
+                ["Oboor Centers were founded in 2007 as the largest chain specialized in providing and developing diagnosis, assessment, rehabilitation and education services for people with disabilities in Saudi Arabia.", "We aim to empower people with disabilities to live with greater quality and independence through an integrated system of rehabilitation and educational programs, qualified staff, and therapeutic environments equipped with the latest technologies.", "Our services extend across a wide network of branches covering major regions of the Kingdom, enabling families to access specialized care easily and ensuring continuity throughout the rehabilitation journey."],
+              ).map((p, i) => <p key={i}>{p}</p>)}
             </div>
           </div>
           {/* Image (left) */}
@@ -115,16 +125,16 @@ export default async function AboutPage() {
             <div className="relative overflow-hidden rounded-3xl bg-gradient-to-bl from-brand-deep to-[#0a2329] p-8 text-start text-white">
               <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand/20 text-brand"><TargetIcon /></span>
               <p className="mt-4 text-sm text-brand">{pick(locale, "رسالتنا", "Our Mission")}</p>
-              <h3 className="mt-1 text-xl font-extrabold">{pick(locale, "تحسين نوعية الحياة والاندماج الفعّال", "Improving quality of life and meaningful integration")}</h3>
-              <p className="mt-3 text-sm leading-8 text-white/75">{pick(locale, "تحسين نوعية حياة الأشخاص من ذوي الإعاقة وأسرهم، ودمجهم الفعّال في المجتمع، من خلال برامج تأهيلية وتعليمية مبنية على أسس علمية وممارسات مهنية عالية الجودة.", "Improving the quality of life of people with disabilities and their families and integrating them meaningfully into society, through rehabilitation and educational programs built on scientific foundations and high-quality professional practices.")}</p>
+              <h3 className="mt-1 text-xl font-extrabold">{aTitle("mission", "تحسين نوعية الحياة والاندماج الفعّال", "Improving quality of life and meaningful integration")}</h3>
+              <p className="mt-3 text-sm leading-8 text-white/75">{aText("mission", "تحسين نوعية حياة الأشخاص من ذوي الإعاقة وأسرهم، ودمجهم الفعّال في المجتمع، من خلال برامج تأهيلية وتعليمية مبنية على أسس علمية وممارسات مهنية عالية الجودة.", "Improving the quality of life of people with disabilities and their families and integrating them meaningfully into society, through rehabilitation and educational programs built on scientific foundations and high-quality professional practices.")}</p>
               <Link href="/programs" className="mt-5 inline-flex items-center gap-2 rounded-xl bg-brand px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-dark">{pick(locale, "عرض الخدمات", "View Services")}<Chev /></Link>
             </div>
             {/* رؤيتنا (light, left) */}
             <div className="relative overflow-hidden rounded-3xl bg-[#e8f7f9] p-8 text-start">
               <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-brand shadow-sm"><EyeIcon /></span>
               <p className="mt-4 text-sm text-brand-dark">{pick(locale, "رؤيتنا", "Our Vision")}</p>
-              <h3 className="mt-1 text-xl font-extrabold text-ink">{pick(locale, "الكيان الرائد والمرجعي", "The leading, reference entity")}</h3>
-              <p className="mt-3 text-sm leading-8 text-ink-muted">{pick(locale, "أن نكون الكيان الرائد والمرجعي في تقديم الخدمات المتكاملة والمستدامة للأشخاص ذوي الإعاقة وأسرهم على مستوى المملكة والمنطقة.", "To be the leading, reference entity in providing integrated and sustainable services for people with disabilities and their families across the Kingdom and the region.")}</p>
+              <h3 className="mt-1 text-xl font-extrabold text-ink">{aTitle("vision", "الكيان الرائد والمرجعي", "The leading, reference entity")}</h3>
+              <p className="mt-3 text-sm leading-8 text-ink-muted">{aText("vision", "أن نكون الكيان الرائد والمرجعي في تقديم الخدمات المتكاملة والمستدامة للأشخاص ذوي الإعاقة وأسرهم على مستوى المملكة والمنطقة.", "To be the leading, reference entity in providing integrated and sustainable services for people with disabilities and their families across the Kingdom and the region.")}</p>
             </div>
           </div>
         </div>
@@ -135,8 +145,8 @@ export default async function AboutPage() {
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
             <div className="text-start">
-              <h2 className="text-3xl font-extrabold text-ink">{pick(locale, "نبذة عن البرامج", "About our programs")}</h2>
-              <p className="mt-2 max-w-2xl text-sm leading-7 text-ink-muted">{pick(locale, "نعتمد في مراكز عبور منهجية علمية متكاملة مدعومة بأحدث التقنيات والبيئات العلاجية المتخصصة لضمان أفضل نتائج تأهيلية ممكنة لكل حالة.", "At Oboor Centers we follow an integrated, evidence-based methodology supported by the latest technologies and specialized therapeutic environments to ensure the best possible rehabilitation outcomes for each case.")}</p>
+              <h2 className="text-3xl font-extrabold text-ink">{aTitle("programs", "نبذة عن البرامج", "About our programs")}</h2>
+              <p className="mt-2 max-w-2xl text-sm leading-7 text-ink-muted">{aText("programs", "نعتمد في مراكز عبور منهجية علمية متكاملة مدعومة بأحدث التقنيات والبيئات العلاجية المتخصصة لضمان أفضل نتائج تأهيلية ممكنة لكل حالة.", "At Oboor Centers we follow an integrated, evidence-based methodology supported by the latest technologies and specialized therapeutic environments to ensure the best possible rehabilitation outcomes for each case.")}</p>
             </div>
             <Link href="/programs" className="flex items-center gap-2 rounded-xl bg-brand px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-dark">{pick(locale, "عرض الخدمات", "View Services")}<Chev /></Link>
           </div>
@@ -168,8 +178,8 @@ export default async function AboutPage() {
       <section className="bg-surface py-16">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mb-10 text-start">
-            <h2 className="text-3xl font-extrabold text-ink">{pick(locale, "نبذة عن الأخصائيين", "About our specialists")}</h2>
-            <p className="mt-2 max-w-2xl text-sm leading-7 text-ink-muted">{pick(locale, "يضمّ مركز عبور نخبة من الأخصائيين والاستشاريين المؤهلين والحاصلين على اعتمادات دولية في مختلف مجالات التأهيل.", "Oboor Center brings together a select team of qualified specialists and consultants holding international accreditations across various fields of rehabilitation.")}</p>
+            <h2 className="text-3xl font-extrabold text-ink">{aTitle("specialists", "نبذة عن الأخصائيين", "About our specialists")}</h2>
+            <p className="mt-2 max-w-2xl text-sm leading-7 text-ink-muted">{aText("specialists", "يضمّ مركز عبور نخبة من الأخصائيين والاستشاريين المؤهلين والحاصلين على اعتمادات دولية في مختلف مجالات التأهيل.", "Oboor Center brings together a select team of qualified specialists and consultants holding international accreditations across various fields of rehabilitation.")}</p>
           </div>
           <div className="grid gap-7 md:grid-cols-2 lg:grid-cols-3">
             {specialists.slice(0, 3).map((s) => (
@@ -200,8 +210,8 @@ export default async function AboutPage() {
           <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
             <div className="text-start">
               <TagLine>{pick(locale, "حضور واسع في المملكة", "A wide presence across the Kingdom")}</TagLine>
-              <h2 className="mt-3 text-3xl font-extrabold text-ink">{pick(locale, "نبذة عن الفروع", "About our branches")}</h2>
-              <p className="mt-2 max-w-2xl text-sm leading-7 text-ink-muted">{pick(locale, "تمتد مراكز عبور عبر أكثر من ١١ مدينة رئيسية في المملكة العربية السعودية، لضمان وصول خدماتنا المتخصصة إلى الأسر أينما كانت، مع الحفاظ على نفس مستوى الجودة والتميّز في كل موقع.", "Oboor Centers span more than 11 major cities across Saudi Arabia, ensuring our specialized services reach families wherever they are, while maintaining the same level of quality and excellence at every location.")}</p>
+              <h2 className="mt-3 text-3xl font-extrabold text-ink">{aTitle("branches", "نبذة عن الفروع", "About our branches")}</h2>
+              <p className="mt-2 max-w-2xl text-sm leading-7 text-ink-muted">{aText("branches", "تمتد مراكز عبور عبر أكثر من ١١ مدينة رئيسية في المملكة العربية السعودية، لضمان وصول خدماتنا المتخصصة إلى الأسر أينما كانت، مع الحفاظ على نفس مستوى الجودة والتميّز في كل موقع.", "Oboor Centers span more than 11 major cities across Saudi Arabia, ensuring our specialized services reach families wherever they are, while maintaining the same level of quality and excellence at every location.")}</p>
             </div>
             <Link href="/branches" className="flex items-center gap-2 rounded-xl bg-brand px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-dark">{pick(locale, "استعرض الفروع", "Browse Branches")}<Chev /></Link>
           </div>
@@ -237,8 +247,8 @@ export default async function AboutPage() {
             <div className="flex items-center gap-3 text-start">
               <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand text-white"><PinIcon /></span>
               <div>
-                <p className="text-base font-bold text-ink">{pick(locale, "نتوسع باستمرار لخدمتكم في كل منطقة", "We keep expanding to serve you in every region")}</p>
-                <p className="mt-0.5 text-sm text-ink-muted">{pick(locale, "هل تبحث عن فرع قريب منك؟ تواصل معنا لمعرفة أقرب مركز إلى موقعك.", "Looking for a branch near you? Contact us to find the nearest center to your location.")}</p>
+                <p className="text-base font-bold text-ink">{aTitle("cta", "نتوسع باستمرار لخدمتكم في كل منطقة", "We keep expanding to serve you in every region")}</p>
+                <p className="mt-0.5 text-sm text-ink-muted">{aText("cta", "هل تبحث عن فرع قريب منك؟ تواصل معنا لمعرفة أقرب مركز إلى موقعك.", "Looking for a branch near you? Contact us to find the nearest center to your location.")}</p>
               </div>
             </div>
             <Link href="/contact" className="flex items-center gap-2 rounded-xl bg-brand px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-dark">{pick(locale, "خذ الخطوة لعبور", "Take the Step to Oboor")}<Chev /></Link>

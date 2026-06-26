@@ -7,6 +7,7 @@ class SectionItem(models.Model):
 
     PAGES = [
         ("home", "الرئيسية"),
+        ("about", "عن عبور"),
         ("success", "قصص النجاح"),
         ("specialists", "الأخصائيون"),
         ("assessment", "التقييم"),
