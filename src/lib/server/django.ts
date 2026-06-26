@@ -45,6 +45,7 @@ export type SectionRow = {
   icon: string; value: string; color: string;
   title_ar: string; title_en: string; text_ar: string; text_en: string;
   data_ar: unknown; data_en: unknown;
+  image?: string;
 };
 
 // يجلب عناصر أقسام صفحة معيّنة ويجمّعها حسب block. يرجّع null للسقوط للبيانات الثابتة.

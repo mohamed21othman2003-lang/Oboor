@@ -87,7 +87,7 @@ export default async function AboutPage() {
           <div className="grid items-center gap-12 lg:grid-cols-2">
             {/* Image (right) — صورة مُصمّمة كاملة + شارة «تأهيل شامل» فوقها */}
             <div className="relative order-1 mx-auto w-full max-w-[480px]">
-              <Image src="/about-hero.png" alt={pick(locale, "مركز عبور للرعاية والتأهيل", "Oboor Center for Care & Rehabilitation")} width={511} height={560} className="h-auto w-full" quality={90} priority />
+              <Image src={blk("hero")?.image || "/about-hero.png"} alt={pick(locale, "مركز عبور للرعاية والتأهيل", "Oboor Center for Care & Rehabilitation")} width={511} height={560} className="h-auto w-full" quality={90} priority />
               <Image src="/about-badge.png" alt={pick(locale, "تأهيل شامل ومتكامل", "Comprehensive, integrated rehabilitation")} width={302} height={130} className="absolute right-4 top-5 h-auto w-[58%] max-w-[270px] drop-shadow-lg" />
             </div>
 
