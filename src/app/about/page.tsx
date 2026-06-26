@@ -5,6 +5,7 @@ import { getSpecialists } from "@/lib/specialistsData";
 import { REGION_BRANCHES, REGION_BRANCHES_EN, type Branch } from "@/lib/branchesData";
 import { loadBranches } from "@/lib/server/branches";
 import { fetchSections, fetchContent } from "@/lib/server/django";
+import { CMS_ICONS } from "@/lib/cms/icons";
 import { getLocale } from "@/i18n/locale";
 import { pick, type Locale } from "@/i18n/config";
 
@@ -66,6 +67,11 @@ export default async function AboutPage() {
   const aTitle = (b: string, ar: string, e: string) => { const r = blk(b); const v = r && (en ? r.title_en || r.title_ar : r.title_ar); return v || pick(locale, ar, e); };
   const aText = (b: string, ar: string, e: string) => { const r = blk(b); const v = r && (en ? r.text_en || r.text_ar : r.text_ar); return v || pick(locale, ar, e); };
   const aList = (b: string, ar: string[], e: string[]) => { const r = blk(b); const d = r && (en ? r.data_en : r.data_ar) as unknown; const arr = Array.isArray(d) ? (d as string[]) : []; return arr.length ? arr : (en ? e : ar); };
+
+  // قائمة البرامج: صفوف program_item من الـCMS (مع fallback للقائمة الثابتة)
+  const programItems = about?.program_item?.length
+    ? about.program_item.map((r) => ({ icon: r.icon, title: en ? r.title_en || r.title_ar : r.title_ar, desc: en ? r.text_en || r.text_ar : r.text_ar }))
+    : PROGRAMS.map((p) => ({ icon: p.icon, title: en ? p.title_en : p.title, desc: en ? p.desc_en : p.desc }));
 
   return (
     <>
@@ -165,12 +171,12 @@ export default async function AboutPage() {
           <div className="grid items-center gap-10 lg:grid-cols-2">
             {/* List (right) */}
             <div className="order-2 space-y-3 lg:order-1">
-              {PROGRAMS.map((p) => (
-                <div key={p.title} className="flex items-start gap-4 rounded-2xl border border-line bg-white p-4 text-start shadow-sm">
-                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand/10 text-brand">{PROG_ICONS[p.icon]}</span>
+              {programItems.map((p, i) => (
+                <div key={i} className="flex items-start gap-4 rounded-2xl border border-line bg-white p-4 text-start shadow-sm">
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand/10 text-brand">{CMS_ICONS[p.icon] ?? CMS_ICONS.heart}</span>
                   <div>
-                    <h3 className="text-base font-bold text-ink">{pick(locale, p.title, p.title_en)}</h3>
-                    <p className="mt-1 text-xs leading-6 text-ink-muted">{pick(locale, p.desc, p.desc_en)}</p>
+                    <h3 className="text-base font-bold text-ink">{p.title}</h3>
+                    <p className="mt-1 text-xs leading-6 text-ink-muted">{p.desc}</p>
                   </div>
                 </div>
               ))}
@@ -270,13 +276,6 @@ export default async function AboutPage() {
   );
 }
 
-const PROG_ICONS: Record<string, React.ReactNode> = {
-  chat: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>,
-  activity: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></svg>,
-  hand: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 11V6a2 2 0 0 0-4 0v5M14 10V4a2 2 0 0 0-4 0v6M10 10.5V6a2 2 0 0 0-4 0v8" /><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2a8 8 0 0 1-8-8 2 2 0 1 1 4 0" /></svg>,
-  brain: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9.5 3A2.5 2.5 0 0 0 7 5.5a2.5 2.5 0 0 0-1 4.8A2.5 2.5 0 0 0 7 15a2.5 2.5 0 0 0 5 .5V5.5A2.5 2.5 0 0 0 9.5 3zM14.5 3A2.5 2.5 0 0 1 17 5.5a2.5 2.5 0 0 1 1 4.8A2.5 2.5 0 0 1 17 15a2.5 2.5 0 0 1-5 .5" /></svg>,
-  users: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" /></svg>,
-};
 
 function EyeIcon() {
   return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z" /><circle cx="12" cy="12" r="3" /></svg>;
