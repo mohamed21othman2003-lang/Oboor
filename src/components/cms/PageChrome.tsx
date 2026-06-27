@@ -16,6 +16,7 @@ const BLOCK_LABELS: Record<string, string> = {
   success: "قسم قصص النجاح",
   gallery: "قسم المعرض",
   news: "قسم الأخبار",
+  certs: "قسم الشهادات والاعتمادات",
 };
 const ITEM_LABELS: Record<string, string> = {
   "hero.badge": "الوسم العلوي",
@@ -39,6 +40,11 @@ const ITEM_LABELS: Record<string, string> = {
   "gallery.badge": "الوسم العلوي",
   "gallery.main": "العنوان",
   "news.main": "العنوان + الجملة التوضيحية",
+  "certs.heading": "العنوان + الجملة التوضيحية",
+  "certs.cert1": "الشهادة الأولى",
+  "certs.cert2": "الشهادة الثانية",
+  "certs.cert3": "الشهادة الثالثة",
+  "certs.cert4": "الشهادة الرابعة",
 };
 // تسميات مخصّصة لحقلَي «العنوان/النص» حسب العنصر (لتوضيح ما يمثّله كل حقل)
 const FIELD_LABELS: Record<string, { title?: string; text?: string }> = {
@@ -56,6 +62,11 @@ const FIELD_LABELS: Record<string, { title?: string; text?: string }> = {
   "gallery.badge": { title: "الوسم" },
   "gallery.main": { title: "العنوان" },
   "news.main": { title: "العنوان", text: "الجملة التوضيحية" },
+  "certs.heading": { title: "العنوان", text: "الجملة التوضيحية" },
+  "certs.cert1": { title: "اسم/كود الشهادة", text: "التصنيف" },
+  "certs.cert2": { title: "اسم/كود الشهادة", text: "التصنيف" },
+  "certs.cert3": { title: "اسم/كود الشهادة", text: "التصنيف" },
+  "certs.cert4": { title: "اسم/كود الشهادة", text: "التصنيف" },
 };
 // ملاحظات توضيحية لبعض العناصر (مثل الرقم التلقائي)
 const ITEM_NOTES: Record<string, string> = {

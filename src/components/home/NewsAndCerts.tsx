@@ -39,8 +39,11 @@ function NewsCard({ n, locale }: { n: (typeof NEWS)[number]; locale: Locale }) {
   );
 }
 
-export default function NewsAndCerts({ locale, news: newsProp, chrome }: { locale: Locale; news?: (typeof NEWS)[number][]; chrome?: HomeChrome }) {
+type Cert = { name: string; label: string };
+
+export default function NewsAndCerts({ locale, news: newsProp, certs: certsProp, chrome }: { locale: Locale; news?: (typeof NEWS)[number][]; certs?: Cert[]; chrome?: HomeChrome }) {
   const news = newsProp?.length ? newsProp : (locale === "en" ? NEWS_EN : NEWS);
+  const certs: Cert[] = certsProp?.length ? certsProp : [0, 1, 2, 3].map(() => ({ name: "ISO 9001", label: pick(locale, "إدارة الجودة", "Quality Mgmt.") }));
   const trackRef = useRef<HTMLDivElement>(null);
   const idxRef = useRef(0);
   const scroll = (dir: number) => {
@@ -93,8 +96,8 @@ export default function NewsAndCerts({ locale, news: newsProp, chrome }: { local
         <div>
           <div className="mb-6 flex items-start justify-between gap-4">
             <div className="min-w-0 text-start">
-              <h3 className="text-2xl font-extrabold text-white">{pick(locale, "عبور، بالشهادات العالمية", "Oboor, Globally Accredited")}</h3>
-              <p className="mt-1 text-sm text-white/70">{pick(locale, "سجلٌ حافل بالاعتمادات، وتمكينٌ مبنيٌ على أعلى معايير الجودة.", "A distinguished record of international accreditations and empowerment built on the highest quality standards.")}</p>
+              <h3 className="text-2xl font-extrabold text-white">{chrome?.["certs.heading"]?.title || pick(locale, "عبور، بالشهادات العالمية", "Oboor, Globally Accredited")}</h3>
+              <p className="mt-1 text-sm text-white/70">{chrome?.["certs.heading"]?.text || pick(locale, "سجلٌ حافل بالاعتمادات، وتمكينٌ مبنيٌ على أعلى معايير الجودة.", "A distinguished record of international accreditations and empowerment built on the highest quality standards.")}</p>
             </div>
             <Link href="/about" className="mt-1 inline-flex shrink-0 items-center gap-1 whitespace-nowrap text-sm font-semibold text-white/90 transition-colors hover:text-white">
               {pick(locale, "عرض الكل", "View All")}
@@ -102,11 +105,13 @@ export default function NewsAndCerts({ locale, news: newsProp, chrome }: { local
             </Link>
           </div>
           <div className="grid grid-cols-2 gap-4">
-            {[0, 1, 2, 3].map((i) => (
+            {certs.map((c, i) => (
               <div key={i} className="flex flex-col items-center rounded-2xl bg-white/95 p-6 text-center">
-                <div className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-brand text-[10px] font-bold text-brand-deep">ISO<br />9001</div>
-                <p className="mt-3 text-sm font-bold text-ink">ISO 9001</p>
-                <p className="text-[11px] text-ink-muted">Quality Mgmt.</p>
+                <div className="flex h-14 w-14 flex-col items-center justify-center rounded-full border-2 border-brand text-[10px] font-bold leading-tight text-brand-deep">
+                  {c.name.split(" ").map((w, j) => <span key={j}>{w}</span>)}
+                </div>
+                <p className="mt-3 text-sm font-bold text-ink">{c.name}</p>
+                <p className="text-[11px] text-ink-muted">{c.label}</p>
               </div>
             ))}
           </div>
