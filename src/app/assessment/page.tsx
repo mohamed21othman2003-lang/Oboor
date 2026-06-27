@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { getAssessStats, getAssessFeatures, getAssessSteps, getAssessments, getQuestionsFor, PRELIM_QUESTIONS, PRELIM_QUESTIONS_EN, ANSWER_OPTIONS, ANSWER_OPTIONS_EN, type Assessment } from "@/lib/assessmentData";
 import AssessmentWizard from "@/components/AssessmentWizard";
+import AnimatedNumber from "@/components/home/AnimatedNumber";
 import { getLocale } from "@/i18n/locale";
 import { pick, type Locale } from "@/i18n/config";
 import { fetchContent, fetchSections } from "@/lib/server/django";
@@ -138,7 +139,7 @@ export default async function AssessmentPage() {
               <div dir="ltr" className="mt-8 flex items-center justify-end gap-10">
                 {ASSESS_STATS.map((s) => (
                   <div key={s.label} className="text-center">
-                    <p className="text-2xl font-extrabold text-brand sm:text-3xl">{s.value}</p>
+                    <p className="text-2xl font-extrabold text-brand sm:text-3xl"><AnimatedNumber value={s.value} /></p>
                     <p className="mt-1 text-xs text-ink-muted">{s.label}</p>
                   </div>
                 ))}
