@@ -2,50 +2,91 @@ import Link from "next/link";
 import { pick, type Locale } from "@/i18n/config";
 
 /**
- * قسم «التواصل» الموحّد (CTA) المستخدم في نهاية كل الصفحات.
- * شكل ثابت مطابق للتصميم: بادج + عنوان + وصف + 3 أزرار بأيقونات
- * (طلب التحاق · تواصل عبر الواتساب · اعثر على أقرب فرع).
- * يتغيّر فقط نص العنوان/الوصف/البادج حسب الصفحة.
+ * قسم «التواصل» الموحّد (CTA) المستخدم في نهاية الصفحات.
+ * افتراضياً: بادج + عنوان + وصف + 3 أزرار (طلب التحاق · واتساب · أقرب فرع).
+ * خيارات إضافية:
+ *  - features: صف نقاط مميزات يظهر تحت الوصف.
+ *  - primary: زر رئيسي مخصّص (أبيض) — مثل «قيّم طفلك الآن».
+ *  - showApply / showBranches: لإظهار/إخفاء زرّي الالتحاق والفرع.
+ *  - starBadge: أيقونة نجمة في البادج بدل النقطة.
  */
 export default function CtaSection({
   locale,
   title,
   subtitle,
   badge,
+  features,
+  primary,
+  showApply = true,
+  showBranches = true,
+  starBadge = false,
 }: {
   locale: Locale;
   title: React.ReactNode;
   subtitle: string;
   badge?: string;
+  features?: string[];
+  primary?: { href: string; label: string };
+  showApply?: boolean;
+  showBranches?: boolean;
+  starBadge?: boolean;
 }) {
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-[#0e4048] via-[#1a6c75] to-[#0e4048]">
       <div className="relative mx-auto max-w-7xl px-6 py-14 text-center lg:px-8">
         <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-sm font-medium text-white/90">
-          <span className="h-2 w-2 rounded-full bg-success" />
+          {starBadge ? <StarIcon /> : <span className="h-2 w-2 rounded-full bg-success" />}
           {badge ?? pick(locale, "خدمة العملاء متاحة على مدار الساعة", "Customer service available around the clock")}
         </span>
         <h2 className="mt-5 text-3xl font-extrabold text-white sm:text-4xl">{title}</h2>
         <p className="mx-auto mt-3 max-w-2xl text-sm text-white/75">{subtitle}</p>
+
+        {features && features.length > 0 && (
+          <div className="mx-auto mt-6 flex max-w-3xl flex-wrap items-center justify-center gap-x-7 gap-y-2.5">
+            {features.map((f) => (
+              <span key={f} className="flex items-center gap-2 text-sm text-white/85">
+                <span className="h-1.5 w-1.5 rounded-full bg-success" />
+                {f}
+              </span>
+            ))}
+          </div>
+        )}
+
         <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-          <Link href="/admission" className="flex items-center gap-2 rounded-xl bg-brand px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-dark">
-            <FormIcon />
-            {pick(locale, "طلب التحاق", "Apply Now")}
-          </Link>
+          {primary && (
+            <Link href={primary.href} className="flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-semibold text-ink transition-colors hover:bg-surface">
+              <ClipboardIcon />
+              {primary.label}
+            </Link>
+          )}
+          {showApply && (
+            <Link href="/admission" className="flex items-center gap-2 rounded-xl bg-brand px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-dark">
+              <FormIcon />
+              {pick(locale, "طلب التحاق", "Apply Now")}
+            </Link>
+          )}
           <a href="https://wa.me/966920003452" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 rounded-xl bg-[#2ba73e] px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90">
             <WhatsappIcon />
             {pick(locale, "تواصل عبر الواتساب", "Contact via WhatsApp")}
           </a>
-          <Link href="/branches" className="flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-semibold text-ink transition-colors hover:bg-surface">
-            <PinIcon />
-            {pick(locale, "اعثر على أقرب فرع", "Find Nearest Branch")}
-          </Link>
+          {showBranches && (
+            <Link href="/branches" className="flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-semibold text-ink transition-colors hover:bg-surface">
+              <PinIcon />
+              {pick(locale, "اعثر على أقرب فرع", "Find Nearest Branch")}
+            </Link>
+          )}
         </div>
       </div>
     </section>
   );
 }
 
+function StarIcon() {
+  return <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="text-success"><path d="M12 2l2.9 6.3 6.6.6-5 4.4 1.5 6.4L12 17.8 6 21l1.5-6.4-5-4.4 6.6-.6z" /></svg>;
+}
+function ClipboardIcon() {
+  return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-brand"><rect x="8" y="3" width="8" height="4" rx="1" /><path d="M9 5H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-3" /><path d="M9 13l2 2 4-4" /></svg>;
+}
 function FormIcon() {
   return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" /><rect x="9" y="3" width="6" height="4" rx="1" /><path d="M9 12h6M9 16h4" /></svg>;
 }
