@@ -5,7 +5,7 @@ import { JOBS, JOBS_EN, CITIES, CITIES_EN, EMPLOYMENT_TYPES, EMPLOYMENT_TYPES_EN
 import CareersExplorer from "@/components/CareersExplorer";
 import { getLocale } from "@/i18n/locale";
 import { pick, type Locale } from "@/i18n/config";
-import { fetchContent, fetchSections } from "@/lib/server/django";
+import { fetchContent, fetchSections, type SectionRow } from "@/lib/server/django";
 
 // الشكل اللي بيرجع من Django (content/careers)
 type ApiJob = {
@@ -66,6 +66,11 @@ function Chev() {
   return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="dir-flip"><path strokeLinecap="round" strokeLinejoin="round" d="M15 18l-6-6 6-6" /></svg>;
 }
 
+// يلوّن الجزء المحاط بـ **نجمتين** باللون المميّز
+function renderHighlight(s: string): React.ReactNode {
+  return s.split(/\*\*(.+?)\*\*/).map((part, i) => (i % 2 === 1 ? <span key={i} className="text-brand">{part}</span> : part));
+}
+
 export default async function CareersPage() {
   const locale = await getLocale();
   const en = locale === "en";
@@ -79,6 +84,28 @@ export default async function CareersPage() {
   const employmentTypes = sections?.employment_types
     ? sections.employment_types.map((r) => (en ? r.title_en || r.title_ar : r.title_ar))
     : en ? EMPLOYMENT_TYPES_EN : EMPLOYMENT_TYPES;
+
+  // محتوى الهيرو وترويسة القائمة من CMS (مع السقوط للنص الثابت)
+  const find = (block: string, key: string): SectionRow | undefined => (sections?.[block] ?? []).find((r) => r.key === key);
+  const T = (r: SectionRow | undefined) => (r ? (en ? r.title_en || r.title_ar : r.title_ar) : "");
+  const B = (r: SectionRow | undefined) => (r ? (en ? r.text_en || r.text_ar : r.text_ar) : "");
+  const hHead = find("hero", "heading");
+  const hBadge = find("hero", "badge");
+  const hStat = find("hero", "stat");
+  const hList = find("list", "header");
+
+  const badge = T(hBadge) || pick(locale, "انضم إلى فريق عبور", "Join the Oboor Team");
+  const heading = T(hHead) || pick(locale, "وظائف تصنع **فرقاً حقيقياً**", "Careers that make **a real difference**");
+  const desc = B(hHead) || pick(locale,
+    "في مراكز عبور، نبحث عن أخصائيين وكوادر تحمل شغفاً بالتأهيل والرعاية. انضم إلى بيئة مهنية متخصصة تُقدّر الكفاءة وتدعم نموك المهني، مع أثر إنساني ملموس في حياة المستفيدين وأسرهم.",
+    "At Oboor Centers, we are looking for specialists and professionals who are passionate about rehabilitation and care. Join a specialized professional environment that values competence and supports your professional growth, with a tangible human impact on the lives of beneficiaries and their families.",
+  );
+  const heroImg = hHead?.image || "/figma/careers/hero-v2.jpg";
+  const statCaption = T(hStat) || pick(locale, "وظائف متاحة", "Open Positions");
+  const statUnit = B(hStat) || pick(locale, "وظائف", "jobs");
+  const listH2 = T(hList) || pick(locale, "الوظائف المتاحة", "Open Positions");
+  const listLabel = B(hList) || pick(locale, "وظيفة متاحة", "open positions");
+  const countText = en ? String(jobs.length) : jobs.length.toLocaleString("ar-EG");
 
   return (
     <>
@@ -96,17 +123,13 @@ export default async function CareersPage() {
             <div className="order-2 text-start lg:order-1">
               <span className="inline-flex items-center gap-2 rounded-full border border-brand/25 bg-white px-4 py-1.5 text-xs font-bold text-brand shadow-sm">
                 <span className="h-1.5 w-1.5 rounded-full bg-brand" />
-                {pick(locale, "انضم إلى فريق عبور", "Join the Oboor Team")}
+                {badge}
               </span>
               <h1 className="mt-5 text-4xl font-extrabold leading-tight text-ink sm:text-5xl">
-                {pick(locale, "وظائف تصنع ", "Careers that make ")}<span className="text-brand">{pick(locale, "فرقاً حقيقياً", "a real difference")}</span>
+                {renderHighlight(heading)}
               </h1>
               <p className="mt-5 max-w-xl text-base leading-8 text-ink-muted">
-                {pick(
-                  locale,
-                  "في مراكز عبور، نبحث عن أخصائيين وكوادر تحمل شغفاً بالتأهيل والرعاية. انضم إلى بيئة مهنية متخصصة تُقدّر الكفاءة وتدعم نموك المهني، مع أثر إنساني ملموس في حياة المستفيدين وأسرهم.",
-                  "At Oboor Centers, we are looking for specialists and professionals who are passionate about rehabilitation and care. Join a specialized professional environment that values competence and supports your professional growth, with a tangible human impact on the lives of beneficiaries and their families.",
-                )}
+                {desc}
               </p>
             </div>
 
@@ -114,7 +137,7 @@ export default async function CareersPage() {
             <div className="relative order-1 mx-auto h-[420px] w-full max-w-[495px] lg:order-2">
               <div className="absolute -bottom-4 -left-4 h-full w-full rounded-3xl bg-brand/10" />
               <div className="relative h-full w-full overflow-hidden rounded-3xl shadow-lg">
-                <Image src="/figma/careers/hero-v2.jpg" alt={pick(locale, "فريق عبور", "Oboor team")} fill className="object-cover" sizes="(max-width:1024px) 100vw, 495px" priority />
+                <Image src={heroImg} alt={pick(locale, "فريق عبور", "Oboor team")} fill className="object-cover" sizes="(max-width:1024px) 100vw, 495px" priority />
               </div>
               {/* Floating badge */}
               <div className="absolute bottom-5 left-5 flex items-center gap-3 rounded-2xl bg-white px-4 py-2.5 shadow-lg">
@@ -122,8 +145,8 @@ export default async function CareersPage() {
                   <BriefcaseIcon />
                 </span>
                 <div className="text-start">
-                  <p className="text-[11px] text-ink-soft">{pick(locale, "وظائف متاحة", "Open Positions")}</p>
-                  <p className="text-base font-extrabold text-brand">{pick(locale, "٨ وظائف", "8 jobs")}</p>
+                  <p className="text-[11px] text-ink-soft">{statCaption}</p>
+                  <p className="text-base font-extrabold text-brand">{countText} {statUnit}</p>
                 </div>
               </div>
             </div>
@@ -137,10 +160,10 @@ export default async function CareersPage() {
           {/* Header */}
           <div className="mb-6 text-start">
             <span className="inline-flex items-center gap-2 text-sm font-semibold text-brand">
-              {pick(locale, "8 وظيفة متاحة", "8 open positions")}
+              {countText} {listLabel}
               <span className="inline-block h-0.5 w-9 rounded-full bg-brand" />
             </span>
-            <h2 className="mt-2 text-3xl font-extrabold text-ink">{pick(locale, "الوظائف المتاحة", "Open Positions")}</h2>
+            <h2 className="mt-2 text-3xl font-extrabold text-ink">{listH2}</h2>
           </div>
 
           <CareersExplorer jobs={jobs} cities={cities} employmentTypes={employmentTypes} locale={locale} />
