@@ -27,6 +27,10 @@ const BLOCK_LABELS: Record<string, string> = {
   highlights: "القصة المميّزة",
   join_cards: "بطاقات الانضمام",
   contact_prompt: "شريط دعوة التواصل",
+  features: "المميزات",
+  steps: "خطوات التقييم",
+  prelim_questions: "الأسئلة الأولية",
+  answer_options: "خيارات الإجابة",
 };
 const ITEM_LABELS: Record<string, string> = {
   "hero.badge": "الوسم العلوي",

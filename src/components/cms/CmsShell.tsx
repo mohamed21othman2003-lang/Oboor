@@ -35,6 +35,7 @@ const NAV: NavGroup[] = [
       { label: "مراكزنا (الفروع)", href: "/cms/content/branches", icon: "pin" },
       { label: "رُوّادنا (الأخصائيون)", href: "/cms/content/specialists", icon: "user" },
       { label: "أبطال عبور (قصص النجاح)", href: "/cms/content/success", icon: "star" },
+      { label: "التقييم", href: "/cms/assessment", icon: "clipboard" },
       { label: "انضم إلينا (الوظائف)", href: "/cms/content/careers", icon: "megaphone" },
     ],
   },

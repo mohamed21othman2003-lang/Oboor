@@ -22,7 +22,7 @@ const BLOCK_LABELS: Record<string, string> = {
 const blockLabel = (b: string) => BLOCK_LABELS[b] || b;
 
 // صفحات لها كيان مستقل في السايد بار ⇒ تُستبعد من قائمة «أقسام الصفحات» العامة
-const DEDICATED_PAGES = new Set(["about", "careers", "home", "success", "specialists"]);
+const DEDICATED_PAGES = new Set(["about", "careers", "home", "success", "specialists", "assessment"]);
 
 export default function CollectionList({ type }: { type: string }) {
   const router = useRouter();
