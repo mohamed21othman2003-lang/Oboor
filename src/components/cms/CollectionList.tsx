@@ -4,6 +4,10 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { listCollection, deleteItem, reorderCollection, TYPE_LABELS, type CmsItem } from "@/lib/cms/api";
+import PageChrome from "@/components/cms/PageChrome";
+
+// أنواع المحتوى التي لصفحتها «رأس صفحة» قابل للتعديل من نفس القائمة (نوع ← مفتاح الصفحة)
+const PAGE_CHROME: Record<string, string> = { careers: "careers" };
 
 // أسماء ودّية لأقسام الصفحات (block) — لتجميع العناصر تحت قسمها بدل خلطها
 const BLOCK_LABELS: Record<string, string> = {
@@ -18,7 +22,7 @@ const BLOCK_LABELS: Record<string, string> = {
 const blockLabel = (b: string) => BLOCK_LABELS[b] || b;
 
 // صفحات لها كيان مستقل في السايد بار ⇒ تُستبعد من قائمة «أقسام الصفحات» العامة
-const DEDICATED_PAGES = new Set(["about"]);
+const DEDICATED_PAGES = new Set(["about", "careers"]);
 
 export default function CollectionList({ type }: { type: string }) {
   const router = useRouter();
@@ -211,6 +215,8 @@ export default function CollectionList({ type }: { type: string }) {
           </Link>
         )}
       </div>
+
+      {!pageFilter && PAGE_CHROME[type] && <PageChrome page={PAGE_CHROME[type]} />}
 
       {error && <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">{error}</p>}
 
