@@ -10,12 +10,16 @@ export default function AnimatedNumber({ value, duration = 1600 }: { value: stri
   const [display, setDisplay] = useState<string>(value);
 
   useEffect(() => {
-    const m = String(value).match(/^([^\d]*)([\d,]+)(.*)$/);
+    const raw = String(value);
+    // ادعم الأرقام العربية (٠-٩) بتحويلها للاتيني للتحليل ثم عرضها بنفس نمط الأصل
+    const arDigits = /[٠-٩]/.test(raw);
+    const latin = raw.replace(/[٠-٩]/g, (d) => String(d.charCodeAt(0) - 0x0660));
+    const m = latin.match(/^([^\d]*)([\d,]+)(.*)$/);
     if (!m) { setDisplay(value); return; }
     const prefix = m[1];
     const suffix = m[3];
     const target = parseInt(m[2].replace(/,/g, ""), 10);
-    const fmt = (n: number) => `${prefix}${n.toLocaleString("en-US")}${suffix}`;
+    const fmt = (n: number) => `${prefix}${n.toLocaleString(arDigits ? "ar-EG" : "en-US")}${suffix}`;
 
     setDisplay(fmt(0));
     const el = ref.current;
