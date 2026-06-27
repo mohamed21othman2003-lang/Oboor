@@ -49,10 +49,18 @@ export type SectionRow = {
 };
 
 // يجلب عناصر أقسام صفحة معيّنة ويجمّعها حسب block. يرجّع null للسقوط للبيانات الثابتة.
+// عنصر «له معنى» = فيه نص أو رقم أو صورة أو قائمة. العناصر الفارغة تمامًا
+// (مثل عنصر أضافه الأدمن ولم يملأه) تُستبعد حتى لا تظهر فارغة/مكسورة على الموقع.
+function meaningful(r: SectionRow): boolean {
+  const txt = `${r.title_ar ?? ""}${r.title_en ?? ""}${r.text_ar ?? ""}${r.text_en ?? ""}${r.value ?? ""}${r.image ?? ""}`.trim();
+  if (txt) return true;
+  return (Array.isArray(r.data_ar) && r.data_ar.length > 0) || (Array.isArray(r.data_en) && r.data_en.length > 0);
+}
+
 export async function fetchSections(page: string): Promise<Record<string, SectionRow[]> | null> {
   const rows = await fetchContent<SectionRow[]>(`sections/${page}`);
   if (!rows || !rows.length) return null;
   const grouped: Record<string, SectionRow[]> = {};
-  for (const r of rows) (grouped[r.block] ??= []).push(r);
+  for (const r of rows) { if (meaningful(r)) (grouped[r.block] ??= []).push(r); }
   return grouped;
 }
