@@ -12,9 +12,9 @@ class ProgramDetail(models.Model):
     about_ar = models.JSONField("نبذة (عربي)", default=list, blank=True, help_text="فقرات النبذة التعريفية أعلى الصفحة (قسم «عن البرنامج»).")
     about_en = models.JSONField("نبذة (إنجليزي)", default=list, blank=True)
 
-    philosophy_intro_ar = models.TextField("مقدمة الفلسفة (عربي)", blank=True, help_text="جملة تمهيدية لقسم «فلسفة البرنامج».")
+    philosophy_intro_ar = models.TextField("مقدمة الفلسفة (عربي)", blank=True, help_text="جملة تمهيدية تظهر أعلى قسم «فلسفة البرنامج» (القسم الغامق في صفحة البرنامج).")
     philosophy_intro_en = models.TextField("مقدمة الفلسفة (إنجليزي)", blank=True)
-    philosophy_ar = models.JSONField("الفلسفة (عربي)", default=list, blank=True, help_text="بطاقات فلسفة البرنامج (تظهر في القسم الغامق).")
+    philosophy_ar = models.JSONField("الفلسفة (عربي)", default=list, blank=True, help_text="نقاط فلسفة البرنامج — كل نقطة تظهر كبطاقة في القسم الغامق بصفحة البرنامج (رؤية المركز وأسلوبه). اتركها فارغة إن لم يكن للبرنامج قسم فلسفة.")
     philosophy_en = models.JSONField("الفلسفة (إنجليزي)", default=list, blank=True)
 
     methods_ar = models.JSONField("المنهج العلمي (عربي)", default=list, blank=True, help_text="أساليب/مناهج علمية — كارت «المنهج العلمي» (لكل عنصر: اسم عريض اختياري + وصف).")
