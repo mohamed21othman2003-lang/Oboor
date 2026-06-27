@@ -71,6 +71,35 @@ function resolveSrc(s: string): string {
   return "/" + s.replace(/^\/+/, "");
 }
 
+// عناصر يُعرض نصّها كفقرات منفصلة (حقل لكل فقرة) بدل صندوق واحد
+const PARAGRAPH_KEYS = new Set(["about.intro"]);
+
+// محرّر فقرات — كل فقرة في حقل مستقل (عربي/إنجليزي)؛ تُخزَّن مفصولة بأسطر
+function ParagraphsField({ ar, en, onChange }: { ar: string; en: string; onChange: (ar: string, en: string) => void }) {
+  const a = ar ? ar.split("\n") : [];
+  const e = en ? en.split("\n") : [];
+  const n = Math.max(a.length, e.length, 1);
+  const norm = (arr: string[]) => { const c = [...arr]; while (c.length < n) c.push(""); return c; };
+  const setRow = (i: number, av: string, ev: string) => { const na = norm(a); const ne = norm(e); na[i] = av; ne[i] = ev; onChange(na.join("\n"), ne.join("\n")); };
+  const removeRow = (i: number) => onChange(norm(a).filter((_, j) => j !== i).join("\n"), norm(e).filter((_, j) => j !== i).join("\n"));
+  const add = () => onChange([...a, ""].join("\n"), [...e, ""].join("\n"));
+  return (
+    <div className="space-y-2">
+      {Array.from({ length: n }, (_, i) => (
+        <div key={i} className="flex items-start gap-2">
+          <span className="mt-2 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-surface text-[10px] font-bold text-ink-soft">{i + 1}</span>
+          <div className="grid flex-1 gap-2 sm:grid-cols-2">
+            <textarea value={a[i] ?? ""} onChange={(ev) => setRow(i, ev.target.value, e[i] ?? "")} rows={3} className={INPUT} placeholder="عربي" />
+            <textarea value={e[i] ?? ""} onChange={(ev) => setRow(i, a[i] ?? "", ev.target.value)} dir="ltr" rows={3} className={INPUT} placeholder="English" />
+          </div>
+          <button type="button" onClick={() => removeRow(i)} className="mt-1 shrink-0 rounded-lg bg-red-50 px-2 py-1.5 text-[11px] font-semibold text-red-600 hover:bg-red-600 hover:text-white">حذف</button>
+        </div>
+      ))}
+      <button type="button" onClick={add} className="inline-flex items-center gap-1 rounded-lg bg-brand/10 px-2.5 py-1 text-[11px] font-semibold text-brand hover:bg-brand hover:text-white">+ إضافة فقرة</button>
+    </div>
+  );
+}
+
 export default function PageChrome({ page }: { page: string }) {
   const [items, setItems] = useState<CmsItem[]>([]);
   const [edits, setEdits] = useState<Record<number, Record<string, string>>>({});
@@ -186,10 +215,14 @@ export default function PageChrome({ page }: { page: string }) {
                         {hasText && (
                           <div>
                             <p className="mb-1 text-xs font-semibold text-ink-soft">{FIELD_LABELS[key]?.text || "النص"}</p>
-                            <div className="grid gap-2 sm:grid-cols-2">
-                              <textarea value={val(it, "text_ar")} onChange={(e) => setVal(it.id, "text_ar", e.target.value)} rows={3} className={INPUT} placeholder="عربي" />
-                              <textarea value={val(it, "text_en")} onChange={(e) => setVal(it.id, "text_en", e.target.value)} dir="ltr" rows={3} className={INPUT} placeholder="English" />
-                            </div>
+                            {PARAGRAPH_KEYS.has(key) ? (
+                              <ParagraphsField ar={val(it, "text_ar")} en={val(it, "text_en")} onChange={(a, e) => { setVal(it.id, "text_ar", a); setVal(it.id, "text_en", e); }} />
+                            ) : (
+                              <div className="grid gap-2 sm:grid-cols-2">
+                                <textarea value={val(it, "text_ar")} onChange={(e) => setVal(it.id, "text_ar", e.target.value)} rows={3} className={INPUT} placeholder="عربي" />
+                                <textarea value={val(it, "text_en")} onChange={(e) => setVal(it.id, "text_en", e.target.value)} dir="ltr" rows={3} className={INPUT} placeholder="English" />
+                              </div>
+                            )}
                           </div>
                         )}
                         {hasImage && (
