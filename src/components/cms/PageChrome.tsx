@@ -5,10 +5,10 @@ import Link from "next/link";
 import { listCollection, updateItem, uploadField, type CmsItem } from "@/lib/cms/api";
 
 // ترتيب الأقسام كما تظهر على الصفحة (لعرضها مرتّبة بدل ترتيب قاعدة البيانات)
-const BLOCK_ORDER = ["hero", "about", "smart_search", "stats", "join_cards", "why_us", "success", "gallery", "news", "certs", "map_regions", "features", "profile_intro", "profile_stats", "journey", "accreditations", "steps", "prelim_questions", "answer_options", "categories", "list", "cities", "employment_types", "contact_prompt", "highlights"];
+const BLOCK_ORDER = ["hero", "about", "smart_search", "stats", "join_cards", "why_us", "success", "gallery", "news", "certs", "map_regions", "features", "services", "profile_intro", "profile_stats", "journey", "accreditations", "steps", "prelim_questions", "answer_options", "categories", "list", "cities", "employment_types", "contact_prompt", "highlights"];
 const blockRank = (b: string) => { const i = BLOCK_ORDER.indexOf(b); return i === -1 ? 999 : i; };
 // أقسام محتواها منظّم معقّد ⇒ تُحرّر بالمحرّر الكامل (رابط) بدل الحقول المبسّطة
-const COMPLEX_BLOCKS = new Set(["highlights"]);
+const COMPLEX_BLOCKS = new Set(["highlights", "services"]);
 
 // أسماء ودّية لأقسام رأس الصفحة وعناصرها
 const BLOCK_LABELS: Record<string, string> = {
@@ -37,6 +37,7 @@ const BLOCK_LABELS: Record<string, string> = {
   journey: "رحلة التأهيل (ملف الفرع)",
   accreditations: "الاعتمادات (ملف الفرع)",
   profile_intro: "نبذة ملف الفرع",
+  services: "كروت خدمات الفرع",
 };
 const ITEM_LABELS: Record<string, string> = {
   "hero.badge": "الوسم العلوي",
