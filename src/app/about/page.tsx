@@ -68,6 +68,14 @@ export default async function AboutPage() {
   const aText = (b: string, ar: string, e: string) => { const r = blk(b); const v = r && (en ? r.text_en || r.text_ar : r.text_ar); return v || pick(locale, ar, e); };
   const aList = (b: string, ar: string[], e: string[]) => { const r = blk(b); const d = r && (en ? r.data_en : r.data_ar) as unknown; const arr = Array.isArray(d) ? (d as string[]) : []; return arr.length ? arr : (en ? e : ar); };
 
+  // كارت الفرع الرئيسي في قسم «نبذة عن الفروع» (من الـCMS مع fallback)
+  const mainCard = (about?.branches ?? []).find((r) => r.key === "main_card");
+  const mcCity = mainCard ? (en ? mainCard.title_en || mainCard.title_ar : mainCard.title_ar) : pick(locale, "الرياض", "Riyadh");
+  const mcRegion = mainCard ? (en ? mainCard.text_en || mainCard.text_ar : mainCard.text_ar) : pick(locale, "منطقة الرياض — ٣ فروع", "Riyadh Region — 3 branches");
+  const mcDistrictsRaw = mainCard ? ((en ? mainCard.data_en : mainCard.data_ar) as unknown) : null;
+  const mcDistricts = Array.isArray(mcDistrictsRaw) && mcDistrictsRaw.length ? (mcDistrictsRaw as string[]) : pick(locale, ["حي العليا", "حي النرجس", "حي الصحافة"], ["Al-Olaya District", "Al-Narjes District", "Al-Sahafa District"]);
+  const mcPhone = mainCard?.value || "920-000-001";
+
   // قائمة البرامج: عناصر قسم «البرامج» التي لها أيقونة (العنوان بلا أيقونة) — مع fallback ثابت
   const progRows = (about?.programs ?? []).filter((r) => r.icon);
   const programItems = progRows.length
@@ -238,15 +246,15 @@ export default async function AboutPage() {
             {/* Main branch (dark, right) */}
             <div className="relative overflow-hidden rounded-2xl bg-gradient-to-bl from-brand-deep to-[#0a2329] p-6 text-start text-white lg:order-1 lg:row-span-3">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-brand/20 px-3 py-1 text-xs font-bold text-brand"><PinIcon />{pick(locale, "الفرع الرئيسي", "Main Branch")}</span>
-              <h3 className="mt-4 text-3xl font-extrabold">{pick(locale, "الرياض", "Riyadh")}</h3>
-              <p className="mt-1 text-sm text-white/70">{pick(locale, "منطقة الرياض — ٣ فروع", "Riyadh Region — 3 branches")}</p>
+              <h3 className="mt-4 text-3xl font-extrabold">{mcCity}</h3>
+              <p className="mt-1 text-sm text-white/70">{mcRegion}</p>
               <ul className="mt-5 space-y-2 text-sm text-white/85">
-                {pick(locale, ["حي العليا", "حي النرجس", "حي الصحافة"], ["Al-Olaya District", "Al-Narjes District", "Al-Sahafa District"]).map((d) => (
+                {mcDistricts.map((d) => (
                   <li key={d} className="flex items-center justify-start gap-2"><span className="h-1.5 w-1.5 rounded-full bg-brand" />{d}</li>
                 ))}
               </ul>
-              <div className="mt-5 flex items-center justify-start gap-2 border-t border-white/10 pt-4 text-sm text-white/80">
-                <PhoneIcon />920-000-001
+              <div className="mt-5 flex items-center justify-start gap-2 border-t border-white/10 pt-4 text-sm text-white/80" dir="ltr">
+                <PhoneIcon />{mcPhone}
               </div>
             </div>
 
