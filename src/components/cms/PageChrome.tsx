@@ -2,13 +2,19 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { listCollection, updateItem, uploadField, type CmsItem } from "@/lib/cms/api";
+import { listCollection, updateItem, createItem, deleteItem, uploadField, type CmsItem } from "@/lib/cms/api";
 
 // ترتيب الأقسام كما تظهر على الصفحة (لعرضها مرتّبة بدل ترتيب قاعدة البيانات)
 const BLOCK_ORDER = ["hero", "about", "smart_search", "stats", "join_cards", "why_us", "success", "gallery", "news", "certs", "map_regions", "features", "services", "profile_intro", "profile_stats", "journey", "accreditations", "steps", "prelim_questions", "answer_options", "categories", "list", "cities", "employment_types", "contact_prompt", "highlights"];
 const blockRank = (b: string) => { const i = BLOCK_ORDER.indexOf(b); return i === -1 ? 999 : i; };
 // أقسام محتواها منظّم معقّد ⇒ تُحرّر بالمحرّر الكامل (رابط) بدل الحقول المبسّطة
 const COMPLEX_BLOCKS = new Set(["highlights", "services"]);
+// أقسام هي قوائم متكررة ⇒ يُسمح بإضافة/حذف عناصرها
+const LIST_BLOCKS = new Set([
+  "answer_options", "prelim_questions", "cities", "employment_types",
+  "accreditations", "journey", "profile_stats", "join_cards",
+  "map_regions", "features", "stats", "steps", "services",
+]);
 
 // أسماء ودّية لأقسام رأس الصفحة وعناصرها
 const BLOCK_LABELS: Record<string, string> = {
@@ -164,6 +170,7 @@ export default function PageChrome({ page }: { page: string }) {
   const [loading, setLoading] = useState(true);
   const [savingId, setSavingId] = useState<number | null>(null);
   const [okId, setOkId] = useState<number | null>(null);
+  const [addingBlock, setAddingBlock] = useState<string | null>(null);
   const [err, setErr] = useState("");
 
   useEffect(() => {
@@ -203,6 +210,28 @@ export default function PageChrome({ page }: { page: string }) {
       setItems((prev) => prev.map((x) => (x.id === it.id ? saved : x)));
       setOkId(it.id);
     } catch (e) { setErr(e instanceof Error ? e.message : "تعذّر رفع الصورة."); }
+    finally { setSavingId(null); }
+  }
+
+  // إضافة عنصر جديد لقسم قائمة (بنفس بنية باقي العناصر)
+  async function addItem(block: string) {
+    setAddingBlock(block); setErr(""); setOkId(null);
+    try {
+      const orders = items.filter((i) => String(i.block) === block).map((i) => Number(i.order) || 0);
+      const order = (orders.length ? Math.max(...orders) : -1) + 1;
+      const created = await createItem("sections", { page, block, order, title_ar: "", title_en: "" }) as CmsItem;
+      setItems((prev) => [...prev, created]);
+    } catch (e) { setErr(e instanceof Error ? e.message : "تعذّر الإضافة."); }
+    finally { setAddingBlock(null); }
+  }
+
+  async function removeItem(it: CmsItem) {
+    if (typeof window !== "undefined" && !window.confirm("حذف هذا العنصر نهائياً؟")) return;
+    setSavingId(it.id); setErr("");
+    try {
+      await deleteItem("sections", it.id);
+      setItems((prev) => prev.filter((x) => x.id !== it.id));
+    } catch (e) { setErr(e instanceof Error ? e.message : "تعذّر الحذف."); }
     finally { setSavingId(null); }
   }
 
@@ -257,7 +286,10 @@ export default function PageChrome({ page }: { page: string }) {
                           <p className="text-xs font-bold text-ink">{String(it.title_ar || it.key || "")}</p>
                           <p className="mt-0.5 text-[11px] text-ink-soft">محتوى منظّم (عناوين + قائمة) — يُحرّر بالمحرّر الكامل.</p>
                         </div>
-                        <Link href={`/cms/content/sections/${it.id}`} className="shrink-0 rounded-lg bg-brand/10 px-3 py-1.5 text-xs font-semibold text-brand hover:bg-brand hover:text-white">فتح المحرّر ←</Link>
+                        <div className="flex shrink-0 items-center gap-2">
+                          <Link href={`/cms/content/sections/${it.id}`} className="rounded-lg bg-brand/10 px-3 py-1.5 text-xs font-semibold text-brand hover:bg-brand hover:text-white">فتح المحرّر ←</Link>
+                          {LIST_BLOCKS.has(g.block) && <button type="button" onClick={() => removeItem(it)} className="rounded-lg bg-red-50 px-2.5 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-600 hover:text-white">حذف</button>}
+                        </div>
                       </div>
                     );
                   }
@@ -322,10 +354,17 @@ export default function PageChrome({ page }: { page: string }) {
                         </button>
                         {okId === it.id && <span className="text-xs font-semibold text-emerald-600">تم الحفظ ✓</span>}
                         {dirty(it.id) && okId !== it.id && <span className="text-xs font-semibold text-amber-600">تعديلات غير محفوظة</span>}
+                        {LIST_BLOCKS.has(g.block) && <button type="button" onClick={() => removeItem(it)} className="mr-auto rounded-lg bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-600 hover:text-white">حذف</button>}
                       </div>
                     </div>
                   );
                 })}
+                {LIST_BLOCKS.has(g.block) && (
+                  <button type="button" onClick={() => addItem(g.block)} disabled={addingBlock === g.block} className="inline-flex items-center gap-1 rounded-lg bg-brand px-3.5 py-2 text-xs font-bold text-white hover:bg-brand-dark disabled:opacity-50">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path strokeLinecap="round" d="M12 5v14M5 12h14" /></svg>
+                    {addingBlock === g.block ? "جارٍ الإضافة…" : "إضافة عنصر جديد"}
+                  </button>
+                )}
               </div>
               )}
             </div>
