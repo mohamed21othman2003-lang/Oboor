@@ -7,7 +7,7 @@ import { listCollection, deleteItem, reorderCollection, TYPE_LABELS, type CmsIte
 import PageChrome from "@/components/cms/PageChrome";
 
 // أنواع المحتوى التي لصفحتها «رأس صفحة» قابل للتعديل من نفس القائمة (نوع ← مفتاح الصفحة)
-const PAGE_CHROME: Record<string, string> = { careers: "careers", success: "success" };
+const PAGE_CHROME: Record<string, string> = { careers: "careers", success: "success", specialists: "specialists" };
 
 // أسماء ودّية لأقسام الصفحات (block) — لتجميع العناصر تحت قسمها بدل خلطها
 const BLOCK_LABELS: Record<string, string> = {
@@ -22,7 +22,7 @@ const BLOCK_LABELS: Record<string, string> = {
 const blockLabel = (b: string) => BLOCK_LABELS[b] || b;
 
 // صفحات لها كيان مستقل في السايد بار ⇒ تُستبعد من قائمة «أقسام الصفحات» العامة
-const DEDICATED_PAGES = new Set(["about", "careers", "home", "success"]);
+const DEDICATED_PAGES = new Set(["about", "careers", "home", "success", "specialists"]);
 
 export default function CollectionList({ type }: { type: string }) {
   const router = useRouter();
