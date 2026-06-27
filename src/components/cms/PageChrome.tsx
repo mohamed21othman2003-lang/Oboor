@@ -1,7 +1,14 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { listCollection, updateItem, uploadField, type CmsItem } from "@/lib/cms/api";
+
+// ترتيب الأقسام كما تظهر على الصفحة (لعرضها مرتّبة بدل ترتيب قاعدة البيانات)
+const BLOCK_ORDER = ["hero", "about", "smart_search", "stats", "why_us", "success", "gallery", "news", "certs", "list", "cities", "employment_types", "highlights"];
+const blockRank = (b: string) => { const i = BLOCK_ORDER.indexOf(b); return i === -1 ? 999 : i; };
+// أقسام محتواها منظّم معقّد ⇒ تُحرّر بالمحرّر الكامل (رابط) بدل الحقول المبسّطة
+const COMPLEX_BLOCKS = new Set(["highlights"]);
 
 // أسماء ودّية لأقسام رأس الصفحة وعناصرها
 const BLOCK_LABELS: Record<string, string> = {
@@ -17,6 +24,7 @@ const BLOCK_LABELS: Record<string, string> = {
   gallery: "قسم المعرض",
   news: "قسم الأخبار",
   certs: "قسم الشهادات والاعتمادات",
+  highlights: "القصة المميّزة",
 };
 const ITEM_LABELS: Record<string, string> = {
   "hero.badge": "الوسم العلوي",
@@ -154,7 +162,7 @@ export default function PageChrome({ page }: { page: string }) {
     try {
       const e = edits[it.id] || {};
       const payload: Record<string, unknown> = {};
-      for (const k of ["title_ar", "title_en", "text_ar", "text_en"]) if (k in e) payload[k] = e[k];
+      for (const k of ["title_ar", "title_en", "text_ar", "text_en", "value"]) if (k in e) payload[k] = e[k];
       if (Object.keys(payload).length) {
         const saved = await updateItem("sections", it.id, payload) as CmsItem;
         setItems((prev) => prev.map((x) => (x.id === it.id ? saved : x)));
@@ -184,6 +192,7 @@ export default function PageChrome({ page }: { page: string }) {
     if (!g) { g = { block: b, items: [] }; blocks.push(g); }
     g.items.push(it);
   }
+  blocks.sort((a, b) => blockRank(a.block) - blockRank(b.block));
 
   return (
     <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-line">
@@ -193,8 +202,8 @@ export default function PageChrome({ page }: { page: string }) {
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="7" rx="1.5" /><path d="M3 14h18M3 18h12" /></svg>
           </span>
           <div className="text-start">
-            <span className="block font-bold text-ink">محتوى رأس الصفحة</span>
-            <span className="block text-[11px] text-ink-soft">العنوان والوصف والصورة وترويسة القائمة — تظهر أعلى الصفحة</span>
+            <span className="block font-bold text-ink">محتوى وعناوين الصفحة</span>
+            <span className="block text-[11px] text-ink-soft">العناوين والنصوص والأرقام والصور — مرتّبة حسب ظهورها في الصفحة</span>
           </div>
         </div>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={`shrink-0 text-ink-soft transition-transform ${open ? "rotate-180" : ""}`}><path strokeLinecap="round" d="M6 9l6 6 6-6" /></svg>
@@ -218,6 +227,18 @@ export default function PageChrome({ page }: { page: string }) {
               {isOpen && (
               <div className="space-y-3 border-t border-line p-3">
                 {g.items.map((it) => {
+                  // أقسام بمحتوى منظّم معقّد — تُحرّر بالمحرّر الكامل
+                  if (COMPLEX_BLOCKS.has(g.block)) {
+                    return (
+                      <div key={it.id} className="flex items-center justify-between gap-3 rounded-xl border border-line bg-surface/40 p-3">
+                        <div className="text-start">
+                          <p className="text-xs font-bold text-ink">{String(it.title_ar || it.key || "")}</p>
+                          <p className="mt-0.5 text-[11px] text-ink-soft">محتوى منظّم (عناوين + قائمة) — يُحرّر بالمحرّر الكامل.</p>
+                        </div>
+                        <Link href={`/cms/content/sections/${it.id}`} className="shrink-0 rounded-lg bg-brand/10 px-3 py-1.5 text-xs font-semibold text-brand hover:bg-brand hover:text-white">فتح المحرّر ←</Link>
+                      </div>
+                    );
+                  }
                   const key = `${g.block}.${String(it.key ?? "")}`;
                   const hasText = String(it.text_ar ?? "").trim() !== "" || String(it.text_en ?? "").trim() !== "" || ("text_ar" in (edits[it.id] || {}));
                   const hasImage = String(it.image ?? "").trim() !== "" || Boolean(it.image_file);
@@ -249,6 +270,12 @@ export default function PageChrome({ page }: { page: string }) {
                                 <AutoTextarea value={val(it, "text_en")} onChange={(v) => setVal(it.id, "text_en", v)} dir="ltr" placeholder="English" />
                               </div>
                             )}
+                          </div>
+                        )}
+                        {(String(it.value ?? "").trim() !== "" || g.block === "stats") && (
+                          <div>
+                            <p className="mb-1 text-xs font-semibold text-ink-soft">الرقم</p>
+                            <input value={val(it, "value")} onChange={(e) => setVal(it.id, "value", e.target.value)} dir="ltr" className={INPUT} placeholder="مثال: 500" />
                           </div>
                         )}
                         {hasImage && (
