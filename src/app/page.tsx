@@ -96,9 +96,18 @@ async function loadChrome(locale: Locale): Promise<HomeChrome> {
   return out;
 }
 
+// شهادات الاعتماد في الرئيسية (sections/home/certs)
+async function loadCerts(locale: Locale): Promise<{ name: string; label: string }[] | undefined> {
+  const sections = await fetchSections("home");
+  const rows = sections?.certs?.filter((r) => r.key !== "heading");
+  if (!rows || !rows.length) return undefined;
+  const en = locale === "en";
+  return rows.map((r) => ({ name: en ? r.title_en || r.title_ar : r.title_ar, label: en ? r.text_en || r.text_ar : r.text_ar }));
+}
+
 export default async function Home() {
   const locale = await getLocale();
-  const [heroSlides, statItems, featureItems, gallery, successHome, newsHome, chrome, serviceCards] = await Promise.all([
+  const [heroSlides, statItems, featureItems, gallery, successHome, newsHome, chrome, serviceCards, certs] = await Promise.all([
     loadHero(locale),
     loadStats(locale),
     loadFeatures(locale),
@@ -107,6 +116,7 @@ export default async function Home() {
     loadNewsHome(locale),
     loadChrome(locale),
     loadServiceCards(locale),
+    loadCerts(locale),
   ]);
   return (
     <>
@@ -117,7 +127,7 @@ export default async function Home() {
       <WhyUs locale={locale} items={featureItems} chrome={chrome} />
       <SuccessStories locale={locale} stories={successHome} chrome={chrome} />
       <Gallery locale={locale} images={gallery?.images} captions={gallery?.captions} chrome={chrome} />
-      <NewsAndCerts locale={locale} news={newsHome} chrome={chrome} />
+      <NewsAndCerts locale={locale} news={newsHome} certs={certs} chrome={chrome} />
 
       {/* WhatsApp float */}
       <a
