@@ -167,6 +167,20 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
 
   function renderRow(row: Row, i: number) {
     if (row.kind === "pair") {
+      // قسم «كيف يساعد…» في التقنيات — محرّر منظّم بعرض كامل
+      if (row.ar?.base === "help_section" || row.en?.base === "help_section") {
+        return (
+          <div key={i}>
+            <label className="mb-1.5 block text-sm font-semibold text-ink">قسم «كيف يساعد…» (عنوان + بطاقتان)</label>
+            <HelpSectionEditor
+              ar={blkObj(values.help_section_ar)}
+              en={blkObj(values.help_section_en)}
+              onChange={(a, e) => { set("help_section_ar", a); set("help_section_en", e); }}
+            />
+            <Help text="السكشن الذي يشرح كيف تساعد التقنية الطفل — عدّل العنوان وعنوان كل بطاقة وعناصرها (عربي يمين / إنجليزي يسار)." />
+          </div>
+        );
+      }
       // أقسام صفحة الخدمة (blocks) — محرّر منظّم بعرض كامل (عربي + إنجليزي معاً)
       if (row.ar?.base === "blocks" || row.en?.base === "blocks") {
         return (
@@ -939,6 +953,36 @@ function BlocksEditor({ ar, en, onChange }: { ar: unknown[]; en: unknown[]; onCh
           {Object.entries(BLOCK_KIND_LABEL).map(([k, l]) => <option key={k} value={k}>{l}</option>)}
         </select>
         <button type="button" onClick={add} className="inline-flex items-center gap-1 rounded-lg bg-brand px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-dark">+ إضافة القسم</button>
+      </div>
+    </div>
+  );
+}
+
+// محرّر قسم «كيف يساعد…» في التقنيات — عنوان + بطاقتين (فوائد + قيمة تربوية)، عربي/إنجليزي
+function HelpSectionEditor({ ar, en, onChange }: { ar: Rec; en: Rec; onChange: (ar: Rec, en: Rec) => void }) {
+  const sc = (key: string, label: string) => (
+    <BiScalar label={label} a={blkStr(ar[key])} e={blkStr(en[key])}
+      onA={(v) => onChange({ ...ar, [key]: v }, { ...en })} onE={(v) => onChange({ ...ar }, { ...en, [key]: v })} />
+  );
+  const list = (key: string, label: string) => (
+    <div>
+      <p className="mb-1 text-xs font-semibold text-ink-soft">{label}</p>
+      <BiStrList a={blkStrArr(ar[key])} e={blkStrArr(en[key])} onChange={(av, ev) => onChange({ ...ar, [key]: av }, { ...en, [key]: ev })} />
+    </div>
+  );
+  return (
+    <div className="space-y-3 rounded-2xl border border-line bg-surface/40 p-4">
+      <div className="grid grid-cols-2 gap-2 px-1 text-[10px] font-bold text-ink-soft"><span>عربي</span><span dir="ltr">English</span></div>
+      {sc("title", "عنوان القسم")}
+      <div className="space-y-2 rounded-xl border border-line bg-white p-3">
+        <p className="text-xs font-bold text-ink">البطاقة الأولى — الفوائد</p>
+        {sc("benefitsHeading", "عنوان البطاقة")}
+        {list("benefits", "عناصر البطاقة")}
+      </div>
+      <div className="space-y-2 rounded-xl border border-line bg-white p-3">
+        <p className="text-xs font-bold text-ink">البطاقة الثانية — القيمة التربوية</p>
+        {sc("valueHeading", "عنوان البطاقة")}
+        {list("values", "عناصر البطاقة")}
       </div>
     </div>
   );
