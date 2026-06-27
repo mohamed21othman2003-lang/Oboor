@@ -75,6 +75,7 @@ export default function PageChrome({ page }: { page: string }) {
   const [items, setItems] = useState<CmsItem[]>([]);
   const [edits, setEdits] = useState<Record<number, Record<string, string>>>({});
   const [open, setOpen] = useState(false);
+  const [openBlock, setOpenBlock] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(true);
   const [savingId, setSavingId] = useState<number | null>(null);
   const [okId, setOkId] = useState<number | null>(null);
@@ -147,10 +148,20 @@ export default function PageChrome({ page }: { page: string }) {
       {open && (
         <div className="space-y-4 border-t border-line p-4">
           {err && <p className="rounded-xl bg-red-50 px-4 py-2.5 text-sm text-red-600">{err}</p>}
-          {blocks.map((g) => (
-            <div key={g.block}>
-              <p className="mb-2 px-1 text-xs font-bold text-brand-dark">{BLOCK_LABELS[g.block] || g.block}</p>
-              <div className="space-y-3">
+          {blocks.map((g, gi) => {
+            const isOpen = openBlock[g.block] ?? false;
+            return (
+            <div key={g.block} className="overflow-hidden rounded-xl border border-line">
+              <button onClick={() => setOpenBlock((p) => ({ ...p, [g.block]: !isOpen }))} className="flex w-full items-center justify-between gap-3 bg-surface/60 px-4 py-3 text-right transition-colors hover:bg-surface">
+                <span className="flex items-center gap-2">
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-brand text-[11px] font-bold text-white">{gi + 1}</span>
+                  <span className="text-sm font-bold text-ink">{BLOCK_LABELS[g.block] || g.block}</span>
+                  <span className="text-[11px] text-ink-soft">({g.items.length})</span>
+                </span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={`shrink-0 text-ink-soft transition-transform ${isOpen ? "rotate-180" : ""}`}><path strokeLinecap="round" d="M6 9l6 6 6-6" /></svg>
+              </button>
+              {isOpen && (
+              <div className="space-y-3 border-t border-line p-3">
                 {g.items.map((it) => {
                   const key = `${g.block}.${String(it.key ?? "")}`;
                   const hasText = String(it.text_ar ?? "").trim() !== "" || String(it.text_en ?? "").trim() !== "" || ("text_ar" in (edits[it.id] || {}));
@@ -208,8 +219,10 @@ export default function PageChrome({ page }: { page: string }) {
                   );
                 })}
               </div>
+              )}
             </div>
-          ))}
+            );
+          })}
           <p className="px-1 text-[11px] text-ink-soft">تلميح: في العنوان الرئيسي، ضع الجزء الذي تريده باللون المميّز بين نجمتين **هكذا**.</p>
         </div>
       )}
