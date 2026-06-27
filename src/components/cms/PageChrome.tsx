@@ -16,6 +16,11 @@ const ITEM_LABELS: Record<string, string> = {
   "hero.stat": "الشارة العائمة (العدّاد)",
   "list.header": "ترويسة قائمة الوظائف",
 };
+// ملاحظات توضيحية لبعض العناصر (مثل الرقم التلقائي)
+const ITEM_NOTES: Record<string, string> = {
+  "hero.stat": "الرقم يُحسب تلقائياً = عدد الوظائف المنشورة (يتحدّث وحده عند الإضافة أو الحذف). أنت تتحكّم فقط في «العنوان» و«النص» حوله.",
+  "list.header": "الرقم يُحسب تلقائياً = عدد الوظائف المنشورة. أنت تتحكّم فقط في النصوص حوله.",
+};
 
 const INPUT = "w-full rounded-xl border border-line bg-surface px-4 py-2.5 text-sm text-ink outline-none transition-colors focus:border-brand focus:bg-white focus:ring-2 focus:ring-brand/20";
 
@@ -113,6 +118,7 @@ export default function PageChrome({ page }: { page: string }) {
                   return (
                     <div key={it.id} className="rounded-xl border border-line bg-surface/40 p-3">
                       <p className="mb-2 text-xs font-bold text-ink">{ITEM_LABELS[key] || String(it.title_ar || it.key || "")}</p>
+                      {ITEM_NOTES[key] && <p className="mb-2 rounded-lg bg-brand/5 px-3 py-2 text-[11px] leading-5 text-ink-soft">ℹ️ {ITEM_NOTES[key]}</p>}
                       <div className="space-y-2">
                         <div>
                           <p className="mb-1 text-xs font-semibold text-ink-soft">العنوان</p>
