@@ -23,22 +23,32 @@ type ApiAssessment = {
 
 type WizardData = { assessments: Assessment[]; questions: Record<string, string[]> };
 
+// نص «عدد الأسئلة» يُحسب تلقائياً من عدد الأسئلة الفعلية (لا يتعارض مع الواقع)
+function qLabel(n: number, en: boolean): string {
+  if (en) return `${n} question${n === 1 ? "" : "s"}`;
+  if (n === 1) return "سؤال واحد";
+  if (n === 2) return "سؤالان";
+  if (n >= 3 && n <= 10) return `${n} أسئلة`;
+  return `${n} سؤالاً`;
+}
+
 // نحوّل صفوف Django المسطّحة إلى كروت + خريطة أسئلة حسب اللغة
 function fromApi(rows: ApiAssessment[], locale: Locale): WizardData {
   const en = locale === "en";
+  const questions: Record<string, string[]> = {};
+  for (const r of rows) {
+    questions[r.slug] = en && r.question_list_en?.length ? r.question_list_en : r.question_list_ar;
+  }
   const assessments: Assessment[] = rows.map((r) => ({
     slug: r.slug,
     title: en ? (r.title_en ?? r.title_ar) : r.title_ar,
     desc: en ? (r.desc_en ?? r.desc_ar) : r.desc_ar,
     icon: r.icon,
     duration: en ? (r.duration_en ?? r.duration_ar) : r.duration_ar,
-    questions: en ? (r.questions_en ?? r.questions_ar) : r.questions_ar,
+    // العدد من الأسئلة الفعلية (يتحدّث تلقائياً عند إضافة/حذف سؤال)
+    questions: qLabel((questions[r.slug] ?? []).length, en),
     ageRange: en ? (r.age_range_en ?? r.age_range_ar) : r.age_range_ar,
   }));
-  const questions: Record<string, string[]> = {};
-  for (const r of rows) {
-    questions[r.slug] = en && r.question_list_en?.length ? r.question_list_en : r.question_list_ar;
-  }
   return { assessments, questions };
 }
 

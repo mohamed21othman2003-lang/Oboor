@@ -46,6 +46,10 @@ HIDDEN = {"id", "created_at", "updated_at", "slug", "key"}
 # حقول موجودة في الموديل لكن لا أثر لها على أي صفحة في الموقع ⇒ تُخفى من المحرّر
 # (تبقى في قاعدة البيانات؛ مجرّد إخفاء من واجهة CMS لتقليل التشويش)
 HIDDEN_PER_MODEL = {
+    AssessmentCard: {
+        # «عدد الأسئلة» يُحسب تلقائياً من عدد الأسئلة الفعلية ⇒ لا داعي لإدخاله يدوياً
+        "questions_ar", "questions_en",
+    },
     SiteSettings: {
         "site_name_ar", "site_name_en",  # غير مستخدم في أي صفحة
         "logo_path",                      # الموقع يقرأ logo_url من حقل اللوجو
