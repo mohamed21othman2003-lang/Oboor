@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { listCollection, deleteItem, reorderCollection, TYPE_LABELS, type CmsItem } from "@/lib/cms/api";
+import { listCollection, deleteItem, reorderCollection, TYPE_LABELS, addLabelFor, type CmsItem } from "@/lib/cms/api";
 import PageChrome from "@/components/cms/PageChrome";
 
 // أنواع المحتوى التي لصفحتها «رأس صفحة» قابل للتعديل من نفس القائمة (نوع ← مفتاح الصفحة)
@@ -211,7 +211,7 @@ export default function CollectionList({ type }: { type: string }) {
         {!readonly && (
           <Link href={pageFilter ? `/cms/content/${type}/new?page=${pageFilter}` : `/cms/content/${type}/new`} className="inline-flex items-center gap-2 rounded-xl bg-brand px-4 py-2.5 text-sm font-bold text-white shadow-sm transition-colors hover:bg-brand-dark">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" d="M12 5v14M5 12h14" /></svg>
-            إضافة جديد
+            {addLabelFor(type)}
           </Link>
         )}
       </div>
@@ -224,7 +224,7 @@ export default function CollectionList({ type }: { type: string }) {
         <p className="text-ink-soft">جارٍ التحميل…</p>
       ) : (pageFilter ? pageItems.length === 0 : items.length === 0) ? (
         <div className="rounded-2xl border border-dashed border-line bg-white p-10 text-center text-ink-soft">
-          لا توجد عناصر بعد. {!readonly && "اضغط «إضافة جديد» للبدء."}
+          لا توجد عناصر بعد. {!readonly && `اضغط «${addLabelFor(type)}» للبدء.`}
         </div>
       ) : pageFilter ? (
         <div className="space-y-4">

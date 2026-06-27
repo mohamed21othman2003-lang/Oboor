@@ -175,3 +175,23 @@ export const TYPE_LABELS: Record<string, string> = {
   career: "طلبات التوظيف",
   assessment: "نتائج التقييم",
 };
+
+// نص زر الإضافة محدّد لكل نوع (اليوزر يعرف بالظبط بيضيف إيه)
+export const ADD_LABELS: Record<string, string> = {
+  news: "إضافة خبر جديد",
+  programs: "إضافة برنامج جديد",
+  services: "إضافة خدمة جديدة",
+  techniques: "إضافة تقنية جديدة",
+  branches: "إضافة فرع جديد",
+  specialists: "إضافة أخصائي جديد",
+  success: "إضافة قصة نجاح",
+  careers: "إضافة وظيفة جديدة",
+  "assessment-cards": "إضافة تقييم جديد",
+  hero: "إضافة شريحة جديدة",
+  stats: "إضافة رقم إنجاز",
+  features: "إضافة ميزة جديدة",
+  gallery: "إضافة صورة جديدة",
+  "service-cards": "إضافة بطاقة خدمة",
+  sections: "إضافة قسم جديد",
+};
+export const addLabelFor = (type: string) => ADD_LABELS[type] || "إضافة جديد";

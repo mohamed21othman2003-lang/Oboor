@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   getSchema, getItem, createItem, updateItem, uploadField, uploadImage, resetDefault,
-  TYPE_LABELS, type FieldSchema, type CmsItem,
+  TYPE_LABELS, addLabelFor, type FieldSchema, type CmsItem,
 } from "@/lib/cms/api";
 import { CMS_ICONS, ICON_LABELS, iconNamesFor } from "@/lib/cms/icons";
 import { iconByKey, OFFER_ICON_KEYS } from "@/lib/areaIcon";
@@ -247,7 +247,7 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
     <div className="mx-auto max-w-4xl space-y-6 pb-24">
       <div>
         <Link href={`/cms/content/${type}`} className="text-xs font-semibold text-brand hover:text-brand-dark">← {label}</Link>
-        <h1 className="mt-1 text-2xl font-extrabold text-ink">{isNew ? `إضافة ${label}` : `تعديل: ${label}`}</h1>
+        <h1 className="mt-1 text-2xl font-extrabold text-ink">{isNew ? addLabelFor(type) : `تعديل: ${label}`}</h1>
       </div>
 
       {/* نسبة الاكتمال */}
