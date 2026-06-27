@@ -5,7 +5,7 @@ import Link from "next/link";
 import { listCollection, updateItem, uploadField, type CmsItem } from "@/lib/cms/api";
 
 // ترتيب الأقسام كما تظهر على الصفحة (لعرضها مرتّبة بدل ترتيب قاعدة البيانات)
-const BLOCK_ORDER = ["hero", "about", "smart_search", "stats", "why_us", "success", "gallery", "news", "certs", "list", "cities", "employment_types", "highlights"];
+const BLOCK_ORDER = ["hero", "about", "smart_search", "stats", "join_cards", "why_us", "success", "gallery", "news", "certs", "map_regions", "features", "steps", "prelim_questions", "answer_options", "categories", "list", "cities", "employment_types", "contact_prompt", "highlights"];
 const blockRank = (b: string) => { const i = BLOCK_ORDER.indexOf(b); return i === -1 ? 999 : i; };
 // أقسام محتواها منظّم معقّد ⇒ تُحرّر بالمحرّر الكامل (رابط) بدل الحقول المبسّطة
 const COMPLEX_BLOCKS = new Set(["highlights"]);
@@ -25,6 +25,8 @@ const BLOCK_LABELS: Record<string, string> = {
   news: "قسم الأخبار",
   certs: "قسم الشهادات والاعتمادات",
   highlights: "القصة المميّزة",
+  join_cards: "بطاقات الانضمام",
+  contact_prompt: "شريط دعوة التواصل",
 };
 const ITEM_LABELS: Record<string, string> = {
   "hero.badge": "الوسم العلوي",
