@@ -169,9 +169,19 @@ export default async function SuccessStoriesPage() {
       {/* CTA */}
       <CtaSection
         locale={locale}
+        starBadge
         badge={pick(locale, "الخطوة الأولى نحو التغير", "The first step toward change")}
         title={pick(locale, "ابدأ تقييم طفلك الآن", "Start your child's assessment now")}
         subtitle={pick(locale, "التقييم المبكر هو بداية كل قصة نجاح. فريقنا من الأخصائيين المعتمدين جاهز لتقديم تقييم شامل ودقيق لوضع طفلك ورسم خطة تأهيلية مخصصة له.", "Early assessment is the beginning of every success story. Our team of certified specialists is ready to provide a comprehensive, accurate assessment of your child and design a personalized rehabilitation plan.")}
+        features={[
+          pick(locale, "تقييم شامل ومتخصص", "Comprehensive specialized assessment"),
+          pick(locale, "خطة علاجية مخصصة", "Personalized treatment plan"),
+          pick(locale, "متابعة دورية مستمرة", "Ongoing periodic follow-up"),
+          pick(locale, "دعم الأسرة الكامل", "Full family support"),
+        ]}
+        primary={{ href: "/assessment", label: pick(locale, "قيّم طفلك الآن", "Assess your child now") }}
+        showApply={false}
+        showBranches={false}
       />
     </>
   );
