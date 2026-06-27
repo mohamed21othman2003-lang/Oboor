@@ -15,6 +15,15 @@ const LIST_BLOCKS = new Set([
   "accreditations", "journey", "profile_stats", "join_cards",
   "map_regions", "features", "stats", "steps", "services",
 ]);
+// نص زر الإضافة محدّد لكل قسم
+const BLOCK_ADD: Record<string, string> = {
+  answer_options: "إضافة خيار إجابة", prelim_questions: "إضافة سؤال",
+  cities: "إضافة مدينة", employment_types: "إضافة نوع دوام",
+  accreditations: "إضافة اعتماد", journey: "إضافة خطوة",
+  profile_stats: "إضافة إحصائية", join_cards: "إضافة بطاقة",
+  map_regions: "إضافة منطقة", features: "إضافة ميزة",
+  stats: "إضافة رقم", steps: "إضافة خطوة", services: "إضافة خدمة",
+};
 
 // أسماء ودّية لأقسام رأس الصفحة وعناصرها
 const BLOCK_LABELS: Record<string, string> = {
@@ -362,7 +371,7 @@ export default function PageChrome({ page }: { page: string }) {
                 {LIST_BLOCKS.has(g.block) && (
                   <button type="button" onClick={() => addItem(g.block)} disabled={addingBlock === g.block} className="inline-flex items-center gap-1 rounded-lg bg-brand px-3.5 py-2 text-xs font-bold text-white hover:bg-brand-dark disabled:opacity-50">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path strokeLinecap="round" d="M12 5v14M5 12h14" /></svg>
-                    {addingBlock === g.block ? "جارٍ الإضافة…" : "إضافة عنصر جديد"}
+                    {addingBlock === g.block ? "جارٍ الإضافة…" : (BLOCK_ADD[g.block] || "إضافة عنصر جديد")}
                   </button>
                 )}
               </div>
