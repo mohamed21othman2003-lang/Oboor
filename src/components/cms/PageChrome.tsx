@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { listCollection, updateItem, uploadField, type CmsItem } from "@/lib/cms/api";
 
 // أسماء ودّية لأقسام رأس الصفحة وعناصرها
@@ -71,6 +71,21 @@ function resolveSrc(s: string): string {
   return "/" + s.replace(/^\/+/, "");
 }
 
+// نص متعدّد الأسطر يتمدّد تلقائياً ليظهر كل المحتوى بلا تمرير داخلي
+function AutoTextarea({ value, onChange, dir, placeholder }: { value: string; onChange: (v: string) => void; dir?: string; placeholder?: string }) {
+  const ref = useRef<HTMLTextAreaElement>(null);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
+  }, [value]);
+  return (
+    <textarea ref={ref} value={value} onChange={(e) => onChange(e.target.value)} dir={dir} rows={1} placeholder={placeholder}
+      className={INPUT + " resize-none overflow-hidden"} />
+  );
+}
+
 // عناصر يُعرض نصّها كفقرات منفصلة (حقل لكل فقرة) بدل صندوق واحد
 const PARAGRAPH_KEYS = new Set(["about.intro"]);
 
@@ -89,8 +104,8 @@ function ParagraphsField({ ar, en, onChange }: { ar: string; en: string; onChang
         <div key={i} className="flex items-start gap-2">
           <span className="mt-2 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-surface text-[10px] font-bold text-ink-soft">{i + 1}</span>
           <div className="grid flex-1 gap-2 sm:grid-cols-2">
-            <textarea value={a[i] ?? ""} onChange={(ev) => setRow(i, ev.target.value, e[i] ?? "")} rows={3} className={INPUT} placeholder="عربي" />
-            <textarea value={e[i] ?? ""} onChange={(ev) => setRow(i, a[i] ?? "", ev.target.value)} dir="ltr" rows={3} className={INPUT} placeholder="English" />
+            <AutoTextarea value={a[i] ?? ""} onChange={(v) => setRow(i, v, e[i] ?? "")} placeholder="عربي" />
+            <AutoTextarea value={e[i] ?? ""} onChange={(v) => setRow(i, a[i] ?? "", v)} dir="ltr" placeholder="English" />
           </div>
           <button type="button" onClick={() => removeRow(i)} className="mt-1 shrink-0 rounded-lg bg-red-50 px-2 py-1.5 text-[11px] font-semibold text-red-600 hover:bg-red-600 hover:text-white">حذف</button>
         </div>
@@ -219,8 +234,8 @@ export default function PageChrome({ page }: { page: string }) {
                               <ParagraphsField ar={val(it, "text_ar")} en={val(it, "text_en")} onChange={(a, e) => { setVal(it.id, "text_ar", a); setVal(it.id, "text_en", e); }} />
                             ) : (
                               <div className="grid gap-2 sm:grid-cols-2">
-                                <textarea value={val(it, "text_ar")} onChange={(e) => setVal(it.id, "text_ar", e.target.value)} rows={3} className={INPUT} placeholder="عربي" />
-                                <textarea value={val(it, "text_en")} onChange={(e) => setVal(it.id, "text_en", e.target.value)} dir="ltr" rows={3} className={INPUT} placeholder="English" />
+                                <AutoTextarea value={val(it, "text_ar")} onChange={(v) => setVal(it.id, "text_ar", v)} placeholder="عربي" />
+                                <AutoTextarea value={val(it, "text_en")} onChange={(v) => setVal(it.id, "text_en", v)} dir="ltr" placeholder="English" />
                               </div>
                             )}
                           </div>
