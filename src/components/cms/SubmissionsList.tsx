@@ -128,13 +128,19 @@ export default function SubmissionsList({ type }: { type: string }) {
                       {rows.map((f) => {
                         const v = val(it, f.name);
                         const isLink = f.type === "image" && v.startsWith("http");
+                        const isEmail = f.name.includes("email") && v.includes("@");
+                        const isPhone = (f.name.includes("phone") || f.name.includes("whatsapp")) && v.trim() !== "";
+                        const linkCls = "font-bold text-[#0F6C73] underline decoration-[#1FA6A8]/40 underline-offset-2 hover:text-[#1FA6A8]";
                         return (
                           <div key={f.name} className="flex items-start gap-3 rounded-xl bg-white p-3 ring-1 ring-line">
                             <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#1FA6A8]/10 text-[#1FA6A8]">{iconFor(f.name, f.type)}</span>
                             <div className="min-w-0">
                               <p className="text-[11px] font-semibold text-ink-soft">{f.label}</p>
                               <p className="mt-0.5 text-sm font-medium text-ink break-words">
-                                {isLink ? <a href={v} target="_blank" rel="noopener" className="font-bold text-[#1FA6A8] underline">فتح الملف ↗</a> : <span dir={isArabic(v) ? undefined : "ltr"} className="inline-block">{v}</span>}
+                                {isLink ? <a href={v} target="_blank" rel="noopener" className="font-bold text-[#1FA6A8] underline">فتح الملف ↗</a>
+                                  : isEmail ? <a href={`mailto:${v}`} dir="ltr" className={`inline-block ${linkCls}`}>{v}</a>
+                                  : isPhone ? <a href={`tel:${v.replace(/\s+/g, "")}`} dir="ltr" className={`inline-block ${linkCls}`}>{v}</a>
+                                  : <span dir={isArabic(v) ? undefined : "ltr"} className="inline-block">{v}</span>}
                               </p>
                             </div>
                           </div>
