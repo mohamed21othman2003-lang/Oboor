@@ -14,6 +14,7 @@ class SectionItem(models.Model):
         ("branches", "الفروع"),
         ("careers", "الوظائف"),
         ("news", "الأخبار"),
+        ("programs", "البرامج"),
         ("header", "الهيدر (القائمة العلوية)"),
         ("footer", "الفوتر (التذييل)"),
     ]

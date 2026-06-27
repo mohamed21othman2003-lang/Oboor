@@ -7,7 +7,8 @@ import ServiceSearchBar from "@/components/ServiceSearchBar";
 import ServicesTabs from "@/components/ServicesTabs";
 import CtaSection from "@/components/CtaSection";
 import type { Program } from "@/components/ProgramCard";
-import { fetchContent } from "@/lib/server/django";
+import { fetchContent, fetchSections } from "@/lib/server/django";
+import { hl } from "@/lib/highlight";
 
 // صفّ بطاقة خدمة كما يرجع من Django (content/service-cards)
 type ServiceCardRow = {
@@ -69,7 +70,7 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-function Hero({ locale }: { locale: Locale }) {
+function Hero({ locale, badge, heading, subtitle }: { locale: Locale; badge?: string; heading?: string; subtitle?: string }) {
   return (
     <section className="bg-gradient-to-b from-[#ebf7f9] to-white">
       <div className="mx-auto max-w-7xl px-6 pb-16 pt-10 lg:px-8">
@@ -81,13 +82,13 @@ function Hero({ locale }: { locale: Locale }) {
 
         <div className="mb-8 text-center">
           <span className="rounded-full bg-white px-4 py-1.5 text-sm font-medium text-brand-dark shadow-sm ring-1 ring-line">
-            {pick(locale, "برامجنا التمكينية في المملكة", "Our Services in Saudi Arabia")}
+            {badge || pick(locale, "برامجنا التمكينية في المملكة", "Our Services in Saudi Arabia")}
           </span>
           <h1 className="mt-5 text-3xl font-extrabold text-ink sm:text-4xl">
-            {pick(locale, "برامجنا ", "Our Empowerment ")}<span className="text-brand">{pick(locale, "التمكينية", "Programs")}</span>
+            {heading ? hl(heading) : <>{pick(locale, "برامجنا ", "Our Empowerment ")}<span className="text-brand">{pick(locale, "التمكينية", "Programs")}</span></>}
           </h1>
           <p className="mx-auto mt-4 max-w-3xl text-base leading-8 text-ink-muted">
-            {pick(
+            {subtitle || pick(
               locale,
               "نقدم في عبور برامج تأهيلية وخدمات عيادية وتقنيات تأهيلية لدعم الأطفال والأسر وفق احتياجات كل حالة.",
               "At Oboor we offer rehabilitation programs, clinical services, and rehabilitation technologies to support children and families according to each case's needs."
@@ -113,10 +114,19 @@ function CTA({ locale }: { locale: Locale }) {
 
 export default async function ServicesPage() {
   const locale = await getLocale();
+  const en = locale === "en";
   const cards = await getServiceCards(locale);
+  const sections = await fetchSections("programs");
+  const h = (sections?.hero ?? []).find((r) => r.key === "heading");
+  const hbadge = (sections?.hero ?? []).find((r) => r.key === "badge");
   return (
     <>
-      <Hero locale={locale} />
+      <Hero
+        locale={locale}
+        badge={hbadge ? (en ? hbadge.title_en || hbadge.title_ar : hbadge.title_ar) : undefined}
+        heading={h ? (en ? h.title_en || h.title_ar : h.title_ar) : undefined}
+        subtitle={h ? (en ? h.text_en || h.text_ar : h.text_ar) : undefined}
+      />
       <Suspense fallback={null}>
         <ServicesTabs locale={locale} cards={cards} />
       </Suspense>
