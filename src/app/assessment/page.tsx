@@ -6,6 +6,7 @@ import AssessmentWizard from "@/components/AssessmentWizard";
 import { getLocale } from "@/i18n/locale";
 import { pick, type Locale } from "@/i18n/config";
 import { fetchContent, fetchSections } from "@/lib/server/django";
+import { hl } from "@/lib/highlight";
 
 // الشكل اللي بيرجع من Django (content/assessment)
 type ApiAssessment = {
@@ -74,6 +75,10 @@ export default async function AssessmentPage() {
 
   // أقسام الصفحة من Django CMS مع سقوط للبيانات الثابتة
   const sections = await fetchSections("assessment");
+  const hero = sections?.hero ?? [];
+  const hF = (k: string) => hero.find((r) => r.key === k);
+  const hT = (r?: (typeof hero)[number]) => (r ? (en ? r.title_en || r.title_ar : r.title_ar) : "");
+  const hB = (r?: (typeof hero)[number]) => (r ? (en ? r.text_en || r.text_ar : r.text_ar) : "");
 
   const ASSESS_STATS = sections?.stats
     ? sections.stats.map((row) => ({
@@ -124,11 +129,11 @@ export default async function AssessmentPage() {
             <div className="order-2 text-start lg:order-1">
               <span className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-1.5 text-sm font-medium text-brand-dark shadow-sm ring-1 ring-line">
                 <span className="h-2 w-2 rounded-full bg-success" />
-                {pick(locale, "تقييم مجاني وسريع", "Free & Fast Assessment")}
+                {hT(hF("badge")) || pick(locale, "تقييم مجاني وسريع", "Free & Fast Assessment")}
               </span>
-              <h1 className="mt-5 text-4xl font-extrabold leading-tight text-ink sm:text-5xl">{pick(locale, "قيّم ابنك ", "Assess Your Child ")}<span className="text-brand">{pick(locale, "الآن", "Now")}</span></h1>
+              <h1 className="mt-5 text-4xl font-extrabold leading-tight text-ink sm:text-5xl">{hF("heading") ? hl(hT(hF("heading"))) : <>{pick(locale, "قيّم ابنك ", "Assess Your Child ")}<span className="text-brand">{pick(locale, "الآن", "Now")}</span></>}</h1>
               <p className="mt-5 max-w-xl text-base leading-8 text-ink-muted">
-                {pick(locale, "احصل على تقييم أولي سريع يساعدك على فهم احتياجات طفلك وتحديد الخطوات الصحيحة نحو مستقبل أفضل.", "Get a quick preliminary assessment that helps you understand your child's needs and identify the right steps toward a better future.")}
+                {hB(hF("heading")) || pick(locale, "احصل على تقييم أولي سريع يساعدك على فهم احتياجات طفلك وتحديد الخطوات الصحيحة نحو مستقبل أفضل.", "Get a quick preliminary assessment that helps you understand your child's needs and identify the right steps toward a better future.")}
               </p>
               <div dir="ltr" className="mt-8 flex items-center justify-end gap-10">
                 {ASSESS_STATS.map((s) => (
@@ -156,8 +161,8 @@ export default async function AssessmentPage() {
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mx-auto mb-12 max-w-2xl text-center">
             <span className="text-sm font-bold text-brand">{pick(locale, "لماذا هذا التقييم؟", "Why this assessment?")}</span>
-            <h2 className="mt-2 text-3xl font-extrabold text-ink sm:text-4xl">{pick(locale, "خطوة صغيرة، فرق كبير في حياة طفلك", "A small step, a big difference in your child's life")}</h2>
-            <p className="mt-3 text-sm leading-7 text-ink-muted">{pick(locale, "التقييم المبكر هو الخطوة الأولى نحو مستقبل أفضل. نحن نساعدك على فهم احتياجات طفلك بطريقة بسيطة وواضحة.", "Early assessment is the first step toward a better future. We help you understand your child's needs in a simple, clear way.")}</p>
+            <h2 className="mt-2 text-3xl font-extrabold text-ink sm:text-4xl">{hF("why_heading") ? hl(hT(hF("why_heading"))) : pick(locale, "خطوة صغيرة، فرق كبير في حياة طفلك", "A small step, a big difference in your child's life")}</h2>
+            <p className="mt-3 text-sm leading-7 text-ink-muted">{hB(hF("why_heading")) || pick(locale, "التقييم المبكر هو الخطوة الأولى نحو مستقبل أفضل. نحن نساعدك على فهم احتياجات طفلك بطريقة بسيطة وواضحة.", "Early assessment is the first step toward a better future. We help you understand your child's needs in a simple, clear way.")}</p>
           </div>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {ASSESS_FEATURES.map((f) => (
@@ -176,8 +181,8 @@ export default async function AssessmentPage() {
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mx-auto mb-12 max-w-2xl text-center">
             <span className="text-sm font-bold text-brand">{pick(locale, "كيف يعمل التقييم؟", "How does the assessment work?")}</span>
-            <h2 className="mt-2 text-3xl font-extrabold sm:text-4xl">{pick(locale, "رحلة بسيطة من ٥ خطوات", "A simple 5-step journey")}</h2>
-            <p className="mt-3 text-sm text-white/70">{pick(locale, "نأخذ بيدك خطوة بخطوة نحو فهم احتياجات طفلك.", "We guide you step by step toward understanding your child's needs.")}</p>
+            <h2 className="mt-2 text-3xl font-extrabold sm:text-4xl">{hF("steps_heading") ? hl(hT(hF("steps_heading"))) : pick(locale, "رحلة بسيطة من ٥ خطوات", "A simple 5-step journey")}</h2>
+            <p className="mt-3 text-sm text-white/70">{hB(hF("steps_heading")) || pick(locale, "نأخذ بيدك خطوة بخطوة نحو فهم احتياجات طفلك.", "We guide you step by step toward understanding your child's needs.")}</p>
           </div>
           <div className="relative grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {/* connecting line (desktop) */}

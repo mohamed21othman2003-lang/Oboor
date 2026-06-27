@@ -5,6 +5,7 @@ import { getSpecialistStats, getJoinCards, getContactPrompt, getSpecialists, typ
 import { getLocale } from "@/i18n/locale";
 import { pick, type Locale } from "@/i18n/config";
 import { fetchContent, fetchSections } from "@/lib/server/django";
+import { hl } from "@/lib/highlight";
 import SpecialistsExplorer from "@/components/SpecialistsExplorer";
 import CtaSection from "@/components/CtaSection";
 
@@ -90,6 +91,10 @@ export default async function SpecialistsPage() {
 
   // أقسام صفحة الأخصائيين من Django مع fallback للبيانات الثابتة
   const sections = await fetchSections("specialists");
+  const hero = sections?.hero ?? [];
+  const hF = (k: string) => hero.find((r) => r.key === k);
+  const hT = (r?: (typeof hero)[number]) => (r ? (en ? r.title_en || r.title_ar : r.title_ar) : "");
+  const hB = (r?: (typeof hero)[number]) => (r ? (en ? r.text_en || r.text_ar : r.text_ar) : "");
 
   const stats = sections?.stats
     ? sections.stats.map((row) => ({
@@ -128,12 +133,12 @@ export default async function SpecialistsPage() {
 
           <div className="mx-auto max-w-3xl text-center">
             <span className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-1.5 text-sm font-medium text-brand-dark shadow-sm ring-1 ring-line">
-              {pick(locale, "فريق معتمد ومؤهل", "A certified and qualified team")}
+              {hT(hF("badge")) || pick(locale, "فريق معتمد ومؤهل", "A certified and qualified team")}
               <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" className="text-brand"><polygon points="12 2 15 8.9 22.5 9.3 16.7 14 18.6 21.2 12 17.2 5.4 21.2 7.3 14 1.5 9.3 9 8.9" /></svg>
             </span>
-            <h1 className="mt-5 text-4xl font-extrabold text-ink sm:text-5xl">{pick(locale, "روّادنا", "Our Pioneers")}</h1>
+            <h1 className="mt-5 text-4xl font-extrabold text-ink sm:text-5xl">{hF("heading") ? hl(hT(hF("heading"))) : pick(locale, "روّادنا", "Our Pioneers")}</h1>
             <p className="mx-auto mt-5 max-w-2xl text-base leading-8 text-ink-muted">
-              {pick(
+              {hB(hF("heading")) || pick(
                 locale,
                 "تعرف على فريقنا من الأخصائيين المؤهلين في مختلف مجالات التأهيل والعلاج، واختر الأنسب لاحتياجات طفلك.",
                 "Meet our team of qualified specialists across the various fields of rehabilitation and therapy, and choose the best fit for your child's needs.",

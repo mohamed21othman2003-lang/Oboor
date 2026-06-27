@@ -10,6 +10,7 @@ import { getLocale } from "@/i18n/locale";
 import { pick } from "@/i18n/config";
 import { loadBranches } from "@/lib/server/branches";
 import { fetchSections } from "@/lib/server/django";
+import { hl } from "@/lib/highlight";
 import CtaSection from "@/components/CtaSection";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -61,6 +62,12 @@ export default async function BranchesPage() {
         desc: en ? row.text_en || row.text_ar : row.text_ar,
       }))
     : en ? BRANCH_FEATURES_EN : BRANCH_FEATURES;
+
+  // نصوص الهيرو والعناوين من الـCMS
+  const hero = sections?.hero ?? [];
+  const hF = (k: string) => hero.find((r) => r.key === k);
+  const hT = (r?: (typeof hero)[number]) => (r ? (en ? r.title_en || r.title_ar : r.title_ar) : "");
+  const hB = (r?: (typeof hero)[number]) => (r ? (en ? r.text_en || r.text_ar : r.text_ar) : "");
   return (
     <>
       {/* Hero */}
@@ -75,11 +82,11 @@ export default async function BranchesPage() {
           <div className="mx-auto max-w-3xl text-center">
             <span className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-1.5 text-sm font-medium text-brand-dark shadow-sm ring-1 ring-line">
               <PinIconSm />
-              {pick(locale, "مراكزنا في المملكة", "Our Branches Across the Kingdom")}
+              {hT(hF("badge")) || pick(locale, "مراكزنا في المملكة", "Our Branches Across the Kingdom")}
             </span>
-            <h1 className="mt-5 text-4xl font-extrabold text-ink sm:text-5xl"><span className="text-brand">{pick(locale, "مراكزنا", "Our Centers")}</span>{pick(locale, "، رعايةٌ تمتد من حولك", " — Care That Extends to You")}</h1>
+            <h1 className="mt-5 text-4xl font-extrabold text-ink sm:text-5xl">{hF("heading") ? hl(hT(hF("heading"))) : <><span className="text-brand">{pick(locale, "مراكزنا", "Our Centers")}</span>{pick(locale, "، رعايةٌ تمتد من حولك", " — Care That Extends to You")}</>}</h1>
             <p className="mx-auto mt-4 max-w-2xl text-base leading-8 text-ink-muted">
-              {pick(locale, "ابحث عن أقرب فرع إليك واستكشف خدماتنا في مختلف مناطق المملكة العربية السعودية.", "Find your nearest branch and explore our services across the various regions of Saudi Arabia.")}
+              {hB(hF("heading")) || pick(locale, "ابحث عن أقرب فرع إليك واستكشف خدماتنا في مختلف مناطق المملكة العربية السعودية.", "Find your nearest branch and explore our services across the various regions of Saudi Arabia.")}
             </p>
           </div>
 
@@ -97,8 +104,8 @@ export default async function BranchesPage() {
       <section className="bg-surface py-16">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mb-8 text-center">
-            <h2 className="text-3xl font-extrabold text-ink">{pick(locale, "على بُعد ", "Just ")}<span className="text-brand">{pick(locale, "خطوة منك", "One Step Away")}</span></h2>
-            <p className="mt-2 text-sm text-ink-muted">{pick(locale, "بضغطة على الخريطة، تجد أقرب فرع إليك، وكل ما تحتاجه للوصول إلينا.", "With a tap on the map, find the nearest branch and everything you need to reach us.")}</p>
+            <h2 className="text-3xl font-extrabold text-ink">{hF("map_heading") ? hl(hT(hF("map_heading"))) : <>{pick(locale, "على بُعد ", "Just ")}<span className="text-brand">{pick(locale, "خطوة منك", "One Step Away")}</span></>}</h2>
+            <p className="mt-2 text-sm text-ink-muted">{hB(hF("map_heading")) || pick(locale, "بضغطة على الخريطة، تجد أقرب فرع إليك، وكل ما تحتاجه للوصول إلينا.", "With a tap on the map, find the nearest branch and everything you need to reach us.")}</p>
           </div>
 
           <BranchesMapSection locale={locale} branches={branches} regions={mapRegions} />
@@ -109,9 +116,9 @@ export default async function BranchesPage() {
       <section className="bg-white py-16">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mx-auto mb-12 max-w-3xl text-center">
-            <h2 className="text-3xl font-extrabold text-ink">{pick(locale, "بيئتنا، ", "Our Environment — ")}<span className="text-brand">{pick(locale, "أمانٌ وتمكين", "Safety and Empowerment")}</span></h2>
+            <h2 className="text-3xl font-extrabold text-ink">{hF("features_heading") ? hl(hT(hF("features_heading"))) : <>{pick(locale, "بيئتنا، ", "Our Environment — ")}<span className="text-brand">{pick(locale, "أمانٌ وتمكين", "Safety and Empowerment")}</span></>}</h2>
             <p className="mt-3 text-sm leading-7 text-ink-muted">
-              {pick(locale, "في كل مراكزنا، نحتضن طفلك برعاية متخصصة، لندعمه في رحلة نموّه، ونمكّنه ليشق طريقه باستقلالية.", "Across all our branches, we embrace your child with specialized care that supports their growth and empowers them to move forward with independence.")}
+              {hB(hF("features_heading")) || pick(locale, "في كل مراكزنا، نحتضن طفلك برعاية متخصصة، لندعمه في رحلة نموّه، ونمكّنه ليشق طريقه باستقلالية.", "Across all our branches, we embrace your child with specialized care that supports their growth and empowers them to move forward with independence.")}
             </p>
           </div>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">

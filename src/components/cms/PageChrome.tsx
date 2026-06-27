@@ -38,6 +38,10 @@ const ITEM_LABELS: Record<string, string> = {
   "hero.badge": "الوسم العلوي",
   "hero.heading": "العنوان + الوصف + الصورة",
   "hero.stat": "الشارة العائمة (العدّاد)",
+  "hero.map_heading": "عنوان قسم الخريطة",
+  "hero.features_heading": "عنوان قسم المميزات",
+  "hero.why_heading": "عنوان قسم «لماذا هذا التقييم»",
+  "hero.steps_heading": "عنوان قسم الخطوات",
   "list.header": "ترويسة قائمة الوظائف",
   // الصفحة الرئيسية
   "hero.chrome": "الوسم + زر الإجراء (ثابتان فوق كل الشرائح)",
@@ -65,6 +69,11 @@ const ITEM_LABELS: Record<string, string> = {
 // تسميات مخصّصة لحقلَي «العنوان/النص» حسب العنصر (لتوضيح ما يمثّله كل حقل)
 const FIELD_LABELS: Record<string, { title?: string; text?: string }> = {
   "hero.chrome": { title: "الوسم العلوي", text: "نص زر الإجراء" },
+  "hero.heading": { title: "العنوان", text: "الجملة التوضيحية" },
+  "hero.map_heading": { title: "العنوان", text: "الجملة التوضيحية" },
+  "hero.features_heading": { title: "العنوان", text: "الجملة التوضيحية" },
+  "hero.why_heading": { title: "العنوان", text: "الجملة التوضيحية" },
+  "hero.steps_heading": { title: "العنوان", text: "الجملة التوضيحية" },
   "about.badge": { title: "الوسم", text: "نص الزر" },
   "about.intro": { title: "العنوان", text: "الفقرات (كل سطر = فقرة)" },
   "about.accred": { title: "العنوان", text: "السطر الصغير" },
