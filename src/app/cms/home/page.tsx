@@ -8,6 +8,7 @@ const SECTIONS: { label: string; desc: string; href: string }[] = [
   { label: "شرائح الهيرو", desc: "الصور والعناوين المتحركة أعلى الصفحة", href: "/cms/content/hero" },
   { label: "الأرقام والإحصائيات", desc: "أرقام الإنجاز (شواهد الأثر)", href: "/cms/content/stats" },
   { label: "لماذا عبور؟ (المميزات)", desc: "بطاقات مميزات المركز", href: "/cms/content/features" },
+  { label: "بطاقات البحث الذكي", desc: "كروت البرامج/الخدمات/التقنيات في قسم البحث الذكي (نفسها في صفحة برامجنا)", href: "/cms/content/service-cards" },
   { label: "المعرض", desc: "صور معرض الصفحة الرئيسية", href: "/cms/content/gallery" },
   { label: "أبطال عبور (قصص النجاح)", desc: "نفس قصص النجاح التي تظهر في الرئيسية", href: "/cms/content/success" },
   { label: "إعلامنا (الأخبار)", desc: "أحدث الأخبار التي تظهر في الرئيسية", href: "/cms/content/news" },
