@@ -74,13 +74,24 @@ export default async function BranchDetailPage({ params }: { params: Promise<{ s
   if (!b) notFound();
 
   const en = locale === "en";
-  const BRANCH_SERVICES = branchServices(locale);
   const successStories = getSuccessStories(locale);
   // المميزات من الـCMS (نفس مصدر صفحة الفروع) مع fallback للبيانات الثابتة
   const sections = await fetchSections("branches");
   const branchFeatures = sections?.features
     ? sections.features.map((r) => ({ icon: r.icon, title: en ? r.title_en || r.title_ar : r.title_ar, desc: en ? r.text_en || r.text_ar : r.text_ar }))
     : (en ? BRANCH_FEATURES_EN : BRANCH_FEATURES);
+
+  // كروت خدمات الفرع من الـCMS (عامة لكل الفروع) مع fallback ثابت
+  const BRANCH_SERVICES: Program[] = sections?.services?.length
+    ? sections.services.map((r) => ({
+        badge: pick(locale, "خدمة", "Service"),
+        href: r.value || undefined,
+        title: en ? r.title_en || r.title_ar : r.title_ar,
+        desc: en ? r.text_en || r.text_ar : r.text_ar,
+        features: ((en ? r.data_en : r.data_ar) as string[] | undefined) ?? [],
+        regions: [pick(locale, "الرياض", "Riyadh"), pick(locale, "جدة", "Jeddah"), pick(locale, "الشرقية", "Eastern Province")],
+      }))
+    : branchServices(locale);
 
   const info = [
     { icon: <PhoneIcon />, label: pick(locale, "رقم الهاتف", "Phone Number"), value: b.phone },
