@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { pick, type Locale } from "@/i18n/config";
+import { hl, type HomeChrome } from "@/lib/highlight";
 
 const PARAGRAPHS = [
   "بيدٍ خبيرة وقلبٍ حانٍ ينمو طفلك في مركز عبور المظلة المتخصصة في تأهيل ورعاية الأطفال من ذوي الاضطرابات النمائية عبر برامج التدخل المبكر؛ نعمل معكم ومعهم على بناء جودة حياتهم، ليتجاوزوا كل التحديات، ونأخذ بيد كل طفلٍ ليعبر نحو غدِه بعزمٍ وثبات.",
@@ -16,22 +17,28 @@ const PARAGRAPHS_EN = [
   "At Oboor, we create an environment filled with warmth and safety — one that encourages learning and growth with confidence. Guided by a mission rooted in humanity before profession, our team of highly qualified specialists brings expertise delivered with care, offering your children the highest standards of rehabilitation.",
 ];
 
-export default function About({ locale }: { locale: Locale }) {
-  const paragraphs = locale === "en" ? PARAGRAPHS_EN : PARAGRAPHS;
+export default function About({ locale, chrome }: { locale: Locale; chrome?: HomeChrome }) {
+  const fallbackParas = locale === "en" ? PARAGRAPHS_EN : PARAGRAPHS;
+  const introText = chrome?.["about.intro"]?.text;
+  const paragraphs = introText ? introText.split("\n").map((s) => s.trim()).filter(Boolean) : fallbackParas;
+  const badge = chrome?.["about.badge"]?.title || pick(locale, "عن عبور", "About Oboor");
+  const button = chrome?.["about.badge"]?.text || pick(locale, "تَعرّف أكثر", "Learn More");
+  const img1 = chrome?.["about.img1"]?.image || "/figma/home/imgImageWithFallback2.jpg";
+  const img2 = chrome?.["about.img2"]?.image || "/figma/home/imgImageWithFallback1.jpg";
+  const accredTitle = chrome?.["about.accred"]?.title || pick(locale, "مركز معتمد", "Accredited Center");
+  const accredText = chrome?.["about.accred"]?.text || pick(locale, "خدمات تأهيلية متكاملة", "Integrated rehabilitation services");
   return (
     <section className="bg-white py-20">
       <div className="mx-auto grid max-w-7xl items-center gap-12 px-6 lg:grid-cols-2 lg:px-8">
         {/* Text */}
         <div className="order-2 flex flex-col items-start gap-5 text-start lg:order-1">
           <span className="rounded-full bg-brand/10 px-4 py-1.5 text-sm font-medium text-brand-dark">
-            {pick(locale, "عن عبور", "About Oboor")}
+            {badge}
           </span>
           <h2 className="text-3xl font-extrabold text-ink sm:text-4xl">
-            {pick(
-              locale,
-              <>تعرّف على مركز <span className="text-brand">عبور</span></>,
-              <>Get to know <span className="text-brand">Oboor</span> Center</>
-            )}
+            {chrome?.["about.intro"]?.title
+              ? hl(chrome["about.intro"].title)
+              : pick(locale, <>تعرّف على مركز <span className="text-brand">عبور</span></>, <>Get to know <span className="text-brand">Oboor</span> Center</>)}
           </h2>
           {paragraphs.map((p, i) => (
             <p key={i} className="text-sm leading-7 text-ink-muted">{p}</p>
@@ -40,17 +47,17 @@ export default function About({ locale }: { locale: Locale }) {
             href="/about"
             className="mt-2 rounded-xl bg-brand px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-dark"
           >
-            {pick(locale, "تَعرّف أكثر", "Learn More")}
+            {button}
           </Link>
         </div>
 
         {/* Images */}
         <div className="relative order-1 h-[460px] lg:order-2">
           <div className="absolute bottom-0 right-0 h-[360px] w-[58%] overflow-hidden rounded-3xl shadow-lg">
-            <Image src="/figma/home/imgImageWithFallback2.jpg" alt={pick(locale, "طفلة في مركز عبور", "A girl at Oboor Center")} fill sizes="(max-width:1024px) 100vw, 45vw" className="object-cover" />
+            <Image src={img1} alt={pick(locale, "طفلة في مركز عبور", "A girl at Oboor Center")} fill sizes="(max-width:1024px) 100vw, 45vw" className="object-cover" />
           </div>
           <div className="absolute left-0 top-0 h-[300px] w-[52%] overflow-hidden rounded-3xl shadow-xl ring-8 ring-white">
-            <Image src="/figma/home/imgImageWithFallback1.jpg" alt={pick(locale, "جلسة تأهيل", "A rehabilitation session")} fill sizes="(max-width:1024px) 100vw, 45vw" className="object-cover" />
+            <Image src={img2} alt={pick(locale, "جلسة تأهيل", "A rehabilitation session")} fill sizes="(max-width:1024px) 100vw, 45vw" className="object-cover" />
           </div>
           {/* Floating badge */}
           <div className="absolute bottom-6 right-[42%] flex items-center gap-3 rounded-2xl bg-white p-3 shadow-xl ring-1 ring-line">
@@ -58,8 +65,8 @@ export default function About({ locale }: { locale: Locale }) {
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7.4-6.3-4.6L5.7 21l2.3-7.4-6-4.6h7.6L12 2z" /></svg>
             </div>
             <div className="text-start">
-              <p className="text-sm font-bold text-ink">{pick(locale, "مركز معتمد", "Accredited Center")}</p>
-              <p className="text-xs text-ink-muted">{pick(locale, "خدمات تأهيلية متكاملة", "Integrated rehabilitation services")}</p>
+              <p className="text-sm font-bold text-ink">{accredTitle}</p>
+              <p className="text-xs text-ink-muted">{accredText}</p>
             </div>
           </div>
         </div>

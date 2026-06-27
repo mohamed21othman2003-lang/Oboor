@@ -26,6 +26,7 @@ const NAV: NavGroup[] = [
   {
     title: "صفحات الموقع",
     items: [
+      { label: "الصفحة الرئيسية", href: "/cms/home", icon: "home" },
       { label: "عن عبور (من نحن)", href: "/cms/content/sections?page=about", icon: "info" },
       { label: "إعلامنا (الأخبار والمقالات)", href: "/cms/content/news", icon: "news" },
       { label: "برامجنا التمكينية: البرامج", href: "/cms/content/programs", icon: "cap" },
@@ -171,6 +172,7 @@ export default function CmsShell({ children }: { children: React.ReactNode }) {
 
 const ICONS: Record<string, React.ReactNode> = {
   info: <Svg><circle cx="12" cy="12" r="9" /><path d="M12 16v-4M12 8h.01" /></Svg>,
+  home: <Svg><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><path d="M9 22V12h6v10" /></Svg>,
   grid: <Svg><rect x="3" y="3" width="7" height="7" rx="1.5" /><rect x="14" y="3" width="7" height="7" rx="1.5" /><rect x="3" y="14" width="7" height="7" rx="1.5" /><rect x="14" y="14" width="7" height="7" rx="1.5" /></Svg>,
   mail: <Svg><rect x="3" y="5" width="18" height="14" rx="2" /><path d="M3 7l9 6 9-6" /></Svg>,
   userPlus: <Svg><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M19 8v6M22 11h-6" /></Svg>,

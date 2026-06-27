@@ -4,12 +4,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect, type ReactNode } from "react";
 import { pick, type Locale } from "@/i18n/config";
+import type { HomeChrome } from "@/lib/highlight";
 
 export type HeroSlide = { img: string; heading: ReactNode; desc: ReactNode };
 
-export default function Hero({ locale, slides: slidesProp }: { locale: Locale; slides?: HeroSlide[] }) {
-  const badge = pick(locale, "نرعى نقاءهم، ونبني غدهم", "Nurturing Their Potential, Shaping Their Future");
-  const cta = pick(locale, "من هنا، نُمكّنهم", "From Here, We Empower Them");
+export default function Hero({ locale, slides: slidesProp, chrome }: { locale: Locale; slides?: HeroSlide[]; chrome?: HomeChrome }) {
+  const badge = chrome?.["hero.chrome"]?.title || pick(locale, "نرعى نقاءهم، ونبني غدهم", "Nurturing Their Potential, Shaping Their Future");
+  const cta = chrome?.["hero.chrome"]?.text || pick(locale, "من هنا، نُمكّنهم", "From Here, We Empower Them");
 
   const staticSlides = [
     {

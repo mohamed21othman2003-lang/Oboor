@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useRef } from "react";
 // index-based scrolling for reliable RTL behaviour
 import { pick, type Locale } from "@/i18n/config";
+import { hl, type HomeChrome } from "@/lib/highlight";
 
 const STORIES = [
   {
@@ -127,7 +128,7 @@ function Story({ s, locale }: { s: (typeof STORIES)[number]; locale: Locale }) {
   );
 }
 
-export default function SuccessStories({ locale, stories: storiesProp }: { locale: Locale; stories?: (typeof STORIES)[number][] }) {
+export default function SuccessStories({ locale, stories: storiesProp, chrome }: { locale: Locale; stories?: (typeof STORIES)[number][]; chrome?: HomeChrome }) {
   const stories = storiesProp?.length ? storiesProp : (locale === "en" ? STORIES_EN : STORIES);
   const trackRef = useRef<HTMLDivElement>(null);
   const idxRef = useRef(0);
@@ -150,16 +151,14 @@ export default function SuccessStories({ locale, stories: storiesProp }: { local
         {/* Header: title (start) + arrows (end) */}
         <div className="mb-10 flex flex-col items-start gap-6 sm:flex-row sm:items-end sm:justify-between">
           <div className="text-start">
-            <span className="rounded-full bg-brand/10 px-4 py-1.5 text-sm font-medium text-brand-dark">{pick(locale, "أبطال عبور", "Oboor Champions")}</span>
+            <span className="rounded-full bg-brand/10 px-4 py-1.5 text-sm font-medium text-brand-dark">{chrome?.["success.badge"]?.title || pick(locale, "أبطال عبور", "Oboor Champions")}</span>
             <h2 className="mt-4 text-3xl font-extrabold text-ink sm:text-4xl">
-              {pick(
-                locale,
-                <>عبروا، <span className="text-brand">وعبّروا!</span></>,
-                <>They crossed barriers and found <span className="text-brand">their voice</span></>
-              )}
+              {chrome?.["success.main"]?.title
+                ? hl(chrome["success.main"].title)
+                : pick(locale, <>عبروا، <span className="text-brand">وعبّروا!</span></>, <>They crossed barriers and found <span className="text-brand">their voice</span></>)}
             </h2>
             <p className="mt-3 max-w-2xl text-sm text-ink-muted">
-              {pick(
+              {chrome?.["success.main"]?.text || pick(
                 locale,
                 "قصص لحياة تغيرت، وملامح طفولة استعادت بهجتها، نفخر بمسيرة رافقنا فيها أبطالنا من أول خطوة وحتى التمكين.",
                 "Stories of transformed lives and childhoods that have regained their joy. We take pride in the journeys we have accompanied — supporting our champions from their very first step to empowerment."

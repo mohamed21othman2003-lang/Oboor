@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { pick, type Locale } from "@/i18n/config";
+import { hl, type HomeChrome } from "@/lib/highlight";
 
 const team = <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" /></svg>;
 const book = <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" /></svg>;
@@ -31,7 +32,7 @@ const FEATURES_EN = [
   { icon: shield, title: "Our Environment", note: "Safe and stimulating spaces designed to provide comfort while enhancing your child's abilities." },
 ];
 
-export default function WhyUs({ locale, items }: { locale: Locale; items?: FeatureItem[] }) {
+export default function WhyUs({ locale, items, chrome }: { locale: Locale; items?: FeatureItem[]; chrome?: HomeChrome }) {
   const features = items && items.length
     ? items.map((f) => ({ ...f, icon: ICONS[f.icon] ?? team }))
     : (locale === "en" ? FEATURES_EN : FEATURES);
@@ -39,16 +40,14 @@ export default function WhyUs({ locale, items }: { locale: Locale; items?: Featu
     <section className="bg-surface py-20">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="mb-12 text-center">
-          <span className="rounded-full bg-brand/10 px-4 py-1.5 text-sm font-medium text-brand-dark">{pick(locale, "لماذا عبور؟", "Why Oboor?")}</span>
+          <span className="rounded-full bg-brand/10 px-4 py-1.5 text-sm font-medium text-brand-dark">{chrome?.["why_us.badge"]?.title || pick(locale, "لماذا عبور؟", "Why Oboor?")}</span>
           <h2 className="mt-4 text-3xl font-extrabold text-ink sm:text-4xl">
-            {pick(
-              locale,
-              <>العبور الأفضل يبدأ من <span className="text-brand">عبور</span></>,
-              <>The Best Path of Progress Begins at <span className="text-brand">Oboor</span></>
-            )}
+            {chrome?.["why_us.main"]?.title
+              ? hl(chrome["why_us.main"].title)
+              : pick(locale, <>العبور الأفضل يبدأ من <span className="text-brand">عبور</span></>, <>The Best Path of Progress Begins at <span className="text-brand">Oboor</span></>)}
           </h2>
           <p className="mx-auto mt-3 max-w-2xl text-sm text-ink-muted">
-            {pick(
+            {chrome?.["why_us.main"]?.text || pick(
               locale,
               "نُرسّخ ركائز التمكين، لنعبر بطفلك نحو غدٍ أبهى وأجمل.",
               "We strengthen the foundations of empowerment, guiding your child toward a brighter and more meaningful future."

@@ -6,6 +6,7 @@ import ProgramCard from "@/components/ProgramCard";
 import ServiceSearchBar from "@/components/ServiceSearchBar";
 import { serviceCategories, type ServiceCategoryKey } from "@/components/ServicesTabs";
 import { pick, type Locale } from "@/i18n/config";
+import { hl, type HomeChrome } from "@/lib/highlight";
 
 const bookIcon = <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" /><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" /></svg>;
 const stethoscopeIcon = <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 3v6a5 5 0 0 0 10 0V3" /><path d="M4 3H2M14 3h-2M9 14v3a4 4 0 0 0 8 0v-1" /><circle cx="19" cy="13" r="2" /></svg>;
@@ -13,7 +14,7 @@ const chipIcon = <svg width="16" height="16" viewBox="0 0 24 24" fill="none" str
 
 const CHIP_ICON: Record<ServiceCategoryKey, React.ReactNode> = { programs: bookIcon, clinical: stethoscopeIcon, techniques: chipIcon };
 
-export default function SmartSearch({ locale }: { locale: Locale }) {
+export default function SmartSearch({ locale, chrome }: { locale: Locale; chrome?: HomeChrome }) {
   const cats = serviceCategories(locale);
   const [active, setActive] = useState<ServiceCategoryKey>("programs");
   const current = cats.find((c) => c.key === active)!;
@@ -24,17 +25,15 @@ export default function SmartSearch({ locale }: { locale: Locale }) {
         <div className="mb-10 text-center">
           <span className="inline-flex items-center gap-2 rounded-full bg-brand/10 px-4 py-1.5 text-sm font-medium text-brand-dark">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="7" /><path d="M21 21l-4-4" /></svg>
-            {pick(locale, "البحث الذكي عن الخدمات", "Smart Service Search")}
+            {chrome?.["smart_search.badge"]?.title || pick(locale, "البحث الذكي عن الخدمات", "Smart Service Search")}
           </span>
           <h2 className="mt-4 text-3xl font-extrabold text-ink sm:text-4xl">
-            {pick(
-              locale,
-              <>دليلك الذكي <span className="text-brand">لخطوتك الأولى</span></>,
-              <>Your Smart Guide to the <span className="text-brand">First Step</span></>
-            )}
+            {chrome?.["smart_search.main"]?.title
+              ? hl(chrome["smart_search.main"].title)
+              : pick(locale, <>دليلك الذكي <span className="text-brand">لخطوتك الأولى</span></>, <>Your Smart Guide to the <span className="text-brand">First Step</span></>)}
           </h2>
           <p className="mx-auto mt-3 max-w-2xl text-sm text-ink-muted">
-            {pick(
+            {chrome?.["smart_search.main"]?.text || pick(
               locale,
               "بخطواتٍ بسيطة، حدّد فئة البرنامج والخدمة أو التقنية التي يحتاجها طفلك، واختر الفرع الأقرب إليك؛ لنأخذ بيد طفلك في رحلة تأهيلية متكاملة تُناسب احتياجاته.",
               "In a few simple steps, identify the program category, service, or therapy your child needs, and choose the nearest branch. We will guide your child through a comprehensive rehabilitation journey tailored to their individual needs."

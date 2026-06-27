@@ -8,7 +8,8 @@ import Gallery from "@/components/home/Gallery";
 import NewsAndCerts from "@/components/home/NewsAndCerts";
 import { getLocale } from "@/i18n/locale";
 import { pick, type Locale } from "@/i18n/config";
-import { fetchContent } from "@/lib/server/django";
+import { fetchContent, fetchSections } from "@/lib/server/django";
+import type { HomeChrome } from "@/lib/highlight";
 
 // أشكال الصفوف القادمة من Django CMS
 type ApiHero = { key: string; badge_ar: string; badge_en: string; heading_ar: string; heading_en: string; desc_ar: string; desc_en: string; cta_ar: string; cta_en: string; image: string; order: number };
@@ -75,26 +76,46 @@ async function loadNewsHome(locale: Locale) {
   }));
 }
 
+// عناوين ونصوص أقسام الرئيسية من CMS (sections/home) → خريطة "block.key"
+async function loadChrome(locale: Locale): Promise<HomeChrome> {
+  const sections = await fetchSections("home");
+  const en = locale === "en";
+  const out: HomeChrome = {};
+  if (sections) {
+    for (const [block, rows] of Object.entries(sections)) {
+      for (const r of rows) {
+        out[`${block}.${r.key}`] = {
+          title: en ? r.title_en || r.title_ar : r.title_ar,
+          text: en ? r.text_en || r.text_ar : r.text_ar,
+          image: r.image,
+        };
+      }
+    }
+  }
+  return out;
+}
+
 export default async function Home() {
   const locale = await getLocale();
-  const [heroSlides, statItems, featureItems, gallery, successHome, newsHome] = await Promise.all([
+  const [heroSlides, statItems, featureItems, gallery, successHome, newsHome, chrome] = await Promise.all([
     loadHero(locale),
     loadStats(locale),
     loadFeatures(locale),
     loadGallery(locale),
     loadSuccessHome(locale),
     loadNewsHome(locale),
+    loadChrome(locale),
   ]);
   return (
     <>
-      <Hero locale={locale} slides={heroSlides} />
-      <About locale={locale} />
-      <SmartSearch locale={locale} />
-      <Stats locale={locale} items={statItems} />
-      <WhyUs locale={locale} items={featureItems} />
-      <SuccessStories locale={locale} stories={successHome} />
-      <Gallery locale={locale} images={gallery?.images} captions={gallery?.captions} />
-      <NewsAndCerts locale={locale} news={newsHome} />
+      <Hero locale={locale} slides={heroSlides} chrome={chrome} />
+      <About locale={locale} chrome={chrome} />
+      <SmartSearch locale={locale} chrome={chrome} />
+      <Stats locale={locale} items={statItems} chrome={chrome} />
+      <WhyUs locale={locale} items={featureItems} chrome={chrome} />
+      <SuccessStories locale={locale} stories={successHome} chrome={chrome} />
+      <Gallery locale={locale} images={gallery?.images} captions={gallery?.captions} chrome={chrome} />
+      <NewsAndCerts locale={locale} news={newsHome} chrome={chrome} />
 
       {/* WhatsApp float */}
       <a
