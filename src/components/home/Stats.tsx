@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { pick, type Locale } from "@/i18n/config";
+import { hl, type HomeChrome } from "@/lib/highlight";
 import AnimatedNumber from "./AnimatedNumber";
 
 const users = (
@@ -61,7 +62,7 @@ const STATS_EN = [
   { icon: book, value: "+7", label: "Rehabilitation programs", note: "Across all stages and ages" },
 ];
 
-export default function Stats({ locale, items }: { locale: Locale; items?: StatItem[] }) {
+export default function Stats({ locale, items, chrome }: { locale: Locale; items?: StatItem[]; chrome?: HomeChrome }) {
   const stats = items && items.length
     ? items.map((s) => ({ ...s, icon: ICONS[s.icon] ?? users }))
     : (locale === "en" ? STATS_EN : STATS);
@@ -72,14 +73,12 @@ export default function Stats({ locale, items }: { locale: Locale; items?: StatI
       <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
         <div className="mb-12 text-center">
           <h2 className="text-3xl font-extrabold text-white sm:text-4xl">
-            {pick(
-              locale,
-              <>شواهدُ أثرٍ تتحدث عن <span className="text-brand">نفسها</span></>,
-              <>Proof of Impact That Speaks for <span className="text-brand">Itself</span></>
-            )}
+            {chrome?.["stats.main"]?.title
+              ? hl(chrome["stats.main"].title)
+              : pick(locale, <>شواهدُ أثرٍ تتحدث عن <span className="text-brand">نفسها</span></>, <>Proof of Impact That Speaks for <span className="text-brand">Itself</span></>)}
           </h2>
           <p className="mx-auto mt-3 max-w-2xl text-sm text-white/70">
-            {pick(
+            {chrome?.["stats.main"]?.text || pick(
               locale,
               "أرقامٌ تعكس مسيرتنا نحو مستقبلهم، وأثرٌ نفخر بمشاركته.",
               "Numbers that reflect our journey toward their future — and the impact we are proud to share."

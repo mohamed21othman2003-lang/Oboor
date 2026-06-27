@@ -9,12 +9,53 @@ const BLOCK_LABELS: Record<string, string> = {
   list: "ترويسة القائمة",
   cities: "المدن (فلاتر البحث)",
   employment_types: "أنواع الدوام (فلاتر البحث)",
+  about: "قسم «عن عبور»",
+  smart_search: "قسم البحث الذكي",
+  stats: "قسم الأرقام",
+  why_us: "قسم «لماذا عبور؟»",
+  success: "قسم قصص النجاح",
+  gallery: "قسم المعرض",
+  news: "قسم الأخبار",
 };
 const ITEM_LABELS: Record<string, string> = {
   "hero.badge": "الوسم العلوي",
   "hero.heading": "العنوان + الوصف + الصورة",
   "hero.stat": "الشارة العائمة (العدّاد)",
   "list.header": "ترويسة قائمة الوظائف",
+  // الصفحة الرئيسية
+  "hero.chrome": "الوسم + زر الإجراء (ثابتان فوق كل الشرائح)",
+  "about.badge": "الوسم وزر «تعرّف أكثر»",
+  "about.intro": "العنوان + الفقرات",
+  "about.accred": "بطاقة «مركز معتمد»",
+  "about.img1": "الصورة الكبيرة",
+  "about.img2": "الصورة الصغيرة",
+  "smart_search.badge": "الوسم العلوي",
+  "smart_search.main": "العنوان + الجملة التوضيحية",
+  "stats.main": "العنوان + الجملة التوضيحية",
+  "why_us.badge": "الوسم العلوي",
+  "why_us.main": "العنوان + الجملة التوضيحية",
+  "success.badge": "الوسم العلوي",
+  "success.main": "العنوان + الجملة التوضيحية",
+  "gallery.badge": "الوسم العلوي",
+  "gallery.main": "العنوان",
+  "news.main": "العنوان + الجملة التوضيحية",
+};
+// تسميات مخصّصة لحقلَي «العنوان/النص» حسب العنصر (لتوضيح ما يمثّله كل حقل)
+const FIELD_LABELS: Record<string, { title?: string; text?: string }> = {
+  "hero.chrome": { title: "الوسم العلوي", text: "نص زر الإجراء" },
+  "about.badge": { title: "الوسم", text: "نص الزر" },
+  "about.intro": { title: "العنوان", text: "الفقرات (كل سطر = فقرة)" },
+  "about.accred": { title: "العنوان", text: "السطر الصغير" },
+  "smart_search.badge": { title: "الوسم" },
+  "smart_search.main": { title: "العنوان", text: "الجملة التوضيحية" },
+  "stats.main": { title: "العنوان", text: "الجملة التوضيحية" },
+  "why_us.badge": { title: "الوسم" },
+  "why_us.main": { title: "العنوان", text: "الجملة التوضيحية" },
+  "success.badge": { title: "الوسم" },
+  "success.main": { title: "العنوان", text: "الجملة التوضيحية" },
+  "gallery.badge": { title: "الوسم" },
+  "gallery.main": { title: "العنوان" },
+  "news.main": { title: "العنوان", text: "الجملة التوضيحية" },
 };
 // ملاحظات توضيحية لبعض العناصر (مثل الرقم التلقائي)
 const ITEM_NOTES: Record<string, string> = {
@@ -114,22 +155,26 @@ export default function PageChrome({ page }: { page: string }) {
                   const key = `${g.block}.${String(it.key ?? "")}`;
                   const hasText = String(it.text_ar ?? "").trim() !== "" || String(it.text_en ?? "").trim() !== "" || ("text_ar" in (edits[it.id] || {}));
                   const hasImage = String(it.image ?? "").trim() !== "" || Boolean(it.image_file);
+                  const hasTitle = String(it.title_ar ?? "").trim() !== "" || String(it.title_en ?? "").trim() !== "" || ("title_ar" in (edits[it.id] || {}));
+                  const showTitle = hasTitle || !hasImage; // العناصر المخصّصة للصورة فقط لا تعرض حقل العنوان
                   const imgSrc = resolveSrc(String(it.image ?? ""));
                   return (
                     <div key={it.id} className="rounded-xl border border-line bg-surface/40 p-3">
                       <p className="mb-2 text-xs font-bold text-ink">{ITEM_LABELS[key] || String(it.title_ar || it.key || "")}</p>
                       {ITEM_NOTES[key] && <p className="mb-2 rounded-lg bg-brand/5 px-3 py-2 text-[11px] leading-5 text-ink-soft">ℹ️ {ITEM_NOTES[key]}</p>}
                       <div className="space-y-2">
-                        <div>
-                          <p className="mb-1 text-xs font-semibold text-ink-soft">العنوان</p>
-                          <div className="grid gap-2 sm:grid-cols-2">
-                            <input value={val(it, "title_ar")} onChange={(e) => setVal(it.id, "title_ar", e.target.value)} className={INPUT} placeholder="عربي" />
-                            <input value={val(it, "title_en")} onChange={(e) => setVal(it.id, "title_en", e.target.value)} dir="ltr" className={INPUT} placeholder="English" />
+                        {showTitle && (
+                          <div>
+                            <p className="mb-1 text-xs font-semibold text-ink-soft">{FIELD_LABELS[key]?.title || "العنوان"}</p>
+                            <div className="grid gap-2 sm:grid-cols-2">
+                              <input value={val(it, "title_ar")} onChange={(e) => setVal(it.id, "title_ar", e.target.value)} className={INPUT} placeholder="عربي" />
+                              <input value={val(it, "title_en")} onChange={(e) => setVal(it.id, "title_en", e.target.value)} dir="ltr" className={INPUT} placeholder="English" />
+                            </div>
                           </div>
-                        </div>
+                        )}
                         {hasText && (
                           <div>
-                            <p className="mb-1 text-xs font-semibold text-ink-soft">النص</p>
+                            <p className="mb-1 text-xs font-semibold text-ink-soft">{FIELD_LABELS[key]?.text || "النص"}</p>
                             <div className="grid gap-2 sm:grid-cols-2">
                               <textarea value={val(it, "text_ar")} onChange={(e) => setVal(it.id, "text_ar", e.target.value)} rows={3} className={INPUT} placeholder="عربي" />
                               <textarea value={val(it, "text_en")} onChange={(e) => setVal(it.id, "text_en", e.target.value)} dir="ltr" rows={3} className={INPUT} placeholder="English" />

@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect, useCallback } from "react";
 import { pick, type Locale } from "@/i18n/config";
+import { type HomeChrome } from "@/lib/highlight";
 
 const IMAGES = [
   "/figma/home/imgImageWithFallback6.png", // big (center)
@@ -26,7 +27,7 @@ const CELL = [
   "lg:col-start-3 lg:col-span-2 lg:row-start-3",
 ];
 
-export default function Gallery({ locale, images: imagesProp, captions }: { locale: Locale; images?: string[]; captions?: string[] }) {
+export default function Gallery({ locale, images: imagesProp, captions, chrome }: { locale: Locale; images?: string[]; captions?: string[]; chrome?: HomeChrome }) {
   const images = imagesProp && imagesProp.length ? imagesProp : IMAGES;
   const [open, setOpen] = useState<number | null>(null);
   const alt = (i: number) =>
@@ -53,8 +54,8 @@ export default function Gallery({ locale, images: imagesProp, captions }: { loca
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="mb-8 flex items-start justify-between gap-4">
           <div className="min-w-0 text-start">
-            <span className="rounded-full bg-brand/10 px-4 py-1.5 text-sm font-medium text-brand-dark">{pick(locale, "المعرض", "Gallery")}</span>
-            <h2 className="mt-3 text-3xl font-extrabold text-ink sm:text-4xl">{pick(locale, "ملامح من عبور", "Moments from Oboor")}</h2>
+            <span className="rounded-full bg-brand/10 px-4 py-1.5 text-sm font-medium text-brand-dark">{chrome?.["gallery.badge"]?.title || pick(locale, "المعرض", "Gallery")}</span>
+            <h2 className="mt-3 text-3xl font-extrabold text-ink sm:text-4xl">{chrome?.["gallery.main"]?.title || pick(locale, "ملامح من عبور", "Moments from Oboor")}</h2>
           </div>
           <Link href="/gallery" className="mt-1 inline-flex shrink-0 items-center gap-1 whitespace-nowrap text-sm font-semibold text-brand transition-colors hover:text-brand-dark">
             {pick(locale, "عرض الكل", "View All")}

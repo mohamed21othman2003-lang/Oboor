@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRef } from "react";
 import { pick, type Locale } from "@/i18n/config";
+import { type HomeChrome } from "@/lib/highlight";
 
 const NEWS = [
   { img: "/figma/home/imgImageWithFallback14.jpg", badge: "تطوير", title: "إطلاق النسخة المحدثة من برنامج التدخل المبكر", desc: "تشمل فنيات علاجية جديدة للأطفال دون سن الثلاث." },
@@ -38,7 +39,7 @@ function NewsCard({ n, locale }: { n: (typeof NEWS)[number]; locale: Locale }) {
   );
 }
 
-export default function NewsAndCerts({ locale, news: newsProp }: { locale: Locale; news?: (typeof NEWS)[number][] }) {
+export default function NewsAndCerts({ locale, news: newsProp, chrome }: { locale: Locale; news?: (typeof NEWS)[number][]; chrome?: HomeChrome }) {
   const news = newsProp?.length ? newsProp : (locale === "en" ? NEWS_EN : NEWS);
   const trackRef = useRef<HTMLDivElement>(null);
   const idxRef = useRef(0);
@@ -62,8 +63,8 @@ export default function NewsAndCerts({ locale, news: newsProp }: { locale: Local
         <div className="lg:col-span-2">
           <div className="mb-6 flex items-start justify-between gap-4">
             <div className="min-w-0 text-start">
-              <h3 className="text-2xl font-extrabold text-white">{pick(locale, "صدى العبور وحراكه", "The Impact of Oboor in Motion")}</h3>
-              <p className="mt-1 text-sm text-white/70">{pick(locale, "هنا ندوّن تفاصيل الأثر، تابع آخر المستجدات.", "Here, we document the details of our impact. Stay updated with the latest news and developments.")}</p>
+              <h3 className="text-2xl font-extrabold text-white">{chrome?.["news.main"]?.title || pick(locale, "صدى العبور وحراكه", "The Impact of Oboor in Motion")}</h3>
+              <p className="mt-1 text-sm text-white/70">{chrome?.["news.main"]?.text || pick(locale, "هنا ندوّن تفاصيل الأثر، تابع آخر المستجدات.", "Here, we document the details of our impact. Stay updated with the latest news and developments.")}</p>
             </div>
             <Link href="/news" className="mt-1 inline-flex shrink-0 items-center gap-1 whitespace-nowrap text-sm font-semibold text-white/90 transition-colors hover:text-white">
               {pick(locale, "عرض الكل", "View All")}
