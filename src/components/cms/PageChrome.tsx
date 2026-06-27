@@ -31,6 +31,8 @@ const BLOCK_LABELS: Record<string, string> = {
   steps: "خطوات التقييم",
   prelim_questions: "الأسئلة الأولية",
   answer_options: "خيارات الإجابة",
+  map_regions: "مناطق الخريطة (وعدد الفروع)",
+  categories: "تصنيفات الأخبار",
 };
 const ITEM_LABELS: Record<string, string> = {
   "hero.badge": "الوسم العلوي",
