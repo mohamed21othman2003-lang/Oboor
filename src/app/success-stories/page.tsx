@@ -10,6 +10,7 @@ import {
 import { getLocale } from "@/i18n/locale";
 import { pick, type Locale } from "@/i18n/config";
 import { fetchContent, fetchSections } from "@/lib/server/django";
+import { hl } from "@/lib/highlight";
 import CtaSection from "@/components/CtaSection";
 import AnimatedNumber from "@/components/home/AnimatedNumber";
 import SuccessStoriesGrid from "@/components/SuccessStoriesGrid";
@@ -104,6 +105,15 @@ export default async function SuccessStoriesPage() {
     ? { ...cmsHighlights, journeyTemplate: cmsHighlights.journeyTemplate || "" }
     : getStoryHighlightsData(locale);
 
+  // HERO: المقدمة العلوية من الـ CMS (مع fallback للنص الثابت)
+  const heroRows = sections?.hero ?? [];
+  const sFind = (k: string) => heroRows.find((r) => r.key === k);
+  const sT = (r?: (typeof heroRows)[number]) => (r ? (en ? r.title_en || r.title_ar : r.title_ar) : "");
+  const sB = (r?: (typeof heroRows)[number]) => (r ? (en ? r.text_en || r.text_ar : r.text_ar) : "");
+  const heroBadge = sT(sFind("badge")) || pick(locale, "قصص حقيقية من عائلاتنا", "Real stories from our families");
+  const heroHeading = sT(sFind("heading"));
+  const heroSub = sB(sFind("heading")) || pick(locale, "كل قصة نجاح تُعبّر عن رحلة حقيقية من التحدي إلى الإنجاز. نفتخر بكل مستفيد شقّ طريقه بمساعدتنا.", "Every success story reflects a real journey from challenge to achievement. We are proud of every child who found their way with our help.");
+
   return (
     <>
       {/* Hero */}
@@ -118,21 +128,15 @@ export default async function SuccessStoriesPage() {
           <div className="mx-auto max-w-3xl text-center">
             <span className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-1.5 text-sm font-medium text-brand-dark shadow-sm ring-1 ring-line">
               <SparkleIcon />
-              {pick(locale, "قصص حقيقية من عائلاتنا", "Real stories from our families")}
+              {heroBadge}
             </span>
             <h1 className="mt-5 text-4xl font-extrabold leading-tight text-ink sm:text-5xl">
-              {pick(
-                locale,
-                <>أبناؤنا يُلهمونا <span className="text-brand">كل يوم</span></>,
-                <>Our children inspire us <span className="text-brand">every day</span></>,
-              )}
+              {heroHeading
+                ? hl(heroHeading)
+                : pick(locale, <>أبناؤنا يُلهمونا <span className="text-brand">كل يوم</span></>, <>Our children inspire us <span className="text-brand">every day</span></>)}
             </h1>
             <p className="mx-auto mt-5 max-w-2xl text-base leading-8 text-ink-muted">
-              {pick(
-                locale,
-                "كل قصة نجاح تُعبّر عن رحلة حقيقية من التحدي إلى الإنجاز. نفتخر بكل مستفيد شقّ طريقه بمساعدتنا.",
-                "Every success story reflects a real journey from challenge to achievement. We are proud of every child who found their way with our help.",
-              )}
+              {heroSub}
             </p>
           </div>
 
