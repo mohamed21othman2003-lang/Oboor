@@ -5,8 +5,11 @@ import Link from "next/link";
 import ProgramCard from "@/components/ProgramCard";
 import ServiceSearchBar from "@/components/ServiceSearchBar";
 import { serviceCategories, type ServiceCategoryKey } from "@/components/ServicesTabs";
+import type { Program } from "@/components/ProgramCard";
 import { pick, type Locale } from "@/i18n/config";
 import { hl, type HomeChrome } from "@/lib/highlight";
+
+type ServiceCards = { programs: Program[]; clinical: Program[]; techniques: Program[] };
 
 const bookIcon = <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" /><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" /></svg>;
 const stethoscopeIcon = <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 3v6a5 5 0 0 0 10 0V3" /><path d="M4 3H2M14 3h-2M9 14v3a4 4 0 0 0 8 0v-1" /><circle cx="19" cy="13" r="2" /></svg>;
@@ -14,8 +17,10 @@ const chipIcon = <svg width="16" height="16" viewBox="0 0 24 24" fill="none" str
 
 const CHIP_ICON: Record<ServiceCategoryKey, React.ReactNode> = { programs: bookIcon, clinical: stethoscopeIcon, techniques: chipIcon };
 
-export default function SmartSearch({ locale, chrome }: { locale: Locale; chrome?: HomeChrome }) {
-  const cats = serviceCategories(locale);
+export default function SmartSearch({ locale, chrome, cards }: { locale: Locale; chrome?: HomeChrome; cards?: ServiceCards }) {
+  const cats = cards
+    ? serviceCategories(locale).map((c) => ({ ...c, items: cards[c.key]?.length ? cards[c.key] : c.items }))
+    : serviceCategories(locale);
   const [active, setActive] = useState<ServiceCategoryKey>("programs");
   const current = cats.find((c) => c.key === active)!;
 
