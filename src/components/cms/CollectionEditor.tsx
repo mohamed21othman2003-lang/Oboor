@@ -385,6 +385,20 @@ const HIDE_IF_EMPTY = new Set([
   "about_tag_ar", "about_tag_en",  // البطاقة المميّزة — تظهر فقط للخدمات التي تستخدمها
   "help_section_ar", "help_section_en",  // قسم المساعدة في التقنيات — يظهر فقط لمن يستخدمه
 ]);
+// نص زر الإضافة لكل قائمة (حسب اسم الحقل) — ليكون واضحاً ما الذي يُضاف
+const LIST_ADD_LABELS: Record<string, string> = {
+  target_tags: "إضافة وسم", target_list: "إضافة نقطة",
+  methods: "إضافة أسلوب", training_areas: "إضافة مجال",
+  about: "إضافة فقرة", paragraphs: "إضافة فقرة",
+  stations: "إضافة محطة", responsibilities: "إضافة مهمة",
+  requirements: "إضافة متطلب", question_list: "إضافة سؤال",
+  targets: "إضافة فئة", offers: "إضافة عنصر",
+  values: "إضافة نتيجة", benefits: "إضافة بند",
+  bullets: "إضافة نقطة", tags: "إضافة وسم",
+  qualifications: "إضافة مؤهّل", days: "إضافة يوم",
+};
+const listAdd = (base: string) => LIST_ADD_LABELS[base] || "إضافة عنصر";
+
 // حقول كارت الفعالية (في الأخبار) — تظهر فقط للفعاليات والورش
 const EVENT_FIELDS = new Set([
   "time_ar", "time_en", "location_ar", "location_en", "audience_ar", "audience_en",
@@ -468,11 +482,11 @@ function FieldInput({ f, value, onChange, badge, dir }: { f: FieldSchema; value:
         ) : OBJECT_FIELDS[f.base] ? (
           <ObjectEditor value={value} onChange={onChange} fields={OBJECT_FIELDS[f.base]} dir={dir} />
         ) : CARD_LIST_FIELDS[f.base] ? (
-          <CardListEditor value={value} onChange={onChange} fields={CARD_LIST_FIELDS[f.base]} dir={dir} />
+          <CardListEditor value={value} onChange={onChange} fields={CARD_LIST_FIELDS[f.base]} dir={dir} addLabel={listAdd(f.base)} />
         ) : COMPLEX_JSON.has(f.base) || isComplexJson(value) ? (
           <ReadOnlyJson f={f} value={value} />
         ) : isSimpleArray(value) || value == null ? (
-          <ListEditor value={isSimpleArray(value) ? value : []} onChange={onChange} dir={dir} />
+          <ListEditor value={isSimpleArray(value) ? value : []} onChange={onChange} dir={dir} addLabel={listAdd(f.base)} />
         ) : (
           <ReadOnlyJson f={f} value={value} />
         )
@@ -667,7 +681,7 @@ function ObjectEditor({ value, onChange, fields, dir }: { value: unknown; onChan
 }
 
 // محرّر قائمة بطاقات — كل عنصر كائن بخانات معنونة (بدل قائمة JSON مركّبة)
-function CardListEditor({ value, onChange, fields, dir }: { value: unknown; onChange: (v: unknown) => void; fields: { key: string; label: string }[]; dir?: string }) {
+function CardListEditor({ value, onChange, fields, dir, addLabel = "إضافة عنصر" }: { value: unknown; onChange: (v: unknown) => void; fields: { key: string; label: string }[]; dir?: string; addLabel?: string }) {
   const items = (Array.isArray(value) ? value : []).filter((x) => x && typeof x === "object" && !Array.isArray(x)) as Record<string, unknown>[];
   const update = (i: number, key: string, v: string) => onChange(items.map((it, j) => (j === i ? { ...it, [key]: v } : it)));
   const remove = (i: number) => onChange(items.filter((_, j) => j !== i));
@@ -693,14 +707,14 @@ function CardListEditor({ value, onChange, fields, dir }: { value: unknown; onCh
       ))}
       <button type="button" onClick={add} className="inline-flex items-center gap-1.5 rounded-lg bg-brand/10 px-3 py-1.5 text-xs font-semibold text-brand transition-colors hover:bg-brand hover:text-white">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path strokeLinecap="round" d="M12 5v14M5 12h14" /></svg>
-        إضافة عنصر
+        {addLabel}
       </button>
     </div>
   );
 }
 
 // محرّر قوائم سهل — صفّ لكل عنصر مع زر حذف + زر إضافة (بدل JSON)
-function ListEditor({ value, onChange, dir }: { value: (string | number)[]; onChange: (v: unknown) => void; dir?: string }) {
+function ListEditor({ value, onChange, dir, addLabel = "إضافة عنصر" }: { value: (string | number)[]; onChange: (v: unknown) => void; dir?: string; addLabel?: string }) {
   const items = value.map(String);
   const update = (i: number, v: string) => { const copy = [...items]; copy[i] = v; onChange(copy); };
   const remove = (i: number) => onChange(items.filter((_, j) => j !== i));
@@ -717,7 +731,7 @@ function ListEditor({ value, onChange, dir }: { value: (string | number)[]; onCh
       ))}
       <button type="button" onClick={add} className="inline-flex items-center gap-1.5 rounded-lg bg-brand/10 px-3 py-1.5 text-xs font-semibold text-brand transition-colors hover:bg-brand hover:text-white">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path strokeLinecap="round" d="M12 5v14M5 12h14" /></svg>
-        إضافة عنصر
+        {addLabel}
       </button>
     </div>
   );
@@ -776,7 +790,7 @@ function OptionalScalar({ label, addLabel, a, e, onA, onE }: { label: string; ad
 }
 
 // قائمة نصوص ثنائية اللغة (صفّ لكل عنصر: عربي + إنجليزي + حذف)
-function BiStrList({ a, e, onChange }: { a: string[]; e: string[]; onChange: (a: string[], e: string[]) => void }) {
+function BiStrList({ a, e, onChange, addLabel = "إضافة عنصر" }: { a: string[]; e: string[]; onChange: (a: string[], e: string[]) => void; addLabel?: string }) {
   const n = Math.max(a.length, e.length);
   const norm = (arr: string[]) => { const c = [...arr]; while (c.length < n) c.push(""); return c; };
   const setRow = (i: number, av: string, ev: string) => { const na = norm(a); const ne = norm(e); na[i] = av; ne[i] = ev; onChange(na, ne); };
@@ -795,7 +809,7 @@ function BiStrList({ a, e, onChange }: { a: string[]; e: string[]; onChange: (a:
           <button type="button" onClick={() => removeRow(i)} className="mt-1 shrink-0 rounded-lg bg-red-50 px-2 py-1.5 text-[11px] font-semibold text-red-600 hover:bg-red-600 hover:text-white">حذف</button>
         </div>
       ))}
-      <button type="button" onClick={add} className="inline-flex items-center gap-1 rounded-lg bg-brand/10 px-2.5 py-1 text-[11px] font-semibold text-brand hover:bg-brand hover:text-white">+ إضافة عنصر</button>
+      <button type="button" onClick={add} className="inline-flex items-center gap-1 rounded-lg bg-brand/10 px-2.5 py-1 text-[11px] font-semibold text-brand hover:bg-brand hover:text-white">+ {addLabel}</button>
     </div>
   );
 }
@@ -821,7 +835,7 @@ function ObjItem({ index, ia, ie, schema, onChange, onRemove }: { index: number;
         {visible.map((s) => s.list ? (
           <div key={s.key}>
             <p className="mb-1 text-xs font-semibold text-ink-soft">{s.label}</p>
-            <BiStrList a={blkStrArr(ia[s.key])} e={blkStrArr(ie[s.key])} onChange={(av, ev) => onChange({ ...ia, [s.key]: av }, { ...ie, [s.key]: ev })} />
+            <BiStrList a={blkStrArr(ia[s.key])} e={blkStrArr(ie[s.key])} addLabel={listAdd(s.key)} onChange={(av, ev) => onChange({ ...ia, [s.key]: av }, { ...ie, [s.key]: ev })} />
           </div>
         ) : (
           <BiScalar key={s.key} label={s.label} a={blkStr(ia[s.key])} e={blkStr(ie[s.key])} onA={(v) => onChange({ ...ia, [s.key]: v }, { ...ie })} onE={(v) => onChange({ ...ia }, { ...ie, [s.key]: v })} />
@@ -879,7 +893,7 @@ function BlocksEditor({ ar, en, onChange }: { ar: unknown[]; en: unknown[]; onCh
         const strList = (key: string, label: string) => (
           <div key={key}>
             <p className="mb-1 text-xs font-semibold text-ink-soft">{label}</p>
-            <BiStrList a={blkStrArr(p.a[key])} e={blkStrArr(p.e[key])} onChange={(av, ev) => patch(i, { ...p.a, [key]: av }, { ...p.e, [key]: ev })} />
+            <BiStrList a={blkStrArr(p.a[key])} e={blkStrArr(p.e[key])} addLabel={listAdd(key)} onChange={(av, ev) => patch(i, { ...p.a, [key]: av }, { ...p.e, [key]: ev })} />
           </div>
         );
         const introField = (key: string) => (
@@ -919,7 +933,7 @@ function BlocksEditor({ ar, en, onChange }: { ar: unknown[]; en: unknown[]; onCh
                 {nestScalar("child", "title", "العنوان")}{nestScalar("child", "label", "الوصف")}
                 <div>
                   <p className="mb-1 text-xs font-semibold text-ink-soft">المستويات</p>
-                  <BiStrList a={blkStrArr(blkObj(p.a.child).levels)} e={blkStrArr(blkObj(p.e.child).levels)}
+                  <BiStrList a={blkStrArr(blkObj(p.a.child).levels)} e={blkStrArr(blkObj(p.e.child).levels)} addLabel="إضافة مستوى"
                     onChange={(av, ev) => patch(i, { ...p.a, child: { ...blkObj(p.a.child), levels: av } }, { ...p.e, child: { ...blkObj(p.e.child), levels: ev } })} />
                 </div>
               </div>
@@ -968,7 +982,7 @@ function HelpSectionEditor({ ar, en, onChange }: { ar: Rec; en: Rec; onChange: (
   const list = (key: string, label: string) => (
     <div>
       <p className="mb-1 text-xs font-semibold text-ink-soft">{label}</p>
-      <BiStrList a={blkStrArr(ar[key])} e={blkStrArr(en[key])} onChange={(av, ev) => onChange({ ...ar, [key]: av }, { ...en, [key]: ev })} />
+      <BiStrList a={blkStrArr(ar[key])} e={blkStrArr(en[key])} addLabel={listAdd(key)} onChange={(av, ev) => onChange({ ...ar, [key]: av }, { ...en, [key]: ev })} />
     </div>
   );
   return (
