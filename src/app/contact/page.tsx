@@ -190,7 +190,7 @@ function SocialLink({ label, href, children }: { label: string; href: string; ch
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex items-center gap-3 rounded-xl bg-white/10 px-6 py-3 transition-colors hover:bg-white/20"
+      className="flex w-full items-center justify-center gap-3 rounded-xl bg-white/10 px-6 py-3 transition-colors hover:bg-white/20 sm:w-auto sm:min-w-[150px]"
     >
       <span className="text-sm font-bold uppercase text-white">{label}</span>
       <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/15 text-white">
@@ -215,7 +215,7 @@ function SocialSection({ locale, site }: { locale: Locale; site: SiteInfo | null
             "Contact customer service and we'll help you choose the best branch for your child.",
           )}
         </p>
-        <div className="mt-8 flex flex-wrap justify-center gap-4">
+        <div className="mx-auto mt-8 flex max-w-md flex-col items-stretch justify-center gap-4 sm:max-w-none sm:flex-row sm:flex-wrap">
           <SocialLink label="Instagram" href={ig}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="5" /><circle cx="12" cy="12" r="4" /><circle cx="17.5" cy="6.5" r="1" fill="currentColor" /></svg>
           </SocialLink>
