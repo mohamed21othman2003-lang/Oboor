@@ -244,11 +244,20 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
 
   if (loading) return <p className="text-ink-soft">جارٍ التحميل…</p>;
 
+  const preview = isNew ? null : previewHref(type, values);
   return (
     <div className="mx-auto max-w-4xl space-y-6 pb-24">
-      <div>
-        <Link href={`/cms/content/${type}`} className="text-xs font-semibold text-brand hover:text-brand-dark">← {label}</Link>
-        <h1 className="mt-1 text-2xl font-extrabold text-ink">{isNew ? addLabelFor(type) : `تعديل: ${label}`}</h1>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <Link href={`/cms/content/${type}`} className="text-xs font-semibold text-brand hover:text-brand-dark">← {label}</Link>
+          <h1 className="mt-1 text-2xl font-extrabold text-ink">{isNew ? addLabelFor(type) : `تعديل: ${label}`}</h1>
+        </div>
+        {preview && (
+          <a href={preview} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-white px-3.5 py-2 text-sm font-semibold text-brand transition-colors hover:bg-brand hover:text-white">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3" /></svg>
+            عاين هذه الصفحة
+          </a>
+        )}
       </div>
 
       {/* نسبة الاكتمال */}
@@ -371,6 +380,33 @@ const OBJECT_FIELDS: Record<string, { key: string; label: string }[]> = {
     { key: "label", label: "نص البطاقة (مثال: الأفراد من ذوي الإعاقة)" },
   ],
 };
+
+// رابط الصفحة الحقيقية المقابلة للعنصر (لزر «عاين هذه الصفحة»)
+const PAGE_URL: Record<string, string> = {
+  home: "/", about: "/about", success: "/success-stories", specialists: "/specialists",
+  assessment: "/assessment", branches: "/branches", careers: "/careers", news: "/news",
+  programs: "/programs", header: "/", footer: "/",
+};
+function previewHref(type: string, v: Record<string, unknown>): string | null {
+  const slug = String(v.slug ?? "");
+  switch (type) {
+    case "programs": return slug ? `/programs/${slug}` : "/programs";
+    case "services": return slug ? `/services/${slug}` : "/programs";
+    case "techniques": return slug ? `/techniques/${slug}` : "/programs";
+    case "branches": return slug ? `/branches/${slug}` : "/branches";
+    case "careers": return slug ? `/careers/${slug}` : "/careers";
+    case "news": return slug ? `/news/${slug}` : "/news";
+    case "specialists": return "/specialists";
+    case "success": return "/success-stories";
+    case "assessment-cards": return "/assessment";
+    case "service-cards": return "/programs";
+    case "hero": case "stats": case "features": return "/";
+    case "gallery": return "/gallery";
+    case "site": return "/";
+    case "sections": return PAGE_URL[String(v.page ?? "")] ?? null;
+    default: return null;
+  }
+}
 
 // حقول مخفية من الفورم (الترتيب يُدار بأسهم القائمة)
 // «مسار الصورة» النصّي مخفي — الصورة تُدار بأداة الرفع (image_file) التي تعرض الصورة الحالية تلقائياً

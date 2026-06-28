@@ -17,6 +17,11 @@ const LIST_BLOCKS = new Set([
   "map_regions", "features", "stats", "steps", "services",
 ]);
 // نص زر الإضافة محدّد لكل قسم
+// رابط الصفحة الحقيقية لكل صفحة (لزر «عاين الصفحة»)
+const PAGE_URL: Record<string, string> = {
+  home: "/", careers: "/careers", success: "/success-stories", specialists: "/specialists",
+  branches: "/branches", news: "/news", assessment: "/assessment", about: "/about", programs: "/programs",
+};
 const BLOCK_ADD: Record<string, string> = {
   answer_options: "إضافة خيار إجابة", prelim_questions: "إضافة سؤال",
   cities: "إضافة مدينة", employment_types: "إضافة نوع دوام",
@@ -281,6 +286,12 @@ export default function PageChrome({ page }: { page: string }) {
 
       {open && (
         <div className="space-y-4 border-t border-line p-4">
+          {PAGE_URL[page] && (
+            <a href={PAGE_URL[page]} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-white px-3 py-1.5 text-xs font-semibold text-brand transition-colors hover:bg-brand hover:text-white">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3" /></svg>
+              عاين الصفحة
+            </a>
+          )}
           {err && <p className="rounded-xl bg-red-50 px-4 py-2.5 text-sm text-red-600">{err}</p>}
           {blocks.map((g, gi) => {
             const isOpen = openBlock[g.block] ?? false;
