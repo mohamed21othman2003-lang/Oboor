@@ -160,7 +160,7 @@ export default function ServiceSearchBar({ locale = "ar", searchLabel }: { regio
 
   return (
     <div className="relative flex flex-col items-stretch gap-2 rounded-2xl bg-white p-3 shadow-md ring-1 ring-line lg:flex-row lg:items-center">
-      <Dropdown boxed label={pick(locale, "الفئة الرئيسية", "Main Category")} triggerIcon={ICONS.book} value={catKey} onChange={onCat} options={catOptions} />
+      <Dropdown label={pick(locale, "الفئة الرئيسية", "Main Category")} triggerIcon={ICONS.book} value={catKey} onChange={onCat} options={catOptions} />
       <span className="hidden h-9 w-px shrink-0 bg-line lg:block" />
       <Dropdown label={pick(locale, "اختر البرنامج", "Select Program")} triggerIcon={ICONS.grid} value={programIdx} onChange={setProgramIdx} options={programOptions} />
       <span className="hidden h-9 w-px shrink-0 bg-line lg:block" />
