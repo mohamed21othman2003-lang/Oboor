@@ -59,15 +59,20 @@ export default function BranchGallery({ images, branchName, locale = "ar" }: { i
         >
           <button onClick={() => setOpen(true)} className="relative block h-[300px] w-full sm:h-[440px]" aria-label={pick(locale, "تكبير الصورة", "Zoom image")}>
             {images.map((src, i) => (
-              <Image
-                key={src + i}
-                src={src}
-                alt={pick(locale, `${branchName} - صورة ${i + 1}`, `${branchName} - photo ${i + 1}`)}
-                fill
-                priority={i === 0}
-                className={`object-contain transition-opacity duration-700 ${i === index ? "opacity-100" : "opacity-0"}`}
-                sizes="100vw"
-              />
+              <div key={src + i} className={`absolute inset-0 transition-opacity duration-700 ${i === index ? "opacity-100" : "opacity-0"}`}>
+                {/* خلفية مموّهة من نفس الصورة تملأ الفراغ على الجنبين بدل الأبيض */}
+                <Image src={src} alt="" aria-hidden fill className="scale-110 object-cover blur-2xl" sizes="100vw" />
+                <div className="absolute inset-0 bg-white/35" />
+                {/* الصورة الفعلية كاملة بدون قص */}
+                <Image
+                  src={src}
+                  alt={pick(locale, `${branchName} - صورة ${i + 1}`, `${branchName} - photo ${i + 1}`)}
+                  fill
+                  priority={i === 0}
+                  className="object-contain drop-shadow-[0_8px_28px_rgba(13,61,69,0.18)]"
+                  sizes="100vw"
+                />
+              </div>
             ))}
             <span className="absolute bottom-3 right-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-black/40 text-white opacity-0 transition-opacity group-hover:opacity-100">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3M11 8v6M8 11h6" /></svg>
