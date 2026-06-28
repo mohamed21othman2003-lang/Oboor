@@ -99,7 +99,7 @@ function StoryModal({ story, locale, highlights, onClose }: { story: SuccessStor
           {/* brand */}
           <span className="absolute top-6 start-1/2 -translate-x-1/2 text-2xl font-extrabold tracking-tight text-brand/30">{pick(locale, "عبور", "Oboor")}</span>
           {/* badge */}
-          <span className="absolute end-4 top-1/2 z-10 -translate-y-1/2 inline-flex items-center gap-1.5 rounded-full bg-brand px-3.5 py-1.5 text-xs font-bold text-white shadow-md">
+          <span className="absolute end-2 top-1/2 z-10 -translate-y-1/2 inline-flex items-center gap-1 rounded-full bg-brand px-2.5 py-1 text-[10px] font-bold text-white shadow-md">
             <SparkIcon />
             {h.badge}
           </span>
