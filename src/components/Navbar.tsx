@@ -39,7 +39,7 @@ export default function Navbar({
             src={logoSrc}
             alt={pick(locale, "مركز عبور للرعاية والتأهيل", "Oboor Center for Care & Rehabilitation")}
             width={120}
-            height={70}
+            height={79}
             className="h-12 w-auto"
             priority
           />

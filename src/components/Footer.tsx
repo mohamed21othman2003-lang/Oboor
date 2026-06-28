@@ -121,7 +121,7 @@ export default function Footer({
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-16 text-start sm:px-6 lg:grid-cols-4 lg:px-8">
         {/* Brand */}
         <div>
-          <Image src={logoSrc} alt={pick(locale, "مركز عبور", "Oboor Center")} width={130} height={76} className="h-16 w-auto" />
+          <Image src={logoSrc} alt={pick(locale, "مركز عبور", "Oboor Center")} width={130} height={86} className="h-16 w-auto" />
           <p className="mt-5 text-sm leading-8 text-white/55">{brandDesc}</p>
           <div className="mt-6 flex gap-3">
             {social
