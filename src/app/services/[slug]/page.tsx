@@ -324,7 +324,7 @@ export default async function ClinicalDetailPage({ params }: { params: Promise<{
 
       {/* About */}
       <section className="bg-white pb-12 pt-4">
-        <div className="mx-auto grid max-w-7xl items-start gap-12 px-6 lg:grid-cols-2 lg:px-8">
+        <div className="mx-auto grid max-w-7xl items-start gap-6 px-6 lg:grid-cols-2 lg:gap-8 lg:px-8">
           <div className="relative order-1 mx-auto aspect-[3/4] w-full max-w-sm lg:max-w-md">
             <div className="absolute -right-4 -top-4 h-24 w-24 rounded-2xl bg-brand/10" />
             <div className="absolute -bottom-4 left-8 h-20 w-20 rounded-full bg-brand/10" />
@@ -332,7 +332,7 @@ export default async function ClinicalDetailPage({ params }: { params: Promise<{
               <Image src={s.image} alt={s.title} fill className="object-cover object-center" />
             </div>
           </div>
-          <div className="order-2 text-start">
+          <div className="order-2 text-start lg:pt-8">
             <h2 className="text-3xl font-extrabold text-ink">{aboutFirst} <span className="text-brand">{aboutRest.join(" ")}</span></h2>
             <div className="mt-6 space-y-4">
               {s.about.map((para, i) => <p key={i} className="text-sm leading-8 text-ink-muted">{para}</p>)}
