@@ -52,7 +52,7 @@ function groupNews(rows: ApiNews[], locale: Locale): NewsGroups {
   for (const a of rows) {
     const item = toItem(a, locale);
     if (a.section === "workshops") {
-      // أول عنصر مميّز فقط يظهر كبطاقة كبيرة؛ أي عنصر مميّز إضافي يدخل الشبكة العادية (حتى لا يختفي)
+      // أول عنصر مميّز يظهر كبطاقة كبيرة؛ أي عنصر مميّز إضافي يدخل الشبكة العادية (حتى لا يختفي)
       if (a.featured && !g.workshopFeatured) g.workshopFeatured = item; else g.workshops.push(item);
     } else if (a.section === "center") g.centerNews.push(item);
     else if (a.section === "events") g.events.push(item);
