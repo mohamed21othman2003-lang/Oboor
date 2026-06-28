@@ -38,15 +38,17 @@ const defaultIcon = <svg width="20" height="20" viewBox="0 0 24 24" {...sw}><pat
 export default function ProgramCard({ p, locale = "ar" }: { p: Program; locale?: Locale }) {
   return (
     <div className="flex h-full flex-col rounded-2xl border border-line border-t-4 border-t-brand bg-white p-6 text-start shadow-sm">
-      {/* Header: icon (right) + badge (left) */}
-      <div className="mb-3 flex items-start justify-between">
-        <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand/[0.08] text-brand">
+      {/* Header: الأيقونة يمين، وجنبها شارة «برنامج» والعنوان (مجمّعين) — مطابق للديزاين */}
+      <div className="mb-3 flex items-start gap-3">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand/[0.08] text-brand">
           {(p.slug && PROGRAM_ICONS[p.slug]) || defaultIcon}
         </span>
-        <span className="rounded-full border border-[#b8ebf0] bg-[#e8f7f8] px-3 py-1 text-xs font-bold text-ink">{p.badge ?? pick(locale, "برنامج", "Program")}</span>
+        <div className="min-w-0">
+          <span className="inline-block rounded-full border border-[#b8ebf0] bg-[#e8f7f8] px-3 py-0.5 text-[11px] font-bold text-ink">{p.badge ?? pick(locale, "برنامج", "Program")}</span>
+          <h3 className="mt-1.5 text-base font-bold leading-6 text-ink">{p.title}</h3>
+        </div>
       </div>
 
-      <h3 className="text-base font-bold text-ink">{p.title}</h3>
       <p className="mt-2 text-[13px] leading-7 text-ink-muted">{p.desc}</p>
 
       {/* يناسب pill */}
