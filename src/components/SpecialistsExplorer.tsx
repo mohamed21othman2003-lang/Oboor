@@ -65,14 +65,14 @@ export default function SpecialistsExplorer({
   return (
     <>
       {/* Search / filter bar */}
-      <div className="mb-10 flex flex-wrap items-center gap-2 rounded-2xl border border-line bg-white p-3 shadow-sm lg:flex-nowrap">
+      <div className="mb-10 flex flex-col items-stretch gap-1 rounded-2xl border border-line bg-white p-3 shadow-sm lg:flex-row lg:flex-nowrap lg:items-center lg:gap-2">
         <Dropdown icon={<BookIcon />} label={pick(locale, "التخصص", "Specialty")} allLabel={pick(locale, "جميع التخصصات", "All Specialties")} value={specialty} onChange={setSpecialty} options={specialties} />
         <Divider />
         <Dropdown icon={<RibbonIcon />} label={pick(locale, "الخبرة", "Experience")} allLabel={pick(locale, "جميع الخبرات", "All Experience")} value={experience} onChange={setExperience} options={experiences} />
         <Divider />
         <Dropdown icon={<PinIcon />} label={pick(locale, "المنطقة / الفرع", "Region / Branch")} allLabel={pick(locale, "جميع الفروع", "All Branches")} value={region} onChange={setRegion} options={regions} />
         <Divider />
-        <div className="relative min-w-[200px] flex-1">
+        <div className="relative w-full lg:min-w-[200px] lg:flex-1">
           <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-ink-soft"><SearchIcon /></span>
           <input
             type="text"
@@ -82,17 +82,20 @@ export default function SpecialistsExplorer({
             className="w-full rounded-xl bg-surface py-2.5 pr-10 pl-3 text-start text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-brand/30"
           />
         </div>
-        <button
-          type="button"
-          onClick={() => resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
-          className="flex shrink-0 items-center gap-2 rounded-xl bg-brand px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-dark"
-        >
-          <SearchIcon />
-          {pick(locale, "ابحث الآن", "Search Now")}
-        </button>
-        <button type="button" onClick={reset} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-ink-soft transition-colors hover:bg-surface" aria-label={pick(locale, "إعادة تعيين", "Reset")}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8" /><path d="M3 3v5h5" /></svg>
-        </button>
+        {/* الأزرار: صف واحد على الموبايل (يمنع تيتم زر إعادة التعيين) — وعناصر مباشرة على الديسكتوب */}
+        <div className="mt-1 flex items-center gap-2 lg:mt-0 lg:contents">
+          <button
+            type="button"
+            onClick={() => resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
+            className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-brand px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-dark lg:flex-none lg:shrink-0"
+          >
+            <SearchIcon />
+            {pick(locale, "ابحث الآن", "Search Now")}
+          </button>
+          <button type="button" onClick={reset} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-ink-soft transition-colors hover:bg-surface" aria-label={pick(locale, "إعادة تعيين", "Reset")}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8" /><path d="M3 3v5h5" /></svg>
+          </button>
+        </div>
       </div>
 
       <div ref={resultsRef} className="scroll-mt-24">
@@ -125,8 +128,8 @@ function Dropdown({ icon, label, allLabel, value, onChange, options }: { icon: R
   };
 
   return (
-    <div ref={ref} className="relative min-w-[160px] shrink-0">
-      <button type="button" onClick={() => setOpen((o) => !o)} className="flex w-full items-center gap-2.5 rounded-xl px-2 py-1.5 transition-colors hover:bg-surface">
+    <div ref={ref} className="relative w-full border-b border-line/70 last:border-b-0 lg:w-auto lg:min-w-[160px] lg:shrink-0 lg:border-b-0">
+      <button type="button" onClick={() => setOpen((o) => !o)} className="flex min-h-[52px] w-full items-center gap-2.5 rounded-xl px-2 py-1.5 transition-colors hover:bg-surface">
         <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand/10 text-brand">{icon}</span>
         <span className="flex-1 text-start">
           <span className="block text-[11px] leading-none text-ink-soft">{label}</span>
