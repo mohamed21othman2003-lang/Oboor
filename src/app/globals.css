@@ -39,6 +39,20 @@ body {
   font-family: var(--font-sans);
 }
 
+/* توحيد مؤشّر التركيز (focus) على لون الهوية بدل إطار المتصفّح الافتراضي
+   (الذي يظهر أحياناً بلون أصفر عند النقر/اللمس). يبقى مرئياً لتنقّل الكيبورد
+   فقط حفاظاً على إتاحة الوصول، ويختفي عند النقر بالماوس أو اللمس. */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+}
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
 /* Mirror directional (horizontal) icons when the layout flips to LTR.
    The icons are authored left-pointing for the default RTL layout. */
 [dir="ltr"] .dir-flip {
