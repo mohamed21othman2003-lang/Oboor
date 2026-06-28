@@ -53,6 +53,15 @@ body {
   outline: none;
 }
 
+/* Tailwind v4 يجعل الأزرار بمؤشّر افتراضي — نعيد مؤشّر اليد لكل العناصر التفاعلية */
+button:not(:disabled),
+[role="button"]:not([aria-disabled="true"]),
+label[for],
+summary,
+select {
+  cursor: pointer;
+}
+
 /* Mirror directional (horizontal) icons when the layout flips to LTR.
    The icons are authored left-pointing for the default RTL layout. */
 [dir="ltr"] .dir-flip {
