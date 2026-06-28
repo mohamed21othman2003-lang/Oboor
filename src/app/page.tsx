@@ -6,8 +6,11 @@ import WhyUs, { type FeatureItem } from "@/components/home/WhyUs";
 import SuccessStories from "@/components/home/SuccessStories";
 import Gallery from "@/components/home/Gallery";
 import NewsAndCerts from "@/components/home/NewsAndCerts";
+import type { Metadata } from "next";
 import { getLocale } from "@/i18n/locale";
 import { pick, type Locale } from "@/i18n/config";
+
+export const metadata: Metadata = { alternates: { canonical: "/" } };
 import { fetchContent, fetchSections } from "@/lib/server/django";
 import { loadServiceCards } from "@/lib/server/serviceCards";
 import type { HomeChrome } from "@/lib/highlight";

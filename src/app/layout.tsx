@@ -29,9 +29,37 @@ const cairo = Cairo({
   weight: ["400", "500", "600", "700", "800"],
 });
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://oobor.vercel.app";
+const SITE_DESC =
+  "مركز عبور للرعاية النهارية والتأهيل — برامج تأهيلية وخدمات عيادية متخصصة لذوي الإعاقة والأطفال ذوي الاحتياجات: التدخل المبكر، النطق والتخاطب، العلاج الوظيفي والطبيعي، عبر فروعنا في أنحاء المملكة.";
+const OG_IMAGE = "/figma/home/imgImageWithFallback.jpg";
+
 export const metadata: Metadata = {
-  title: "عبور | Oboor",
-  description: "منصة عبور الرقمية",
+  metadataBase: new URL(SITE_URL),
+  title: { default: "عبور | Oboor للرعاية والتأهيل", template: "%s | عبور" },
+  description: SITE_DESC,
+  applicationName: "عبور",
+  keywords: [
+    "عبور", "مركز عبور", "التأهيل", "الرعاية النهارية", "التدخل المبكر",
+    "النطق والتخاطب", "العلاج الوظيفي", "العلاج الطبيعي", "ذوي الإعاقة",
+    "الأطفال ذوي الاحتياجات", "السعودية", "Oboor",
+  ],
+  robots: { index: true, follow: true },
+  openGraph: {
+    type: "website",
+    siteName: "عبور | Oboor",
+    title: "عبور | Oboor للرعاية والتأهيل",
+    description: SITE_DESC,
+    url: SITE_URL,
+    locale: "ar_SA",
+    images: [{ url: OG_IMAGE, alt: "مركز عبور للرعاية والتأهيل" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "عبور | Oboor للرعاية والتأهيل",
+    description: SITE_DESC,
+    images: [OG_IMAGE],
+  },
 };
 
 export default async function RootLayout({
@@ -132,6 +160,27 @@ export default async function RootLayout({
   return (
     <html lang={locale} dir={dirOf(locale)} className={`${cairo.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col font-sans bg-background text-foreground">
+        {/* بيانات منظَّمة (Schema.org / JSON-LD) — تعريف المنظمة لمحركات البحث */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "MedicalOrganization",
+              name: "مركز عبور للرعاية والتأهيل",
+              alternateName: "Oboor Center for Care & Rehabilitation",
+              url: SITE_URL,
+              logo: `${SITE_URL}/logo.png`,
+              image: `${SITE_URL}${OG_IMAGE}`,
+              description: SITE_DESC,
+              email: chrome.footer.contact.email,
+              telephone: chrome.footer.contact.phone,
+              areaServed: { "@type": "Country", name: "Saudi Arabia" },
+              address: { "@type": "PostalAddress", addressCountry: "SA" },
+              sameAs: chrome.footer.social.map((s) => s.url).filter(Boolean),
+            }),
+          }}
+        />
         <PreviewBanner />
         <SiteChrome locale={locale} chrome={chrome}>{children}</SiteChrome>
       </body>
