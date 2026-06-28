@@ -42,10 +42,10 @@ export default function CtaSection({
         <p className="mx-auto mt-3 max-w-2xl text-sm text-white/75">{subtitle}</p>
 
         {features && features.length > 0 && (
-          <div className="mx-auto mt-6 flex max-w-3xl flex-wrap items-center justify-center gap-x-7 gap-y-2.5">
+          <div className="mx-auto mt-6 grid w-fit grid-cols-2 gap-x-8 gap-y-3 text-start">
             {features.map((f) => (
               <span key={f} className="flex items-center gap-2 text-sm text-white/85">
-                <span className="h-1.5 w-1.5 rounded-full bg-success" />
+                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-success" />
                 {f}
               </span>
             ))}
