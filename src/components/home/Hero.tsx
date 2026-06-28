@@ -88,7 +88,11 @@ export default function Hero({ locale, slides: slidesProp, chrome }: { locale: L
             src={sl.img}
             alt={pick(locale, "مركز عبور للرعاية والتأهيل", "Oboor Center for Care & Rehabilitation")}
             fill
-            priority={idx === 0}
+            // Next 16: `priority` صار deprecated. الشريحة الأولى = عنصر LCP →
+            // preload (رابط في <head> للاكتشاف المبكر) + fetchPriority=high على الطلب.
+            preload={idx === 0}
+            fetchPriority={idx === 0 ? "high" : undefined}
+            loading={idx === 0 ? "eager" : "lazy"}
             quality={75}
             sizes="100vw"
             className={`object-cover object-bottom transition-opacity duration-700 ${idx === i ? "opacity-100" : "opacity-0"}`}
