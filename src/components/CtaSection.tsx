@@ -38,7 +38,7 @@ export default function CtaSection({
           {starBadge ? <StarIcon /> : <span className="h-2 w-2 rounded-full bg-success" />}
           {badge ?? pick(locale, "خدمة العملاء متاحة على مدار الساعة", "Customer service available around the clock")}
         </span>
-        <h2 className="mt-5 text-3xl font-extrabold text-white sm:text-4xl">{title}</h2>
+        <h2 className="mt-5 text-3xl font-extrabold leading-snug text-white sm:text-4xl sm:leading-snug">{title}</h2>
         <p className="mx-auto mt-3 max-w-2xl text-sm text-white/75">{subtitle}</p>
 
         {features && features.length > 0 && (
