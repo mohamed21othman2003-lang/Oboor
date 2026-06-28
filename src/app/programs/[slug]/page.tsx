@@ -117,7 +117,7 @@ export default async function ProgramDetailPage({ params }: { params: Promise<{ 
       </section>
 
       {/* About */}
-      <section className="bg-white py-16">
+      <section className="bg-white pb-16 pt-4">
         <div className="mx-auto grid max-w-7xl items-center gap-12 px-6 lg:grid-cols-2 lg:px-8">
           <div className="relative order-1 h-[420px]">
             <div className="absolute -right-4 -top-4 h-24 w-24 rounded-2xl bg-brand/10" />
