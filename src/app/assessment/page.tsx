@@ -84,8 +84,11 @@ export default async function AssessmentPage() {
   const locale = await getLocale();
   const en = locale === "en";
 
-  // أقسام الصفحة من Django CMS مع سقوط للبيانات الثابتة
-  const sections = await fetchSections("assessment");
+  // أقسام الصفحة + بطاقات التقييم من Django بالتوازي (تقليل TTFB) مع سقوط للبيانات الثابتة
+  const [sections, rows] = await Promise.all([
+    fetchSections("assessment"),
+    fetchContent<ApiAssessment[]>("assessment"),
+  ]);
   const hero = sections?.hero ?? [];
   const hF = (k: string) => hero.find((r) => r.key === k);
   const hT = (r?: (typeof hero)[number]) => (r ? (en ? r.title_en || r.title_ar : r.title_ar) : "");
@@ -122,7 +125,6 @@ export default async function AssessmentPage() {
     ? sections.answer_options.map((row) => (en ? (row.title_en || row.title_ar) : row.title_ar))
     : (en ? ANSWER_OPTIONS_EN : ANSWER_OPTIONS);
 
-  const rows = await fetchContent<ApiAssessment[]>("assessment");
   const { assessments, questions } = rows && rows.length ? fromApi(rows, locale) : staticData(locale);
   return (
     <>

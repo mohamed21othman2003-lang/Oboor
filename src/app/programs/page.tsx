@@ -115,8 +115,10 @@ function CTA({ locale }: { locale: Locale }) {
 export default async function ServicesPage() {
   const locale = await getLocale();
   const en = locale === "en";
-  const cards = await getServiceCards(locale);
-  const sections = await fetchSections("programs");
+  const [cards, sections] = await Promise.all([
+    getServiceCards(locale),
+    fetchSections("programs"),
+  ]);
   const h = (sections?.hero ?? []).find((r) => r.key === "heading");
   const hbadge = (sections?.hero ?? []).find((r) => r.key === "badge");
   return (

@@ -74,10 +74,11 @@ function renderHighlight(s: string): React.ReactNode {
 export default async function CareersPage() {
   const locale = await getLocale();
   const en = locale === "en";
-  const fetched = await fetchJobs(locale);
+  const [fetched, sections] = await Promise.all([
+    fetchJobs(locale),
+    fetchSections("careers"),
+  ]);
   const jobs = fetched ?? (en ? JOBS_EN : JOBS);
-
-  const sections = await fetchSections("careers");
   const cities = sections?.cities
     ? sections.cities.map((r) => (en ? r.title_en || r.title_ar : r.title_ar))
     : en ? CITIES_EN : CITIES;

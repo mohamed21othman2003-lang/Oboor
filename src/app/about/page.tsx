@@ -52,17 +52,20 @@ export default async function AboutPage() {
   const en = locale === "en";
   // الفروع والأخصائيون من الـCMS (مع fallback للبيانات الثابتة)
   const staticBranches = locale === "en" ? REGION_BRANCHES_EN : REGION_BRANCHES;
-  const cmsBranches = await loadBranches(locale);
+  // طلبات الـCMS بالتوازي (تقليل زمن الاستجابة/TTFB)
+  const [cmsBranches, specRows, about] = await Promise.all([
+    loadBranches(locale),
+    fetchContent<ApiSpec[]>("specialists"),
+    fetchSections("about"),
+  ]);
   const SMALL_BRANCHES = SMALL_BRANCH_SLUGS
     .map((s) => cmsBranches.find((b) => b.slug === s) ?? staticBranches.find((b) => b.slug === s))
     .filter(Boolean) as Branch[];
-  const specRows = await fetchContent<ApiSpec[]>("specialists");
   const specialists = specRows?.length
     ? specRows.map((r) => ({ slug: r.slug, name: en ? r.name_en || r.name_ar : r.name_ar, specialty: en ? r.specialty_en || r.specialty_ar : r.specialty_ar, desc: en ? r.desc_en || r.desc_ar : r.desc_ar, image: r.image }))
     : getSpecialists(locale);
 
   // نصوص الصفحة من الـCMS (أقسام صفحة about) مع fallback للنص الحالي
-  const about = await fetchSections("about");
   const blk = (b: string) => about?.[b]?.[0];
   const aTitle = (b: string, ar: string, e: string) => { const r = blk(b); const v = r && (en ? r.title_en || r.title_ar : r.title_ar); return v || pick(locale, ar, e); };
   const aText = (b: string, ar: string, e: string) => { const r = blk(b); const v = r && (en ? r.text_en || r.text_ar : r.text_ar); return v || pick(locale, ar, e); };
