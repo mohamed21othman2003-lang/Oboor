@@ -50,6 +50,10 @@ HIDDEN_PER_MODEL = {
         # «عدد الأسئلة» يُحسب تلقائياً من عدد الأسئلة الفعلية ⇒ لا داعي لإدخاله يدوياً
         "questions_ar", "questions_en",
     },
+    Technique: {
+        # أيقونات العروض تُختار تلقائياً حسب نص كل عرض ⇒ لا داعي لإدخالها يدوياً
+        "offer_icons",
+    },
     SiteSettings: {
         "site_name_ar", "site_name_en",  # غير مستخدم في أي صفحة
         "logo_path",                      # الموقع يقرأ logo_url من حقل اللوجو
