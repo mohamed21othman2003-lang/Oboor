@@ -52,25 +52,25 @@ export default function CtaSection({
           </div>
         )}
 
-        <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+        <div className="mx-auto mt-8 flex max-w-md flex-col items-stretch justify-center gap-4 sm:max-w-none sm:flex-row sm:flex-wrap sm:items-center">
           {primary && (
-            <Link href={primary.href} className="flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-semibold text-ink transition-colors hover:bg-surface">
+            <Link href={primary.href} className="flex w-full items-center justify-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-semibold text-ink transition-colors hover:bg-surface sm:w-auto sm:min-w-[190px]">
               <ClipboardIcon />
               {primary.label}
             </Link>
           )}
           {showApply && (
-            <Link href="/admission" className="flex items-center gap-2 rounded-xl bg-brand px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-dark">
+            <Link href="/admission" className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-dark sm:w-auto sm:min-w-[190px]">
               <FormIcon />
               {pick(locale, "طلب التحاق", "Apply Now")}
             </Link>
           )}
-          <a href="https://wa.me/966920003452" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 rounded-xl bg-[#2ba73e] px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90">
+          <a href="https://wa.me/966920003452" target="_blank" rel="noopener noreferrer" className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#2ba73e] px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90 sm:w-auto sm:min-w-[190px]">
             <WhatsappIcon />
             {pick(locale, "تواصل عبر الواتساب", "Contact via WhatsApp")}
           </a>
           {showBranches && (
-            <Link href="/branches" className="flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-semibold text-ink transition-colors hover:bg-surface">
+            <Link href="/branches" className="flex w-full items-center justify-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-semibold text-ink transition-colors hover:bg-surface sm:w-auto sm:min-w-[190px]">
               <PinIcon />
               {pick(locale, "اعثر على أقرب فرع", "Find Nearest Branch")}
             </Link>
