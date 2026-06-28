@@ -44,8 +44,10 @@ const PINS = [
 export default async function BranchesPage() {
   const locale = await getLocale();
   const en = locale === "en";
-  const branches = await loadBranches(locale);
-  const sections = await fetchSections("branches");
+  const [branches, sections] = await Promise.all([
+    loadBranches(locale),
+    fetchSections("branches"),
+  ]);
 
   const mapRegions = sections?.map_regions
     ? sections.map_regions.map((row) => ({

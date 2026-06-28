@@ -75,7 +75,10 @@ function ChevDown() {
 export default async function SpecialistsPage() {
   const locale = await getLocale();
   const en = locale === "en";
-  const specialists = await loadSpecialists(locale);
+  const [specialists, sections] = await Promise.all([
+    loadSpecialists(locale),
+    fetchSections("specialists"),
+  ]);
 
   // القائمة الكاملة لتخصصات وفروع عبور (تظهر في الفلتر حتى قبل إضافة كل الأخصائيين)
   const specialtyOptions = pick(
@@ -90,7 +93,6 @@ export default async function SpecialistsPage() {
   );
 
   // أقسام صفحة الأخصائيين من Django مع fallback للبيانات الثابتة
-  const sections = await fetchSections("specialists");
   const hero = sections?.hero ?? [];
   const hF = (k: string) => hero.find((r) => r.key === k);
   const hT = (r?: (typeof hero)[number]) => (r ? (en ? r.title_en || r.title_ar : r.title_ar) : "");

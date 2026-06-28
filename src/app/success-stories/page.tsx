@@ -83,8 +83,11 @@ type CmsHighlights = Omit<StoryHighlightsData, "journeyTemplate"> & { journeyTem
 export default async function SuccessStoriesPage() {
   const locale = await getLocale();
   const en = locale === "en";
-  const stories = await loadStories(locale);
-  const sections = await fetchSections("success");
+  // طلبات الـCMS بالتوازي بدل التسلسل (يقلّل زمن استجابة الخادم/TTFB)
+  const [stories, sections] = await Promise.all([
+    loadStories(locale),
+    fetchSections("success"),
+  ]);
 
   // STATS: من الـ CMS لو متاح، وإلا fallback للبيانات الثابتة
   const stats = sections?.stats

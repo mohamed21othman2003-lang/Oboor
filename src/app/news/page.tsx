@@ -91,10 +91,11 @@ function Chev() {
 export default async function NewsPage() {
   const locale = await getLocale();
   const en = locale === "en";
-  const rows = await fetchContent<ApiNews[]>("news");
+  const [rows, sections] = await Promise.all([
+    fetchContent<ApiNews[]>("news"),
+    fetchSections("news"),
+  ]);
   const groups = rows && rows.length ? groupNews(rows, locale) : staticGroups(locale);
-
-  const sections = await fetchSections("news");
   const categories = sections?.categories
     ? sections.categories.map((row) => ({
         label: en ? row.title_en || row.title_ar : row.title_ar,
