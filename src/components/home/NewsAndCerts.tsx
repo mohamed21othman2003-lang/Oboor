@@ -61,7 +61,7 @@ export default function NewsAndCerts({ locale, news: newsProp, certs: certsProp,
   const navBtn = "flex h-10 w-10 items-center justify-center rounded-full border border-white/30 bg-white/10 text-white transition-colors hover:bg-white hover:text-brand-deep";
   return (
     <section className="relative overflow-hidden bg-gradient-to-bl from-brand to-brand-deep py-20">
-      <div className="relative mx-auto grid max-w-7xl gap-10 px-6 lg:grid-cols-3 lg:px-8">
+      <div className="relative mx-auto grid max-w-7xl grid-cols-1 gap-10 px-6 lg:grid-cols-3 lg:px-8">
         {/* News */}
         <div className="lg:col-span-2">
           <div className="mb-6 flex items-start justify-between gap-4">
