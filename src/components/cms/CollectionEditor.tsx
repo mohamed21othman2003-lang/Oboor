@@ -196,7 +196,7 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
         );
       }
       return (
-        <div key={i} className="grid gap-4 sm:grid-cols-2">
+        <div key={i} className="grid gap-x-5 gap-y-2 sm:grid-cols-2">
           {row.ar && <FieldInput f={row.ar} value={values[row.ar.name]} onChange={(v) => set(row.ar!.name, v)} badge="عربي" />}
           {row.en && <FieldInput f={row.en} value={values[row.en.name]} onChange={(v) => set(row.en!.name, v)} badge="English" dir="ltr" />}
         </div>
@@ -268,7 +268,7 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
 
       {error && <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">{error}</p>}
 
-      <div className="space-y-5 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-line">
+      <div className="space-y-7 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-line sm:p-8">
         {rows.map(renderRow)}
       </div>
 
@@ -328,7 +328,7 @@ function roleFor(f: FieldSchema): { t: string; c: string } | null {
 function Label({ f, badge }: { f: FieldSchema; badge?: string }) {
   const role = badge === "English" ? null : roleFor(f); // الشارة مرة واحدة (الجانب العربي)
   return (
-    <label className="mb-1.5 flex flex-wrap items-center gap-2 text-sm font-semibold text-ink">
+    <label className="mb-2 flex flex-wrap items-center gap-2 text-sm font-semibold text-ink">
       {f.label}
       {f.required && <span className="text-red-500">*</span>}
       {role && <span className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${role.c}`}>{role.t}</span>}
