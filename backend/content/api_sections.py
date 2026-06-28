@@ -1,6 +1,7 @@
 from rest_framework import generics, serializers
 from .m_sections import SectionItem, ServiceCard
 from .image_utils import ResolvedImageMixin
+from .preview import PreviewListMixin
 
 
 class SectionItemSerializer(ResolvedImageMixin):
@@ -10,7 +11,7 @@ class SectionItemSerializer(ResolvedImageMixin):
                   "title_ar", "title_en", "text_ar", "text_en", "data_ar", "data_en", "image"]
 
 
-class SectionByPage(generics.ListAPIView):
+class SectionByPage(PreviewListMixin, generics.ListAPIView):
     """كل عناصر الأقسام المنشورة لصفحة معيّنة (تُجمَّع حسب block في الواجهة)."""
     serializer_class = SectionItemSerializer
 
@@ -27,7 +28,7 @@ class ServiceCardSerializer(serializers.ModelSerializer):
                   "features_ar", "features_en", "regions_ar", "regions_en"]
 
 
-class ServiceCardList(generics.ListAPIView):
+class ServiceCardList(PreviewListMixin, generics.ListAPIView):
     serializer_class = ServiceCardSerializer
 
     def get_queryset(self):

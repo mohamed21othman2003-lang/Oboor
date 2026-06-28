@@ -12,7 +12,10 @@ class ClinicalServiceSerializer(ResolvedImageMixin):
                   "blocks_ar", "blocks_en", "image", "order", "published"]
 
 
-class ClinicalServiceList(generics.ListAPIView):
+from .preview import PreviewListMixin
+
+
+class ClinicalServiceList(PreviewListMixin, generics.ListAPIView):
     serializer_class = ClinicalServiceSerializer
 
     def get_queryset(self):

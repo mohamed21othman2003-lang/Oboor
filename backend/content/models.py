@@ -85,3 +85,20 @@ class ContentSnapshot(models.Model):
 
     def __str__(self):
         return f"{self.type_key}#{self.obj_id}"
+
+
+class PreviewDraft(models.Model):
+    """مسودّة معاينة: تعديلات غير محفوظة تُخزَّن مؤقتاً لعرضها في وضع المعاينة.
+    تُحفظ في قاعدة البيانات لتعمل عبر كل عمّال الخادم وبعد إعادة التشغيل."""
+    type_key = models.CharField(max_length=40)
+    obj_id = models.CharField(max_length=40)
+    data = models.JSONField(default=dict)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "مسودّة معاينة"
+        verbose_name_plural = "مسودّات المعاينة"
+        unique_together = ("type_key", "obj_id")
+
+    def __str__(self):
+        return f"{self.type_key}#{self.obj_id}"

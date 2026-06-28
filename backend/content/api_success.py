@@ -23,7 +23,10 @@ class SuccessStorySerializer(ResolvedImageMixin):
         ]
 
 
-class SuccessStoryList(generics.ListAPIView):
+from .preview import PreviewListMixin
+
+
+class SuccessStoryList(PreviewListMixin, generics.ListAPIView):
     serializer_class = SuccessStorySerializer
 
     def get_queryset(self):

@@ -1,6 +1,7 @@
 from rest_framework import generics, serializers
 from .m_home import HeroSlide, StatItem, FeatureItem, GalleryImage
 from .image_utils import ResolvedImageMixin
+from .preview import PreviewListMixin
 
 
 class HeroSlideSerializer(ResolvedImageMixin):
@@ -30,28 +31,28 @@ class GalleryImageSerializer(ResolvedImageMixin):
         fields = ["key", "caption_ar", "caption_en", "image", "order"]
 
 
-class HeroSlideList(generics.ListAPIView):
+class HeroSlideList(PreviewListMixin, generics.ListAPIView):
     serializer_class = HeroSlideSerializer
 
     def get_queryset(self):
         return HeroSlide.objects.filter(published=True)
 
 
-class StatItemList(generics.ListAPIView):
+class StatItemList(PreviewListMixin, generics.ListAPIView):
     serializer_class = StatItemSerializer
 
     def get_queryset(self):
         return StatItem.objects.filter(published=True)
 
 
-class FeatureItemList(generics.ListAPIView):
+class FeatureItemList(PreviewListMixin, generics.ListAPIView):
     serializer_class = FeatureItemSerializer
 
     def get_queryset(self):
         return FeatureItem.objects.filter(published=True)
 
 
-class GalleryImageList(generics.ListAPIView):
+class GalleryImageList(PreviewListMixin, generics.ListAPIView):
     serializer_class = GalleryImageSerializer
 
     def get_queryset(self):

@@ -2,7 +2,22 @@
 // لو DJANGO_API_URL متوفّر → نوجّه الطلب لـ Django (مصدر الحقيقة + Django Admin).
 // لو مش متوفّر → الكود الأصلي يخزّن في Supabase مباشرة (fallback).
 
+import { draftMode, cookies } from "next/headers";
+
 export const DJANGO_API_URL = process.env.DJANGO_API_URL;
+
+// في وضع المعاينة فقط: يرجّع باراميتر ?preview=type:id من كوكي المعاينة.
+// خارج وضع المعاينة (الزوّار العاديون) يرجّع فارغاً والصفحات تبقى ثابتة/مُخزّنة (ISR).
+async function previewParam(): Promise<string> {
+  try {
+    const { isEnabled } = await draftMode();
+    if (!isEnabled) return "";
+    const ref = (await cookies()).get("oboor_preview")?.value;
+    return ref ? `?preview=${encodeURIComponent(ref)}` : "";
+  } catch {
+    return "";
+  }
+}
 
 export async function forwardJson(path: string, payload: Record<string, unknown>): Promise<boolean> {
   if (!DJANGO_API_URL) return false;
@@ -27,11 +42,16 @@ export async function forwardForm(path: string, form: FormData): Promise<boolean
 export async function fetchContent<T = unknown>(path: string): Promise<T | null> {
   if (!DJANGO_API_URL) return null;
   try {
-    const res = await fetch(`${DJANGO_API_URL}/content/${path}/`, {
-      // محتوى يتحدّث من لوحة الإدارة → نعيد التحقق كل دقيقة كحدّ أقصى،
-      // مع وسم cache-content حتى يبطله الحفظ فورًا (on-demand revalidation).
-      next: { revalidate: 60, tags: ["cms-content"] },
-    });
+    const preview = await previewParam();
+    const res = await fetch(
+      `${DJANGO_API_URL}/content/${path}/${preview}`,
+      preview
+        ? // وضع المعاينة: لا تخزين، نريد المسودّة الطازجة في كل طلب.
+          { cache: "no-store" }
+        : // محتوى يتحدّث من لوحة الإدارة → نعيد التحقق كل دقيقة كحدّ أقصى،
+          // مع وسم cache-content حتى يبطله الحفظ فورًا (on-demand revalidation).
+          { next: { revalidate: 60, tags: ["cms-content"] } },
+    );
     if (!res.ok) return null;
     return (await res.json()) as T;
   } catch {

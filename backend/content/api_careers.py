@@ -22,7 +22,10 @@ class JobOpeningSerializer(serializers.ModelSerializer):
         ]
 
 
-class JobOpeningList(generics.ListAPIView):
+from .preview import PreviewListMixin
+
+
+class JobOpeningList(PreviewListMixin, generics.ListAPIView):
     serializer_class = JobOpeningSerializer
 
     def get_queryset(self):

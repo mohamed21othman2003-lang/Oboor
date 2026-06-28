@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import path, include
-from content import cms_api, cms_crud
+from content import cms_api, cms_crud, preview as cms_preview
 
 admin.site.site_header = "لوحة تحكّم مركز عبور"
 admin.site.site_title = "إدارة عبور"
@@ -17,6 +17,7 @@ urlpatterns = [
     path("api/cms/me/", cms_api.me),
     path("api/cms/stats/", cms_api.stats),
     path("api/cms/upload/", cms_crud.upload),
+    path("api/cms/preview/", cms_preview.save_preview),
     path("api/cms/collections/<str:type_key>/schema/", cms_crud.schema),
     path("api/cms/collections/<str:type_key>/reorder/", cms_crud.reorder),
     path("api/cms/collections/<str:type_key>/<int:pk>/reset/", cms_crud.reset_default),

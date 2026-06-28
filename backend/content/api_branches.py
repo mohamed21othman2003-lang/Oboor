@@ -13,7 +13,10 @@ class BranchSerializer(serializers.ModelSerializer):
                   "services_ar", "services_en", "gallery", "lat", "lng", "is_new", "order"]
 
 
-class BranchList(generics.ListAPIView):
+from .preview import PreviewListMixin
+
+
+class BranchList(PreviewListMixin, generics.ListAPIView):
     serializer_class = BranchSerializer
 
     def get_queryset(self):

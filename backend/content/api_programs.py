@@ -1,6 +1,7 @@
 from rest_framework import serializers, generics
 from .m_programs import ProgramDetail
 from .image_utils import ResolvedImageMixin
+from .preview import PreviewListMixin
 
 
 class ProgramDetailSerializer(ResolvedImageMixin):
@@ -26,7 +27,7 @@ class ProgramDetailSerializer(ResolvedImageMixin):
         ]
 
 
-class ProgramList(generics.ListAPIView):
+class ProgramList(PreviewListMixin, generics.ListAPIView):
     serializer_class = ProgramDetailSerializer
 
     def get_queryset(self):

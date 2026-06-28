@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   getSchema, getItem, createItem, updateItem, uploadField, uploadImage, resetDefault,
-  TYPE_LABELS, addLabelFor, type FieldSchema, type CmsItem,
+  savePreviewDraft, TYPE_LABELS, addLabelFor, type FieldSchema, type CmsItem,
 } from "@/lib/cms/api";
 import { CMS_ICONS, ICON_LABELS, iconNamesFor } from "@/lib/cms/icons";
 import { iconByKey, OFFER_ICON_KEYS } from "@/lib/areaIcon";
@@ -25,8 +25,25 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
   const [resetting, setResetting] = useState(false);
   const [error, setError] = useState("");
   const [ok, setOk] = useState("");
+  const [previewing, setPreviewing] = useState(false);
 
   const label = TYPE_LABELS[type] || type;
+
+  // معاينة التعديلات الحالية (غير المحفوظة) على الصفحة الحقيقية قبل الحفظ
+  async function doPreview() {
+    const to = previewHref(type, values);
+    if (!to) return;
+    setError("");
+    setPreviewing(true);
+    try {
+      await savePreviewDraft(type, id, values);
+      window.open(`/api/preview?ref=${type}:${id}&to=${encodeURIComponent(to)}`, "_blank", "noopener");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "تعذّرت المعاينة.");
+    } finally {
+      setPreviewing(false);
+    }
+  }
 
   useEffect(() => {
     setLoading(true);
@@ -244,7 +261,7 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
 
   if (loading) return <p className="text-ink-soft">جارٍ التحميل…</p>;
 
-  const preview = isNew ? null : previewHref(type, values);
+  const canPreview = !isNew && !readonly && previewHref(type, values) !== null;
   return (
     <div className="mx-auto max-w-4xl space-y-6 pb-24">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -252,11 +269,17 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
           <Link href={`/cms/content/${type}`} className="text-xs font-semibold text-brand hover:text-brand-dark">← {label}</Link>
           <h1 className="mt-1 text-2xl font-extrabold text-ink">{isNew ? addLabelFor(type) : `تعديل: ${label}`}</h1>
         </div>
-        {preview && (
-          <a href={preview} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-white px-3.5 py-2 text-sm font-semibold text-brand transition-colors hover:bg-brand hover:text-white">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3" /></svg>
-            عاين هذه الصفحة
-          </a>
+        {canPreview && (
+          <button
+            type="button"
+            onClick={doPreview}
+            disabled={previewing}
+            title="افتح الصفحة الحقيقية وشاهد تعديلاتك الحالية قبل الحفظ — لا تظهر للزوّار"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-white px-3.5 py-2 text-sm font-semibold text-brand transition-colors hover:bg-brand hover:text-white disabled:opacity-60"
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z" /><circle cx="12" cy="12" r="3" /></svg>
+            {previewing ? "جارٍ فتح المعاينة…" : "معاينة التعديلات"}
+          </button>
         )}
       </div>
 

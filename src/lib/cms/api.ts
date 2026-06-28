@@ -146,6 +146,11 @@ export async function uploadField(type: string, pk: number | string, field: stri
   await bumpSiteCache();
   return r;
 }
+// تخزين مسودّة معاينة (تعديلات غير محفوظة) في الباك إند، ثم فتح الصفحة في وضع المعاينة.
+export async function savePreviewDraft(type: string, id: number | string, data: Record<string, unknown>) {
+  return cmsFetch(`/cms/preview/`, { method: "POST", body: JSON.stringify({ type, id, data }) });
+}
+
 // رفع صورة عامّة (للمعارض) — تُرجِع رابطها العام
 export function uploadImage(file: File) {
   const fd = new FormData();
