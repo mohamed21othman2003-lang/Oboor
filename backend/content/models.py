@@ -10,7 +10,10 @@ class NewsArticle(models.Model):
     ]
     slug = models.SlugField("المعرّف (slug)", max_length=120, unique=True)
     section = models.CharField("القسم", max_length=20, choices=SECTIONS)
-    featured = models.BooleanField("مميّز", default=False)
+    featured = models.BooleanField(
+        "مميّز", default=False,
+        help_text="عند تفعيله يظهر هذا العنصر كبطاقة كبيرة مميّزة في أعلى قسمه (الورش أو المقالات) بدل كارت عادي. فعّله لعنصر واحد فقط في كل قسم.",
+    )
 
     title_ar = models.CharField("العنوان (عربي)", max_length=300)
     title_en = models.CharField("العنوان (إنجليزي)", max_length=300, blank=True)
