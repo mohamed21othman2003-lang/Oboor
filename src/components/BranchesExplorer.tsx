@@ -157,12 +157,12 @@ function BranchCard({ b, locale }: { b: Branch; locale: Locale }) {
 
 function InfoRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
-    <div className="flex items-start gap-2 text-start">
-      <span className="mt-0.5 shrink-0 text-brand">{icon}</span>
-      <div className="min-w-0">
-        <p className="text-xs font-semibold text-ink-soft">{label}</p>
-        <p className="mt-0.5 text-sm leading-6 text-ink-muted">{value}</p>
-      </div>
+    <div className="text-start">
+      <p className="flex items-center justify-start gap-1.5 text-xs font-semibold text-ink-soft">
+        <span className="text-brand">{icon}</span>
+        {label}
+      </p>
+      <p className="mt-0.5 text-sm leading-6 text-ink-muted">{value}</p>
     </div>
   );
 }
