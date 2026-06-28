@@ -323,9 +323,9 @@ export default async function ClinicalDetailPage({ params }: { params: Promise<{
       </section>
 
       {/* About */}
-      <section className="bg-white py-16">
-        <div className="mx-auto grid max-w-7xl items-center gap-12 px-6 lg:grid-cols-2 lg:px-8">
-          <div className="relative order-1 mx-auto aspect-[3/4] w-full max-w-md lg:max-w-none">
+      <section className="bg-white pb-12 pt-4">
+        <div className="mx-auto grid max-w-7xl items-start gap-12 px-6 lg:grid-cols-2 lg:px-8">
+          <div className="relative order-1 mx-auto aspect-[3/4] w-full max-w-sm lg:max-w-md">
             <div className="absolute -right-4 -top-4 h-24 w-24 rounded-2xl bg-brand/10" />
             <div className="absolute -bottom-4 left-8 h-20 w-20 rounded-full bg-brand/10" />
             <div className="relative h-full w-full overflow-hidden rounded-3xl shadow-lg">
