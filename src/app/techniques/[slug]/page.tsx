@@ -106,7 +106,7 @@ export default async function TechniqueDetailPage({ params }: { params: Promise<
             <Link href="/" className="hover:text-brand">{pick(locale, "الرئيسية", "Home")}</Link>
           </nav>
 
-          <div className="grid items-center gap-12 lg:grid-cols-2">
+          <div className="grid items-center gap-8 lg:grid-cols-2">
             {/* Image */}
             <div className="relative order-1 h-[420px]">
               <div className="absolute -right-4 -top-4 h-24 w-24 rounded-2xl bg-brand/10" />
