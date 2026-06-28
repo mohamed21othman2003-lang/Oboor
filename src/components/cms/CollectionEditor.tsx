@@ -444,6 +444,7 @@ const HIDE_IF_EMPTY = new Set([
   "stations_ar", "stations_en",
   "about_tag_ar", "about_tag_en",  // البطاقة المميّزة — تظهر فقط للخدمات التي تستخدمها
   "help_section_ar", "help_section_en",  // قسم المساعدة في التقنيات — يظهر فقط لمن يستخدمه
+  "about_list_ar", "about_list_en",  // نقاط النبذة — تظهر فقط للخدمات التي تستخدمها
 ]);
 // نص زر الإضافة لكل قائمة (حسب اسم الحقل) — ليكون واضحاً ما الذي يُضاف
 const LIST_ADD_LABELS: Record<string, string> = {

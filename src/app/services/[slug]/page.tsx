@@ -337,7 +337,7 @@ export default async function ClinicalDetailPage({ params }: { params: Promise<{
             <div className="mt-6 space-y-4">
               {s.about.map((para, i) => <p key={i} className="text-sm leading-8 text-ink-muted">{para}</p>)}
             </div>
-            {s.aboutList && (
+            {s.aboutList && s.aboutList.length > 0 && (
               <ul className="mt-5 space-y-3">
                 {s.aboutList.map((it) => (
                   <li key={it} className="flex items-start gap-2 text-sm leading-7 text-ink-muted">
