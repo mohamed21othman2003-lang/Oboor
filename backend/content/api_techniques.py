@@ -1,6 +1,7 @@
 from rest_framework import generics, serializers
 from .m_techniques import Technique
 from .image_utils import ResolvedImageMixin
+from .preview import PreviewListMixin
 
 
 class TechniqueSerializer(ResolvedImageMixin):
@@ -12,7 +13,7 @@ class TechniqueSerializer(ResolvedImageMixin):
                   "help_section_ar", "help_section_en", "image", "order"]
 
 
-class TechniqueList(generics.ListAPIView):
+class TechniqueList(PreviewListMixin, generics.ListAPIView):
     serializer_class = TechniqueSerializer
 
     def get_queryset(self):

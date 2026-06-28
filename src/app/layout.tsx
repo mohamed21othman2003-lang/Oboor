@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Cairo } from "next/font/google";
 import "./globals.css";
 import SiteChrome, { type SiteChromeData } from "@/components/SiteChrome";
+import PreviewBanner from "@/components/PreviewBanner";
 import { getLocale, dirOf } from "@/i18n/locale";
 import { fetchContent, fetchSections, type SectionRow } from "@/lib/server/django";
 import { NAV_LINKS, CONTACT } from "@/lib/site";
@@ -131,6 +132,7 @@ export default async function RootLayout({
   return (
     <html lang={locale} dir={dirOf(locale)} className={`${cairo.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col font-sans bg-background text-foreground">
+        <PreviewBanner />
         <SiteChrome locale={locale} chrome={chrome}>{children}</SiteChrome>
       </body>
     </html>

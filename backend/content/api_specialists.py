@@ -14,7 +14,10 @@ class SpecialistSerializer(ResolvedImageMixin):
                   "qualifications_ar", "qualifications_en", "image", "order"]
 
 
-class SpecialistList(generics.ListAPIView):
+from .preview import PreviewListMixin
+
+
+class SpecialistList(PreviewListMixin, generics.ListAPIView):
     serializer_class = SpecialistSerializer
 
     def get_queryset(self):

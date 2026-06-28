@@ -16,7 +16,10 @@ class AssessmentCardSerializer(serializers.ModelSerializer):
                   "order"]
 
 
-class AssessmentCardList(generics.ListAPIView):
+from .preview import PreviewListMixin
+
+
+class AssessmentCardList(PreviewListMixin, generics.ListAPIView):
     serializer_class = AssessmentCardSerializer
 
     def get_queryset(self):
