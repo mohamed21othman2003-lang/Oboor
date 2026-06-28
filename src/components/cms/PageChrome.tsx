@@ -3,6 +3,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { listCollection, updateItem, createItem, deleteItem, uploadField, type CmsItem } from "@/lib/cms/api";
+import ImageCropModal from "@/components/cms/ImageCropModal";
 
 // ترتيب الأقسام كما تظهر على الصفحة (لعرضها مرتّبة بدل ترتيب قاعدة البيانات)
 const BLOCK_ORDER = ["hero", "about", "smart_search", "stats", "join_cards", "why_us", "success", "gallery", "news", "certs", "map_regions", "features", "services", "profile_intro", "profile_stats", "journey", "accreditations", "steps", "prelim_questions", "answer_options", "categories", "list", "cities", "employment_types", "contact_prompt", "highlights"];
@@ -180,6 +181,7 @@ export default function PageChrome({ page }: { page: string }) {
   const [savingId, setSavingId] = useState<number | null>(null);
   const [okId, setOkId] = useState<number | null>(null);
   const [addingBlock, setAddingBlock] = useState<string | null>(null);
+  const [pendingImg, setPendingImg] = useState<{ it: CmsItem; file: File } | null>(null);
   const [err, setErr] = useState("");
 
   useEffect(() => {
@@ -211,8 +213,16 @@ export default function PageChrome({ page }: { page: string }) {
     finally { setSavingId(null); }
   }
 
-  async function onImage(it: CmsItem, file: File) {
+  // اختيار صورة → فتح المعاينة قبل الرفع
+  function pickImage(it: CmsItem, file: File) {
     if (file.size > 5 * 1024 * 1024) { setErr("الحد الأقصى 5 ميجابايت."); return; }
+    setErr("");
+    setPendingImg({ it, file });
+  }
+
+  async function onImage(it: CmsItem, out: Blob | File) {
+    setPendingImg(null);
+    const file = out instanceof File ? out : new File([out], "image.jpg", { type: out.type || "image/jpeg" });
     setSavingId(it.id); setErr(""); setOkId(null);
     try {
       const saved = await uploadField("sections", it.id, "image_file", file) as CmsItem;
@@ -351,7 +361,7 @@ export default function PageChrome({ page }: { page: string }) {
                               )}
                               <label className="cursor-pointer rounded-lg bg-brand/10 px-3 py-2 text-xs font-semibold text-brand hover:bg-brand hover:text-white">
                                 تغيير الصورة
-                                <input type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) onImage(it, f); e.target.value = ""; }} />
+                                <input type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) pickImage(it, f); e.target.value = ""; }} />
                               </label>
                             </div>
                           </div>
@@ -382,6 +392,7 @@ export default function PageChrome({ page }: { page: string }) {
           <p className="px-1 text-[11px] text-ink-soft">تلميح: في العنوان الرئيسي، ضع الجزء الذي تريده باللون المميّز بين نجمتين **هكذا**.</p>
         </div>
       )}
+      {pendingImg && <ImageCropModal file={pendingImg.file} onCancel={() => setPendingImg(null)} onConfirm={(out) => onImage(pendingImg.it, out)} />}
     </div>
   );
 }
