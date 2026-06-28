@@ -58,8 +58,12 @@ export default function Hero({ locale, slides: slidesProp, chrome }: { locale: L
 
   const n = slides.length;
   const [i, setI] = useState(0);
+  // الشريحة الأولى فقط تُحمَّل فورًا (LCP)؛ باقي الشرائح بعد الإقلاع لتفادي تنزيل
+  // ٣ صور بملء الشاشة دفعةً واحدة ومنافسة صورة الهيرو على عرض النطاق.
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     const t = setInterval(() => setI((p) => (p + 1) % n), 6000);
     return () => clearInterval(t);
   }, [n]);
@@ -75,19 +79,22 @@ export default function Hero({ locale, slides: slidesProp, chrome }: { locale: L
 
   return (
     <section className="relative min-h-[600px] w-full overflow-hidden lg:h-[791px]">
-      {/* Background images — one per slide, cross-fading */}
-      {slides.map((sl, idx) => (
-        <Image
-          key={sl.img}
-          src={sl.img}
-          alt={pick(locale, "مركز عبور للرعاية والتأهيل", "Oboor Center for Care & Rehabilitation")}
-          fill
-          priority={idx === 0}
-          quality={90}
-          sizes="100vw"
-          className={`object-cover object-bottom transition-opacity duration-700 ${idx === i ? "opacity-100" : "opacity-0"}`}
-        />
-      ))}
+      {/* Background images — one per slide, cross-fading.
+          الشريحة الأولى فقط أولوية عالية وتُحمَّل فورًا (LCP)؛ الباقي بعد الإقلاع. */}
+      {slides.map((sl, idx) =>
+        idx === 0 || mounted ? (
+          <Image
+            key={sl.img}
+            src={sl.img}
+            alt={pick(locale, "مركز عبور للرعاية والتأهيل", "Oboor Center for Care & Rehabilitation")}
+            fill
+            priority={idx === 0}
+            quality={75}
+            sizes="100vw"
+            className={`object-cover object-bottom transition-opacity duration-700 ${idx === i ? "opacity-100" : "opacity-0"}`}
+          />
+        ) : null,
+      )}
       {/* Gradient — teal concentrated behind the text side (direction-aware) */}
       <div className={`absolute inset-0 ${gradient}`} />
 
