@@ -52,11 +52,12 @@ function groupNews(rows: ApiNews[], locale: Locale): NewsGroups {
   for (const a of rows) {
     const item = toItem(a, locale);
     if (a.section === "workshops") {
-      if (a.featured) g.workshopFeatured = item; else g.workshops.push(item);
+      // أول عنصر مميّز فقط يظهر كبطاقة كبيرة؛ أي عنصر مميّز إضافي يدخل الشبكة العادية (حتى لا يختفي)
+      if (a.featured && !g.workshopFeatured) g.workshopFeatured = item; else g.workshops.push(item);
     } else if (a.section === "center") g.centerNews.push(item);
     else if (a.section === "events") g.events.push(item);
     else if (a.section === "articles") {
-      if (a.featured) g.articleFeatured = item; else g.articles.push(item);
+      if (a.featured && !g.articleFeatured) g.articleFeatured = item; else g.articles.push(item);
     }
   }
   return g;
