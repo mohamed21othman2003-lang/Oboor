@@ -142,7 +142,9 @@ function BranchCard({ b, locale }: { b: Branch; locale: Locale }) {
           {pick(locale, "عرض التفاصيل", "View Details")}
         </Link>
         <a
-          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${pick(locale, "مركز عبور", "Oboor Center")} - ${b.address}`)}`}
+          href={b.lat != null && b.lng != null
+            ? `https://www.google.com/maps/dir/?api=1&destination=${b.lat},${b.lng}`
+            : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([b.address, b.city, pick(locale, "السعودية", "Saudi Arabia")].filter(Boolean).join("، "))}`}
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center justify-center gap-1.5 rounded-xl border border-brand px-4 py-2.5 text-sm font-semibold text-brand transition-colors hover:bg-brand/5"

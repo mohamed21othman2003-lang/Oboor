@@ -74,7 +74,7 @@ export default function LeafletMap({ locale, branches, regions }: { locale: Loca
   const dirUrl = (b: Branch) =>
     typeof b.lat === "number" && typeof b.lng === "number"
       ? `https://www.google.com/maps/dir/?api=1&destination=${b.lat},${b.lng}`
-      : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`مركز عبور ${b.address}`)}`;
+      : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([b.address, b.city, "السعودية"].filter(Boolean).join("، "))}`;
 
   return (
     <div className="relative overflow-hidden rounded-3xl border border-line shadow-sm">

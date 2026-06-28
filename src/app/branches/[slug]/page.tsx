@@ -99,7 +99,9 @@ export default async function BranchDetailPage({ params }: { params: Promise<{ s
     { icon: <PinIcon />, label: pick(locale, "العنوان", "Address"), value: b.address },
   ];
 
-  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${pick(locale, "مركز عبور", "Oboor Center")} - ${b.address}`)}`;
+  const mapsUrl = b.lat != null && b.lng != null
+    ? `https://www.google.com/maps/dir/?api=1&destination=${b.lat},${b.lng}`
+    : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([b.address, b.city, pick(locale, "السعودية", "Saudi Arabia")].filter(Boolean).join("، "))}`;
 
   return (
     <>
