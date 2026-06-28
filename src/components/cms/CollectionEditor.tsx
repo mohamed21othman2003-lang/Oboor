@@ -9,6 +9,7 @@ import {
 } from "@/lib/cms/api";
 import { CMS_ICONS, ICON_LABELS, iconNamesFor } from "@/lib/cms/icons";
 import { iconByKey, OFFER_ICON_KEYS } from "@/lib/areaIcon";
+import ImageCropModal from "@/components/cms/ImageCropModal";
 
 export default function CollectionEditor({ type, id }: { type: string; id: string }) {
   const router = useRouter();
@@ -1062,18 +1063,28 @@ function ImageInput({ f, value, pathFallback, type, id, isNew, onUploaded }: { f
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
   const [localPreview, setLocalPreview] = useState("");
+  const [pending, setPending] = useState<File | null>(null); // الملف المختار قبل المعاينة/الاعتماد
 
   // أولوية العرض: معاينة فورية → ملف مرفوع → الصورة الحالية على الموقع (المسار)
   const uploaded = typeof value === "string" ? value : "";
   const current = resolveSrc(uploaded || pathFallback);
   const src = localPreview || current;
 
-  async function onFile(e: React.ChangeEvent<HTMLInputElement>) {
+  // عند اختيار ملف: نفتح المعاينة بدل الرفع المباشر
+  function onPick(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
+    e.target.value = "";
     if (!file) return;
     if (file.size > 5 * 1024 * 1024) { setErr("الحد الأقصى 5 ميجابايت."); return; }
     setErr("");
-    setLocalPreview(URL.createObjectURL(file)); // تظهر فوراً قبل اكتمال الرفع
+    setPending(file);
+  }
+
+  // بعد الاعتماد من المعاينة: نرفع الصورة (الأصلية أو المقصوصة)
+  async function doUpload(out: Blob | File) {
+    setPending(null);
+    const file = out instanceof File ? out : new File([out], "image.jpg", { type: out.type || "image/jpeg" });
+    setLocalPreview(URL.createObjectURL(file));
     setBusy(true);
     try {
       const saved = await uploadField(type, id, f.name, file);
@@ -1104,7 +1115,7 @@ function ImageInput({ f, value, pathFallback, type, id, isNew, onUploaded }: { f
           ) : (
             <label className="inline-block cursor-pointer rounded-xl bg-brand/10 px-4 py-2.5 text-sm font-semibold text-brand transition-colors hover:bg-brand hover:text-white">
               {busy ? "جارٍ الرفع…" : src ? "تغيير الصورة" : "رفع صورة"}
-              <input type="file" accept="image/*" onChange={onFile} disabled={busy} className="hidden" />
+              <input type="file" accept="image/*" onChange={onPick} disabled={busy} className="hidden" />
             </label>
           )}
           {localPreview && !busy && <p className="mt-1.5 text-xs font-semibold text-emerald-600">تم رفع الصورة الجديدة ✓</p>}
@@ -1112,6 +1123,7 @@ function ImageInput({ f, value, pathFallback, type, id, isNew, onUploaded }: { f
       </div>
       {err && <p className="mt-1 text-xs text-red-600">{err}</p>}
       <Help text={f.help} />
+      {pending && <ImageCropModal file={pending} onCancel={() => setPending(null)} onConfirm={doUpload} />}
     </div>
   );
 }
