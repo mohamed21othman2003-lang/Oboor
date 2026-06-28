@@ -97,9 +97,16 @@ export default function SubmissionsList({ type }: { type: string }) {
             const phone = val(it, "phone");
             const email = val(it, "email");
             const wa = phone.replace(/[^\d]/g, "");
-            const shown = fields.filter((f) => val(it, f.name).trim() !== "");
+            // الحقول من نوع JSON (مثل «الإجابات») تُعرض بشكل خاص أسفل، لا كنص خام
+            const shown = fields.filter((f) => f.type !== "json" && val(it, f.name).trim() !== "");
             const boxes = shown.filter((f) => f.type === "textarea");
             const rows = shown.filter((f) => f.type !== "textarea");
+            const answers = Array.isArray(it.answers)
+              ? (it.answers as Array<Record<string, unknown>>).map((qa) => ({
+                  q: String(qa.q ?? qa.question ?? ""),
+                  a: String(qa.a ?? qa.answer ?? ""),
+                }))
+              : [];
             return (
               <div key={it.id} className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-line transition-shadow hover:shadow-md">
                 {/* Header */}
@@ -147,6 +154,27 @@ export default function SubmissionsList({ type }: { type: string }) {
                         );
                       })}
                     </div>
+
+                    {/* الإجابات (التقييم): كل سؤال وإجابة المتقدّم عليه */}
+                    {answers.length > 0 && (
+                      <div className="mt-3 rounded-xl bg-white p-4 ring-1 ring-line">
+                        <p className="mb-3 flex items-center gap-1.5 text-[11px] font-semibold text-ink-soft">
+                          <span className="text-[#1FA6A8]">{FIELD_ICONS.message}</span>
+                          الإجابات ({answers.length})
+                        </p>
+                        <ol className="space-y-2.5">
+                          {answers.map((qa, i) => (
+                            <li key={i} className="rounded-lg bg-surface/60 p-3">
+                              <p className="text-sm font-semibold leading-6 text-ink">{i + 1}. {qa.q}</p>
+                              <p className="mt-1 flex items-center gap-1.5 text-sm font-bold text-[#0F6C73]">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><path d="M20 6L9 17l-5-5" /></svg>
+                                {qa.a || "—"}
+                              </p>
+                            </li>
+                          ))}
+                        </ol>
+                      </div>
+                    )}
 
                     {/* الرسائل / الملاحظات */}
                     {boxes.map((f) => (
