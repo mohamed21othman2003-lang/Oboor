@@ -105,12 +105,12 @@ export default function BranchesExplorer({ locale, branches }: { locale: Locale;
 function BranchCard({ b, locale }: { b: Branch; locale: Locale }) {
   return (
     <article className="flex flex-col rounded-2xl border border-line bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
-      {/* Header */}
-      <div className="flex items-start justify-between gap-3 border-b border-line pb-4">
+      {/* Header — الأيقونة يمين والاسم جنبها مباشرة (مجمّعين على اليمين) */}
+      <div className="flex items-start gap-3 border-b border-line pb-4">
         <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand/10 text-brand">
           <BuildingIcon />
         </span>
-        <div className="text-start">
+        <div className="min-w-0 text-start">
           <h3 className="text-lg font-bold text-ink">{b.name}</h3>
           <p className="mt-0.5 text-sm">
             <span className="font-semibold text-brand">{b.city}</span>{" "}
