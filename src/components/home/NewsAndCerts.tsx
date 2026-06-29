@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { pick, type Locale } from "@/i18n/config";
 import { type HomeChrome } from "@/lib/highlight";
 
@@ -22,20 +22,21 @@ const NEWS_EN: typeof NEWS = [
 
 function NewsCard({ n, locale }: { n: (typeof NEWS)[number]; locale: Locale }) {
   return (
-    <div className="overflow-hidden rounded-2xl bg-white text-start">
-      <div className="relative h-36">
-        <Image src={n.img} alt={n.title} fill sizes="(max-width:768px) 100vw, 33vw" className="object-cover" />
+    // الكارت كله قابل للضغط + ارتفاع كامل ليتساوى مع باقي الكروت
+    <Link href="/news" className="group flex h-full flex-col overflow-hidden rounded-2xl bg-white text-start shadow-sm transition-shadow hover:shadow-xl">
+      <div className="relative h-36 shrink-0">
+        <Image src={n.img} alt={n.title} fill sizes="(max-width:768px) 100vw, 33vw" className="object-cover transition-transform duration-300 group-hover:scale-105" />
         <span className="absolute right-3 top-3 rounded-full bg-brand px-3 py-1 text-[11px] font-semibold text-white">{n.badge}</span>
       </div>
-      <div className="p-4">
+      <div className="flex flex-1 flex-col p-4">
         <h4 className="text-sm font-bold leading-7 text-ink">{n.title}</h4>
         <p className="mt-1 text-xs leading-6 text-ink-muted">{n.desc}</p>
-        <Link href="/news" className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-brand transition-colors hover:text-brand-dark">
+        <span className="mt-auto inline-flex items-center gap-1 pt-3 text-xs font-semibold text-brand transition-colors group-hover:text-brand-dark">
           {pick(locale, "اقرأ المزيد", "Read More")}
           <svg className="dir-flip" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M15 6l-6 6 6 6" /></svg>
-        </Link>
+        </span>
       </div>
-    </div>
+    </Link>
   );
 }
 
@@ -45,18 +46,28 @@ export default function NewsAndCerts({ locale, news: newsProp, certs: certsProp,
   const news = newsProp?.length ? newsProp : (locale === "en" ? NEWS_EN : NEWS);
   const certs: Cert[] = certsProp?.length ? certsProp : [0, 1, 2, 3].map(() => ({ name: "ISO 9001", label: pick(locale, "إدارة الجودة", "Quality Mgmt.") }));
   const trackRef = useRef<HTMLDivElement>(null);
-  const idxRef = useRef(0);
-  const scroll = (dir: number) => {
+  const [active, setActive] = useState(0);
+  const stepOf = (el: HTMLDivElement) => {
+    const card = el.children[0] as HTMLElement | undefined;
+    return card ? card.offsetWidth + 20 : 1; // gap-5
+  };
+  const goTo = (idx: number) => {
     const el = trackRef.current;
-    const card = el?.children[0] as HTMLElement | undefined;
-    if (!el || !card) return;
-    const step = card.offsetWidth + 20; // gap-5
+    if (!el) return;
+    const i = Math.min(Math.max(idx, 0), el.children.length - 1);
+    const step = stepOf(el);
     const max = el.scrollWidth - el.clientWidth;
-    idxRef.current = Math.min(Math.max(idxRef.current + dir, 0), el.children.length - 1);
     const rtl = getComputedStyle(el).direction === "rtl";
-    let target = idxRef.current * step * (rtl ? -1 : 1);
+    let target = i * step * (rtl ? -1 : 1);
     target = rtl ? Math.max(target, -max) : Math.min(target, max);
     el.scrollTo({ left: target, behavior: "smooth" });
+    setActive(i);
+  };
+  // مزامنة النقاط مع التمرير باللمس
+  const onScroll = () => {
+    const el = trackRef.current;
+    if (!el) return;
+    setActive(Math.round(Math.abs(el.scrollLeft) / stepOf(el)));
   };
   const navBtn = "flex h-10 w-10 items-center justify-center rounded-full border border-white/30 bg-white/10 text-white transition-colors hover:bg-white hover:text-brand-deep";
   return (
@@ -74,19 +85,33 @@ export default function NewsAndCerts({ locale, news: newsProp, certs: certsProp,
               <svg className="dir-flip" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M15 6l-6 6 6 6" /></svg>
             </Link>
           </div>
-          <div ref={trackRef} className="no-scrollbar flex snap-x snap-mandatory gap-5 overflow-x-auto pb-2">
+          <div
+            ref={trackRef}
+            onScroll={onScroll}
+            className="no-scrollbar flex snap-x snap-mandatory gap-5 overflow-x-auto pb-2 [mask-image:linear-gradient(to_right,transparent,#000_11%,#000_100%)]"
+          >
             {news.map((n) => (
-              <div key={n.title} className="w-[82%] shrink-0 snap-start sm:w-[47%]">
+              <div key={n.title} className="flex w-[85%] shrink-0 snap-start sm:w-[47%] lg:w-[31%]">
                 <NewsCard n={n} locale={locale} />
               </div>
             ))}
           </div>
-          {/* Carousel arrows */}
+          {/* Carousel controls: arrows + dots */}
           <div className="mt-5 flex items-center justify-center gap-3">
-            <button onClick={() => scroll(-1)} aria-label={pick(locale, "السابق", "Previous")} className={navBtn}>
+            <button onClick={() => goTo(active - 1)} aria-label={pick(locale, "السابق", "Previous")} className={navBtn}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M9 18l6-6-6-6" /></svg>
             </button>
-            <button onClick={() => scroll(1)} aria-label={pick(locale, "التالي", "Next")} className={navBtn}>
+            <div className="flex items-center gap-1.5">
+              {news.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => goTo(i)}
+                  aria-label={pick(locale, `الخبر ${i + 1}`, `News ${i + 1}`)}
+                  className={`h-2 rounded-full transition-all ${i === active ? "w-5 bg-white" : "w-2 bg-white/40 hover:bg-white/60"}`}
+                />
+              ))}
+            </div>
+            <button onClick={() => goTo(active + 1)} aria-label={pick(locale, "التالي", "Next")} className={navBtn}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M15 18l-6-6 6-6" /></svg>
             </button>
           </div>
