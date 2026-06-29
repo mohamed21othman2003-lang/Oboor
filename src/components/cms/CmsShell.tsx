@@ -91,7 +91,7 @@ export default function CmsShell({ children }: { children: React.ReactNode }) {
       <aside className={`fixed inset-y-0 right-0 z-40 flex w-72 transform flex-col border-l border-[#e6eff0] bg-white transition-transform lg:static lg:translate-x-0 ${open ? "translate-x-0" : "translate-x-full lg:translate-x-0"}`}>
         {/* Brand */}
         <div className="flex items-center gap-3 px-6 pb-3 pt-6">
-          <Image src="/logo.png" alt="عبور" width={88} height={40} className="h-9 w-auto object-contain" priority />
+          <Image src="/logo.png" alt="عبور" width={120} height={79} className="h-9 w-auto object-contain" priority />
           <div className="mr-auto flex items-center gap-1.5 text-[11px] font-semibold text-[#0F6C73]/70">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M9 3v18" /></svg>
             إدارة الموقع
