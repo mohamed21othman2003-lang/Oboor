@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { getStats, type DashboardStats, TYPE_LABELS } from "@/lib/cms/api";
 
 // ===== خريطة الأيقونات =====
@@ -90,7 +89,7 @@ export default function CmsDashboard() {
     <div className="space-y-8">
       {/* ===== Hero ===== */}
       <section className="relative overflow-hidden rounded-[22px] bg-gradient-to-l from-[#0F6C73] to-[#1FA6A8] p-7 text-white shadow-lg sm:p-9">
-        <Image src="/logo.png" alt="" width={220} height={120} aria-hidden className="pointer-events-none absolute -bottom-6 left-4 h-40 w-auto opacity-10 invert" />
+        <div aria-hidden className="pointer-events-none absolute -bottom-6 left-4 h-40 w-60 bg-contain bg-[left_bottom] bg-no-repeat opacity-10 invert" style={{ backgroundImage: "url(/logo.png)" }} />
         <div className="absolute -right-10 -top-10 h-48 w-48 rounded-full bg-white/10" aria-hidden />
         <div className="relative">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold">لوحة تحكّم مركز عبور</span>
