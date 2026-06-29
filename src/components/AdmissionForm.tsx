@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { pick, type Locale } from "@/i18n/config";
-import { validateName, validatePhone } from "@/lib/validate";
+import { validateName, validatePhone, validateRequired, validateEmail } from "@/lib/validate";
 
 const CITIES = ["الرياض", "جدة", "الدمام", "مكة المكرمة", "المدينة المنورة", "القصيم", "عسير"];
 const CITIES_EN = ["Riyadh", "Jeddah", "Dammam", "Makkah", "Madinah", "Qassim", "Asir"];
@@ -14,27 +14,65 @@ const CASES_EN = ["Autism Spectrum Disorder", "ADHD", "Speech & Language Delay",
 export default function AdmissionForm({ locale }: { locale: Locale }) {
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  // أخطاء لكل حقل (تظهر فوق الحقل نفسه) + خطأ عام للإرسال (شبكة)
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [formError, setFormError] = useState("");
   const cities = locale === "en" ? CITIES_EN : CITIES;
   const branches = locale === "en" ? BRANCHES_EN : BRANCHES;
   const cases = locale === "en" ? CASES_EN : CASES;
 
+  // مسح خطأ حقل بمجرّد أن يبدأ المستخدم تعديله
+  const clearError = (name: string) =>
+    setErrors((prev) => {
+      if (!prev[name]) return prev;
+      const next = { ...prev };
+      delete next[name];
+      return next;
+    });
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
-    const nameErr = validateName(String(fd.get("parentName") || ""), locale);
-    if (nameErr) { setError(nameErr); return; }
-    const phoneErr = validatePhone(String(fd.get("phone") || ""), locale);
-    if (phoneErr) { setError(phoneErr); return; }
+    const g = (k: string) => String(fd.get(k) || "");
+
+    // التحقق بالترتيب البصري للحقول حتى يكون «أول خطأ» هو الأعلى في الصفحة
+    const checks: [string, string][] = [
+      ["childName", validateName(g("childName"), locale)],
+      ["childAge", validateRequired(g("childAge"), locale)],
+      ["gender", validateRequired(g("gender"), locale)],
+      ["city", validateRequired(g("city"), locale)],
+      ["branch", validateRequired(g("branch"), locale)],
+      ["parentName", validateName(g("parentName"), locale)],
+      ["phone", validatePhone(g("phone"), locale)],
+      ["email", validateEmail(g("email"), locale)],
+    ];
+
+    const nextErrors: Record<string, string> = {};
+    for (const [field, msg] of checks) if (msg) nextErrors[field] = msg;
+
+    if (Object.keys(nextErrors).length) {
+      setErrors(nextErrors);
+      setFormError("");
+      // سكرول + تركيز على أول حقل فيه خطأ ليلاحظه المستخدم
+      const first = checks.find(([f]) => nextErrors[f])?.[0];
+      if (first) {
+        const el = document.getElementById(first);
+        el?.scrollIntoView({ behavior: "smooth", block: "center" });
+        setTimeout(() => el?.focus({ preventScroll: true }), 350);
+      }
+      return;
+    }
+
+    setErrors({});
     setLoading(true);
-    setError("");
+    setFormError("");
     try {
       const res = await fetch("/api/admission", { method: "POST", body: fd });
       const data = await res.json();
       if (!res.ok || !data.ok) throw new Error(data.error || "");
       setSent(true);
     } catch {
-      setError(pick(locale, "حدث خطأ، حاول مرة أخرى.", "Something went wrong, please try again."));
+      setFormError(pick(locale, "حدث خطأ، حاول مرة أخرى.", "Something went wrong, please try again."));
     } finally {
       setLoading(false);
     }
@@ -54,7 +92,7 @@ export default function AdmissionForm({ locale }: { locale: Locale }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="mx-auto max-w-4xl rounded-3xl border border-line bg-white p-6 shadow-lg sm:p-8">
+    <form onSubmit={handleSubmit} noValidate className="mx-auto max-w-4xl rounded-3xl border border-line bg-white p-6 shadow-lg sm:p-8">
       <div className="mb-8 text-center">
         <h2 className="text-2xl font-extrabold text-ink">{pick(locale, "ابدأ التسجيل", "Start Registration")}</h2>
         <p className="mx-auto mt-2 max-w-xl text-sm text-ink-muted">{pick(locale, "املأ النموذج أدناه لطلب التحاق طفلك بأحد مراكزنا وسيتواصل معك أحد ممثلينا في أقرب وقت ممكن.", "Fill out the form below to apply for your child's enrollment at one of our branches, and one of our representatives will contact you as soon as possible.")}</p>
@@ -62,18 +100,18 @@ export default function AdmissionForm({ locale }: { locale: Locale }) {
 
       {/* بيانات الطفل */}
       <Section title={pick(locale, "بيانات الطفل", "Child's Information")}>
-        <Field name="childName" label={pick(locale, "اسم الطفل", "Child's Name")} required placeholder={pick(locale, "أدخل اسم طفلك", "Enter your child's name")} />
-        <Field name="childAge" label={pick(locale, "العمر", "Age")} required placeholder={pick(locale, "مثال: 4 سنوات", "Example: 4 years")} />
-        <Select name="gender" label={pick(locale, "الجنس", "Gender")} required options={[pick(locale, "ذكر", "Male"), pick(locale, "أنثى", "Female")]} locale={locale} />
-        <Select name="city" label={pick(locale, "المدينة", "City")} required options={cities} locale={locale} />
-        <Select name="branch" label={pick(locale, "الفرع المطلوب", "Preferred Branch")} required options={branches} locale={locale} />
+        <Field name="childName" label={pick(locale, "اسم الطفل", "Child's Name")} required placeholder={pick(locale, "أدخل اسم طفلك", "Enter your child's name")} error={errors.childName} onClear={clearError} />
+        <Field name="childAge" label={pick(locale, "العمر", "Age")} required placeholder={pick(locale, "مثال: 4 سنوات", "Example: 4 years")} error={errors.childAge} onClear={clearError} />
+        <Select name="gender" label={pick(locale, "الجنس", "Gender")} required options={[pick(locale, "ذكر", "Male"), pick(locale, "أنثى", "Female")]} locale={locale} error={errors.gender} onClear={clearError} />
+        <Select name="city" label={pick(locale, "المدينة", "City")} required options={cities} locale={locale} error={errors.city} onClear={clearError} />
+        <Select name="branch" label={pick(locale, "الفرع المطلوب", "Preferred Branch")} required options={branches} locale={locale} error={errors.branch} onClear={clearError} />
       </Section>
 
       {/* بيانات ولي الأمر */}
       <Section title={pick(locale, "بيانات ولي الأمر", "Parent's Information")}>
-        <Field name="parentName" label={pick(locale, "اسم ولي الأمر", "Parent's Name")} required placeholder={pick(locale, "الاسم الكامل", "Full name")} />
-        <Field name="phone" label={pick(locale, "رقم الجوال", "Mobile Number")} required type="tel" placeholder={pick(locale, "ادخل رقم جوالك", "Enter your mobile number")} />
-        <Field name="email" label={pick(locale, "البريد الإلكتروني", "Email")} required type="email" placeholder="example@gmail.com" />
+        <Field name="parentName" label={pick(locale, "اسم ولي الأمر", "Parent's Name")} required placeholder={pick(locale, "الاسم الكامل", "Full name")} error={errors.parentName} onClear={clearError} />
+        <Field name="phone" label={pick(locale, "رقم الجوال", "Mobile Number")} required type="tel" placeholder={pick(locale, "ادخل رقم جوالك", "Enter your mobile number")} error={errors.phone} onClear={clearError} />
+        <Field name="email" label={pick(locale, "البريد الإلكتروني", "Email")} required type="email" placeholder="example@gmail.com" error={errors.email} onClear={clearError} />
       </Section>
 
       {/* معلومات إضافية */}
@@ -101,7 +139,7 @@ export default function AdmissionForm({ locale }: { locale: Locale }) {
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z" /></svg>
         {loading ? pick(locale, "جارٍ الإرسال...", "Sending...") : pick(locale, "أرسل طلب الالتحاق الآن", "Submit Enrollment Request Now")}
       </button>
-      {error && <p className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-center text-sm font-medium text-red-600">{error}</p>}
+      {formError && <p className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-center text-sm font-medium text-red-600">{formError}</p>}
     </form>
   );
 }
@@ -122,20 +160,51 @@ function Label({ children }: { children: React.ReactNode }) {
   return <label className="block text-start text-sm font-semibold text-ink">{children}</label>;
 }
 
-function Field({ label, name, required, type = "text", placeholder }: { label: string; name: string; required?: boolean; type?: string; placeholder?: string }) {
+// رسالة خطأ تظهر فوق الحقل (لا تحته)
+function FieldError({ name, error }: { name: string; error?: string }) {
+  if (!error) return null;
+  return (
+    <p id={`${name}-error`} role="alert" className="mt-1 text-start text-xs font-medium text-red-600">
+      {error}
+    </p>
+  );
+}
+
+function Field({ label, name, required, type = "text", placeholder, error, onClear }: { label: string; name: string; required?: boolean; type?: string; placeholder?: string; error?: string; onClear?: (name: string) => void }) {
   return (
     <div>
       <Label>{label} {required && <span className="text-danger">*</span>}</Label>
-      <input name={name} type={type} required={required} placeholder={placeholder} className="mt-1.5 w-full rounded-xl border border-line bg-white px-3 py-2.5 text-start text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-brand/30" />
+      <FieldError name={name} error={error} />
+      <input
+        id={name}
+        name={name}
+        type={type}
+        required={required}
+        placeholder={placeholder}
+        aria-invalid={!!error}
+        aria-describedby={error ? `${name}-error` : undefined}
+        onInput={() => onClear?.(name)}
+        className={`mt-1.5 w-full rounded-xl border bg-white px-3 py-2.5 text-start text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 ${error ? "border-red-400 ring-2 ring-red-100 focus:ring-red-200" : "border-line focus:ring-brand/30"}`}
+      />
     </div>
   );
 }
 
-function Select({ label, name, required, options, locale }: { label: string; name: string; required?: boolean; options: string[]; locale: Locale }) {
+function Select({ label, name, required, options, locale, error, onClear }: { label: string; name: string; required?: boolean; options: string[]; locale: Locale; error?: string; onClear?: (name: string) => void }) {
   return (
     <div>
       <Label>{label} {required && <span className="text-danger">*</span>}</Label>
-      <select name={name} required={required} defaultValue="" className="mt-1.5 w-full rounded-xl border border-line bg-white px-3 py-2.5 text-start text-sm text-ink focus:outline-none focus:ring-2 focus:ring-brand/30">
+      <FieldError name={name} error={error} />
+      <select
+        id={name}
+        name={name}
+        required={required}
+        defaultValue=""
+        aria-invalid={!!error}
+        aria-describedby={error ? `${name}-error` : undefined}
+        onChange={() => onClear?.(name)}
+        className={`mt-1.5 w-full rounded-xl border bg-white px-3 py-2.5 text-start text-sm text-ink focus:outline-none focus:ring-2 ${error ? "border-red-400 ring-2 ring-red-100 focus:ring-red-200" : "border-line focus:ring-brand/30"}`}
+      >
         <option value="" disabled>{pick(locale, "اختر", "Select")}</option>
         {options.map((o) => <option key={o} value={o}>{o}</option>)}
       </select>

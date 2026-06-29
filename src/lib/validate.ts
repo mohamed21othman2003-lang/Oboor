@@ -26,3 +26,13 @@ export function validateRequired(v: string, locale: Locale): string {
   if (!v.trim()) return pick(locale, "هذا الحقل مطلوب.", "This field is required.");
   return "";
 }
+
+// بريد إلكتروني صحيح (مطلوب)
+export function validateEmail(v: string, locale: Locale): string {
+  const s = v.trim();
+  if (!s) return pick(locale, "هذا الحقل مطلوب.", "This field is required.");
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s)) {
+    return pick(locale, "الرجاء إدخال بريد إلكتروني صحيح.", "Please enter a valid email address.");
+  }
+  return "";
+}
