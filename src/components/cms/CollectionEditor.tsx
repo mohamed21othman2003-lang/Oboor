@@ -2,6 +2,7 @@
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   getSchema, getItem, createItem, updateItem, uploadField, uploadImage, resetDefault,
@@ -9,7 +10,8 @@ import {
 } from "@/lib/cms/api";
 import { CMS_ICONS, ICON_LABELS, iconNamesFor } from "@/lib/cms/icons";
 import { iconByKey, OFFER_ICON_KEYS } from "@/lib/areaIcon";
-import ImageCropModal from "@/components/cms/ImageCropModal";
+// تحميل مكوّن قصّ الصورة عند الحاجة فقط (يقلّل حجم باندل المحرّر)
+const ImageCropModal = dynamic(() => import("@/components/cms/ImageCropModal"), { ssr: false });
 
 export default function CollectionEditor({ type, id }: { type: string; id: string }) {
   const router = useRouter();
