@@ -190,14 +190,16 @@ function SocialLink({ label, href, children }: { label: string; href: string; ch
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      dir="ltr"
-      className="flex w-full items-center gap-3 rounded-xl bg-white/10 px-7 py-3 transition-colors hover:bg-white/20 sm:w-auto sm:justify-center"
+      className="flex w-full items-center justify-center rounded-xl bg-white/10 px-6 py-3 transition-colors hover:bg-white/20 sm:w-auto"
     >
-      {/* الأيقونة ثم الاسم جنبها مباشرة، مثبّتين لليسار → الأيقونات تتحاذى عموديًا */}
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/15 text-white">
-        {children}
+      {/* المجموعة في المنتصف داخل صندوق ثابت العرض: الأيقونة وجنبها الكلمة،
+          والصندوق متمركز → الأيقونات تتحاذى عموديًا عبر الأزرار */}
+      <span dir="ltr" className="flex w-[150px] items-center gap-3">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/15 text-white">
+          {children}
+        </span>
+        <span className="text-sm font-bold uppercase text-white">{label}</span>
       </span>
-      <span className="text-sm font-bold uppercase text-white">{label}</span>
     </a>
   );
 }
