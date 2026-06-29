@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { pick, type Locale } from "@/i18n/config";
 import { type HomeChrome } from "@/lib/highlight";
 
@@ -47,10 +47,31 @@ export default function NewsAndCerts({ locale, news: newsProp, certs: certsProp,
   const certs: Cert[] = certsProp?.length ? certsProp : [0, 1, 2, 3].map(() => ({ name: "ISO 9001", label: pick(locale, "إدارة الجودة", "Quality Mgmt.") }));
   const trackRef = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0);
+  // حواف التلاشي: نُظهر التلاشي فقط على الجهة التي خلفها محتوى مخفي،
+  // ونزيله عند النهاية حتى يظهر آخر كارت كاملاً (لا مقصوصاً تحت القناع).
+  const [edge, setEdge] = useState({ start: true, end: false });
   const stepOf = (el: HTMLDivElement) => {
     const card = el.children[0] as HTMLElement | undefined;
     return card ? card.offsetWidth + 20 : 1; // gap-5
   };
+  const recomputeEdges = () => {
+    const el = trackRef.current;
+    if (!el) return;
+    const pos = Math.abs(el.scrollLeft);
+    const max = el.scrollWidth - el.clientWidth;
+    setEdge({ start: pos <= 2, end: pos >= max - 2 });
+  };
+  useEffect(() => {
+    recomputeEdges();
+    window.addEventListener("resize", recomputeEdges);
+    return () => window.removeEventListener("resize", recomputeEdges);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [news.length]);
+  // في RTL النهاية ناحية الشمال؛ نعكس ربط الحواف بالاتجاه
+  const rtl = locale !== "en";
+  const fadeLeft = rtl ? !edge.end : !edge.start;
+  const fadeRight = rtl ? !edge.start : !edge.end;
+  const maskImage = `linear-gradient(to right, ${fadeLeft ? "transparent 0%, #000 8%" : "#000 0%"}, ${fadeRight ? "#000 92%, transparent 100%" : "#000 100%"})`;
   const goTo = (idx: number) => {
     const el = trackRef.current;
     if (!el) return;
@@ -68,6 +89,7 @@ export default function NewsAndCerts({ locale, news: newsProp, certs: certsProp,
     const el = trackRef.current;
     if (!el) return;
     setActive(Math.round(Math.abs(el.scrollLeft) / stepOf(el)));
+    recomputeEdges();
   };
   const navBtn = "flex h-10 w-10 items-center justify-center rounded-full border border-white/30 bg-white/10 text-white transition-colors hover:bg-white hover:text-brand-deep";
   return (
@@ -88,7 +110,8 @@ export default function NewsAndCerts({ locale, news: newsProp, certs: certsProp,
           <div
             ref={trackRef}
             onScroll={onScroll}
-            className="no-scrollbar flex snap-x snap-mandatory gap-5 overflow-x-auto pb-2 [mask-image:linear-gradient(to_right,transparent,#000_11%,#000_100%)]"
+            style={{ maskImage, WebkitMaskImage: maskImage }}
+            className="no-scrollbar flex snap-x snap-mandatory gap-5 overflow-x-auto pb-2"
           >
             {news.map((n) => (
               <div key={n.title} className="flex w-[85%] shrink-0 snap-start sm:w-[47%] lg:w-[31%]">
