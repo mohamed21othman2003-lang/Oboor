@@ -194,7 +194,7 @@ function SocialLink({ label, href, children }: { label: string; href: string; ch
     >
       {/* المجموعة في المنتصف داخل صندوق ثابت العرض: الأيقونة وجنبها الكلمة،
           والصندوق متمركز → الأيقونات تتحاذى عموديًا عبر الأزرار */}
-      <span dir="ltr" className="flex w-[150px] items-center gap-3">
+      <span dir="ltr" className="flex w-[150px] items-center justify-start gap-3 sm:justify-center">
         <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/15 text-white">
           {children}
         </span>
