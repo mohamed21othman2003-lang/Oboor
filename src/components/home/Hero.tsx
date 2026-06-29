@@ -6,7 +6,7 @@ import { useState, useEffect, type ReactNode } from "react";
 import { pick, type Locale } from "@/i18n/config";
 import type { HomeChrome } from "@/lib/highlight";
 
-export type HeroSlide = { img: string; heading: ReactNode; desc: ReactNode };
+export type HeroSlide = { img: string; heading: ReactNode; desc: ReactNode; pos?: string };
 
 export default function Hero({ locale, slides: slidesProp, chrome }: { locale: Locale; slides?: HeroSlide[]; chrome?: HomeChrome }) {
   const badge = chrome?.["hero.chrome"]?.title || pick(locale, "نرعى نقاءهم، ونبني غدهم", "Nurturing Their Potential, Shaping Their Future");
@@ -28,6 +28,9 @@ export default function Hero({ locale, slides: slidesProp, chrome }: { locale: L
     },
     {
       img: "/figma/home/hero-slide2-clean.jpg",
+      // الطفل في يسار الصورة العريضة؛ على الموبايل التوسيط يقصّه، لذا نثبّتها يسارًا
+      // حتى عرض lg ثم نرجع للتوسيط الافتراضي على الشاشات الكبيرة.
+      pos: "object-left lg:object-bottom",
       heading: pick(
         locale,
         <>التدخل المبكر خطوة مبكرة في الصغر<br />تُنير سائر العُمر</>,
@@ -95,7 +98,7 @@ export default function Hero({ locale, slides: slidesProp, chrome }: { locale: L
             loading={idx === 0 ? "eager" : "lazy"}
             quality={75}
             sizes="100vw"
-            className={`object-cover object-bottom transition-opacity duration-700 ${idx === i ? "opacity-100" : "opacity-0"}`}
+            className={`object-cover ${sl.pos ?? (sl.img.includes("hero-slide2") ? "object-left lg:object-bottom" : "object-bottom")} transition-opacity duration-700 ${idx === i ? "opacity-100" : "opacity-0"}`}
           />
         ) : null,
       )}

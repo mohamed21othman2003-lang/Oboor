@@ -47,10 +47,11 @@ export async function fetchContent<T = unknown>(path: string): Promise<T | null>
       `${DJANGO_API_URL}/content/${path}/${preview}`,
       preview
         ? // وضع المعاينة: لا تخزين، نريد المسودّة الطازجة في كل طلب.
-          { cache: "no-store" }
-        : // محتوى يتحدّث من لوحة الإدارة → نعيد التحقق كل دقيقة كحدّ أقصى،
-          // مع وسم cache-content حتى يبطله الحفظ فورًا (on-demand revalidation).
-          { next: { revalidate: 60, tags: ["cms-content"] } },
+          { cache: "no-store", signal: AbortSignal.timeout(8000) }
+        : // محتوى يتحدّث من لوحة الإدارة → نعيد التحقق كل ٥ دقائق كحدّ أقصى،
+          // مع وسم cms-content حتى يبطله الحفظ فورًا (on-demand revalidation).
+          // timeout يمنع باك إند بطيء/بارد من تعليق رندر الصفحة (يسقط للبيانات الثابتة).
+          { next: { revalidate: 300, tags: ["cms-content"] }, signal: AbortSignal.timeout(3500) },
     );
     if (!res.ok) return null;
     return (await res.json()) as T;

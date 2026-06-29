@@ -1,0 +1,34 @@
+name: Keep backend warm
+
+# يمنع نوم باك إند Render (الطبقة المجانية تنام بعد ~15 دقيقة خمول).
+# نوم الباك إند = بطء رد السيرفر (TTFB ~1.4s+) وهو السبب الرئيسي لنزول
+# درجة الأداء على الموبايل في Lighthouse. التسخين الدوري يبقيه سريعاً.
+#
+# الإعداد (مرّة واحدة): Settings → Secrets and variables → Actions → Variables → New
+#   BACKEND_URL = https://<render-app>.onrender.com/api/content/site/
+# (أي مسار خفيف يردّ 200 من الباك إند)
+
+on:
+  schedule:
+    - cron: "*/10 * * * *" # كل ١٠ دقائق
+  workflow_dispatch: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping backend
+        run: |
+          URL="${{ vars.BACKEND_URL }}"
+          if [ -z "$URL" ]; then
+            echo "::warning::اضبط متغيّر الريبو BACKEND_URL لتفعيل التسخين (راجع تعليقات الملف)"
+            exit 0
+          fi
+          # حتى ٣ محاولات: لو كان نائماً قد يأخذ الإقلاع وقتاً
+          for i in 1 2 3; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 60 "$URL" || true)
+            echo "ping $i → HTTP $code"
+            [ "$code" = "200" ] && exit 0
+            sleep 20
+          done
+          echo "::warning::الباك إند لم يردّ 200 بعد المحاولات"
