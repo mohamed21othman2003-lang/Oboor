@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
+import GalleryViewer from "@/components/GalleryViewer";
 import { fetchContent } from "@/lib/server/django";
 import { getLocale } from "@/i18n/locale";
 import { pick, type Locale } from "@/i18n/config";
@@ -102,16 +103,7 @@ export default async function GalleryPage() {
             <span className="h-px flex-1 bg-gradient-to-l from-transparent via-line-soft to-transparent" />
           </div>
 
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-            {items.map((it, i) => (
-              <div key={i} className="group relative aspect-[4/3] overflow-hidden rounded-2xl bg-[#f3f5f6] shadow-sm">
-                <Image src={it.src} alt={it.caption} fill className="object-cover transition-transform duration-300 group-hover:scale-105" sizes="(max-width:640px) 50vw, 25vw" />
-                {it.caption && (
-                  <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-3 text-start text-xs font-medium text-white opacity-0 transition-opacity group-hover:opacity-100">{it.caption}</span>
-                )}
-              </div>
-            ))}
-          </div>
+          <GalleryViewer items={items} locale={locale} />
         </div>
       </section>
     </>
