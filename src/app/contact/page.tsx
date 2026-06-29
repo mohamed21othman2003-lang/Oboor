@@ -190,11 +190,14 @@ function SocialLink({ label, href, children }: { label: string; href: string; ch
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex w-full items-center justify-center gap-3 rounded-xl bg-white/10 px-6 py-3 transition-colors hover:bg-white/20 sm:w-auto sm:min-w-[150px]"
+      className="flex w-full items-center justify-center rounded-xl bg-white/10 px-6 py-3 transition-colors hover:bg-white/20 sm:w-auto"
     >
-      <span className="text-sm font-bold uppercase text-white">{label}</span>
-      <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/15 text-white">
-        {children}
+      {/* صندوق ثابت العرض: الاسم يملأ المساحة والأيقونة مثبّتة → تتحاذى الأيقونات عموديًا */}
+      <span className="flex w-[150px] items-center gap-3">
+        <span className="flex-1 text-start text-sm font-bold uppercase text-white">{label}</span>
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/15 text-white">
+          {children}
+        </span>
       </span>
     </a>
   );
