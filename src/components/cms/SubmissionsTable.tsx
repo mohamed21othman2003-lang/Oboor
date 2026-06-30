@@ -190,15 +190,15 @@ export default function SubmissionsTable({
         </div>
       </div>
 
-      {/* تصدير + الإجمالي + حذف المحدد */}
+      {/* الإجمالي (يمين) + التصدير + حذف المحدد (شمال) */}
       <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-sm font-semibold text-ink-soft">إجمالي الطلبات: <span className="font-extrabold text-[#0F6C73]">{total}</span> طلب</p>
         <div className="flex items-center gap-2">
-          <button onClick={exportCsv} className="inline-flex items-center gap-1.5 rounded-xl bg-[#0F6C73] px-4 py-2.5 text-xs font-bold text-white transition-colors hover:bg-[#1FA6A8]">{I.export} تصدير</button>
           {selected.size > 0 && (
             <button onClick={bulkDelete} className="inline-flex items-center gap-1.5 rounded-xl bg-red-50 px-4 py-2.5 text-xs font-bold text-red-600 transition-colors hover:bg-red-600 hover:text-white">{I.trash} حذف المحدد ({selected.size})</button>
           )}
+          <button onClick={exportCsv} className="inline-flex items-center gap-1.5 rounded-xl bg-[#0F6C73] px-4 py-2.5 text-xs font-bold text-white transition-colors hover:bg-[#1FA6A8]">{I.export} تصدير</button>
         </div>
-        <p className="text-sm font-semibold text-ink-soft">إجمالي الطلبات: <span className="font-extrabold text-[#0F6C73]">{total}</span> طلب</p>
       </div>
 
       {/* ===== جدول (ديسكتوب/تابلت) ===== */}
