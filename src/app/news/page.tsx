@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { getLocale } from "@/i18n/locale";
 import { pick, type Locale } from "@/i18n/config";
+import { formatDate } from "@/lib/dateFormat";
 import {
   NEWS_CATEGORIES, NEWS_CATEGORIES_EN,
   WORKSHOP_FEATURED, WORKSHOP_FEATURED_EN,
@@ -37,7 +38,7 @@ function toItem(a: ApiNews, locale: Locale): NewsItem {
     slug: a.slug,
     title: en ? a.title_en : a.title_ar,
     desc: en ? a.desc_en : a.desc_ar,
-    date: en ? a.date_en : a.date_ar,
+    date: formatDate(en ? a.date_en : a.date_ar, locale),
     category: en ? a.category_en : a.category_ar,
     image: a.image,
   };

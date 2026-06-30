@@ -6,6 +6,7 @@ import { ALL_NEWS, getNewsItem } from "@/lib/newsData";
 import { fetchContent } from "@/lib/server/django";
 import { getLocale } from "@/i18n/locale";
 import { pick, type Locale } from "@/i18n/config";
+import { formatDate } from "@/lib/dateFormat";
 
 export function generateStaticParams() {
   return ALL_NEWS.map((n) => ({ slug: n.slug }));
@@ -66,7 +67,7 @@ async function loadNews(slug: string, locale: Locale): Promise<NewsDetail | null
     const body = a(row.body_ar, row.body_en);
     return {
       title: s(row.title_ar, row.title_en), desc: s(row.desc_ar, row.desc_en),
-      date: s(row.date_ar, row.date_en), category: s(row.category_ar, row.category_en),
+      date: formatDate(s(row.date_ar, row.date_en), locale), category: s(row.category_ar, row.category_en),
       image: row.image,
       // المتن أساسي: لو فاضي (مثلاً قبل تحديث الباك إند) نرجع للنص الافتراضي حتى لا تظهر الصفحة فارغة
       body: body.length ? body : (en ? BODY_EN : BODY_AR),
