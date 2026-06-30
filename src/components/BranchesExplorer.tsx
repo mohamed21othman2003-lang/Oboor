@@ -20,13 +20,29 @@ export default function BranchesExplorer({ locale, branches }: { locale: Locale;
   useEffect(() => { setQuery(urlQ); }, [urlQ]);
 
   const q = query.trim().toLowerCase();
-  const byRegion = region === allLabel ? source : source.filter((b) => b.region === region);
-  const list = q
-    ? byRegion.filter((b) => [b.name, b.city, b.area, b.region, ...b.services].some((v) => v.toLowerCase().includes(q)))
-    : byRegion;
+  const matches = (b: Branch) => [b.name, b.city, b.area, b.region, ...b.services].some((v) => v.toLowerCase().includes(q));
+
+  // عند البحث: نبحث في كل المناطق (لا نقيّده بالتاب اليدوي)، ونفعّل تاب المنطقة
+  // تلقائياً إذا كانت كل النتائج تنتمي لمنطقة واحدة — وإلا نُبقي «الكل».
+  const searchHits = q ? source.filter(matches) : null;
+  let activeRegion = region;
+  if (searchHits) {
+    const regionsInHits = [...new Set(searchHits.map((b) => b.region))];
+    activeRegion = regionsInHits.length === 1 ? regionsInHits[0] : allLabel;
+  }
+  const list = searchHits
+    ? (activeRegion === allLabel ? searchHits : searchHits.filter((b) => b.region === activeRegion))
+    : (region === allLabel ? source : source.filter((b) => b.region === region));
 
   function clearSearch() {
     setQuery("");
+    if (urlQ) router.replace("/branches", { scroll: false });
+  }
+
+  // النقر على تاب منطقة = تصفّح يدوي، فنمسح البحث ليعكس التاب اختيارك
+  function pickRegion(name: string) {
+    setRegion(name);
+    if (query) setQuery("");
     if (urlQ) router.replace("/branches", { scroll: false });
   }
 
@@ -59,11 +75,11 @@ export default function BranchesExplorer({ locale, branches }: { locale: Locale;
         {/* Region tabs */}
         <div className="mb-8 flex flex-wrap items-center justify-start gap-2.5">
           {tabs.map((t) => {
-            const active = t.name === region;
+            const active = t.name === activeRegion;
             return (
               <button
                 key={t.name}
-                onClick={() => setRegion(t.name)}
+                onClick={() => pickRegion(t.name)}
                 className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
                   active ? "bg-brand text-white" : "bg-white text-ink-muted ring-1 ring-line hover:bg-surface"
                 }`}
