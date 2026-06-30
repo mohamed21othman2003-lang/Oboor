@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Icon, { ICON_NAMES } from "./icons";
 import type { Field, Bilingual } from "@/lib/admin/types";
+import CustomSelect from "@/components/ui/Select";
 
 type V = unknown;
 
@@ -20,7 +21,7 @@ export default function FieldInput({ field, value, lang, onChange }: { field: Fi
   const setBi = (v: string) => onChange({ ...bi, [lang]: v });
 
   if (field.type === "select") {
-    return <div>{label}<select className={cls} value={String(value ?? "")} onChange={(e) => onChange(e.target.value)}><option value="">— اختر —</option>{field.options?.map((o) => <option key={o} value={o}>{o}</option>)}</select></div>;
+    return <div>{label}<CustomSelect value={String(value ?? "")} onChange={onChange} placeholder="— اختر —" options={field.options ?? []} /></div>;
   }
 
   if (field.type === "boolean") {

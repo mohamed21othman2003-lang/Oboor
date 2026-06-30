@@ -10,6 +10,7 @@ import {
 } from "@/lib/cms/api";
 import { CMS_ICONS, ICON_LABELS, iconNamesFor } from "@/lib/cms/icons";
 import { iconByKey, OFFER_ICON_KEYS } from "@/lib/areaIcon";
+import CustomSelect from "@/components/ui/Select";
 // تحميل مكوّن قصّ الصورة عند الحاجة فقط (يقلّل حجم باندل المحرّر)
 const ImageCropModal = dynamic(() => import("@/components/cms/ImageCropModal"), { ssr: false });
 
@@ -554,10 +555,12 @@ function FieldInput({ f, value, onChange, badge, dir }: { f: FieldSchema; value:
           <ReadOnlyJson f={f} value={value} />
         )
       ) : f.type === "select" ? (
-        <select value={String(value ?? "")} onChange={(e) => onChange(e.target.value)} className={INPUT}>
-          <option value="">— اختر —</option>
-          {f.choices?.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
-        </select>
+        <CustomSelect
+          value={String(value ?? "")}
+          onChange={onChange}
+          placeholder="— اختر —"
+          options={f.choices ?? []}
+        />
       ) : f.type === "number" ? (
         <input
           type="number"
@@ -1027,9 +1030,13 @@ function BlocksEditor({ ar, en, onChange }: { ar: unknown[]; en: unknown[]; onCh
       })}
       <div className="flex flex-wrap items-center gap-2 border-t border-line pt-3">
         <span className="text-xs font-semibold text-ink-soft">إضافة قسم جديد:</span>
-        <select value={addKind} onChange={(e) => setAddKind(e.target.value)} className="rounded-lg border border-line bg-white px-2 py-1.5 text-xs text-ink">
-          {Object.entries(BLOCK_KIND_LABEL).map(([k, l]) => <option key={k} value={k}>{l}</option>)}
-        </select>
+        <div className="w-48">
+          <CustomSelect
+            value={addKind}
+            onChange={setAddKind}
+            options={Object.entries(BLOCK_KIND_LABEL).map(([k, l]) => ({ value: k, label: String(l) }))}
+          />
+        </div>
         <button type="button" onClick={add} className="inline-flex items-center gap-1 rounded-lg bg-brand px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-dark">+ إضافة القسم</button>
       </div>
     </div>

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { CITIES, CITIES_EN } from "@/lib/careersData";
 import { pick, type Locale } from "@/i18n/config";
 import { validateName, validatePhone, stripDigits, digitsOnly } from "@/lib/validate";
+import CustomSelect from "@/components/ui/Select";
 
 const OTHER = "__other__";
 
@@ -137,15 +138,17 @@ export default function CareerApplyForm({ jobTitle, locale }: { jobTitle: string
               <SelectField name="city" label={pick(locale, "المدينة", "City")} required options={cities} />
               <div>
                 <Label required>{pick(locale, "تخصصك / مجالك الحالي", "Your current field / specialty")}</Label>
-                <select
-                  value={role}
-                  onChange={(e) => setRole(e.target.value)}
-                  className="mt-1.5 w-full rounded-xl border border-line bg-white px-3 py-2.5 text-start text-sm text-ink focus:outline-none focus:ring-2 focus:ring-brand/30"
-                >
-                  <option value="" disabled>{pick(locale, "اختر تخصصك…", "Select your specialty…")}</option>
-                  {(locale === "en" ? SPECIALTIES_EN : SPECIALTIES).map((r) => <option key={r} value={r}>{r}</option>)}
-                  <option value={OTHER}>{pick(locale, "أخرى…", "Other…")}</option>
-                </select>
+                <div className="mt-1.5">
+                  <CustomSelect
+                    value={role}
+                    onChange={setRole}
+                    placeholder={pick(locale, "اختر تخصصك…", "Select your specialty…")}
+                    options={[
+                      ...(locale === "en" ? SPECIALTIES_EN : SPECIALTIES).map((r) => ({ value: r, label: r })),
+                      { value: OTHER, label: pick(locale, "أخرى…", "Other…") },
+                    ]}
+                  />
+                </div>
                 {role === OTHER && (
                   <input
                     value={roleOther}
@@ -241,15 +244,9 @@ function SelectField({ label, name, required, options }: { label: string; name: 
   return (
     <div>
       <Label required={required}>{label}</Label>
-      <select
-        name={name}
-        required={required}
-        defaultValue=""
-        className="mt-1.5 w-full rounded-xl border border-line bg-white px-3 py-2.5 text-start text-sm text-ink focus:outline-none focus:ring-2 focus:ring-brand/30"
-      >
-        <option value="" disabled>—</option>
-        {options.map((o) => <option key={o} value={o}>{o}</option>)}
-      </select>
+      <div className="mt-1.5">
+        <CustomSelect name={name} required={required} placeholder="—" options={options} />
+      </div>
     </div>
   );
 }
