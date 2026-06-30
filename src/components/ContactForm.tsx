@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { pick, type Locale } from "@/i18n/config";
-import { validateName, validatePhone } from "@/lib/validate";
+import { validateName, validatePhone, stripDigits, digitsOnly } from "@/lib/validate";
 
 const BRANCHES: { ar: string; en: string }[] = [
   { ar: "الرياض — الفرع الرئيسي", en: "Riyadh — Main Branch" },
@@ -72,11 +72,11 @@ export default function ContactForm({ locale }: { locale: Locale }) {
       <div className="grid gap-5 sm:grid-cols-2">
         <div>
           <label htmlFor="name" className={labelCls}>{pick(locale, "الاسم الكامل", "Full Name")} <span className="text-red-500">*</span></label>
-          <input id="name" name="name" required placeholder={pick(locale, "أدخل اسمك الكامل", "Enter your full name")} className={field} />
+          <input id="name" name="name" required placeholder={pick(locale, "أدخل اسمك الكامل", "Enter your full name")} onInput={(e) => { e.currentTarget.value = stripDigits(e.currentTarget.value); }} className={field} />
         </div>
         <div>
           <label htmlFor="phone" className={labelCls}>{pick(locale, "رقم الجوال", "Mobile Number")} <span className="text-red-500">*</span></label>
-          <input id="phone" name="phone" required dir="ltr" placeholder="05XXXXXXXX" className={`${field} text-start`} />
+          <input id="phone" name="phone" required dir="ltr" inputMode="numeric" placeholder="05XXXXXXXX" onInput={(e) => { e.currentTarget.value = digitsOnly(e.currentTarget.value); }} className={`${field} text-start`} />
         </div>
         <div>
           <label htmlFor="branch" className={labelCls}>{pick(locale, "اختر الفرع", "Choose Branch")}</label>
