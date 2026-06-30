@@ -216,6 +216,18 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
           </div>
         );
       }
+      // التاريخ: منتقي تقويم واحد (لا نص حر، ولا تاريخ قديم) يكتب للّغتين معًا
+      if (row.ar?.base === "date" || /_date$/.test(row.ar?.base ?? "") || row.en?.base === "date" || /_date$/.test(row.en?.base ?? "")) {
+        const arName = row.ar?.name;
+        const enName = row.en?.name;
+        const cur = String(values[arName ?? ""] ?? values[enName ?? ""] ?? "");
+        const f0 = (row.ar || row.en)!;
+        return (
+          <div key={i}>
+            <DateField label={f0.label} help={f0.help} value={cur} onChange={(v) => { if (arName) set(arName, v); if (enName) set(enName, v); }} />
+          </div>
+        );
+      }
       return (
         <div key={i} className="grid gap-x-5 gap-y-2 sm:grid-cols-2">
           {row.ar && <FieldInput f={row.ar} value={values[row.ar.name]} onChange={(v) => set(row.ar!.name, v)} badge="عربي" />}
@@ -492,6 +504,34 @@ function Help({ text }: { text?: string }) {
   return <p className="mt-1 text-[11px] text-ink-soft">{text}</p>;
 }
 
+// تاريخ اليوم بصيغة YYYY-MM-DD بالتوقيت المحلي (لاستخدامه كحدّ أدنى للتقويم)
+function isoToday() {
+  const d = new Date();
+  d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+  return d.toISOString().slice(0, 10);
+}
+
+// منتقي تاريخ (تقويم) — لا يسمح بتاريخ قبل اليوم. يخزّن ISO.
+function DateField({ label, help, value, onChange }: { label?: string; help?: string; value: string; onChange: (v: string) => void }) {
+  const today = isoToday();
+  const iso = /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : "";
+  return (
+    <div>
+      {label && <label className="mb-1.5 block text-sm font-semibold text-ink">{label}</label>}
+      <input
+        type="date"
+        min={today}
+        value={iso}
+        dir="ltr"
+        onChange={(e) => onChange(e.target.value)}
+        className={INPUT + " [color-scheme:light]"}
+      />
+      {help && <Help text={help} />}
+      {value && !iso && <p className="mt-1 text-[11px] text-amber-600">القيمة الحالية «{value}» غير صالحة — اختر تاريخاً من التقويم.</p>}
+    </div>
+  );
+}
+
 const LOCK_ICON = (
   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="inline-block"><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
 );
@@ -572,6 +612,8 @@ function FieldInput({ f, value, onChange, badge, dir }: { f: FieldSchema; value:
           }}
           className={INPUT}
         />
+      ) : f.base === "date" || /_date$/.test(f.base) ? (
+        <DateField value={String(value ?? "")} onChange={(v) => onChange(v)} />
       ) : (
         <AutoTextarea value={String(value ?? "")} onChange={onChange} dir={dir} />
       )}

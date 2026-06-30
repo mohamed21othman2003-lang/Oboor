@@ -5,6 +5,7 @@ import { JOBS, JOBS_EN, CITIES, CITIES_EN, EMPLOYMENT_TYPES, EMPLOYMENT_TYPES_EN
 import CareersExplorer from "@/components/CareersExplorer";
 import { getLocale } from "@/i18n/locale";
 import { pick, type Locale } from "@/i18n/config";
+import { formatDate } from "@/lib/dateFormat";
 import { fetchContent, fetchSections, type SectionRow } from "@/lib/server/django";
 
 // الشكل اللي بيرجع من Django (content/careers)
@@ -34,8 +35,8 @@ export function toJob(a: ApiJob, locale: Locale): Job {
     city: tr(a.city_ar, a.city_en),
     employment: tr(a.employment_ar, a.employment_en),
     experience: tr(a.experience_ar, a.experience_en),
-    date: tr(a.date_ar, a.date_en),
-    startDate: tr(a.start_date_ar, a.start_date_en),
+    date: formatDate(tr(a.date_ar, a.date_en), locale),
+    startDate: formatDate(tr(a.start_date_ar, a.start_date_en), locale),
     isNew: a.is_new,
     description: tr(a.description_ar, a.description_en),
     responsibilities: tr(a.responsibilities_ar, a.responsibilities_en),
