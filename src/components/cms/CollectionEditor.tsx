@@ -228,6 +228,18 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
           </div>
         );
       }
+      // الوقت: منتقيان (من / إلى) بدل النص الحر، يكتبان للّغتين معًا
+      if (row.ar?.base === "time" || /_time$/.test(row.ar?.base ?? "") || row.en?.base === "time" || /_time$/.test(row.en?.base ?? "")) {
+        const arName = row.ar?.name;
+        const enName = row.en?.name;
+        const cur = String(values[arName ?? ""] ?? values[enName ?? ""] ?? "");
+        const f0 = (row.ar || row.en)!;
+        return (
+          <div key={i}>
+            <TimeRangeField label={f0.label} help={f0.help} value={cur} onChange={(v) => { if (arName) set(arName, v); if (enName) set(enName, v); }} />
+          </div>
+        );
+      }
       return (
         <div key={i} className="grid gap-x-5 gap-y-2 sm:grid-cols-2">
           {row.ar && <FieldInput f={row.ar} value={values[row.ar.name]} onChange={(v) => set(row.ar!.name, v)} badge="عربي" />}
@@ -532,6 +544,35 @@ function DateField({ label, help, value, onChange }: { label?: string; help?: st
   );
 }
 
+// منتقي وقت (من / إلى) — يخزّن "HH:MM" أو "HH:MM - HH:MM"
+function TimeRangeField({ label, help, value, onChange }: { label?: string; help?: string; value: string; onChange: (v: string) => void }) {
+  const norm = (t: string) => { const m = /^(\d{1,2}):(\d{2})$/.exec(t.trim()); return m ? `${m[1].padStart(2, "0")}:${m[2]}` : ""; };
+  const range = /^(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})$/.exec(value.trim());
+  const single = /^\d{1,2}:\d{2}$/.test(value.trim());
+  const from = norm(range ? range[1] : single ? value : "");
+  const to = norm(range ? range[2] : "");
+  const parsed = !!range || single || !value.trim();
+  const emit = (f: string, t: string) => onChange(f && t ? `${f} - ${t}` : f || "");
+  return (
+    <div>
+      {label && <label className="mb-1.5 block text-sm font-semibold text-ink">{label}</label>}
+      <div className="flex items-end gap-2">
+        <label className="flex-1">
+          <span className="mb-1 block text-[11px] text-ink-soft">من</span>
+          <input type="time" value={from} dir="ltr" onChange={(e) => emit(e.target.value, to)} className={INPUT + " [color-scheme:light]"} />
+        </label>
+        <span className="pb-2.5 text-ink-soft">—</span>
+        <label className="flex-1">
+          <span className="mb-1 block text-[11px] text-ink-soft">إلى (اختياري)</span>
+          <input type="time" value={to} dir="ltr" onChange={(e) => emit(from, e.target.value)} className={INPUT + " [color-scheme:light]"} />
+        </label>
+      </div>
+      {help && <Help text={help} />}
+      {value && !parsed && <p className="mt-1 text-[11px] text-amber-600">القيمة الحالية «{value}» نصّية — اختر الوقت من المنتقيين.</p>}
+    </div>
+  );
+}
+
 const LOCK_ICON = (
   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="inline-block"><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
 );
@@ -614,6 +655,8 @@ function FieldInput({ f, value, onChange, badge, dir }: { f: FieldSchema; value:
         />
       ) : f.base === "date" || /_date$/.test(f.base) ? (
         <DateField value={String(value ?? "")} onChange={(v) => onChange(v)} />
+      ) : f.base === "time" || /_time$/.test(f.base) ? (
+        <TimeRangeField value={String(value ?? "")} onChange={(v) => onChange(v)} />
       ) : (
         <AutoTextarea value={String(value ?? "")} onChange={onChange} dir={dir} />
       )}
