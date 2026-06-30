@@ -13,7 +13,7 @@ const BRANCHES_EN = ["Al-Narjis Branch", "Al-Olaya Branch", "Al-Rawdah Branch", 
 const CASES = ["اضطراب طيف التوحد", "نقص الانتباه وفرط الحركة (ADHD)", "تأخر النطق واللغة", "صعوبات التعلم", "إعاقة حركية", "أخرى"];
 const CASES_EN = ["Autism Spectrum Disorder", "ADHD", "Speech & Language Delay", "Learning Difficulties", "Physical Disability", "Other"];
 
-export default function AdmissionForm({ locale }: { locale: Locale }) {
+export default function AdmissionForm({ locale, branchOptions }: { locale: Locale; branchOptions?: string[] }) {
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
   // أخطاء لكل حقل (تظهر فوق الحقل نفسه) + خطأ عام للإرسال (شبكة)
@@ -22,6 +22,8 @@ export default function AdmissionForm({ locale }: { locale: Locale }) {
   const [caseType, setCaseType] = useState(""); // لإظهار حقل «حدّد» عند اختيار «أخرى»
   const cities = locale === "en" ? CITIES_EN : CITIES;
   const branches = locale === "en" ? BRANCHES_EN : BRANCHES;
+  // الفروع من الـCMS (تُمرَّر من الصفحة) مع fallback للقائمة الثابتة
+  const branchList = branchOptions?.length ? branchOptions : branches;
   const cases = locale === "en" ? CASES_EN : CASES;
   const otherCase = pick(locale, "أخرى", "Other");
 
@@ -116,7 +118,7 @@ export default function AdmissionForm({ locale }: { locale: Locale }) {
         <Field name="childAge" label={pick(locale, "العمر", "Age")} required placeholder={pick(locale, "مثال: 4 سنوات", "Example: 4 years")} error={errors.childAge} onClear={clearError} />
         <Select name="gender" label={pick(locale, "الجنس", "Gender")} required options={[pick(locale, "ذكر", "Male"), pick(locale, "أنثى", "Female")]} locale={locale} error={errors.gender} onClear={clearError} />
         <Select name="city" label={pick(locale, "المدينة", "City")} required options={cities} locale={locale} error={errors.city} onClear={clearError} />
-        <Select name="branch" label={pick(locale, "الفرع المطلوب", "Preferred Branch")} required options={branches} locale={locale} error={errors.branch} onClear={clearError} />
+        <Select name="branch" label={pick(locale, "الفرع المطلوب", "Preferred Branch")} required options={branchList} locale={locale} error={errors.branch} onClear={clearError} />
       </Section>
 
       {/* بيانات ولي الأمر */}

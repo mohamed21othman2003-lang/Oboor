@@ -18,7 +18,9 @@ const MESSAGE_TYPES: { value: string; ar: string; en: string }[] = [
   { value: "شكوى", ar: "شكوى", en: "Complaint" },
 ];
 
-export default function ContactForm({ locale }: { locale: Locale }) {
+export default function ContactForm({ locale, branches }: { locale: Locale; branches?: string[] }) {
+  // قائمة الفروع من الـCMS (تمرَّر من الصفحة) مع fallback للقائمة الثابتة
+  const branchOptions = branches?.length ? branches : BRANCHES.map((b) => pick(locale, b.ar, b.en));
   const [type, setType] = useState("خدمة");
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -86,7 +88,7 @@ export default function ContactForm({ locale }: { locale: Locale }) {
             id="branch"
             name="branch"
             placeholder={pick(locale, "اختر الفرع", "Choose Branch")}
-            options={BRANCHES.map((b) => ({ value: b.ar, label: pick(locale, b.ar, b.en) }))}
+            options={branchOptions}
           />
         </div>
         <div>

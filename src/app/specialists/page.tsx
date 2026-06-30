@@ -5,6 +5,7 @@ import { getSpecialistStats, getJoinCards, getContactPrompt, getSpecialists, typ
 import { getLocale } from "@/i18n/locale";
 import { pick, type Locale } from "@/i18n/config";
 import { fetchContent, fetchSections } from "@/lib/server/django";
+import { loadBranches } from "@/lib/server/branches";
 import { hl } from "@/lib/highlight";
 import SpecialistsExplorer from "@/components/SpecialistsExplorer";
 import CtaSection from "@/components/CtaSection";
@@ -75,9 +76,10 @@ function ChevDown() {
 export default async function SpecialistsPage() {
   const locale = await getLocale();
   const en = locale === "en";
-  const [specialists, sections] = await Promise.all([
+  const [specialists, sections, branches] = await Promise.all([
     loadSpecialists(locale),
     fetchSections("specialists"),
+    loadBranches(locale),
   ]);
 
   // القائمة الكاملة لتخصصات وفروع عبور (تظهر في الفلتر حتى قبل إضافة كل الأخصائيين)
@@ -86,11 +88,15 @@ export default async function SpecialistsPage() {
     ["علاج وظيفي", "تخاطب وتواصل", "تعديل سلوك", "علاج طبيعي", "تربية خاصة", "تكامل حسي", "تأهيل النطق واللغة", "علم النفس التربوي"],
     ["Occupational Therapy", "Speech & Communication", "Behavior Modification", "Physical Therapy", "Special Education", "Sensory Integration", "Speech & Language Rehab", "Educational Psychology"],
   );
-  const branchOptions = pick(
-    locale,
-    ["الرياض", "جدة", "مكة المكرمة", "المدينة المنورة", "المنطقة الشرقية", "القصيم", "عسير", "الطائف", "أبها", "الخرج"],
-    ["Riyadh", "Jeddah", "Makkah", "Madinah", "Eastern Province", "Qassim", "Asir", "Taif", "Abha", "Al-Kharj"],
-  );
+  // مدن الفروع من الـCMS (تتحدّث تلقائياً عند إضافة فرع) مع fallback ثابت
+  const branchCities = [...new Set(branches.map((b) => b.city).filter(Boolean))];
+  const branchOptions = branchCities.length
+    ? branchCities
+    : pick(
+        locale,
+        ["الرياض", "جدة", "مكة المكرمة", "المدينة المنورة", "المنطقة الشرقية", "القصيم", "عسير", "الطائف", "أبها", "الخرج"],
+        ["Riyadh", "Jeddah", "Makkah", "Madinah", "Eastern Province", "Qassim", "Asir", "Taif", "Abha", "Al-Kharj"],
+      );
 
   // أقسام صفحة الأخصائيين من Django مع fallback للبيانات الثابتة
   const hero = sections?.hero ?? [];
