@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { pick, type Locale } from "@/i18n/config";
 import { validateName, validatePhone, stripDigits, digitsOnly } from "@/lib/validate";
+import CustomSelect from "@/components/ui/Select";
 
 const BRANCHES: { ar: string; en: string }[] = [
   { ar: "الرياض — الفرع الرئيسي", en: "Riyadh — Main Branch" },
@@ -80,12 +81,12 @@ export default function ContactForm({ locale }: { locale: Locale }) {
         </div>
         <div>
           <label htmlFor="branch" className={labelCls}>{pick(locale, "اختر الفرع", "Choose Branch")}</label>
-          <select id="branch" name="branch" className={field} defaultValue="">
-            <option value="" disabled>{pick(locale, "اختر الفرع", "Choose Branch")}</option>
-            {BRANCHES.map((b) => (
-              <option key={b.ar} value={b.ar}>{pick(locale, b.ar, b.en)}</option>
-            ))}
-          </select>
+          <CustomSelect
+            id="branch"
+            name="branch"
+            placeholder={pick(locale, "اختر الفرع", "Choose Branch")}
+            options={BRANCHES.map((b) => ({ value: b.ar, label: pick(locale, b.ar, b.en) }))}
+          />
         </div>
         <div>
           <span className={labelCls}>{pick(locale, "نوع الرسالة", "Message Type")}</span>

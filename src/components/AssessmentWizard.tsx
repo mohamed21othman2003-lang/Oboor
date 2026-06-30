@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { validateName, validatePhone, stripDigits, digitsOnly } from "@/lib/validate";
+import CustomSelect from "@/components/ui/Select";
 import { getAssessments, getQuestionsFor, getAnswerOptions, type Assessment } from "@/lib/assessmentData";
 import { pick, type Locale } from "@/i18n/config";
 
@@ -240,10 +241,9 @@ function Select({ label, name, placeholder, options }: { label: string; name: st
   return (
     <div>
       <label className="block text-start text-sm font-semibold text-ink">{label}</label>
-      <select name={name} defaultValue="" className="mt-1.5 w-full rounded-xl border border-line bg-white px-3 py-2.5 text-start text-sm text-ink focus:outline-none focus:ring-2 focus:ring-brand/30">
-        <option value="" disabled>{placeholder}</option>
-        {options.map((o) => <option key={o} value={o}>{o}</option>)}
-      </select>
+      <div className="mt-1.5">
+        <CustomSelect name={name} placeholder={placeholder} options={options} />
+      </div>
     </div>
   );
 }
