@@ -51,7 +51,6 @@ const I = {
   pin: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>,
   tag: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.6 13.4 12 22l-9-9V3h10z" /><circle cx="7.5" cy="7.5" r="1.5" /></svg>,
   msg: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>,
-  clip: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21.4 11.05 12.25 20.2a5 5 0 0 1-7.07-7.07l9.19-9.19a3 3 0 0 1 4.24 4.24l-9.2 9.19a1 1 0 0 1-1.41-1.41l8.49-8.49" /></svg>,
 };
 
 export default function ContactMessagesView({
@@ -236,12 +235,6 @@ export default function ContactMessagesView({
                 <div className="rounded-xl border border-line bg-surface/40 p-4">
                   <p className="mb-2 flex items-center gap-1.5 text-xs font-bold text-ink-soft"><span className="text-[#1FA6A8]">{I.msg}</span> الرسالة</p>
                   <p className="whitespace-pre-wrap break-words text-sm leading-relaxed text-ink">{v(selected, "message") || "—"}</p>
-                </div>
-
-                {/* المرفقات */}
-                <div className="rounded-xl border border-line bg-surface/40 p-4">
-                  <p className="mb-1 flex items-center gap-1.5 text-xs font-bold text-ink-soft"><span className="text-[#1FA6A8]">{I.clip}</span> مرفقات</p>
-                  <p className="text-sm text-ink-soft">لا توجد مرفقات</p>
                 </div>
               </div>
             );
