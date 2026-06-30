@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { pick, type Locale } from "@/i18n/config";
-import { validateName, validatePhone, validateRequired, validateEmail } from "@/lib/validate";
+import { validateName, validatePhone, validateRequired, validateEmail, stripDigits, digitsOnly } from "@/lib/validate";
 
 const CITIES = ["الرياض", "جدة", "الدمام", "مكة المكرمة", "المدينة المنورة", "القصيم", "عسير"];
 const CITIES_EN = ["Riyadh", "Jeddah", "Dammam", "Makkah", "Madinah", "Qassim", "Asir"];
@@ -100,7 +100,7 @@ export default function AdmissionForm({ locale }: { locale: Locale }) {
 
       {/* بيانات الطفل */}
       <Section title={pick(locale, "بيانات الطفل", "Child's Information")}>
-        <Field name="childName" label={pick(locale, "اسم الطفل", "Child's Name")} required placeholder={pick(locale, "أدخل اسم طفلك", "Enter your child's name")} error={errors.childName} onClear={clearError} />
+        <Field name="childName" label={pick(locale, "اسم الطفل", "Child's Name")} required placeholder={pick(locale, "أدخل اسم طفلك", "Enter your child's name")} error={errors.childName} onClear={clearError} filter="name" />
         <Field name="childAge" label={pick(locale, "العمر", "Age")} required placeholder={pick(locale, "مثال: 4 سنوات", "Example: 4 years")} error={errors.childAge} onClear={clearError} />
         <Select name="gender" label={pick(locale, "الجنس", "Gender")} required options={[pick(locale, "ذكر", "Male"), pick(locale, "أنثى", "Female")]} locale={locale} error={errors.gender} onClear={clearError} />
         <Select name="city" label={pick(locale, "المدينة", "City")} required options={cities} locale={locale} error={errors.city} onClear={clearError} />
@@ -109,8 +109,8 @@ export default function AdmissionForm({ locale }: { locale: Locale }) {
 
       {/* بيانات ولي الأمر */}
       <Section title={pick(locale, "بيانات ولي الأمر", "Parent's Information")}>
-        <Field name="parentName" label={pick(locale, "اسم ولي الأمر", "Parent's Name")} required placeholder={pick(locale, "الاسم الكامل", "Full name")} error={errors.parentName} onClear={clearError} />
-        <Field name="phone" label={pick(locale, "رقم الجوال", "Mobile Number")} required type="tel" placeholder={pick(locale, "ادخل رقم جوالك", "Enter your mobile number")} error={errors.phone} onClear={clearError} />
+        <Field name="parentName" label={pick(locale, "اسم ولي الأمر", "Parent's Name")} required placeholder={pick(locale, "الاسم الكامل", "Full name")} error={errors.parentName} onClear={clearError} filter="name" />
+        <Field name="phone" label={pick(locale, "رقم الجوال", "Mobile Number")} required type="tel" placeholder={pick(locale, "ادخل رقم جوالك", "Enter your mobile number")} error={errors.phone} onClear={clearError} filter="phone" />
         <Field name="email" label={pick(locale, "البريد الإلكتروني", "Email")} required type="email" placeholder="example@gmail.com" error={errors.email} onClear={clearError} />
       </Section>
 
@@ -170,22 +170,27 @@ function FieldError({ name, error }: { name: string; error?: string }) {
   );
 }
 
-function Field({ label, name, required, type = "text", placeholder, error, onClear }: { label: string; name: string; required?: boolean; type?: string; placeholder?: string; error?: string; onClear?: (name: string) => void }) {
+function Field({ label, name, required, type = "text", placeholder, error, onClear, filter }: { label: string; name: string; required?: boolean; type?: string; placeholder?: string; error?: string; onClear?: (name: string) => void; filter?: "name" | "phone" }) {
   return (
     <div>
       <Label>{label} {required && <span className="text-danger">*</span>}</Label>
-      <FieldError name={name} error={error} />
       <input
         id={name}
         name={name}
         type={type}
         required={required}
         placeholder={placeholder}
+        inputMode={filter === "phone" ? "numeric" : undefined}
         aria-invalid={!!error}
         aria-describedby={error ? `${name}-error` : undefined}
-        onInput={() => onClear?.(name)}
+        onInput={(e) => {
+          if (filter === "name") e.currentTarget.value = stripDigits(e.currentTarget.value);
+          else if (filter === "phone") e.currentTarget.value = digitsOnly(e.currentTarget.value);
+          onClear?.(name);
+        }}
         className={`mt-1.5 w-full rounded-xl border bg-white px-3 py-2.5 text-start text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 ${error ? "border-red-400 ring-2 ring-red-100 focus:ring-red-200" : "border-line focus:ring-brand/30"}`}
       />
+      <FieldError name={name} error={error} />
     </div>
   );
 }
@@ -194,7 +199,6 @@ function Select({ label, name, required, options, locale, error, onClear }: { la
   return (
     <div>
       <Label>{label} {required && <span className="text-danger">*</span>}</Label>
-      <FieldError name={name} error={error} />
       <select
         id={name}
         name={name}
@@ -208,6 +212,7 @@ function Select({ label, name, required, options, locale, error, onClear }: { la
         <option value="" disabled>{pick(locale, "اختر", "Select")}</option>
         {options.map((o) => <option key={o} value={o}>{o}</option>)}
       </select>
+      <FieldError name={name} error={error} />
     </div>
   );
 }

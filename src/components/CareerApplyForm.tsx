@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { CITIES, CITIES_EN } from "@/lib/careersData";
 import { pick, type Locale } from "@/i18n/config";
-import { validateName, validatePhone } from "@/lib/validate";
+import { validateName, validatePhone, stripDigits, digitsOnly } from "@/lib/validate";
 
 const OTHER = "__other__";
 
@@ -131,8 +131,8 @@ export default function CareerApplyForm({ jobTitle, locale }: { jobTitle: string
           >
             <input type="hidden" name="job" value={jobTitle} />
             <div className="grid gap-5 sm:grid-cols-2">
-              <Field name="name" label={pick(locale, "الاسم الكامل", "Full Name")} required placeholder={pick(locale, "أدخل اسمك الكامل", "Enter your full name")} />
-              <Field name="phone" label={pick(locale, "رقم الجوال", "Mobile Number")} required type="tel" placeholder="05XXXXXXXX" />
+              <Field name="name" label={pick(locale, "الاسم الكامل", "Full Name")} required placeholder={pick(locale, "أدخل اسمك الكامل", "Enter your full name")} filter="name" />
+              <Field name="phone" label={pick(locale, "رقم الجوال", "Mobile Number")} required type="tel" placeholder="05XXXXXXXX" filter="phone" />
               <Field name="email" label={pick(locale, "البريد الإلكتروني", "Email")} required type="email" placeholder="example@gmail.com" />
               <SelectField name="city" label={pick(locale, "المدينة", "City")} required options={cities} />
               <div>
@@ -220,7 +220,7 @@ function Label({ children, required }: { children: React.ReactNode; required?: b
   );
 }
 
-function Field({ label, name, required, type = "text", placeholder }: { label: string; name: string; required?: boolean; type?: string; placeholder?: string }) {
+function Field({ label, name, required, type = "text", placeholder, filter }: { label: string; name: string; required?: boolean; type?: string; placeholder?: string; filter?: "name" | "phone" }) {
   return (
     <div>
       <Label required={required}>{label}</Label>
@@ -229,6 +229,8 @@ function Field({ label, name, required, type = "text", placeholder }: { label: s
         type={type}
         required={required}
         placeholder={placeholder}
+        inputMode={filter === "phone" ? "numeric" : undefined}
+        onInput={filter ? (e) => { e.currentTarget.value = filter === "name" ? stripDigits(e.currentTarget.value) : digitsOnly(e.currentTarget.value); } : undefined}
         className="mt-1.5 w-full rounded-xl border border-line bg-white px-3 py-2.5 text-start text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-brand/30"
       />
     </div>

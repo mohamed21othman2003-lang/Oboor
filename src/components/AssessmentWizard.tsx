@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { validateName, validatePhone } from "@/lib/validate";
+import { validateName, validatePhone, stripDigits, digitsOnly } from "@/lib/validate";
 import { getAssessments, getQuestionsFor, getAnswerOptions, type Assessment } from "@/lib/assessmentData";
 import { pick, type Locale } from "@/i18n/config";
 
@@ -154,12 +154,12 @@ export default function AssessmentWizard({
             <p className="mt-1 text-sm text-ink-muted">{pick(locale, "نحتاج بعض المعلومات لعرض النتيجة الأولية والتواصل معكم عند الحاجة.", "We need a few details to show the preliminary result and contact you when needed.")}</p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field name="parentName" label={pick(locale, "اسم ولي الأمر", "Parent's Name")} required placeholder={pick(locale, "الاسم الكامل", "Full name")} />
-            <Field name="phone" label={pick(locale, "رقم الجوال", "Mobile Number")} required type="tel" placeholder="05XXXXXXXX" />
+            <Field name="parentName" label={pick(locale, "اسم ولي الأمر", "Parent's Name")} required placeholder={pick(locale, "الاسم الكامل", "Full name")} filter="name" />
+            <Field name="phone" label={pick(locale, "رقم الجوال", "Mobile Number")} required type="tel" placeholder="05XXXXXXXX" filter="phone" />
             <div className="sm:col-span-2">
               <Field name="email" label={pick(locale, "البريد الإلكتروني", "Email")} type="email" placeholder="name@example.com" />
             </div>
-            <Field name="childName" label={pick(locale, "اسم الطفل", "Child's Name")} required placeholder={pick(locale, "اسم الطفل", "Child's name")} />
+            <Field name="childName" label={pick(locale, "اسم الطفل", "Child's Name")} required placeholder={pick(locale, "اسم الطفل", "Child's name")} filter="name" />
             <Field name="age" label={pick(locale, "العمر", "Age")} required placeholder={pick(locale, "مثال: 6 سنوات", "Example: 6 years")} />
             <Select name="gender" label={pick(locale, "الجنس", "Gender")} placeholder={pick(locale, "اختر الجنس", "Select gender")} options={[pick(locale, "ذكر", "Male"), pick(locale, "أنثى", "Female")]} />
             <Select name="city" label={pick(locale, "المدينة", "City")} placeholder={pick(locale, "اختر المدينة", "Select city")} options={[pick(locale, "الرياض", "Riyadh"), pick(locale, "جدة", "Jeddah"), pick(locale, "الشرقية", "Eastern Province"), pick(locale, "مكة المكرمة", "Makkah"), pick(locale, "المدينة المنورة", "Madinah")]} />
@@ -227,11 +227,11 @@ function Meta({ icon, label, value }: { icon: React.ReactNode; label: string; va
   );
 }
 
-function Field({ label, name, required, type = "text", placeholder }: { label: string; name: string; required?: boolean; type?: string; placeholder?: string }) {
+function Field({ label, name, required, type = "text", placeholder, filter }: { label: string; name: string; required?: boolean; type?: string; placeholder?: string; filter?: "name" | "phone" }) {
   return (
     <div>
       <label className="block text-start text-sm font-semibold text-ink">{label} {required && <span className="text-danger">*</span>}</label>
-      <input name={name} type={type} required={required} placeholder={placeholder} className="mt-1.5 w-full rounded-xl border border-line bg-white px-3 py-2.5 text-start text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-brand/30" />
+      <input name={name} type={type} required={required} placeholder={placeholder} inputMode={filter === "phone" ? "numeric" : undefined} onInput={filter ? (e) => { e.currentTarget.value = filter === "name" ? stripDigits(e.currentTarget.value) : digitsOnly(e.currentTarget.value); } : undefined} className="mt-1.5 w-full rounded-xl border border-line bg-white px-3 py-2.5 text-start text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-brand/30" />
     </div>
   );
 }
