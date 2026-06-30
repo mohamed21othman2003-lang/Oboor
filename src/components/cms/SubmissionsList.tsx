@@ -104,7 +104,7 @@ export default function SubmissionsList({ type }: { type: string }) {
     return (
       <>
         {error && <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">{error}</p>}
-        {loading ? <p className="text-ink-soft">جارٍ التحميل…</p> : <SubmissionsTable items={items} label={label} onDelete={deleteById} busy={busy} />}
+        {loading ? <p className="text-ink-soft">جارٍ التحميل…</p> : <SubmissionsTable items={items} fields={fields} label={label} onDelete={deleteById} busy={busy} />}
       </>
     );
   }
