@@ -157,9 +157,9 @@ export default function ContactMessagesView({
       </div>
 
       {/* العرض المقسوم */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[340px_1fr]">
-        {/* قائمة الرسائل */}
-        <div className="rounded-2xl border border-line bg-white shadow-sm">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_340px]">
+        {/* قائمة الرسائل (يسار على الديسكتوب، وأول عنصر على الموبايل) */}
+        <div className="rounded-2xl border border-line bg-white shadow-sm lg:order-2">
           <div className="border-b border-line px-4 py-3 text-sm font-extrabold text-ink">الرسائل ({filtered.length})</div>
           {filtered.length === 0 ? (
             <p className="p-8 text-center text-sm text-ink-soft">لا توجد رسائل مطابقة.</p>
@@ -192,8 +192,8 @@ export default function ContactMessagesView({
           )}
         </div>
 
-        {/* تفاصيل الرسالة */}
-        <div className="rounded-2xl border border-line bg-white p-5 shadow-sm">
+        {/* تفاصيل الرسالة (يمين على الديسكتوب) */}
+        <div className="rounded-2xl border border-line bg-white p-5 shadow-sm lg:order-1">
           {!selected ? (
             <div className="flex h-full min-h-[300px] flex-col items-center justify-center text-center text-ink-soft">
               <span className="mb-2 text-[#1FA6A8]/40">{I.inbox}</span>
