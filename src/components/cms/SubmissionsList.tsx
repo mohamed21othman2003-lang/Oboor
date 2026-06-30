@@ -9,6 +9,23 @@ const isArabic = (v: string) => /[؀-ۿ]/.test(v);
 function Ic({ d }: { d: React.ReactNode }) {
   return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">{d}</svg>;
 }
+
+// «نسخ الرقم»: بديل مفيد على الويب لزر الاتصال (الديسكتوب لا يتصل)
+function CopyPhone({ phone }: { phone: string }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <button
+      type="button"
+      onClick={() => navigator.clipboard?.writeText(phone).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1500); })}
+      className="inline-flex items-center gap-1.5 rounded-xl bg-[#1FA6A8] px-3.5 py-2 text-xs font-bold text-white transition-colors hover:bg-[#0F6C73]"
+    >
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        {copied ? <path d="M20 6 9 17l-5-5" /> : <><rect x="9" y="9" width="13" height="13" rx="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></>}
+      </svg>
+      {copied ? "تم النسخ" : "نسخ الرقم"}
+    </button>
+  );
+}
 const FIELD_ICONS: Record<string, React.ReactNode> = {
   phone: <Ic d={<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2 4.2 2 2 0 0 1 4 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.8 2z" />} />,
   email: <Ic d={<><rect x="3" y="5" width="18" height="14" rx="2" /><path d="M3 7l9 6 9-6" /></>} />,
@@ -124,7 +141,7 @@ export default function SubmissionsList({ type }: { type: string }) {
                     {/* أزرار تواصل سريعة */}
                     {(phone || email) && (
                       <div className="mb-4 flex flex-wrap gap-2">
-                        {phone && <a href={`tel:${phone}`} className="inline-flex items-center gap-1.5 rounded-xl bg-[#1FA6A8] px-3.5 py-2 text-xs font-bold text-white transition-colors hover:bg-[#0F6C73]"><span className="h-4 w-4">{FIELD_ICONS.phone}</span>اتصال</a>}
+                        {phone && <CopyPhone phone={phone} />}
                         {wa && <a href={`https://wa.me/${wa}`} target="_blank" rel="noopener" className="inline-flex items-center gap-1.5 rounded-xl bg-[#25D366] px-3.5 py-2 text-xs font-bold text-white transition-opacity hover:opacity-90"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.5 15.3L2 22l4.8-1.5A10 10 0 1 0 12 2zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-1.7-.1-.4-.1-.9-.3-1.6-.6-2.7-1.2-4.5-4-4.6-4.2-.1-.2-1.1-1.5-1.1-2.8s.7-2 .9-2.2c.2-.2.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 1.9c.1.1.1.3 0 .5l-.4.5-.3.3c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.3.1.5.1.6-.1l.7-.9c.2-.2.4-.2.6-.1l1.8.9c.2.1.4.2.5.3.1.2.1.7-.1 1.1z" /></svg>واتساب</a>}
                         {email && <a href={`mailto:${email}`} className="inline-flex items-center gap-1.5 rounded-xl bg-white px-3.5 py-2 text-xs font-bold text-[#0F6C73] ring-1 ring-line transition-colors hover:bg-[#1FA6A8]/10"><span className="h-4 w-4">{FIELD_ICONS.email}</span>إيميل</a>}
                       </div>
