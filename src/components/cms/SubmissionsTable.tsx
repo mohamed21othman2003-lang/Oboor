@@ -208,7 +208,7 @@ export default function SubmissionsTable({
             <thead className="sticky top-0 z-10 bg-surface">
               <tr className="text-ink-soft">
                 <th className="w-12 px-4 py-3 text-center"><input type="checkbox" checked={allOnPage} onChange={toggleAll} className="h-4 w-4 accent-[#1FA6A8]" aria-label="تحديد الكل" /></th>
-                <th className="px-4 py-3 text-center text-xs font-bold">ولي الأمر</th>
+                <th className="px-4 py-3 text-start text-xs font-bold">ولي الأمر</th>
                 <th className="px-4 py-3 text-center text-xs font-bold">نوع الحالة</th>
                 <th className="px-4 py-3 text-center text-xs font-bold">الفرع</th>
                 <th className="px-4 py-3 text-center text-xs font-bold">تاريخ الطلب</th>
@@ -228,12 +228,12 @@ export default function SubmissionsTable({
                   <tr key={it.id} onClick={() => setViewing(it)} className={`cursor-pointer border-t border-line transition-colors hover:bg-surface/50 ${checked ? "bg-[#1FA6A8]/5" : ""}`}>
                     <td className="px-4 py-3.5 text-center" onClick={(e) => e.stopPropagation()}><input type="checkbox" checked={checked} onChange={() => toggleOne(it.id)} className="h-4 w-4 accent-[#1FA6A8]" aria-label="تحديد" /></td>
                     <td className="px-4 py-3.5">
-                      <div className="flex items-center justify-center gap-2.5">
-                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#1FA6A8]/10 text-[#0F6C73]">{I.user}</span>
-                        <div className="min-w-0 text-center">
+                      <div className="flex items-center justify-start gap-2.5 text-start">
+                        <div className="min-w-0">
                           <p className="font-bold text-ink">{v(it, "parent_name") || "—"}</p>
-                          {phone && <p dir="ltr" className="mt-0.5 text-center text-xs text-ink-soft">{phone}</p>}
+                          {phone && <p dir="ltr" className="mt-0.5 text-end text-xs text-ink-soft">{phone}</p>}
                         </div>
+                        <span className="shrink-0 text-ink-soft">{I.user}</span>
                       </div>
                     </td>
                     <td className="px-4 py-3.5 text-center">
