@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { listCollection, getSchema, deleteItem, TYPE_LABELS, type CmsItem, type FieldSchema } from "@/lib/cms/api";
+import SubmissionsTable from "@/components/cms/SubmissionsTable";
 
 const isArabic = (v: string) => /[؀-ۿ]/.test(v);
 
@@ -69,8 +70,8 @@ export default function SubmissionsList({ type }: { type: string }) {
       .finally(() => setLoading(false));
   }, [type]);
 
-  async function onDelete(id: number) {
-    if (!confirm("حذف هذا الطلب نهائياً؟")) return;
+  // حذف فعلي بدون تأكيد (التأكيد يتم في مكان الاستدعاء)
+  async function deleteById(id: number) {
     setBusy(id);
     try {
       await deleteItem(type, id);
@@ -80,6 +81,10 @@ export default function SubmissionsList({ type }: { type: string }) {
     } finally {
       setBusy(null);
     }
+  }
+  async function onDelete(id: number) {
+    if (!confirm("حذف هذا الطلب نهائياً؟")) return;
+    await deleteById(id);
   }
 
   const val = (it: CmsItem, name: string) => {
@@ -93,6 +98,16 @@ export default function SubmissionsList({ type }: { type: string }) {
     try { return new Date(String(v)).toLocaleString("ar-EG", { dateStyle: "medium", timeStyle: "short" }); }
     catch { return String(v); }
   };
+
+  // طلبات الالتحاق: جدول إدارة (CRM) — نفس البيانات والأكشنز، ديزاين فقط
+  if (type === "admission") {
+    return (
+      <>
+        {error && <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">{error}</p>}
+        {loading ? <p className="text-ink-soft">جارٍ التحميل…</p> : <SubmissionsTable items={items} label={label} onDelete={deleteById} busy={busy} />}
+      </>
+    );
+  }
 
   return (
     <div className="space-y-6">
