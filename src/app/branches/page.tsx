@@ -5,7 +5,6 @@ import { MAP_REGIONS, MAP_REGIONS_EN, BRANCH_FEATURES, BRANCH_FEATURES_EN } from
 import { Suspense } from "react";
 import BranchesExplorer from "@/components/BranchesExplorer";
 import BranchesMapSection from "@/components/BranchesMapSection";
-import BranchSearch from "@/components/BranchSearch";
 import { getLocale } from "@/i18n/locale";
 import { pick } from "@/i18n/config";
 import { loadBranches } from "@/lib/server/branches";
@@ -91,9 +90,6 @@ export default async function BranchesPage() {
               {hB(hF("heading")) || pick(locale, "ابحث عن أقرب فرع إليك واستكشف خدماتنا في مختلف مناطق المملكة العربية السعودية.", "Find your nearest branch and explore our services across the various regions of Saudi Arabia.")}
             </p>
           </div>
-
-          {/* Search bar */}
-          <BranchSearch locale={locale} />
         </div>
       </section>
 
