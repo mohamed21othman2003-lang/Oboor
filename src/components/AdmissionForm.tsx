@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { pick, type Locale } from "@/i18n/config";
 import { validateName, validatePhone, validateRequired, validateEmail, stripDigits, digitsOnly } from "@/lib/validate";
+import CustomSelect from "@/components/ui/Select";
 
 const CITIES = ["الرياض", "جدة", "الدمام", "مكة المكرمة", "المدينة المنورة", "القصيم", "عسير"];
 const CITIES_EN = ["Riyadh", "Jeddah", "Dammam", "Makkah", "Madinah", "Qassim", "Asir"];
@@ -199,19 +200,17 @@ function Select({ label, name, required, options, locale, error, onClear }: { la
   return (
     <div>
       <Label>{label} {required && <span className="text-danger">*</span>}</Label>
-      <select
-        id={name}
-        name={name}
-        required={required}
-        defaultValue=""
-        aria-invalid={!!error}
-        aria-describedby={error ? `${name}-error` : undefined}
-        onChange={() => onClear?.(name)}
-        className={`mt-1.5 w-full rounded-xl border bg-white px-3 py-2.5 text-start text-sm text-ink focus:outline-none focus:ring-2 ${error ? "border-red-400 ring-2 ring-red-100 focus:ring-red-200" : "border-line focus:ring-brand/30"}`}
-      >
-        <option value="" disabled>{pick(locale, "اختر", "Select")}</option>
-        {options.map((o) => <option key={o} value={o}>{o}</option>)}
-      </select>
+      <div className="mt-1.5">
+        <CustomSelect
+          id={name}
+          name={name}
+          required={required}
+          options={options}
+          placeholder={pick(locale, "اختر", "Select")}
+          invalid={!!error}
+          onChange={() => onClear?.(name)}
+        />
+      </div>
       <FieldError name={name} error={error} />
     </div>
   );
