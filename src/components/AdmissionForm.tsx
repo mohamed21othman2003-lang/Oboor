@@ -18,9 +18,11 @@ export default function AdmissionForm({ locale }: { locale: Locale }) {
   // أخطاء لكل حقل (تظهر فوق الحقل نفسه) + خطأ عام للإرسال (شبكة)
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState("");
+  const [caseType, setCaseType] = useState(""); // لإظهار حقل «حدّد» عند اختيار «أخرى»
   const cities = locale === "en" ? CITIES_EN : CITIES;
   const branches = locale === "en" ? BRANCHES_EN : BRANCHES;
   const cases = locale === "en" ? CASES_EN : CASES;
+  const otherCase = pick(locale, "أخرى", "Other");
 
   // مسح خطأ حقل بمجرّد أن يبدأ المستخدم تعديله
   const clearError = (name: string) =>
@@ -51,11 +53,19 @@ export default function AdmissionForm({ locale }: { locale: Locale }) {
     const nextErrors: Record<string, string> = {};
     for (const [field, msg] of checks) if (msg) nextErrors[field] = msg;
 
+    // عند اختيار «أخرى» يجب تحديد نوع الحالة، ونرسلها بدل كلمة «أخرى»
+    if (g("caseType") === otherCase) {
+      const other = g("caseTypeOther").trim();
+      if (!other) nextErrors.caseTypeOther = pick(locale, "الرجاء تحديد نوع الحالة أو الصعوبة.", "Please specify the condition or difficulty.");
+      else fd.set("caseType", other);
+    }
+
     if (Object.keys(nextErrors).length) {
       setErrors(nextErrors);
       setFormError("");
       // سكرول + تركيز على أول حقل فيه خطأ ليلاحظه المستخدم
-      const first = checks.find(([f]) => nextErrors[f])?.[0];
+      const order = [...checks.map(([f]) => f), "caseTypeOther"];
+      const first = order.find((f) => nextErrors[f]);
       if (first) {
         const el = document.getElementById(first);
         el?.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -117,7 +127,30 @@ export default function AdmissionForm({ locale }: { locale: Locale }) {
 
       {/* معلومات إضافية */}
       <Section title={pick(locale, "معلومات إضافية", "Additional Information")}>
-        <Select name="caseType" label={pick(locale, "نوع الحالة أو الصعوبة", "Type of Condition or Difficulty")} options={cases} locale={locale} />
+        <div>
+          <Label>{pick(locale, "نوع الحالة أو الصعوبة", "Type of Condition or Difficulty")}</Label>
+          <div className="mt-1.5">
+            <CustomSelect
+              name="caseType"
+              options={cases}
+              placeholder={pick(locale, "اختر", "Select")}
+              onChange={(v) => { setCaseType(v); if (v !== otherCase) clearError("caseTypeOther"); }}
+            />
+          </div>
+          {caseType === otherCase && (
+            <div className="mt-2">
+              <input
+                id="caseTypeOther"
+                name="caseTypeOther"
+                placeholder={pick(locale, "حدّد نوع الحالة أو الصعوبة…", "Specify the condition or difficulty…")}
+                aria-invalid={!!errors.caseTypeOther}
+                onInput={() => clearError("caseTypeOther")}
+                className={`w-full rounded-xl border bg-white px-3 py-2.5 text-start text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 ${errors.caseTypeOther ? "border-red-400 ring-2 ring-red-100 focus:ring-red-200" : "border-line focus:ring-brand/30"}`}
+              />
+              <FieldError name="caseTypeOther" error={errors.caseTypeOther} />
+            </div>
+          )}
+        </div>
         <div className="sm:col-span-2 lg:col-span-1">
           <Label>{pick(locale, "هل سبق الحصول على جلسات تأهيل؟", "Has your child received rehabilitation sessions before?")}</Label>
           <div className="mt-1.5 flex gap-3">
