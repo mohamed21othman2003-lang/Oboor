@@ -130,7 +130,7 @@ function FeatureCard({ icon, title, note }: { icon: React.ReactNode; title: stri
   );
 }
 
-function FormSection({ locale }: { locale: Locale }) {
+function FormSection({ locale, branches }: { locale: Locale; branches: string[] }) {
   return (
     <section className="bg-surface">
       <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:px-8">
@@ -157,7 +157,7 @@ function FormSection({ locale }: { locale: Locale }) {
         </p>
 
         <div className="mx-auto max-w-3xl">
-          <ContactForm locale={locale} />
+          <ContactForm locale={locale} branches={branches} />
         </div>
       </div>
     </section>
@@ -243,7 +243,7 @@ export default async function ContactPage() {
     <>
       <Hero locale={locale} />
       <ContactCards locale={locale} site={site} />
-      <FormSection locale={locale} />
+      <FormSection locale={locale} branches={branches.map((b) => b.name)} />
       <BranchesSection locale={locale} branches={branches} regions={mapRegions} />
       <SocialSection locale={locale} site={site} />
     </>
