@@ -151,7 +151,7 @@ export default function SubmissionsTable({
     URL.revokeObjectURL(url);
   };
 
-  const actBtn = "flex h-9 w-9 items-center justify-center rounded-xl border border-line bg-white text-ink-soft transition-colors";
+  const actBtn = "flex h-9 w-9 items-center justify-center rounded-xl border border-line bg-white transition-colors";
 
   return (
     <div className="space-y-5">
@@ -248,11 +248,11 @@ export default function SubmissionsTable({
                     </td>
                     <td className="px-4 py-3.5" onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center justify-center gap-1.5">
-                        {email && <a href={`mailto:${email}`} className={`${actBtn} hover:border-[#1FA6A8] hover:text-[#0F6C73]`} title="إيميل" aria-label="إيميل">{I.mail}</a>}
-                        {wa && <a href={`https://wa.me/${wa}`} target="_blank" rel="noopener" className={`${actBtn} hover:border-[#25D366] hover:bg-[#25D366]/10 hover:text-[#25D366]`} title="واتساب" aria-label="واتساب">{I.wa}</a>}
-                        <button onClick={() => setViewing(it)} className={`${actBtn} hover:border-[#1FA6A8] hover:text-[#0F6C73]`} title="عرض التفاصيل" aria-label="عرض التفاصيل">{I.eye}</button>
+                        {email && <a href={`mailto:${email}`} className={`${actBtn} text-[#1FA6A8] hover:border-[#1FA6A8] hover:bg-[#1FA6A8]/10`} title="إيميل" aria-label="إيميل">{I.mail}</a>}
+                        {wa && <a href={`https://wa.me/${wa}`} target="_blank" rel="noopener" className={`${actBtn} text-[#25D366] hover:border-[#25D366] hover:bg-[#25D366]/10`} title="واتساب" aria-label="واتساب">{I.wa}</a>}
+                        <button onClick={() => setViewing(it)} className={`${actBtn} text-[#0F6C73] hover:border-[#1FA6A8] hover:bg-[#1FA6A8]/10`} title="عرض التفاصيل" aria-label="عرض التفاصيل">{I.eye}</button>
                         <div className="relative">
-                          <button onClick={() => setMenu(menu === it.id ? null : it.id)} className={`${actBtn} hover:bg-surface`} title="المزيد" aria-label="المزيد">{I.more}</button>
+                          <button onClick={() => setMenu(menu === it.id ? null : it.id)} className={`${actBtn} text-ink hover:bg-surface`} title="المزيد" aria-label="المزيد">{I.more}</button>
                           {menu === it.id && (
                             <>
                               <div className="fixed inset-0 z-20" onClick={() => setMenu(null)} />
@@ -300,9 +300,9 @@ export default function SubmissionsTable({
               </div>
               <p className="mt-2 flex items-center gap-1.5 text-xs text-ink-soft"><span className="text-[#1FA6A8]">{I.cal}</span>{s.date}{s.time ? ` · ${s.time}` : ""}</p>
               <div className="mt-3 flex items-center gap-1.5 border-t border-line pt-3" onClick={(e) => e.stopPropagation()}>
-                <button onClick={() => setViewing(it)} className={`${actBtn} hover:border-[#1FA6A8]`} aria-label="عرض التفاصيل">{I.eye}</button>
-                {wa && <a href={`https://wa.me/${wa}`} target="_blank" rel="noopener" className={`${actBtn} hover:text-[#25D366]`} aria-label="واتساب">{I.wa}</a>}
-                {email && <a href={`mailto:${email}`} className={actBtn} aria-label="إيميل">{I.mail}</a>}
+                <button onClick={() => setViewing(it)} className={`${actBtn} text-[#0F6C73] hover:border-[#1FA6A8]`} aria-label="عرض التفاصيل">{I.eye}</button>
+                {wa && <a href={`https://wa.me/${wa}`} target="_blank" rel="noopener" className={`${actBtn} text-[#25D366] hover:border-[#25D366]`} aria-label="واتساب">{I.wa}</a>}
+                {email && <a href={`mailto:${email}`} className={`${actBtn} text-[#1FA6A8]`} aria-label="إيميل">{I.mail}</a>}
                 <button onClick={() => del(it.id)} disabled={busy === it.id} className="ms-auto inline-flex items-center gap-1.5 rounded-xl bg-red-50 px-3 py-2 text-xs font-semibold text-red-600 disabled:opacity-50">{I.trash} حذف</button>
               </div>
             </div>
