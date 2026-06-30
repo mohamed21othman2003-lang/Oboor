@@ -5,6 +5,7 @@ import { CITIES, CITIES_EN } from "@/lib/careersData";
 import { pick, type Locale } from "@/i18n/config";
 import { validateName, validatePhone, stripDigits, digitsOnly } from "@/lib/validate";
 import CustomSelect from "@/components/ui/Select";
+import LimitedTextarea from "@/components/ui/LimitedTextarea";
 
 const OTHER = "__other__";
 
@@ -163,10 +164,11 @@ export default function CareerApplyForm({ jobTitle, locale }: { jobTitle: string
 
             <div className="mt-5">
               <Label required>{pick(locale, "نبذة مختصرة عنك", "A Brief About Yourself")}</Label>
-              <textarea
+              <LimitedTextarea
                 name="about"
                 required
                 rows={4}
+                maxLength={500}
                 placeholder={pick(
                   locale,
                   "أخبرنا باختصار عن خلفيتك المهنية، تخصصك، ودوافعك للانضمام إلى فريق عبور…",

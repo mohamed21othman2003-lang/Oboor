@@ -4,6 +4,7 @@ import { useState } from "react";
 import { pick, type Locale } from "@/i18n/config";
 import { validateName, validatePhone, stripDigits, digitsOnly } from "@/lib/validate";
 import CustomSelect from "@/components/ui/Select";
+import LimitedTextarea from "@/components/ui/LimitedTextarea";
 
 const BRANCHES: { ar: string; en: string }[] = [
   { ar: "الرياض — الفرع الرئيسي", en: "Riyadh — Main Branch" },
@@ -110,7 +111,7 @@ export default function ContactForm({ locale }: { locale: Locale }) {
 
       <div className="mt-5">
         <label htmlFor="message" className={labelCls}>{pick(locale, "الرسالة", "Message")} <span className="text-red-500">*</span></label>
-        <textarea id="message" name="message" required rows={5} placeholder={pick(locale, "اكتب رسالتك هنا...", "Write your message here...")} className={`${field} resize-none`} />
+        <LimitedTextarea id="message" name="message" required rows={5} maxLength={500} placeholder={pick(locale, "اكتب رسالتك هنا...", "Write your message here...")} className={`${field} resize-none`} />
       </div>
 
       <button
