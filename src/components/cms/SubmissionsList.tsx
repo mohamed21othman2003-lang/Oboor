@@ -6,6 +6,7 @@ import { listCollection, getSchema, deleteItem, TYPE_LABELS, type CmsItem, type 
 import SubmissionsTable from "@/components/cms/SubmissionsTable";
 import ContactMessagesView from "@/components/cms/ContactMessagesView";
 import JobApplicationsTable from "@/components/cms/JobApplicationsTable";
+import AssessmentResultsTable from "@/components/cms/AssessmentResultsTable";
 
 const isArabic = (v: string) => /[؀-ۿ]/.test(v);
 
@@ -127,6 +128,16 @@ export default function SubmissionsList({ type }: { type: string }) {
       <>
         {error && <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">{error}</p>}
         {loading ? <p className="text-ink-soft">جارٍ التحميل…</p> : <JobApplicationsTable items={items} fields={fields} label={label} onDelete={deleteById} busy={busy} />}
+      </>
+    );
+  }
+
+  // نتائج التقييم: جدول بأكورديون داخلي — نفس البيانات والأكشنز
+  if (type === "assessment") {
+    return (
+      <>
+        {error && <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">{error}</p>}
+        {loading ? <p className="text-ink-soft">جارٍ التحميل…</p> : <AssessmentResultsTable items={items} label={label} onDelete={deleteById} busy={busy} />}
       </>
     );
   }
