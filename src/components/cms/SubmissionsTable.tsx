@@ -229,11 +229,11 @@ export default function SubmissionsTable({
                     <td className="px-4 py-3.5 text-center" onClick={(e) => e.stopPropagation()}><input type="checkbox" checked={checked} onChange={() => toggleOne(it.id)} className="h-4 w-4 accent-[#1FA6A8]" aria-label="تحديد" /></td>
                     <td className="px-4 py-3.5">
                       <div className="flex items-center justify-start gap-2.5 text-start">
+                        <span className="shrink-0 text-ink-soft">{I.user}</span>
                         <div className="min-w-0">
                           <p className="font-bold text-ink">{v(it, "parent_name") || "—"}</p>
                           {phone && <p dir="ltr" className="mt-0.5 text-end text-xs text-ink-soft">{phone}</p>}
                         </div>
-                        <span className="shrink-0 text-ink-soft">{I.user}</span>
                       </div>
                     </td>
                     <td className="px-4 py-3.5 text-center">
