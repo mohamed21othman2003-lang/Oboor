@@ -260,7 +260,7 @@ export default function SubmissionsTable({
                             </>
                           )}
                         </div>
-                        {phone && <button onClick={() => copyPhone(it.id, phone)} className={`${actBtn} hover:border-[#1FA6A8] hover:text-[#0F6C73]`} title={copied === it.id ? "تم النسخ" : "نسخ الرقم"} aria-label="نسخ الرقم">{copied === it.id ? <span className="text-[#1FA6A8]">{I.check}</span> : I.phone}</button>}
+                        <button onClick={() => setViewing(it)} className={`${actBtn} hover:border-[#1FA6A8] hover:text-[#0F6C73]`} title="عرض التفاصيل" aria-label="عرض التفاصيل">{I.eye}</button>
                         {wa && <a href={`https://wa.me/${wa}`} target="_blank" rel="noopener" className={`${actBtn} hover:border-[#25D366] hover:bg-[#25D366]/10 hover:text-[#25D366]`} title="واتساب" aria-label="واتساب">{I.wa}</a>}
                         {email && <a href={`mailto:${email}`} className={`${actBtn} hover:border-[#1FA6A8] hover:text-[#0F6C73]`} title="إيميل" aria-label="إيميل">{I.mail}</a>}
                       </div>
@@ -300,7 +300,7 @@ export default function SubmissionsTable({
               </div>
               <p className="mt-2 flex items-center gap-1.5 text-xs text-ink-soft"><span className="text-[#1FA6A8]">{I.cal}</span>{s.date}{s.time ? ` · ${s.time}` : ""}</p>
               <div className="mt-3 flex items-center gap-1.5 border-t border-line pt-3" onClick={(e) => e.stopPropagation()}>
-                {phone && <button onClick={() => copyPhone(it.id, phone)} className={`${actBtn} hover:border-[#1FA6A8]`} aria-label="نسخ الرقم">{copied === it.id ? <span className="text-[#1FA6A8]">{I.check}</span> : I.phone}</button>}
+                <button onClick={() => setViewing(it)} className={`${actBtn} hover:border-[#1FA6A8]`} aria-label="عرض التفاصيل">{I.eye}</button>
                 {wa && <a href={`https://wa.me/${wa}`} target="_blank" rel="noopener" className={`${actBtn} hover:text-[#25D366]`} aria-label="واتساب">{I.wa}</a>}
                 {email && <a href={`mailto:${email}`} className={actBtn} aria-label="إيميل">{I.mail}</a>}
                 <button onClick={() => del(it.id)} disabled={busy === it.id} className="ms-auto inline-flex items-center gap-1.5 rounded-xl bg-red-50 px-3 py-2 text-xs font-semibold text-red-600 disabled:opacity-50">{I.trash} حذف</button>
