@@ -4,6 +4,7 @@ import { useState } from "react";
 import { pick, type Locale } from "@/i18n/config";
 import { validateName, validatePhone, validateRequired, validateEmail, stripDigits, digitsOnly } from "@/lib/validate";
 import CustomSelect from "@/components/ui/Select";
+import LimitedTextarea from "@/components/ui/LimitedTextarea";
 
 const CITIES = ["الرياض", "جدة", "الدمام", "مكة المكرمة", "المدينة المنورة", "القصيم", "عسير"];
 const CITIES_EN = ["Riyadh", "Jeddah", "Dammam", "Makkah", "Madinah", "Qassim", "Asir"];
@@ -166,7 +167,7 @@ export default function AdmissionForm({ locale }: { locale: Locale }) {
 
       <div className="mt-5">
         <Label>{pick(locale, "ملاحظات إضافية", "Additional Notes")}</Label>
-        <textarea name="notes" rows={4} placeholder={pick(locale, "اكتب رسالتك هنا...", "Write your message here...")} className="mt-1.5 w-full resize-none rounded-xl border border-line bg-white px-3 py-2.5 text-start text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-brand/30" />
+        <LimitedTextarea name="notes" rows={4} maxLength={500} placeholder={pick(locale, "اكتب رسالتك هنا...", "Write your message here...")} className="mt-1.5 w-full resize-none rounded-xl border border-line bg-white px-3 py-2.5 text-start text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-brand/30" />
       </div>
 
       <button type="submit" disabled={loading} className="mt-7 flex w-full items-center justify-center gap-2 rounded-xl bg-brand py-3.5 text-base font-bold text-white transition-colors hover:bg-brand-dark disabled:opacity-60">
