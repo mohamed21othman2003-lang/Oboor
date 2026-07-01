@@ -51,7 +51,7 @@ function NewsCard({ item, locale }: { item: NewsItem; locale: Locale }) {
     <article className="flex flex-col overflow-hidden rounded-2xl border border-line bg-white shadow-sm transition-shadow hover:shadow-md">
       <div className="relative h-48 w-full">
         <Image src={item.image} alt={item.title} fill className="object-cover" sizes="(max-width:768px) 100vw, 33vw" />
-        <span className="absolute right-3 top-3"><Badge>{item.category}</Badge></span>
+        {item.category && <span className="absolute right-3 top-3"><Badge>{item.category}</Badge></span>}
       </div>
       <div className="flex flex-1 flex-col p-5 text-start">
         <p className="flex items-center justify-start gap-1.5 text-xs text-ink-soft"><CalIcon />{item.date}</p>
@@ -71,7 +71,7 @@ function WideCard({ item, cta, locale }: { item: NewsItem; cta: string; locale: 
       </div>
       <div className="flex flex-1 flex-col p-6 text-start">
         <div className="flex items-center justify-start gap-2">
-          <span className="rounded-full border border-brand/40 px-3 py-1 text-[11px] font-bold text-brand">{item.category}</span>
+          {item.category && <span className="rounded-full border border-brand/40 px-3 py-1 text-[11px] font-bold text-brand">{item.category}</span>}
           <span className="flex items-center gap-1.5 text-xs text-ink-soft"><CalIcon />{item.date}</span>
         </div>
         <h3 className="mt-2 text-lg font-bold leading-8 text-ink">{item.title}</h3>
@@ -103,7 +103,7 @@ function FeaturedArticle({ item, locale }: { item: NewsItem; locale: Locale }) {
     <article className="flex flex-col overflow-hidden rounded-2xl border border-line bg-white shadow-sm">
       <div className="relative h-64 w-full">
         <Image src={item.image} alt={item.title} fill className="object-cover" sizes="(max-width:1024px) 100vw, 50vw" />
-        <span className="absolute right-3 top-3"><Badge>{item.category}</Badge></span>
+        {item.category && <span className="absolute right-3 top-3"><Badge>{item.category}</Badge></span>}
         <span className="absolute left-3 top-3 rounded-full bg-brand px-3 py-1 text-[11px] font-bold text-white shadow">{pick(locale, "مميّز", "Featured")}</span>
       </div>
       <div className="flex flex-1 flex-col p-6 text-start">
