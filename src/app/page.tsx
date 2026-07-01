@@ -16,7 +16,7 @@ import { loadServiceCards } from "@/lib/server/serviceCards";
 import type { HomeChrome } from "@/lib/highlight";
 
 // أشكال الصفوف القادمة من Django CMS
-type ApiHero = { key: string; badge_ar: string; badge_en: string; heading_ar: string; heading_en: string; desc_ar: string; desc_en: string; cta_ar: string; cta_en: string; image: string; order: number };
+type ApiHero = { key: string; badge_ar: string; badge_en: string; heading_ar: string; heading_en: string; desc_ar: string; desc_en: string; cta_ar: string; cta_en: string; cta_href: string; image: string; order: number };
 type ApiStat = { key: string; label_ar: string; label_en: string; note_ar: string; note_en: string; value: string; icon: string; order: number };
 type ApiFeature = { key: string; title_ar: string; title_en: string; note_ar: string; note_en: string; icon: string; order: number };
 type ApiGallery = { key: string; caption_ar: string; caption_en: string; image: string; order: number };
@@ -29,7 +29,14 @@ async function loadHero(locale: Locale): Promise<HeroSlide[] | undefined> {
   const rows = await fetchContent<ApiHero[]>("home/hero");
   if (!rows || !rows.length) return undefined;
   const en = locale === "en";
-  return rows.map((r) => ({ img: r.image, heading: t(en, r.heading_ar, r.heading_en), desc: t(en, r.desc_ar, r.desc_en) }));
+  return rows.map((r) => ({
+    img: r.image,
+    badge: t(en, r.badge_ar, r.badge_en),
+    heading: t(en, r.heading_ar, r.heading_en),
+    desc: t(en, r.desc_ar, r.desc_en),
+    cta: t(en, r.cta_ar, r.cta_en),
+    ctaHref: r.cta_href,
+  }));
 }
 
 async function loadStats(locale: Locale): Promise<StatItem[] | undefined> {

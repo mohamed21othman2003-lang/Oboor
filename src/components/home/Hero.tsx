@@ -6,13 +6,13 @@ import { useState, useEffect, type ReactNode } from "react";
 import { pick, type Locale } from "@/i18n/config";
 import type { HomeChrome } from "@/lib/highlight";
 
-export type HeroSlide = { img: string; heading: ReactNode; desc: ReactNode; pos?: string };
+export type HeroSlide = { img: string; heading: ReactNode; desc: ReactNode; pos?: string; badge?: ReactNode; cta?: ReactNode; ctaHref?: string };
 
 export default function Hero({ locale, slides: slidesProp, chrome }: { locale: Locale; slides?: HeroSlide[]; chrome?: HomeChrome }) {
   const badge = chrome?.["hero.chrome"]?.title || pick(locale, "نرعى نقاءهم، ونبني غدهم", "Nurturing Their Potential, Shaping Their Future");
   const cta = chrome?.["hero.chrome"]?.text || pick(locale, "من هنا، نُمكّنهم", "From Here, We Empower Them");
 
-  const staticSlides = [
+  const staticSlides: HeroSlide[] = [
     {
       img: "/figma/home/imgImageWithFallback.jpg",
       heading: pick(
@@ -110,7 +110,7 @@ export default function Hero({ locale, slides: slidesProp, chrome }: { locale: L
         <div key={i} className="flex w-full max-w-xl flex-col items-start gap-6 text-start motion-safe:animate-[fadeIn_0.5s_ease]">
           <span className="inline-flex items-center gap-2 rounded-full border border-brand/40 bg-brand/20 px-4 py-2 text-sm font-medium text-[#7ee8f0]">
             <span className="h-2 w-2 rounded-full bg-brand opacity-95" />
-            {badge}
+            {s.badge || badge}
           </span>
 
           <h1 className="text-4xl font-extrabold leading-tight text-white [text-shadow:0_2px_18px_rgba(13,61,69,0.5)] sm:text-5xl lg:text-[52px] lg:leading-[1.25]">
@@ -122,11 +122,11 @@ export default function Hero({ locale, slides: slidesProp, chrome }: { locale: L
           </p>
 
           <Link
-            href="/programs"
+            href={(typeof s.ctaHref === "string" && s.ctaHref.trim()) || "/programs"}
             className="inline-flex items-center gap-3 rounded-2xl border border-white/30 bg-white/15 px-7 py-4 text-base font-semibold text-white backdrop-blur transition-colors hover:bg-white/25"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="dir-flip"><path strokeLinecap="round" strokeLinejoin="round" d="M15 18l-6-6 6-6" /></svg>
-            {cta}
+            {s.cta || cta}
           </Link>
         </div>
       </div>
