@@ -529,28 +529,86 @@ function Help({ text }: { text?: string }) {
   return <p className="mt-1 text-[11px] text-ink-soft">{text}</p>;
 }
 
-// تاريخ اليوم بصيغة YYYY-MM-DD بالتوقيت المحلي (لاستخدامه كحدّ أدنى للتقويم)
-function isoToday() {
-  const d = new Date();
-  d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-  return d.toISOString().slice(0, 10);
-}
 
-// منتقي تاريخ (تقويم) — لا يسمح بتاريخ قبل اليوم. يخزّن ISO.
+const AR_MONTHS = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
+const AR_DOW = ["أحد", "إثن", "ثلا", "أرب", "خمي", "جمع", "سبت"];
+const isoOf = (y: number, m: number, d: number) => `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+
+// منتقي تاريخ (تقويم مخصّص) — اختيار فقط، بلا كتابة يدوية، ولا يسمح بتاريخ قبل اليوم. يخزّن ISO.
 function DateField({ label, help, value, onChange }: { label?: string; help?: string; value: string; onChange: (v: string) => void }) {
-  const today = isoToday();
   const iso = /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : "";
+  const sel = iso ? { y: +iso.slice(0, 4), m: +iso.slice(5, 7) - 1, d: +iso.slice(8, 10) } : null;
+  const [open, setOpen] = useState(false);
+  const [view, setView] = useState(() => (sel ? new Date(sel.y, sel.m, 1) : (() => { const t = new Date(); return new Date(t.getFullYear(), t.getMonth(), 1); })()));
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onDoc = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); };
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
+    document.addEventListener("mousedown", onDoc);
+    document.addEventListener("keydown", onKey);
+    return () => { document.removeEventListener("mousedown", onDoc); document.removeEventListener("keydown", onKey); };
+  }, [open]);
+
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const y = view.getFullYear(), m = view.getMonth();
+  const firstDow = new Date(y, m, 1).getDay();
+  const daysInMonth = new Date(y, m + 1, 0).getDate();
+  const cells: (number | null)[] = [...Array(firstDow).fill(null), ...Array.from({ length: daysInMonth }, (_, i) => i + 1)];
+  const isPast = (d: number) => new Date(y, m, d) < today;
+  const isToday = (d: number) => new Date(y, m, d).getTime() === today.getTime();
+  const isSel = (d: number) => !!sel && sel.y === y && sel.m === m && sel.d === d;
+  const canPrev = y > today.getFullYear() || (y === today.getFullYear() && m > today.getMonth());
+  const display = sel ? `${sel.d} ${AR_MONTHS[sel.m]} ${sel.y}` : "اختر التاريخ";
+  const pick = (d: number) => { onChange(isoOf(y, m, d)); setOpen(false); };
+
   return (
-    <div>
+    <div ref={ref} className="relative">
       {label && <label className="mb-1.5 block text-sm font-semibold text-ink">{label}</label>}
-      <input
-        type="date"
-        min={today}
-        value={iso}
-        dir="ltr"
-        onChange={(e) => onChange(e.target.value)}
-        className={INPUT + " [color-scheme:light]"}
-      />
+      <button type="button" onClick={() => setOpen((o) => !o)} className={INPUT + " flex items-center justify-between gap-2 text-start"}>
+        <span className={sel ? "text-ink" : "text-ink-soft"}>{display}</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className={sel ? "text-brand" : "text-ink-soft"} aria-hidden>
+          <rect x="3" y="4.5" width="18" height="16" rx="3" stroke="currentColor" strokeWidth="1.7" />
+          <path d="M3 9h18M8 2.5v4M16 2.5v4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+          <rect x="6.5" y="12" width="4" height="4" rx="1" fill="currentColor" />
+        </svg>
+      </button>
+
+      {open && (
+        <div className="absolute start-0 z-30 mt-2 w-[280px] rounded-2xl border border-line bg-white p-3 shadow-xl" dir="rtl">
+          <div className="mb-2 flex items-center justify-between">
+            <button type="button" disabled={!canPrev} onClick={() => setView(new Date(y, m - 1, 1))}
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-ink transition-colors enabled:hover:bg-surface disabled:opacity-30" aria-label="الشهر السابق">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            </button>
+            <span className="text-sm font-bold text-ink">{AR_MONTHS[m]} {y}</span>
+            <button type="button" onClick={() => setView(new Date(y, m + 1, 1))}
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-ink transition-colors hover:bg-surface" aria-label="الشهر التالي">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M15 6l-6 6 6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            </button>
+          </div>
+          <div className="mb-1 grid grid-cols-7 gap-1">
+            {AR_DOW.map((w) => <div key={w} className="text-center text-[11px] font-medium text-ink-soft">{w}</div>)}
+          </div>
+          <div className="grid grid-cols-7 gap-1">
+            {cells.map((d, i) => d === null ? <div key={i} /> : (
+              <button key={i} type="button" disabled={isPast(d)} onClick={() => pick(d)}
+                className={"flex h-9 items-center justify-center rounded-lg text-sm transition-colors " + (
+                  isSel(d) ? "bg-brand font-semibold text-white"
+                  : isPast(d) ? "cursor-not-allowed text-ink-soft/30"
+                  : isToday(d) ? "font-semibold text-brand ring-1 ring-brand/40 hover:bg-brand/10"
+                  : "text-ink hover:bg-surface")}>
+                {d}
+              </button>
+            ))}
+          </div>
+          <div className="mt-2 flex items-center justify-between border-t border-line pt-2">
+            <button type="button" onClick={() => { onChange(""); setOpen(false); }} className="text-xs text-ink-soft transition-colors hover:text-ink">مسح</button>
+            <button type="button" onClick={() => { const t = new Date(); onChange(isoOf(t.getFullYear(), t.getMonth(), t.getDate())); setOpen(false); }} className="text-xs font-semibold text-brand hover:underline">اليوم</button>
+          </div>
+        </div>
+      )}
       {help && <Help text={help} />}
       {value && !iso && <p className="mt-1 text-[11px] text-amber-600">القيمة الحالية «{value}» غير صالحة — اختر تاريخاً من التقويم.</p>}
     </div>
