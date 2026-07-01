@@ -261,7 +261,7 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
     const f = row.f!;
     if (f.type === "image") {
       const pathFallback = String(values.image ?? values.logo_path ?? values.image_path ?? "");
-      return <ImageInput key={i} f={f} value={values[f.name]} pathFallback={pathFallback} type={type} id={id} isNew={isNew} onUploaded={(it) => { setValues(it as Record<string, unknown>); setBaseline(it as Record<string, unknown>); }} />;
+      return <ImageInput key={i} f={f} value={values[f.name]} pathFallback={pathFallback} type={type} id={id} isNew={isNew} onChange={(v) => set(f.name, v)} onUploaded={(it) => { setValues(it as Record<string, unknown>); setBaseline(it as Record<string, unknown>); }} />;
     }
     if (f.name === "icon") {
       return (
@@ -1253,7 +1253,7 @@ function resolveSrc(s: string): string {
   return "/" + s.replace(/^\/+/, "");
 }
 
-function ImageInput({ f, value, pathFallback, type, id, isNew, onUploaded }: { f: FieldSchema; value: unknown; pathFallback: string; type: string; id: string; isNew: boolean; onUploaded: (it: CmsItem) => void }) {
+function ImageInput({ f, value, pathFallback, type, id, isNew, onUploaded, onChange }: { f: FieldSchema; value: unknown; pathFallback: string; type: string; id: string; isNew: boolean; onUploaded: (it: CmsItem) => void; onChange: (v: string) => void }) {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
   const [localPreview, setLocalPreview] = useState("");
@@ -1281,8 +1281,14 @@ function ImageInput({ f, value, pathFallback, type, id, isNew, onUploaded }: { f
     setLocalPreview(URL.createObjectURL(file));
     setBusy(true);
     try {
-      const saved = await uploadField(type, id, f.name, file);
-      onUploaded(saved);
+      if (isNew) {
+        // عنصر جديد لم يُحفظ بعد: نرفع الصورة بشكل مستقل ونضع رابطها ليُحفظ مع العنصر
+        const r = await uploadImage(file);
+        onChange(r.url);
+      } else {
+        const saved = await uploadField(type, id, f.name, file);
+        onUploaded(saved);
+      }
     } catch (e) {
       setErr(e instanceof Error ? e.message : "تعذّر الرفع.");
       setLocalPreview("");
@@ -1304,15 +1310,11 @@ function ImageInput({ f, value, pathFallback, type, id, isNew, onUploaded }: { f
           </div>
         )}
         <div>
-          {isNew ? (
-            <p className="rounded-xl border border-dashed border-line bg-surface px-4 py-3 text-sm text-ink-soft">احفظ العنصر أولاً ثم ارفع الصورة.</p>
-          ) : (
-            <label className="inline-block cursor-pointer rounded-xl bg-brand/10 px-4 py-2.5 text-sm font-semibold text-brand transition-colors hover:bg-brand hover:text-white">
-              {busy ? "جارٍ الرفع…" : src ? "تغيير الصورة" : "رفع صورة"}
-              <input type="file" accept="image/*" onChange={onPick} disabled={busy} className="hidden" />
-            </label>
-          )}
-          {localPreview && !busy && <p className="mt-1.5 text-xs font-semibold text-emerald-600">تم رفع الصورة الجديدة ✓</p>}
+          <label className="inline-block cursor-pointer rounded-xl bg-brand/10 px-4 py-2.5 text-sm font-semibold text-brand transition-colors hover:bg-brand hover:text-white">
+            {busy ? "جارٍ الرفع…" : src ? "تغيير الصورة" : "رفع صورة"}
+            <input type="file" accept="image/*" onChange={onPick} disabled={busy} className="hidden" />
+          </label>
+          {localPreview && !busy && <p className="mt-1.5 text-xs font-semibold text-emerald-600">تم رفع الصورة ✓</p>}
         </div>
       </div>
       {err && <p className="mt-1 text-xs text-red-600">{err}</p>}
