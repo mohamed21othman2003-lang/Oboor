@@ -60,9 +60,13 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
       setHasDefault(Boolean(v._has_default));
     }));
     else {
-      // عنصر جديد ضمن صفحة محدّدة (مثل عن عبور) — اضبط الصفحة تلقائياً
+      // عنصر جديد: ابدأ من قيم أوّليّة (قد تتضمّن الصفحة تلقائياً مثل «عن عبور»)،
+      // واجعل baseline مطابقاً لها حتى لا تُحسَب هذه الافتراضيات كتعديل — فيبقى الحفظ معطّلاً
+      // حتى يُدخل المستخدم محتوى حقيقياً.
       const pg = sp.get("page");
-      if (pg) setValues((v) => ({ ...v, page: pg }));
+      const init: Record<string, unknown> = pg ? { page: pg } : {};
+      setValues(init);
+      setBaseline(init);
     }
     Promise.all(tasks).catch((e) => setError(e.message)).finally(() => setLoading(false));
   }, [type, id, isNew, sp]);
@@ -72,12 +76,15 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
     setOk("");
   }
 
-  // مقارنة التعديلات بآخر نسخة محفوظة (على مستوى الحقول)
+  // مقارنة التعديلات بآخر نسخة محفوظة (على مستوى الحقول).
+  // القيم الفارغة ("" / null / undefined / [] / {}) تُعامَل كقيمة واحدة "لا شيء"،
+  // حتى لا يُحسَب مثلاً كتابة نص ثم مسحه كتعديل حقيقي.
   const dirty = useMemo(() => {
+    const empty = (v: unknown) => v === null || v === undefined || v === "" || (Array.isArray(v) && v.length === 0) || (typeof v === "object" && v !== null && !Array.isArray(v) && Object.keys(v as object).length === 0);
     for (const f of fields) {
       if (f.type === "image") continue;
-      const a = JSON.stringify(values[f.name] ?? null);
-      const b = JSON.stringify(baseline[f.name] ?? null);
+      const a = JSON.stringify(empty(values[f.name]) ? null : values[f.name]);
+      const b = JSON.stringify(empty(baseline[f.name]) ? null : baseline[f.name]);
       if (a !== b) return true;
     }
     return false;
@@ -371,7 +378,7 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
             </button>
             <button
               onClick={onSave}
-              disabled={saving || (!dirty && !isNew)}
+              disabled={saving || !dirty}
               className="rounded-xl bg-brand px-6 py-2.5 text-sm font-bold text-white shadow-sm transition-colors hover:bg-brand-dark disabled:opacity-60"
             >
               {saving ? "جارٍ الحفظ…" : "حفظ"}
