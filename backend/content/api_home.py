@@ -8,7 +8,7 @@ class HeroSlideSerializer(ResolvedImageMixin):
     class Meta:
         model = HeroSlide
         fields = ["key", "badge_ar", "badge_en", "heading_ar", "heading_en",
-                  "desc_ar", "desc_en", "cta_ar", "cta_en", "image", "order"]
+                  "desc_ar", "desc_en", "cta_ar", "cta_en", "cta_href", "image", "order"]
 
 
 class StatItemSerializer(serializers.ModelSerializer):

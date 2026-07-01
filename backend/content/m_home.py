@@ -12,6 +12,10 @@ class HeroSlide(models.Model):
     desc_en = models.TextField("الوصف (إنجليزي)", blank=True)
     cta_ar = models.CharField("زر الإجراء (عربي)", max_length=300)
     cta_en = models.CharField("زر الإجراء (إنجليزي)", max_length=300, blank=True)
+    cta_href = models.CharField(
+        "رابط زر الإجراء", max_length=300, blank=True,
+        help_text="وجهة الزر عند الضغط: رابط داخلي مثل /programs أو /branches، أو رابط كامل https://…. إن تُرك فارغاً يذهب إلى صفحة البرامج.",
+    )
 
     image = models.CharField("صورة الخلفية", max_length=300, blank=True)
     image_file = models.ImageField("رفع صورة", upload_to="content/", blank=True)
