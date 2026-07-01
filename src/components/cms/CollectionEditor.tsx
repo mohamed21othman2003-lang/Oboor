@@ -261,7 +261,9 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
     const f = row.f!;
     if (f.type === "image") {
       const pathFallback = String(values.image ?? values.logo_path ?? values.image_path ?? "");
-      return <ImageInput key={i} f={f} value={values[f.name]} pathFallback={pathFallback} type={type} id={id} isNew={isNew} onChange={(v) => set(f.name, v)} onUploaded={(it) => { setValues(it as Record<string, unknown>); setBaseline(it as Record<string, unknown>); }} />;
+      // اسم حقل المسار النصّي (CharField) المقابل لحقل الرفع — نكتب فيه رابط الصورة عند إنشاء عنصر جديد
+      const pathField = values.logo_path !== undefined ? "logo_path" : values.image_path !== undefined ? "image_path" : "image";
+      return <ImageInput key={i} f={f} value={values[f.name]} pathFallback={pathFallback} type={type} id={id} isNew={isNew} onChange={(v) => set(pathField, v)} onUploaded={(it) => { setValues(it as Record<string, unknown>); setBaseline(it as Record<string, unknown>); }} />;
     }
     if (f.name === "icon") {
       return (
