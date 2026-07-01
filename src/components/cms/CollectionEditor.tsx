@@ -531,7 +531,7 @@ function Help({ text }: { text?: string }) {
 
 
 const AR_MONTHS = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
-const AR_DOW = ["أحد", "إثن", "ثلا", "أرب", "خمي", "جمع", "سبت"];
+const AR_DOW = ["أحد", "اثنين", "ثلاثاء", "أربعاء", "خميس", "جمعة", "سبت"];
 const isoOf = (y: number, m: number, d: number) => `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
 
 // منتقي تاريخ (تقويم مخصّص) — اختيار فقط، بلا كتابة يدوية، ولا يسمح بتاريخ قبل اليوم. يخزّن ISO.
@@ -576,7 +576,7 @@ function DateField({ label, help, value, onChange }: { label?: string; help?: st
       </button>
 
       {open && (
-        <div className="absolute start-0 z-30 mt-2 w-[280px] rounded-2xl border border-line bg-white p-3 shadow-xl" dir="rtl">
+        <div className="absolute start-0 z-30 mt-2 w-[320px] rounded-2xl border border-line bg-white p-3 shadow-xl" dir="rtl">
           <div className="mb-2 flex items-center justify-between">
             <button type="button" disabled={!canPrev} onClick={() => setView(new Date(y, m - 1, 1))}
               className="flex h-8 w-8 items-center justify-center rounded-lg text-ink transition-colors enabled:hover:bg-surface disabled:opacity-30" aria-label="الشهر السابق">
@@ -589,7 +589,7 @@ function DateField({ label, help, value, onChange }: { label?: string; help?: st
             </button>
           </div>
           <div className="mb-1 grid grid-cols-7 gap-1">
-            {AR_DOW.map((w) => <div key={w} className="text-center text-[11px] font-medium text-ink-soft">{w}</div>)}
+            {AR_DOW.map((w) => <div key={w} className="text-center text-[10px] font-medium text-ink-soft">{w}</div>)}
           </div>
           <div className="grid grid-cols-7 gap-1">
             {cells.map((d, i) => d === null ? <div key={i} /> : (
