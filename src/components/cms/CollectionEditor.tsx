@@ -90,15 +90,19 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
     return false;
   }, [fields, values, baseline]);
 
-  // نسبة الاكتمال = الحقول الإلزامية (المعلَّمة بنجمة) فقط
+  // نسبة الاكتمال = الحقول الإلزامية (المعلَّمة بنجمة) + حقل الصورة (محتوى أساسي وإن لم يكن إلزامياً)
   const isEmpty = (v: unknown) => v === null || v === undefined || v === "" || (Array.isArray(v) && v.length === 0) || (typeof v === "object" && v !== null && !Array.isArray(v) && Object.keys(v as object).length === 0);
-  const required = useMemo(() => fields.filter((f) => f.required && f.type !== "image"), [fields]);
+  // الصورة تُعتبر مكتملة إن وُجد ملف مرفوع أو مسار (نتحقق من كل صيغ حقل الصورة)
+  const imageFilled = useMemo(() => ["image_file", "image", "image_path", "logo_path"].some((k) => !isEmpty(values[k])), [values]);
+  const counted = useMemo(() => fields.filter((f) => !HIDDEN_IN_FORM.has(f.name) && (f.required || f.type === "image")), [fields]);
+  const fieldFilled = (f: FieldSchema) => (f.type === "image" ? imageFilled : !isEmpty(values[f.name]));
   const completion = useMemo(() => {
-    if (!required.length) return 100;
-    const filled = required.filter((f) => !isEmpty(values[f.name])).length;
-    return Math.round((filled / required.length) * 100);
-  }, [required, values]);
-  const missing = useMemo(() => required.filter((f) => isEmpty(values[f.name])).map((f) => f.label), [required, values]);
+    if (!counted.length) return 100;
+    const filled = counted.filter(fieldFilled).length;
+    return Math.round((filled / counted.length) * 100);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [counted, values, imageFilled]);
+  const missing = useMemo(() => counted.filter((f) => !fieldFilled(f)).map((f) => f.label), [counted, values, imageFilled]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function discard() {
     if (!dirty) return;
