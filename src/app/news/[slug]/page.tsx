@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
@@ -19,6 +20,7 @@ type ApiNews = {
   date_ar: string; date_en: string; image: string;
   body_ar: string[]; body_en: string[]; learn_ar: string[]; learn_en: string[];
   time_ar: string; time_en: string; location_ar: string; location_en: string;
+  map_url: string;
   audience_ar: string; audience_en: string; seats_ar: string; seats_en: string;
   reg_status_ar: string; reg_status_en: string;
 };
@@ -26,7 +28,7 @@ type ApiNews = {
 type NewsDetail = {
   title: string; desc: string; date: string; category: string; image: string;
   body: string[]; learn: string[];
-  time: string; location: string; audience: string; seats: string; regStatus: string;
+  time: string; location: string; mapUrl: string; audience: string; seats: string; regStatus: string;
   isEvent: boolean; // فعالية/ورشة ⇒ يظهر كارت التفاصيل دائماً
 };
 
@@ -73,6 +75,7 @@ async function loadNews(slug: string, locale: Locale): Promise<NewsDetail | null
       body: body.length ? body : (en ? BODY_EN : BODY_AR),
       learn: a(row.learn_ar, row.learn_en),
       time: formatTime(s(row.time_ar, row.time_en), locale), location: s(row.location_ar, row.location_en),
+      mapUrl: row.map_url || "",
       audience: s(row.audience_ar, row.audience_en), seats: s(row.seats_ar, row.seats_en),
       regStatus: s(row.reg_status_ar, row.reg_status_en),
       isEvent: ["events", "workshops"].includes(row.section),
@@ -86,6 +89,7 @@ async function loadNews(slug: string, locale: Locale): Promise<NewsDetail | null
     body: en ? BODY_EN : BODY_AR, learn: en ? LEARN_EN : LEARN_AR,
     time: pick(locale, "٩:٠٠ صباحاً - ١٢:٠٠ ظهراً", "9:00 AM - 12:00 PM"),
     location: pick(locale, "قاعة التدريب الرئيسية - مركز عبور، الرياض", "Main Training Hall - Oboor Center, Riyadh"),
+    mapUrl: "",
     audience: pick(locale, "أولياء الأمور والأسر", "Parents and families"),
     seats: pick(locale, "٢٠ مقعداً", "20 seats"),
     regStatus: pick(locale, "التسجيل مفتوح - مقاعد محدودة", "Registration open - limited seats"),
@@ -111,10 +115,10 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
   if (!n) notFound();
 
   // صفوف كارت التفاصيل — تظهر فقط لو الحقل مُعبّأ
-  const info = [
+  const info: { icon: ReactNode; label: string; value: string; href?: string }[] = [
     { icon: <CalIcon />, label: pick(locale, "التاريخ", "Date"), value: n.date },
     { icon: <ClockIcon />, label: pick(locale, "الوقت", "Time"), value: n.time },
-    { icon: <PinIcon />, label: pick(locale, "المكان", "Location"), value: n.location },
+    { icon: <PinIcon />, label: pick(locale, "المكان", "Location"), value: n.location, href: n.mapUrl || undefined },
     { icon: <UsersIcon />, label: pick(locale, "الفئة المستهدفة", "Target Audience"), value: n.audience },
     { icon: <SeatIcon />, label: pick(locale, "عدد المقاعد", "Seats Available"), value: n.seats },
   ].filter((it) => it.value);
@@ -184,7 +188,15 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
                       <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand/10 text-brand">{it.icon}</span>
                       <div>
                         <p className="text-xs text-ink-soft">{it.label}</p>
-                        <p className="text-sm font-semibold leading-6 text-ink">{it.value}</p>
+                        {it.href ? (
+                          <a href={it.href} target="_blank" rel="noopener noreferrer"
+                            className="group inline-flex items-center gap-1.5 text-sm font-semibold leading-6 text-brand transition-colors hover:text-brand-dark hover:underline">
+                            <span>{it.value}</span>
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0 opacity-70 transition-opacity group-hover:opacity-100"><path d="M7 17L17 7M17 7H8M17 7v9" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                          </a>
+                        ) : (
+                          <p className="text-sm font-semibold leading-6 text-ink">{it.value}</p>
+                        )}
                       </div>
                     </div>
                   ))}
