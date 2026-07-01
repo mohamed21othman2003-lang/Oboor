@@ -240,6 +240,17 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
           </div>
         );
       }
+      // التصنيف (الأخبار): منسدلة موحّدة من قائمة ثابتة تكتب للّغتين معاً
+      if (type === "news" && (row.ar?.base === "category" || row.en?.base === "category")) {
+        const arName = row.ar?.name;
+        const enName = row.en?.name;
+        const cur = String(values[arName ?? ""] ?? "");
+        return (
+          <div key={i}>
+            <CategorySelect label="التصنيف" help={row.ar?.help || row.en?.help} value={cur} onChange={(ar, en) => { if (arName) set(arName, ar); if (enName) set(enName, en); }} />
+          </div>
+        );
+      }
       return (
         <div key={i} className="grid gap-x-5 gap-y-2 sm:grid-cols-2">
           {row.ar && <FieldInput f={row.ar} value={values[row.ar.name]} onChange={(v) => set(row.ar!.name, v)} badge="عربي" />}
@@ -569,6 +580,35 @@ function TimeRangeField({ label, help, value, onChange }: { label?: string; help
       </div>
       {help && <Help text={help} />}
       {value && !parsed && <p className="mt-1 text-[11px] text-amber-600">القيمة الحالية «{value}» نصّية — اختر الوقت من المنتقيين.</p>}
+    </div>
+  );
+}
+
+// تصنيفات الأخبار المعتمدة (عربي/إنجليزي)
+const NEWS_CATEGORIES = [
+  { ar: "أخبار المراكز", en: "Center News" },
+  { ar: "توعية أسرية", en: "Family Awareness" },
+  { ar: "ورشة تدريبية", en: "Training Workshop" },
+  { ar: "فعاليات", en: "Events" },
+];
+
+// منسدلة التصنيف — قائمة ثابتة تكتب للّغتين معاً (تمنع التصنيفات المكرّرة/المكتوبة يدوياً)
+function CategorySelect({ label, help, value, onChange }: { label?: string; help?: string; value: string; onChange: (ar: string, en: string) => void }) {
+  const known = NEWS_CATEGORIES.some((c) => c.ar === value);
+  const options = [
+    ...(value && !known ? [{ value, label: `${value} (الحالي)` }] : []),
+    ...NEWS_CATEGORIES.map((c) => ({ value: c.ar, label: c.ar })),
+  ];
+  return (
+    <div>
+      {label && <label className="mb-1.5 block text-sm font-semibold text-ink">{label}</label>}
+      <CustomSelect
+        value={value}
+        placeholder="اختر التصنيف"
+        options={options}
+        onChange={(v) => { const c = NEWS_CATEGORIES.find((x) => x.ar === v); onChange(v, c ? c.en : ""); }}
+      />
+      {help && <Help text={help} />}
     </div>
   );
 }
