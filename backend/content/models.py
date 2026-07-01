@@ -35,6 +35,10 @@ class NewsArticle(models.Model):
     time_en = models.CharField("الوقت (إنجليزي)", max_length=120, blank=True)
     location_ar = models.CharField("المكان (عربي)", max_length=200, blank=True)
     location_en = models.CharField("المكان (إنجليزي)", max_length=200, blank=True)
+    map_url = models.URLField(
+        "رابط الموقع على الخريطة", max_length=500, blank=True,
+        help_text="اختياري — الصق رابط المكان من خرائط جوجل (Share ثم Copy link). عند إضافته يصبح اسم المكان رابطاً يفتح الخريطة؛ إن تُرك فارغاً يظهر الاسم كنص فقط.",
+    )
     audience_ar = models.CharField("الفئة المستهدفة (عربي)", max_length=200, blank=True)
     audience_en = models.CharField("الفئة المستهدفة (إنجليزي)", max_length=200, blank=True)
     seats_ar = models.CharField("عدد المقاعد (عربي)", max_length=80, blank=True)

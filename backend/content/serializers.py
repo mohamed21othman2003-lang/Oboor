@@ -10,7 +10,7 @@ class NewsArticleSerializer(ResolvedImageMixin):
                   "desc_ar", "desc_en", "category_ar", "category_en",
                   "date_ar", "date_en",
                   "body_ar", "body_en", "learn_ar", "learn_en",
-                  "time_ar", "time_en", "location_ar", "location_en",
+                  "time_ar", "time_en", "location_ar", "location_en", "map_url",
                   "audience_ar", "audience_en", "seats_ar", "seats_en",
                   "reg_status_ar", "reg_status_en",
                   "image", "order"]

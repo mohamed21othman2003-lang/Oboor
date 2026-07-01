@@ -498,7 +498,7 @@ const listAdd = (base: string) => LIST_ADD_LABELS[base] || "إضافة عنصر"
 
 // حقول كارت الفعالية (في الأخبار) — تظهر فقط للفعاليات والورش
 const EVENT_FIELDS = new Set([
-  "time_ar", "time_en", "location_ar", "location_en", "audience_ar", "audience_en",
+  "time_ar", "time_en", "location_ar", "location_en", "map_url", "audience_ar", "audience_en",
   "seats_ar", "seats_en", "reg_status_ar", "reg_status_en",
 ]);
 // حقول مقفولة (تُعرض للاطلاع فقط؛ تغييرها يكسر مكان المحتوى)
