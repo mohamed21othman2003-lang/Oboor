@@ -141,7 +141,7 @@ export default function SubmissionsTable({
       ["نوع الحالة", (it) => v(it, "case_type")],
       ["الفرع", (it) => v(it, "branch")],
       ["البريد", (it) => v(it, "email")],
-      ["التاريخ", (it) => { const s = stamp(v(it, "created_at")); return `${s.date} ${s.time}`.trim(); }],
+      ["التاريخ", (it) => v(it, "created_at")],
     ];
     await exportSheet({
       filename: "admission-requests",

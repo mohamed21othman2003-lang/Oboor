@@ -57,6 +57,14 @@ export async function exportSheet(opts: {
         cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF3F9FA" } };
       }
       const val = cell.value == null ? "" : String(cell.value);
+      if (col?.date && val) {
+        // صيغة رقمية موحّدة LTR (YYYY/MM/DD HH:mm) — لا تتلخبط في إكسل مع RTL
+        const d = new Date(val);
+        if (!isNaN(d.getTime())) {
+          const p = (n: number) => String(n).padStart(2, "0");
+          cell.value = `${d.getFullYear()}/${p(d.getMonth() + 1)}/${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+        }
+      }
       if (col?.link && val) {
         cell.value = { text: "فتح الملف ↗", hyperlink: val };
         cell.font = { color: { argb: "FF0F6C73" }, underline: true, bold: true };

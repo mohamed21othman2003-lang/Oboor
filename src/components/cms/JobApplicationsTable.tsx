@@ -106,7 +106,7 @@ export default function JobApplicationsTable({
     const cols: [string, (it: CmsItem) => string, boolean?][] = [
       ["الاسم", (it) => v(it, "name")], ["البريد", (it) => v(it, "email")], ["الجوال", (it) => v(it, "phone")],
       ["الوظيفة", (it) => v(it, "job")], ["المدينة", (it) => v(it, "city")], ["المسمى الحالي", (it) => v(it, "current_role")],
-      ["الخبرة", (it) => v(it, "experience")], ["التاريخ", (it) => { const s = stamp(v(it, "created_at")); return `${s.date} ${s.time}`.trim(); }],
+      ["الخبرة", (it) => v(it, "experience")], ["التاريخ", (it) => v(it, "created_at")],
       ["السيرة الذاتية", (it) => v(it, "cv"), true],
     ];
     await exportSheet({

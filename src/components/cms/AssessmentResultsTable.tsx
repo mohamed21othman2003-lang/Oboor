@@ -104,7 +104,7 @@ export default function AssessmentResultsTable({
     const cols: [string, (it: CmsItem) => string][] = [
       ["الطفل", (it) => v(it, "child_name")], ["ولي الأمر", (it) => v(it, "parent_name")], ["الجوال", (it) => v(it, "phone")],
       ["نوع التقييم", (it) => v(it, "assessment")], ["العمر", (it) => v(it, "age")], ["مستوى الحالة", (it) => levelInfo(v(it, "level")).label],
-      ["المدينة", (it) => v(it, "city")], ["التاريخ", (it) => { const s = stamp(v(it, "created_at")); return `${s.date} ${s.time}`.trim(); }],
+      ["المدينة", (it) => v(it, "city")], ["التاريخ", (it) => v(it, "created_at")],
     ];
     await exportSheet({
       filename: "assessment-results",
