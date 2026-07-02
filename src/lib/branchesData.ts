@@ -12,6 +12,10 @@ export type Branch = {
   address: string;
   hours: string;
   phone: string;
+  phoneEvening?: string;
+  email?: string;
+  manager?: string;
+  mapUrl?: string;
   services: string[];
   gallery?: string[];
   lat?: number | null;

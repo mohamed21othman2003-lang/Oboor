@@ -137,9 +137,12 @@ function BranchCard({ b, locale }: { b: Branch; locale: Locale }) {
 
       {/* Rows */}
       <div className="space-y-3 py-4">
-        <InfoRow icon={<PinIcon />} label={pick(locale, "العنوان", "Address")} value={b.address} />
-        <InfoRow icon={<ClockIcon />} label={pick(locale, "أوقات العمل", "Working Hours")} value={b.hours} />
-        <InfoRow icon={<PhoneIcon />} label={pick(locale, "رقم التواصل", "Phone Number")} value={b.phone} />
+        {b.address && <InfoRow icon={<PinIcon />} label={pick(locale, "العنوان", "Address")} value={b.address} />}
+        {b.hours && <InfoRow icon={<ClockIcon />} label={pick(locale, "أوقات العمل", "Working Hours")} value={b.hours} />}
+        {b.manager && <InfoRow icon={<UserIcon />} label={pick(locale, "مدير الفرع", "Branch Manager")} value={b.manager} />}
+        {b.phone && <InfoRow icon={<PhoneIcon />} label={pick(locale, "رقم التواصل", "Phone Number")} value={b.phone} href={`tel:${b.phone}`} />}
+        {b.phoneEvening && <InfoRow icon={<PhoneIcon />} label={pick(locale, "رقم المساء", "Evening Phone")} value={b.phoneEvening} href={`tel:${b.phoneEvening}`} />}
+        {b.email && <InfoRow icon={<MailIcon />} label={pick(locale, "البريد الإلكتروني", "Email")} value={b.email} href={`mailto:${b.email}`} />}
       </div>
 
       {/* Services */}
@@ -158,7 +161,9 @@ function BranchCard({ b, locale }: { b: Branch; locale: Locale }) {
           {pick(locale, "عرض التفاصيل", "View Details")}
         </Link>
         <a
-          href={b.lat != null && b.lng != null
+          href={b.mapUrl
+            ? b.mapUrl
+            : b.lat != null && b.lng != null
             ? `https://www.google.com/maps/dir/?api=1&destination=${b.lat},${b.lng}`
             : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([b.address, b.city, pick(locale, "السعودية", "Saudi Arabia")].filter(Boolean).join("، "))}`}
           target="_blank"
@@ -173,14 +178,18 @@ function BranchCard({ b, locale }: { b: Branch; locale: Locale }) {
   );
 }
 
-function InfoRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+function InfoRow({ icon, label, value, href }: { icon: React.ReactNode; label: string; value: string; href?: string }) {
   return (
     <div className="text-start">
       <p className="flex items-center justify-start gap-1.5 text-xs font-semibold text-ink-soft">
         <span className="text-brand">{icon}</span>
         {label}
       </p>
-      <p className="mt-0.5 text-sm leading-6 text-ink-muted">{value}</p>
+      {href ? (
+        <a href={href} className="mt-0.5 block text-sm leading-6 text-brand transition-colors hover:text-brand-dark hover:underline" dir="ltr">{value}</a>
+      ) : (
+        <p className="mt-0.5 text-sm leading-6 text-ink-muted">{value}</p>
+      )}
     </div>
   );
 }
@@ -200,4 +209,10 @@ function PhoneIcon() {
 }
 function NavIcon() {
   return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11" /></svg>;
+}
+function UserIcon() {
+  return <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>;
+}
+function MailIcon() {
+  return <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="M3 7l9 6 9-6" /></svg>;
 }

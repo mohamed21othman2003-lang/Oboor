@@ -14,7 +14,7 @@ type ApiBranch = {
   region_ar: string; region_en: string;
   address_ar: string; address_en: string;
   hours_ar: string; hours_en: string;
-  phone: string;
+  phone: string; phone_evening: string; email: string; manager: string; map_url: string;
   rating: string; reviews_count: string;
   services_ar: string[]; services_en: string[];
   gallery: string[];
@@ -35,6 +35,10 @@ function toBranch(row: ApiBranch, locale: Locale): Branch {
     address: f(row.address_ar, row.address_en),
     hours: f(row.hours_ar, row.hours_en),
     phone: row.phone,
+    phoneEvening: row.phone_evening || "",
+    email: row.email || "",
+    manager: row.manager || "",
+    mapUrl: row.map_url || "",
     rating: row.rating || "",
     reviewsCount: row.reviews_count || "",
     services: en ? (row.services_en ?? row.services_ar) : row.services_ar,

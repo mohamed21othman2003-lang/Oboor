@@ -94,12 +94,17 @@ export default async function BranchDetailPage({ params }: { params: Promise<{ s
     : branchServices(locale);
 
   const info = [
-    { icon: <PhoneIcon />, label: pick(locale, "رقم الهاتف", "Phone Number"), value: b.phone },
-    { icon: <ClockIcon />, label: pick(locale, "ساعات العمل", "Working Hours"), value: b.hours },
-    { icon: <PinIcon />, label: pick(locale, "العنوان", "Address"), value: b.address },
-  ];
+    { icon: <PhoneIcon />, label: pick(locale, "رقم الهاتف", "Phone Number"), value: b.phone, href: b.phone ? `tel:${b.phone}` : undefined },
+    { icon: <PhoneIcon />, label: pick(locale, "رقم المساء", "Evening Phone"), value: b.phoneEvening || "", href: b.phoneEvening ? `tel:${b.phoneEvening}` : undefined },
+    { icon: <MailIcon />, label: pick(locale, "البريد الإلكتروني", "Email"), value: b.email || "", href: b.email ? `mailto:${b.email}` : undefined },
+    { icon: <UserIcon />, label: pick(locale, "مدير الفرع", "Branch Manager"), value: b.manager || "", href: undefined },
+    { icon: <ClockIcon />, label: pick(locale, "ساعات العمل", "Working Hours"), value: b.hours, href: undefined },
+    { icon: <PinIcon />, label: pick(locale, "العنوان", "Address"), value: b.address, href: undefined },
+  ].filter((it) => it.value);
 
-  const mapsUrl = b.lat != null && b.lng != null
+  const mapsUrl = b.mapUrl
+    ? b.mapUrl
+    : b.lat != null && b.lng != null
     ? `https://www.google.com/maps/dir/?api=1&destination=${b.lat},${b.lng}`
     : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([b.address, b.city, pick(locale, "السعودية", "Saudi Arabia")].filter(Boolean).join("، "))}`;
 
@@ -146,7 +151,11 @@ export default async function BranchDetailPage({ params }: { params: Promise<{ s
                   <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand/10 text-brand">{it.icon}</span>
                   <div className="text-start">
                     <p className="text-xs text-ink-soft">{it.label}</p>
-                    <p className="text-sm font-semibold text-ink">{it.value}</p>
+                    {it.href ? (
+                      <a href={it.href} className="text-sm font-semibold text-brand transition-colors hover:text-brand-dark hover:underline" dir="ltr">{it.value}</a>
+                    ) : (
+                      <p className="text-sm font-semibold text-ink">{it.value}</p>
+                    )}
                   </div>
                 </div>
               ))}
@@ -226,6 +235,12 @@ function PhoneIcon() {
 }
 function ClockIcon() {
   return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" strokeLinecap="round" /></svg>;
+}
+function UserIcon() {
+  return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>;
+}
+function MailIcon() {
+  return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="M3 7l9 6 9-6" /></svg>;
 }
 function PinIcon() {
   return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>;

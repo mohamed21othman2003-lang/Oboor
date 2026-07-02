@@ -31,10 +31,12 @@ export default async function BranchProfilePage({ params }: { params: Promise<{ 
     { label: pick(locale, "المنطقة", "Region"), value: b.region },
     { label: pick(locale, "الحي", "District"), value: b.area },
     { label: pick(locale, "العنوان", "Address"), value: b.address },
+    { label: pick(locale, "مدير الفرع", "Branch Manager"), value: b.manager || "" },
     { label: pick(locale, "رقم الهاتف", "Phone"), value: b.phone },
-    { label: pick(locale, "البريد الإلكتروني", "Email"), value: CONTACT.email },
+    { label: pick(locale, "رقم المساء", "Evening Phone"), value: b.phoneEvening || "" },
+    { label: pick(locale, "البريد الإلكتروني", "Email"), value: b.email || CONTACT.email },
     { label: pick(locale, "ساعات العمل", "Working Hours"), value: b.hours },
-  ];
+  ].filter((r) => r.value);
 
   const features = locale === "en" ? BRANCH_FEATURES_EN : BRANCH_FEATURES;
 

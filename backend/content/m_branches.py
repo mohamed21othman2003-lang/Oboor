@@ -24,6 +24,13 @@ class Branch(models.Model):
     hours_en = models.CharField("ساعات العمل (إنجليزي)", max_length=300, blank=True)
 
     phone = models.CharField("رقم الهاتف", max_length=40, blank=True)
+    phone_evening = models.CharField("رقم المساء", max_length=80, blank=True)
+    email = models.CharField("بريد الفرع الإلكتروني", max_length=200, blank=True)
+    manager = models.CharField("مدير الفرع", max_length=200, blank=True)
+    map_url = models.CharField(
+        "رابط الموقع على الخريطة", max_length=500, blank=True,
+        help_text="رابط موقع الفرع على خرائط جوجل — يُستخدم لزر «الاتجاهات».",
+    )
 
     rating = models.CharField("التقييم (مثل 4.8 — اتركه فارغاً لإخفائه)", max_length=10, blank=True)
     reviews_count = models.CharField("عدد التقييمات (اتركه فارغاً لإخفائه)", max_length=20, blank=True)
