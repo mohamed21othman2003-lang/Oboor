@@ -19,7 +19,10 @@ class SiteSettings(models.Model):
     email = models.CharField("البريد الإلكتروني", max_length=120, blank=True)
     phone_unified = models.CharField("الرقم الموحّد", max_length=40, blank=True)
     phone_customer = models.CharField("خدمة العملاء", max_length=40, blank=True)
-    whatsapp = models.CharField("واتساب (رقم wa.me)", max_length=40, blank=True)
+    whatsapp = models.CharField(
+        "رقم الواتساب", max_length=40, blank=True,
+        help_text="رقم الواتساب بالصيغة الدولية بدون + أو مسافات (مثال: 966920003452). يُستخدم في كل أزرار «تواصل عبر واتساب» بالموقع. إن تُرك فارغاً يُستخدم الرقم الافتراضي.",
+    )
     website = models.CharField("الموقع الإلكتروني", max_length=120, blank=True)
     main_branch_ar = models.CharField("الفرع الرئيسي (عربي)", max_length=200, blank=True)
     main_branch_en = models.CharField("الفرع الرئيسي (إنجليزي)", max_length=200, blank=True)

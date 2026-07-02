@@ -12,12 +12,14 @@ export default function SpecialistsExplorer({
   contactPrompt,
   specialtyOptions = [],
   branchOptions = [],
+  whatsapp,
 }: {
   specialists: Specialist[];
   locale: Locale;
   contactPrompt?: { title: string; subtitle: string };
   specialtyOptions?: string[];
   branchOptions?: string[];
+  whatsapp?: string;
 }) {
   const [specialty, setSpecialty] = useState("");
   const [experience, setExperience] = useState("");
@@ -100,7 +102,7 @@ export default function SpecialistsExplorer({
 
       <div ref={resultsRef} className="scroll-mt-24">
         {filtered.length > 0 ? (
-          <SpecialistsGrid specialists={filtered} locale={locale} contactPrompt={contactPrompt} />
+          <SpecialistsGrid specialists={filtered} locale={locale} contactPrompt={contactPrompt} whatsapp={whatsapp} />
         ) : (
           <p className="py-12 text-center text-sm text-ink-muted">{pick(locale, "لا يوجد أخصائيون مطابقون لبحثك.", "No specialists match your search.")}</p>
         )}

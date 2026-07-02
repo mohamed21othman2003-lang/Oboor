@@ -4,7 +4,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ALL_NEWS, getNewsItem } from "@/lib/newsData";
-import { fetchContent } from "@/lib/server/django";
+import { fetchContent, getWhatsAppUrl } from "@/lib/server/django";
 import { getLocale } from "@/i18n/locale";
 import { pick, type Locale } from "@/i18n/config";
 import { formatDate, formatTime } from "@/lib/dateFormat";
@@ -111,7 +111,7 @@ function Chev() {
 export default async function NewsDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const locale = await getLocale();
-  const n = await loadNews(slug, locale);
+  const [n, whatsapp] = await Promise.all([loadNews(slug, locale), getWhatsAppUrl()]);
   if (!n) notFound();
 
   // صفوف كارت التفاصيل — تظهر فقط لو الحقل مُعبّأ
@@ -206,7 +206,7 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
                       {n.regStatus}
                     </div>
                   )}
-                  <a href="https://wa.me/966920003452" target="_blank" rel="noopener noreferrer" className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-dark">
+                  <a href={whatsapp} target="_blank" rel="noopener noreferrer" className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-dark">
                     <PhoneIcon />
                     {pick(locale, "تواصل معنا للتسجيل", "Contact us to register")}
                   </a>

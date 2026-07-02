@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { getSpecialistStats, getJoinCards, getContactPrompt, getSpecialists, type Specialist } from "@/lib/specialistsData";
 import { getLocale } from "@/i18n/locale";
 import { pick, type Locale } from "@/i18n/config";
-import { fetchContent, fetchSections } from "@/lib/server/django";
+import { fetchContent, fetchSections, getWhatsAppUrl } from "@/lib/server/django";
 import { loadBranches } from "@/lib/server/branches";
 import { hl } from "@/lib/highlight";
 import SpecialistsExplorer from "@/components/SpecialistsExplorer";
@@ -76,10 +76,11 @@ function ChevDown() {
 export default async function SpecialistsPage() {
   const locale = await getLocale();
   const en = locale === "en";
-  const [specialists, sections, branches] = await Promise.all([
+  const [specialists, sections, branches, whatsapp] = await Promise.all([
     loadSpecialists(locale),
     fetchSections("specialists"),
     loadBranches(locale),
+    getWhatsAppUrl(),
   ]);
 
   // القائمة الكاملة لتخصصات وفروع عبور (تظهر في الفلتر حتى قبل إضافة كل الأخصائيين)
@@ -180,7 +181,7 @@ export default async function SpecialistsPage() {
             <span className="h-px flex-1 bg-line" />
           </div>
 
-          <SpecialistsExplorer locale={locale} specialists={specialists} contactPrompt={contactPrompt} specialtyOptions={specialtyOptions} branchOptions={branchOptions} />
+          <SpecialistsExplorer locale={locale} specialists={specialists} contactPrompt={contactPrompt} specialtyOptions={specialtyOptions} branchOptions={branchOptions} whatsapp={whatsapp} />
         </div>
       </section>
 

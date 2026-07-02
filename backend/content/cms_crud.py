@@ -57,7 +57,7 @@ HIDDEN_PER_MODEL = {
     SiteSettings: {
         "site_name_ar", "site_name_en",  # غير مستخدم في أي صفحة
         "logo_path",                      # الموقع يقرأ logo_url من حقل اللوجو
-        "whatsapp", "website",            # غير مقروءة في أي مكان
+        "website",                        # غير مقروء في أي مكان
         "whatsapp_url",                   # السوشيال في الفوتر تُدار من أقسام الصفحات
         "youtube_url", "snapchat_url",    # غير معروضة في صفحة التواصل
     },

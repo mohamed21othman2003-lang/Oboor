@@ -6,7 +6,7 @@ import AssessmentWizard from "@/components/AssessmentWizard";
 import AnimatedNumber from "@/components/home/AnimatedNumber";
 import { getLocale } from "@/i18n/locale";
 import { pick, type Locale } from "@/i18n/config";
-import { fetchContent, fetchSections } from "@/lib/server/django";
+import { fetchContent, fetchSections, getWhatsAppUrl } from "@/lib/server/django";
 import { hl } from "@/lib/highlight";
 
 // الشكل اللي بيرجع من Django (content/assessment)
@@ -85,9 +85,10 @@ export default async function AssessmentPage() {
   const en = locale === "en";
 
   // أقسام الصفحة + بطاقات التقييم من Django بالتوازي (تقليل TTFB) مع سقوط للبيانات الثابتة
-  const [sections, rows] = await Promise.all([
+  const [sections, rows, whatsapp] = await Promise.all([
     fetchSections("assessment"),
     fetchContent<ApiAssessment[]>("assessment"),
+    getWhatsAppUrl(),
   ]);
   const hero = sections?.hero ?? [];
   const hF = (k: string) => hero.find((r) => r.key === k);
@@ -221,7 +222,7 @@ export default async function AssessmentPage() {
             <h2 className="text-3xl font-extrabold text-ink sm:text-4xl">{pick(locale, "ابدأ تقييم طفلك الآن", "Start your child's assessment now")}</h2>
             <p className="mt-2 text-sm text-ink-muted">{pick(locale, "يستغرق التقييم أقل من ٣ دقائق ونتيجته فورية.", "The assessment takes less than 3 minutes and the result is instant.")}</p>
           </div>
-          <AssessmentWizard locale={locale} assessments={assessments} questions={questions} prelimQuestions={prelimQuestions} answerOptions={answerOptions} />
+          <AssessmentWizard locale={locale} assessments={assessments} questions={questions} prelimQuestions={prelimQuestions} answerOptions={answerOptions} whatsapp={whatsapp} />
         </div>
       </section>
     </>

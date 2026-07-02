@@ -5,13 +5,14 @@ import SiteChrome, { type SiteChromeData } from "@/components/SiteChrome";
 import PreviewBanner from "@/components/PreviewBanner";
 import { getLocale, dirOf } from "@/i18n/locale";
 import { fetchContent, fetchSections, type SectionRow } from "@/lib/server/django";
-import { NAV_LINKS, CONTACT } from "@/lib/site";
+import { NAV_LINKS, CONTACT, waUrl } from "@/lib/site";
 import { getCommon } from "@/i18n/dict/common";
 
 type SiteSettings = {
   logo_url?: string;
   email?: string;
   phone_unified?: string;
+  whatsapp?: string;
   main_branch_ar?: string; main_branch_en?: string;
   brand_desc_ar?: string; brand_desc_en?: string;
   cta_admission_ar?: string; cta_admission_en?: string;
@@ -132,7 +133,7 @@ export default async function RootLayout({
         { platform: "x", url: "https://x.com/hdc_ksa", label: en ? "X" : "إكس" },
         { platform: "instagram", url: "https://www.instagram.com/hdc_ksa", label: en ? "Instagram" : "انستغرام" },
         { platform: "tiktok", url: "https://www.tiktok.com/@hdc_ksa", label: en ? "TikTok" : "تيك توك" },
-        { platform: "whatsapp", url: "https://wa.me/966920003452", label: en ? "WhatsApp" : "واتساب" },
+        { platform: "whatsapp", url: waUrl(site?.whatsapp), label: en ? "WhatsApp" : "واتساب" },
       ];
 
   const chrome: SiteChromeData = {

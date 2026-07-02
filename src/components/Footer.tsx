@@ -3,7 +3,7 @@ import Link from "next/link";
 import { getCommon } from "@/i18n/dict/common";
 import type { Locale } from "@/i18n/locale";
 import { pick } from "@/i18n/config";
-import { CONTACT } from "@/lib/site";
+import { CONTACT, waUrl } from "@/lib/site";
 
 // Serializable footer data resolved on the server (CMS or static fallback).
 export type FooterData = {
@@ -109,7 +109,7 @@ export default function Footer({
         { platform: "x", url: "https://x.com/hdc_ksa", label: pick(locale, "إكس", "X") },
         { platform: "instagram", url: "https://www.instagram.com/hdc_ksa", label: pick(locale, "انستغرام", "Instagram") },
         { platform: "tiktok", url: "https://www.tiktok.com/@hdc_ksa", label: pick(locale, "تيك توك", "TikTok") },
-        { platform: "whatsapp", url: "https://wa.me/966920003452", label: pick(locale, "واتساب", "WhatsApp") },
+        { platform: "whatsapp", url: waUrl(), label: pick(locale, "واتساب", "WhatsApp") },
       ];
 
   const mainBranch = footer?.contact.mainBranch || t.mainBranch;

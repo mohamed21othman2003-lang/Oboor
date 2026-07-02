@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { pick, type Locale } from "@/i18n/config";
+import { getWhatsAppUrl } from "@/lib/server/django";
 
 /**
  * قسم «التواصل» الموحّد (CTA) المستخدم في نهاية الصفحات.
@@ -10,7 +11,7 @@ import { pick, type Locale } from "@/i18n/config";
  *  - showApply / showBranches: لإظهار/إخفاء زرّي الالتحاق والفرع.
  *  - starBadge: أيقونة نجمة في البادج بدل النقطة.
  */
-export default function CtaSection({
+export default async function CtaSection({
   locale,
   title,
   subtitle,
@@ -31,6 +32,7 @@ export default function CtaSection({
   showBranches?: boolean;
   starBadge?: boolean;
 }) {
+  const whatsapp = await getWhatsAppUrl();
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-[#0e4048] via-[#1a6c75] to-[#0e4048]">
       <div className="relative mx-auto max-w-7xl px-6 py-14 text-center lg:px-8">
@@ -65,7 +67,7 @@ export default function CtaSection({
               {pick(locale, "طلب التحاق", "Apply Now")}
             </Link>
           )}
-          <a href="https://wa.me/966920003452" target="_blank" rel="noopener noreferrer" className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#2ba73e] px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90 sm:w-auto sm:min-w-[190px]">
+          <a href={whatsapp} target="_blank" rel="noopener noreferrer" className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#2ba73e] px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90 sm:w-auto sm:min-w-[190px]">
             <WhatsappIcon />
             {pick(locale, "تواصل عبر الواتساب", "Contact via WhatsApp")}
           </a>
