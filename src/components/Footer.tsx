@@ -93,7 +93,6 @@ export default function Footer({
   const quickTitle = footer?.quickTitle || t.quickLinks;
   const servicesTitle = footer?.servicesTitle || t.servicesTitle;
   const contactTitle = footer?.contactTitle || t.contactTitle;
-  const privacy = footer?.privacy || t.privacy;
   const rights = footer?.rights || t.rights;
 
   const quickLinks = footer?.quickLinks?.length
@@ -184,8 +183,7 @@ export default function Footer({
 
       {/* Copyright */}
       <div className="border-t border-white/10">
-        <div className="mx-auto flex max-w-7xl flex-col-reverse items-center justify-between gap-2 px-4 py-5 text-xs text-white/45 sm:flex-row sm:px-6 lg:px-8">
-          <Link href="#" className="transition-colors hover:text-brand">{privacy}</Link>
+        <div className="mx-auto flex max-w-7xl items-center justify-center gap-2 px-4 py-5 text-center text-xs text-white/45 sm:px-6 lg:px-8">
           <p>{rights}</p>
         </div>
       </div>
