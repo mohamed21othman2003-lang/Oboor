@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import ContactForm from "@/components/ContactForm";
 import BranchesMapSection from "@/components/BranchesMapSection";
 import { loadBranches } from "@/lib/server/branches";
-import { MAP_REGIONS, MAP_REGIONS_EN, type Branch } from "@/lib/branchesData";
+import { mapRegionsFrom, type Branch } from "@/lib/branchesData";
 import { CONTACT } from "@/lib/site";
 import { fetchContent } from "@/lib/server/django";
 import { getLocale } from "@/i18n/locale";
@@ -238,7 +238,7 @@ function SocialSection({ locale, site }: { locale: Locale; site: SiteInfo | null
 export default async function ContactPage() {
   const locale = await getLocale();
   const [branches, site] = await Promise.all([loadBranches(locale), fetchContent<SiteInfo>("site")]);
-  const mapRegions = locale === "en" ? MAP_REGIONS_EN : MAP_REGIONS;
+  const mapRegions = mapRegionsFrom(branches);
   return (
     <>
       <Hero locale={locale} />

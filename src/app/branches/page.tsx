@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { MAP_REGIONS, MAP_REGIONS_EN, BRANCH_FEATURES, BRANCH_FEATURES_EN } from "@/lib/branchesData";
+import { BRANCH_FEATURES, BRANCH_FEATURES_EN, mapRegionsFrom } from "@/lib/branchesData";
 import { Suspense } from "react";
 import BranchesExplorer from "@/components/BranchesExplorer";
 import BranchesMapSection from "@/components/BranchesMapSection";
@@ -48,13 +48,8 @@ export default async function BranchesPage() {
     fetchSections("branches"),
   ]);
 
-  const mapRegions = sections?.map_regions
-    ? sections.map_regions.map((row) => ({
-        name: en ? row.title_en || row.title_ar : row.title_ar,
-        count: Number(row.value) || 0,
-        color: row.color,
-      }))
-    : en ? MAP_REGIONS_EN : MAP_REGIONS;
+  // مناطق الخريطة (الليجند) مشتقّة من الفروع الفعلية — تتحدّث تلقائياً مع أي تغيير في الفروع
+  const mapRegions = mapRegionsFrom(branches);
 
   const branchFeatures = sections?.features
     ? sections.features.map((row) => ({

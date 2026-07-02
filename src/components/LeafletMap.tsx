@@ -14,9 +14,13 @@ type Region = { name: string; count: number; color: string };
 const COORDS: Record<string, [number, number]> = {
   "الرياض": [24.7136, 46.6753],
   "مكة المكرمة": [21.3891, 39.8579],
+  "الشرقية": [26.2999, 50.2083],
   "المنطقة الشرقية": [26.2999, 50.2083],
   "المدينة المنورة": [24.5247, 39.5692],
   "عسير": [18.2465, 42.5117],
+  "القصيم": [26.3260, 43.9750],
+  "جازان": [16.8892, 42.5511],
+  "الجوف": [29.9697, 40.2064],
   "جدة": [21.4858, 39.1925],
   "تبوك": [28.3838, 36.555],
 };
@@ -72,7 +76,9 @@ export default function LeafletMap({ locale, branches, regions }: { locale: Loca
   };
 
   const dirUrl = (b: Branch) =>
-    typeof b.lat === "number" && typeof b.lng === "number"
+    b.mapUrl
+      ? b.mapUrl
+      : typeof b.lat === "number" && typeof b.lng === "number"
       ? `https://www.google.com/maps/dir/?api=1&destination=${b.lat},${b.lng}`
       : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([b.address, b.city, "السعودية"].filter(Boolean).join("، "))}`;
 

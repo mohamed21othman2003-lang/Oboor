@@ -97,6 +97,23 @@ export function regionTabs(locale: Locale = "ar"): { name: string; count: number
   return regionTabsFrom(locale === "en" ? BRANCHES_EN : BRANCHES, locale);
 }
 
+// مناطق خريطة الفروع (الليجند) — تُشتقّ من الفروع الفعلية مع لون لكل منطقة.
+// تُستخدم في صفحتَي الفروع والتواصل لتظل الخريطة متطابقة دائماً مع الفروع.
+const MAP_REGION_PALETTE = ["#2cbcc8", "#f59e0b", "#8b5cf6", "#ec4899", "#10b981", "#3b82f6", "#ef4444", "#eab308"];
+export function mapRegionsFrom(source: Branch[]): { name: string; count: number; color: string }[] {
+  const order: string[] = [];
+  const counts: Record<string, number> = {};
+  for (const b of source) {
+    const name = b.region || b.city;
+    if (!name) continue;
+    if (!(name in counts)) order.push(name);
+    counts[name] = (counts[name] || 0) + 1;
+  }
+  return order
+    .sort((a, b) => counts[b] - counts[a])
+    .map((name, i) => ({ name, count: counts[name], color: MAP_REGION_PALETTE[i % MAP_REGION_PALETTE.length] }));
+}
+
 // مفتاح المناطق في الخريطة (أرقام تعريفية كما في الديزاين)
 export const MAP_REGIONS = [
   { name: "الرياض", count: 8, color: "#2cbcc8" },
