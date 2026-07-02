@@ -11,7 +11,7 @@ import { getLocale } from "@/i18n/locale";
 import { pick, type Locale } from "@/i18n/config";
 
 export const metadata: Metadata = { alternates: { canonical: "/" } };
-import { fetchContent, fetchSections } from "@/lib/server/django";
+import { fetchContent, fetchSections, getWhatsAppUrl } from "@/lib/server/django";
 import { loadServiceCards } from "@/lib/server/serviceCards";
 import type { HomeChrome } from "@/lib/highlight";
 
@@ -117,7 +117,7 @@ async function loadCerts(locale: Locale): Promise<{ name: string; label: string 
 
 export default async function Home() {
   const locale = await getLocale();
-  const [heroSlides, statItems, featureItems, gallery, successHome, newsHome, chrome, serviceCards, certs] = await Promise.all([
+  const [heroSlides, statItems, featureItems, gallery, successHome, newsHome, chrome, serviceCards, certs, whatsapp] = await Promise.all([
     loadHero(locale),
     loadStats(locale),
     loadFeatures(locale),
@@ -127,6 +127,7 @@ export default async function Home() {
     loadChrome(locale),
     loadServiceCards(locale),
     loadCerts(locale),
+    getWhatsAppUrl(),
   ]);
   return (
     <>
@@ -141,7 +142,7 @@ export default async function Home() {
 
       {/* WhatsApp float */}
       <a
-        href="https://wa.me/966920003452"
+        href={whatsapp}
         target="_blank"
         rel="noopener noreferrer"
         aria-label={pick(locale, "تواصل عبر واتساب", "Contact via WhatsApp")}

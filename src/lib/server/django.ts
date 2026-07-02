@@ -60,6 +60,14 @@ export async function fetchContent<T = unknown>(path: string): Promise<T | null>
   }
 }
 
+// رابط واتساب الموقع من إعدادات الـCMS (حقل whatsapp)، مع السقوط للرقم الافتراضي.
+// الجلب مُخزَّن (revalidate) ومُوحَّد عبر Next fetch cache فاستدعاؤه في عدة أماكن رخيص.
+export async function getWhatsAppUrl(): Promise<string> {
+  const { waUrl } = await import("@/lib/site");
+  const site = await fetchContent<{ whatsapp?: string }>("site");
+  return waUrl(site?.whatsapp);
+}
+
 // صفّ عنصر قسم عام كما يرجع من Django (content/sections/<page>)
 export type SectionRow = {
   page: string; block: string; key: string; order: number;

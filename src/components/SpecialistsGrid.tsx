@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { getSpecialists, getContactPrompt, type Specialist } from "@/lib/specialistsData";
 import { pick, type Locale } from "@/i18n/config";
+import { waUrl } from "@/lib/site";
 
 type ContactPrompt = { title: string; subtitle: string };
 
@@ -11,11 +12,14 @@ export default function SpecialistsGrid({
   locale,
   specialists: specialistsProp,
   contactPrompt,
+  whatsapp,
 }: {
   locale: Locale;
   specialists?: Specialist[];
   contactPrompt?: ContactPrompt;
+  whatsapp?: string;
 }) {
+  const whatsappHref = whatsapp || waUrl();
   const [active, setActive] = useState<Specialist | null>(null);
   const specialists = specialistsProp ?? getSpecialists(locale);
 
@@ -40,7 +44,7 @@ export default function SpecialistsGrid({
         </button>
       </div>
 
-      {active && <Modal s={active} locale={locale} contactPrompt={contactPrompt} onClose={() => setActive(null)} />}
+      {active && <Modal s={active} locale={locale} contactPrompt={contactPrompt} whatsappHref={whatsappHref} onClose={() => setActive(null)} />}
     </>
   );
 }
@@ -84,7 +88,7 @@ function InfoItem({ icon, text }: { icon: React.ReactNode; text: string }) {
   );
 }
 
-function Modal({ s, locale, contactPrompt: contactPromptProp, onClose }: { s: Specialist; locale: Locale; contactPrompt?: ContactPrompt; onClose: () => void }) {
+function Modal({ s, locale, contactPrompt: contactPromptProp, whatsappHref, onClose }: { s: Specialist; locale: Locale; contactPrompt?: ContactPrompt; whatsappHref: string; onClose: () => void }) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     document.addEventListener("keydown", onKey);
@@ -186,7 +190,7 @@ function Modal({ s, locale, contactPrompt: contactPromptProp, onClose }: { s: Sp
             {/* Footer */}
             <div className="flex items-center gap-3">
               <a
-                href="https://wa.me/966920003452"
+                href={whatsappHref}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-brand py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-dark"

@@ -5,6 +5,7 @@ import { validateName, validatePhone, stripDigits, digitsOnly } from "@/lib/vali
 import CustomSelect from "@/components/ui/Select";
 import { getAssessments, getQuestionsFor, getAnswerOptions, type Assessment } from "@/lib/assessmentData";
 import { pick, type Locale } from "@/i18n/config";
+import { waUrl } from "@/lib/site";
 
 export default function AssessmentWizard({
   locale,
@@ -12,13 +13,16 @@ export default function AssessmentWizard({
   questions,
   prelimQuestions,
   answerOptions,
+  whatsapp,
 }: {
   locale: Locale;
   assessments?: Assessment[];
   questions?: Record<string, string[]>;
   prelimQuestions?: string[];
   answerOptions?: string[];
+  whatsapp?: string;
 }) {
+  const whatsappHref = whatsapp || waUrl();
   const STEPS = [
     pick(locale, "اختر التقييم المناسب", "Choose the Assessment"),
     pick(locale, "اجب الأسئلة", "Answer Questions"),
@@ -208,7 +212,7 @@ export default function AssessmentWizard({
           </div>
 
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-            <a href="https://wa.me/966920003452" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 rounded-xl bg-brand px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-dark">{pick(locale, "تواصل مع خدمة العملاء", "Contact Customer Service")}</a>
+            <a href={whatsappHref} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 rounded-xl bg-brand px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-dark">{pick(locale, "تواصل مع خدمة العملاء", "Contact Customer Service")}</a>
             <a href="/admission" className="rounded-xl border border-brand px-6 py-3 text-sm font-semibold text-brand transition-colors hover:bg-brand hover:text-white">{pick(locale, "طلب التحاق", "Apply Now")}</a>
             <button onClick={reset} className="rounded-xl border border-line px-6 py-3 text-sm font-semibold text-ink-muted transition-colors hover:bg-surface">{pick(locale, "تقييم جديد", "New Assessment")}</button>
           </div>

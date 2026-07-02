@@ -31,3 +31,9 @@ export const CONTACT = {
   mainBranchAr: "الرياض ( الفرع الرئيسي )",
   mainBranchEn: "Riyadh (Main Branch)",
 };
+
+// يبني رابط واتساب من رقم الـCMS (أو الرقم الافتراضي)، بعد تنظيفه من أي رموز غير رقمية.
+export function waUrl(num?: string | null): string {
+  const digits = (num || CONTACT.whatsapp).replace(/[^\d]/g, "") || CONTACT.whatsapp;
+  return `https://wa.me/${digits}`;
+}
