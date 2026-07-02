@@ -146,7 +146,7 @@ export default function SubmissionsTable({
     await exportSheet({
       filename: "admission-requests",
       sheetName: "طلبات الالتحاق",
-      columns: cols.map(([header]) => ({ header })),
+      columns: cols.map(([header]) => ({ header, date: header === "التاريخ" })),
       rows: filtered.map((it) => cols.map(([, acc]) => acc(it))),
     });
   };

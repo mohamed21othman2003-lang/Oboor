@@ -8,6 +8,7 @@ export type SheetColumn = {
   header: string;
   width?: number;
   link?: boolean; // اعرض الخلية كرابط قابل للضغط (القيمة = رابط الملف)
+  date?: boolean; // قيمة تاريخ/وقت — تُقرأ LTR حتى لا تتلخبط الأرقام مع النص العربي
 };
 
 export async function exportSheet(opts: {
@@ -44,22 +45,21 @@ export async function exportSheet(opts: {
     cell.border = thin;
   });
 
-  // الصفوف
+  // الصفوف — كل الخلايا موسّطة (justify)؛ التاريخ يُقرأ LTR
   opts.rows.forEach((r, i) => {
     const row = ws.addRow(r);
     row.height = 20;
     row.eachCell((cell, colNumber) => {
-      cell.alignment = { vertical: "middle", horizontal: "right" };
+      const col = opts.columns[colNumber - 1];
+      cell.alignment = { vertical: "middle", horizontal: "center", readingOrder: col?.date ? "ltr" : "rtl" };
       cell.border = thin;
       if (i % 2 === 1) {
         cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF3F9FA" } };
       }
-      const col = opts.columns[colNumber - 1];
       const val = cell.value == null ? "" : String(cell.value);
       if (col?.link && val) {
         cell.value = { text: "فتح الملف ↗", hyperlink: val };
         cell.font = { color: { argb: "FF0F6C73" }, underline: true, bold: true };
-        cell.alignment = { vertical: "middle", horizontal: "center" };
       }
     });
   });

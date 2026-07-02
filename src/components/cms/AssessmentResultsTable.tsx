@@ -109,7 +109,7 @@ export default function AssessmentResultsTable({
     await exportSheet({
       filename: "assessment-results",
       sheetName: "نتائج التقييم",
-      columns: cols.map(([header]) => ({ header })),
+      columns: cols.map(([header]) => ({ header, date: header === "التاريخ" })),
       rows: filtered.map((it) => cols.map(([, acc]) => acc(it))),
     });
   };

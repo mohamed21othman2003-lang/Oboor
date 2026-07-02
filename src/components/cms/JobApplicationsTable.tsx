@@ -112,7 +112,7 @@ export default function JobApplicationsTable({
     await exportSheet({
       filename: "job-applications",
       sheetName: "طلبات التوظيف",
-      columns: cols.map(([header, , link]) => ({ header, link })),
+      columns: cols.map(([header, , link]) => ({ header, link, date: header === "التاريخ" })),
       rows: filtered.map((it) => cols.map(([, acc]) => acc(it))),
     });
   };
