@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import CustomSelect from "@/components/ui/Select";
 import { type CmsItem, type FieldSchema } from "@/lib/cms/api";
+import { exportSheet } from "@/lib/cms/exportSheet";
 
 /* ===== جدول طلبات التوظيف (CRM) — ديزاين فقط، نفس البيانات والأكشنز ===== */
 
@@ -101,18 +102,19 @@ export default function JobApplicationsTable({
   const copyPhone = (id: number, phone: string) => navigator.clipboard?.writeText(phone).then(() => { setCopied(id); setTimeout(() => setCopied((c) => (c === id ? null : c)), 1500); });
   const del = async (id: number) => { setMenu(null); if (!confirm("حذف هذا الطلب نهائياً؟")) return; await onDelete(id); };
 
-  const exportCsv = () => {
-    const cols: [string, (it: CmsItem) => string][] = [
+  const exportCsv = async () => {
+    const cols: [string, (it: CmsItem) => string, boolean?][] = [
       ["الاسم", (it) => v(it, "name")], ["البريد", (it) => v(it, "email")], ["الجوال", (it) => v(it, "phone")],
       ["الوظيفة", (it) => v(it, "job")], ["المدينة", (it) => v(it, "city")], ["المسمى الحالي", (it) => v(it, "current_role")],
       ["الخبرة", (it) => v(it, "experience")], ["التاريخ", (it) => { const s = stamp(v(it, "created_at")); return `${s.date} ${s.time}`.trim(); }],
+      ["السيرة الذاتية", (it) => v(it, "cv"), true],
     ];
-    const esc = (s: string) => `"${s.replace(/"/g, '""')}"`;
-    const rows = [cols.map((c) => c[0]), ...filtered.map((it) => cols.map((c) => c[1](it)))];
-    const csv = "﻿" + rows.map((r) => r.map(esc).join(",")).join("\r\n");
-    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8;" }));
-    const a = document.createElement("a"); a.href = url; a.download = "job-applications.csv"; a.click();
-    URL.revokeObjectURL(url);
+    await exportSheet({
+      filename: "job-applications",
+      sheetName: "طلبات التوظيف",
+      columns: cols.map(([header, , link]) => ({ header, link })),
+      rows: filtered.map((it) => cols.map(([, acc]) => acc(it))),
+    });
   };
 
   const actBtn = "flex h-9 w-9 items-center justify-center rounded-xl border border-line bg-white transition-colors";

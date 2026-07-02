@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import CustomSelect from "@/components/ui/Select";
 import { type CmsItem, type FieldSchema } from "@/lib/cms/api";
+import { exportSheet } from "@/lib/cms/exportSheet";
 
 /* ===== جدول إدارة طلبات الالتحاق (شكل CRM) — ديزاين فقط، نفس البيانات والأكشنز ===== */
 
@@ -133,7 +134,7 @@ export default function SubmissionsTable({
     setSelected(new Set());
   };
 
-  const exportCsv = () => {
+  const exportCsv = async () => {
     const cols: [string, (it: CmsItem) => string][] = [
       ["ولي الأمر", (it) => v(it, "parent_name")],
       ["الجوال", (it) => v(it, "phone")],
@@ -142,13 +143,12 @@ export default function SubmissionsTable({
       ["البريد", (it) => v(it, "email")],
       ["التاريخ", (it) => { const s = stamp(v(it, "created_at")); return `${s.date} ${s.time}`.trim(); }],
     ];
-    const esc = (s: string) => `"${s.replace(/"/g, '""')}"`;
-    const rows = [cols.map((c) => c[0]), ...filtered.map((it) => cols.map((c) => c[1](it)))];
-    const csv = "﻿" + rows.map((r) => r.map(esc).join(",")).join("\r\n");
-    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8;" }));
-    const a = document.createElement("a");
-    a.href = url; a.download = `admission-requests.csv`; a.click();
-    URL.revokeObjectURL(url);
+    await exportSheet({
+      filename: "admission-requests",
+      sheetName: "طلبات الالتحاق",
+      columns: cols.map(([header]) => ({ header })),
+      rows: filtered.map((it) => cols.map(([, acc]) => acc(it))),
+    });
   };
 
   const actBtn = "flex h-9 w-9 items-center justify-center rounded-xl border border-line bg-white transition-colors";

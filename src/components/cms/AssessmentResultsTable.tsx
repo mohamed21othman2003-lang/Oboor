@@ -4,6 +4,7 @@ import { Fragment, useMemo, useState } from "react";
 import Link from "next/link";
 import CustomSelect from "@/components/ui/Select";
 import { type CmsItem } from "@/lib/cms/api";
+import { exportSheet } from "@/lib/cms/exportSheet";
 
 /* ===== نتائج التقييم — جدول بأكورديون داخلي (يتمدّد تحت الصف) — ديزاين فقط ===== */
 
@@ -99,18 +100,18 @@ export default function AssessmentResultsTable({
   const onFilter = (fn: () => void) => { fn(); setPage(1); };
   const del = async (id: number) => { setMenu(null); if (!confirm("حذف هذه النتيجة نهائياً؟")) return; await onDelete(id); };
 
-  const exportCsv = () => {
+  const exportCsv = async () => {
     const cols: [string, (it: CmsItem) => string][] = [
       ["الطفل", (it) => v(it, "child_name")], ["ولي الأمر", (it) => v(it, "parent_name")], ["الجوال", (it) => v(it, "phone")],
       ["نوع التقييم", (it) => v(it, "assessment")], ["العمر", (it) => v(it, "age")], ["مستوى الحالة", (it) => levelInfo(v(it, "level")).label],
       ["المدينة", (it) => v(it, "city")], ["التاريخ", (it) => { const s = stamp(v(it, "created_at")); return `${s.date} ${s.time}`.trim(); }],
     ];
-    const esc = (s: string) => `"${s.replace(/"/g, '""')}"`;
-    const rows = [cols.map((c) => c[0]), ...filtered.map((it) => cols.map((c) => c[1](it)))];
-    const csv = "﻿" + rows.map((r) => r.map(esc).join(",")).join("\r\n");
-    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8;" }));
-    const a = document.createElement("a"); a.href = url; a.download = "assessment-results.csv"; a.click();
-    URL.revokeObjectURL(url);
+    await exportSheet({
+      filename: "assessment-results",
+      sheetName: "نتائج التقييم",
+      columns: cols.map(([header]) => ({ header })),
+      rows: filtered.map((it) => cols.map(([, acc]) => acc(it))),
+    });
   };
 
   const actBtn = "flex h-9 w-9 items-center justify-center rounded-xl border border-line bg-white transition-colors";
