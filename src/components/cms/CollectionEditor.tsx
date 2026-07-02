@@ -133,6 +133,9 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
   // تجميع الحقول: أزواج عربي/إنجليزي في صف واحد، الباقي مفرد
   // (الترتيب مخفي — تتم إدارته بالأسهم في القائمة)
   type Row = { kind: "pair" | "single"; ar?: FieldSchema; en?: FieldSchema; f?: FieldSchema };
+  // أقسام الروابط (قائمة الهيدر + روابط/سوشيال الفوتر): حقل «القيمة» هو وجهة الرابط
+  const sectionBlock = type === "sections" ? String(values.block ?? "") : "";
+  const isLinkBlock = ["nav", "quick_links", "services", "social"].includes(sectionBlock);
   const rows = useMemo(() => {
     const out: Row[] = [];
     const done = new Set<string>();
@@ -144,6 +147,17 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
       if (type === "sections") {
         if (f.name === "image") continue;
         if (f.name === "image_file" && isEmpty(baseline.image) && isEmpty(baseline.image_file)) continue;
+      }
+      // عناصر الروابط: «النص» غير مستخدم، ونوضّح أن «القيمة» هي الرابط/الوجهة
+      if (isLinkBlock) {
+        if (f.base === "text") continue; // النص (عربي/إنجليزي) لا معنى له لعنصر رابط
+        if (f.name === "value") {
+          const label = sectionBlock === "social" ? "رابط الحساب" : "الرابط (الوجهة عند الضغط)";
+          const help = "المكان الذي يفتحه هذا العنصر عند الضغط: رابط داخلي في الموقع مثل /about أو /news، أو رابط كامل يبدأ بـ https:// لموقع خارجي.";
+          out.push({ kind: "single", f: { ...f, label, help } });
+          done.add(f.name);
+          continue;
+        }
       }
       // الأخبار: حقول كارت الفعالية تظهر فقط للفعاليات والورش
       if (type === "news" && EVENT_FIELDS.has(f.name) && !["events", "workshops"].includes(String(values.section ?? ""))) continue;
@@ -158,7 +172,7 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
       }
     }
     return out;
-  }, [fields, baseline, type, values.section]);
+  }, [fields, baseline, type, values.section, sectionBlock, isLinkBlock]);
 
   async function onSave() {
     setSaving(true);
