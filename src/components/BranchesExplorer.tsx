@@ -120,7 +120,7 @@ export default function BranchesExplorer({ locale, branches }: { locale: Locale;
 
 function BranchCard({ b, locale }: { b: Branch; locale: Locale }) {
   return (
-    <article className="flex flex-col rounded-2xl border border-line bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
+    <article className="flex h-full flex-col rounded-2xl border border-line bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
       {/* Header — الأيقونة يمين والاسم جنبها مباشرة (مجمّعين على اليمين) */}
       <div className="flex items-start gap-3 border-b border-line pb-4">
         <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand/10 text-brand">
@@ -156,7 +156,7 @@ function BranchCard({ b, locale }: { b: Branch; locale: Locale }) {
       </div>
 
       {/* Buttons */}
-      <div className="mt-5 flex items-center gap-2.5">
+      <div className="mt-auto flex items-center gap-2.5 pt-5">
         <Link href={`/branches/${b.slug}`} className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-brand py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-dark">
           {pick(locale, "عرض التفاصيل", "View Details")}
         </Link>
