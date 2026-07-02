@@ -125,7 +125,8 @@ export default async function RootLayout({
         .sort((a, b) => a.order - b.order)
         .map((row) => ({
           platform: row.icon,
-          url: row.value,
+          // رقم الواتساب موحَّد من إعدادات الموقع (حقل whatsapp) — بقية المنصّات من قيمتها
+          url: row.icon === "whatsapp" ? waUrl(site?.whatsapp) : row.value,
           label: r(row.title_ar, row.title_en) || row.icon,
         }))
         .filter((s) => s.platform && s.url)
