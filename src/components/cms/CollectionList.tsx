@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { listCollection, deleteItem, reorderCollection, typeLabel, addLabelFor, type CmsItem } from "@/lib/cms/api";
 import { useCmsLang } from "@/lib/cms/i18n";
+import { groupLabel } from "@/lib/cms/groupLabels";
 import PageChrome from "@/components/cms/PageChrome";
 
 // أنواع المحتوى التي لصفحتها «رأس صفحة» قابل للتعديل من نفس القائمة (نوع ← مفتاح الصفحة)
@@ -140,7 +141,7 @@ export default function CollectionList({ type }: { type: string }) {
   }, [items, groupBy, groupDefs, type]);
 
   // وضع «صفحة واحدة» (مثل عن عبور) — نعرض أقسام صفحة بعينها فقط
-  const pageLabel = pageFilter ? (groupDefs?.find((g) => g.value === pageFilter)?.label || pageFilter) : null;
+  const pageLabel = pageFilter ? groupLabel(groupDefs?.find((g) => g.value === pageFilter)?.label || pageFilter, lang) : null;
   const pageItems = pageFilter ? items.filter((it) => String(it.page ?? "") === pageFilter) : items;
 
   // تجميع عناصر صفحة فرعيًا حسب القسم (block) مع الحفاظ على الترتيب
@@ -262,7 +263,7 @@ export default function CollectionList({ type }: { type: string }) {
                 <button onClick={() => setOpen((p) => ({ ...p, [g.key]: !isOpen }))} className="flex w-full items-center justify-between gap-3 px-5 py-4 text-start transition-colors hover:bg-surface/60">
                   <div className="flex items-center gap-3">
                     <span className="flex h-8 min-w-8 items-center justify-center rounded-full bg-brand/10 px-2 text-sm font-extrabold text-brand">{g.items.length}</span>
-                    <span className="font-bold text-ink">{g.label}</span>
+                    <span className="font-bold text-ink">{groupLabel(g.label, lang)}</span>
                   </div>
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={`shrink-0 text-ink-soft transition-transform ${isOpen ? "rotate-180" : ""}`}><path strokeLinecap="round" d="M6 9l6 6 6-6" /></svg>
                 </button>

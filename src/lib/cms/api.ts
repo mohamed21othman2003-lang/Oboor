@@ -8,6 +8,28 @@ const TOKEN_KEY = "oboor_cms_token";
 
 export type CmsUser = { username: string; name: string; email: string; is_staff: boolean };
 
+// ترجمة رسائل خطأ Django الشائعة حسب لغة اللوحة (تُقرأ من localStorage)
+const API_ERRORS_EN: Record<string, string> = {
+  "غير موجود.": "Not found.",
+  "نوع غير معروف.": "Unknown type.",
+  "غير مسموح.": "Not allowed.",
+  "لا يوجد ملف.": "No file provided.",
+  "الحد الأقصى 5 ميجابايت.": "Maximum size is 5 MB.",
+  "الملف ليس صورة صالحة.": "The file is not a valid image.",
+  "هذا النوع لا يدعم الترتيب.": "This type does not support reordering.",
+  "لا توجد نسخة افتراضية محفوظة لهذا العنصر.": "No saved default version for this item.",
+  "تعذّر تسجيل الدخول.": "Could not sign in.",
+  "انتهت الجلسة، الرجاء تسجيل الدخول مجدداً.": "Your session has expired. Please sign in again.",
+};
+function cmsPanelLang(): "ar" | "en" {
+  if (typeof window === "undefined") return "ar";
+  return localStorage.getItem("oboor_cms_lang") === "en" ? "en" : "ar";
+}
+// ترجمة رسالة خطأ واحدة إن كانت معروفة واللوحة إنجليزية
+function apiError(msg: string): string {
+  return cmsPanelLang() === "en" ? (API_ERRORS_EN[msg] || msg) : msg;
+}
+
 export function getToken(): string | null {
   if (typeof window === "undefined") return null;
   return localStorage.getItem(TOKEN_KEY);
@@ -26,7 +48,7 @@ export async function cmsLogin(username: string, password: string): Promise<{ to
     body: JSON.stringify({ username, password }),
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.detail || "تعذّر تسجيل الدخول.");
+  if (!res.ok) throw new Error(apiError(data.detail || "تعذّر تسجيل الدخول."));
   setToken(data.token);
   return data;
 }
@@ -44,7 +66,7 @@ export async function cmsFetch<T = unknown>(path: string, opts: RequestInit = {}
   if (res.status === 401) {
     clearToken();
     if (typeof window !== "undefined") window.location.href = "/cms/login";
-    throw new Error("انتهت الجلسة، الرجاء تسجيل الدخول مجدداً.");
+    throw new Error(apiError("انتهت الجلسة، الرجاء تسجيل الدخول مجدداً."));
   }
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
@@ -53,7 +75,7 @@ export async function cmsFetch<T = unknown>(path: string, opts: RequestInit = {}
       const parts = Object.entries(data).map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join("، ") : v}`);
       if (parts.length) throw new Error(parts.join(" — "));
     }
-    throw new Error((data && data.detail) || `خطأ (${res.status})`);
+    throw new Error(apiError((data && data.detail) || (cmsPanelLang() === "en" ? `Error (${res.status})` : `خطأ (${res.status})`)));
   }
   if (res.status === 204) return undefined as T;
   return res.json();
