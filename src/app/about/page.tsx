@@ -97,13 +97,13 @@ export default async function AboutPage() {
           </nav>
 
           <div className="grid items-center gap-12 lg:grid-cols-2">
-            {/* Image (right) — صورة الأطفال، والشارتان كبطاقات HTML ثنائية اللغة تغطيان النص المطبوع بالصورة */}
+            {/* Image (right) — صورة نظيفة بدون بطاقات مطبوعة؛ الشارتان بطاقات HTML صغيرة ثنائية اللغة */}
             <div className="relative order-1 mx-auto w-full max-w-[480px]">
               <Image src={blk("hero")?.image || "/about-hero.png"} alt={pick(locale, "مركز عبور للرعاية والتأهيل", "Oboor Center for Care & Rehabilitation")} width={511} height={560} className="h-auto w-full" quality={90} priority />
-              {/* شارة «تأسس عام» — تغطي البطاقة المطبوعة أعلى يسار الصورة (أكبر لتغطيتها بالكامل) */}
-              <StatBadge className="left-[1.5%] top-[16.5%] w-[42%] max-w-[210px] px-4 py-6" valueClassName="text-2xl sm:text-3xl" iconClassName="h-8 w-8" iconSize={16} label={pick(locale, "تأسّس عام", "Established")} value={pick(locale, "٢٠٠٧", "2007")} />
-              {/* شارة «تأهيل شامل» — أعلى يمين الصورة */}
-              <StatBadge className="right-[3%] top-[4%] w-[58%] max-w-[270px] px-3.5 py-2.5" iconClassName="h-8 w-8" iconSize={16} label={pick(locale, "برامج متخصصة", "Specialized Programs")} value={pick(locale, "تأهيل شامل ومتكامل", "Comprehensive Rehabilitation")} />
+              {/* شارة «تأهيل شامل» — أعلى يمين */}
+              <StatBadge className="right-[3%] top-[5%] w-[54%] max-w-[248px] px-3.5 py-2.5" iconClassName="h-5 w-5" iconSize={12} label={pick(locale, "برامج متخصصة", "Specialized Programs")} value={pick(locale, "تأهيل شامل ومتكامل", "Comprehensive Rehabilitation")} />
+              {/* شارة «تأسس عام» — أسفل يسار، ضيّقة حتى لا تتلامس مع الأولى */}
+              <StatBadge className="left-[3%] top-[21%] w-[37%] max-w-[176px] px-3.5 py-2.5" valueClassName="text-lg sm:text-xl" iconClassName="h-5 w-5" iconSize={12} label={pick(locale, "تأسّس عام", "Established")} value={pick(locale, "٢٠٠٧", "2007")} />
             </div>
 
             {/* Text (left) */}
