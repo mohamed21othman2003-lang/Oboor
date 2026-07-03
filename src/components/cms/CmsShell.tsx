@@ -5,45 +5,46 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { clearToken, getToken, type CmsUser } from "@/lib/cms/api";
+import { useCmsLang, type CmsLang } from "@/lib/cms/i18n";
 
-type NavItem = { label: string; href: string; icon: keyof typeof ICONS };
-type NavGroup = { title: string; items: NavItem[] };
+type NavItem = { label: string; label_en: string; href: string; icon: keyof typeof ICONS };
+type NavGroup = { title: string; title_en: string; items: NavItem[] };
 
 const NAV: NavGroup[] = [
   {
-    title: "الرئيسية",
-    items: [{ label: "لوحة التحكّم", href: "/cms", icon: "grid" }],
+    title: "الرئيسية", title_en: "Home",
+    items: [{ label: "لوحة التحكّم", label_en: "Dashboard", href: "/cms", icon: "grid" }],
   },
   {
-    title: "الطلبات والرسائل",
+    title: "الطلبات والرسائل", title_en: "Requests & Messages",
     items: [
-      { label: "رسائل التواصل", href: "/cms/submissions/contact", icon: "mail" },
-      { label: "طلبات الالتحاق", href: "/cms/submissions/admission", icon: "userPlus" },
-      { label: "طلبات التوظيف", href: "/cms/submissions/career", icon: "briefcase" },
-      { label: "نتائج التقييم", href: "/cms/submissions/assessment", icon: "clipboard" },
+      { label: "رسائل التواصل", label_en: "Contact Messages", href: "/cms/submissions/contact", icon: "mail" },
+      { label: "طلبات الالتحاق", label_en: "Admission Requests", href: "/cms/submissions/admission", icon: "userPlus" },
+      { label: "طلبات التوظيف", label_en: "Job Applications", href: "/cms/submissions/career", icon: "briefcase" },
+      { label: "نتائج التقييم", label_en: "Assessment Results", href: "/cms/submissions/assessment", icon: "clipboard" },
     ],
   },
   {
-    title: "صفحات الموقع",
+    title: "صفحات الموقع", title_en: "Site Pages",
     items: [
-      { label: "الصفحة الرئيسية", href: "/cms/home", icon: "home" },
-      { label: "عن عبور (من نحن)", href: "/cms/content/sections?page=about", icon: "info" },
-      { label: "إعلامنا (الأخبار والمقالات)", href: "/cms/content/news", icon: "news" },
-      { label: "برامجنا التمكينية: البرامج", href: "/cms/content/programs", icon: "cap" },
-      { label: "برامجنا التمكينية: الخدمات العيادية", href: "/cms/content/services", icon: "health" },
-      { label: "برامجنا التمكينية: التقنيات", href: "/cms/content/techniques", icon: "chip" },
-      { label: "مراكزنا (الفروع)", href: "/cms/content/branches", icon: "pin" },
-      { label: "رُوّادنا (الأخصائيون)", href: "/cms/content/specialists", icon: "user" },
-      { label: "أبطال عبور (قصص النجاح)", href: "/cms/content/success", icon: "star" },
-      { label: "التقييم", href: "/cms/assessment", icon: "clipboard" },
-      { label: "انضم إلينا (الوظائف)", href: "/cms/content/careers", icon: "megaphone" },
+      { label: "الصفحة الرئيسية", label_en: "Home Page", href: "/cms/home", icon: "home" },
+      { label: "عن عبور (من نحن)", label_en: "About Oboor", href: "/cms/content/sections?page=about", icon: "info" },
+      { label: "إعلامنا (الأخبار والمقالات)", label_en: "Our Media (News & Articles)", href: "/cms/content/news", icon: "news" },
+      { label: "برامجنا التمكينية: البرامج", label_en: "Programs", href: "/cms/content/programs", icon: "cap" },
+      { label: "برامجنا التمكينية: الخدمات العيادية", label_en: "Clinical Services", href: "/cms/content/services", icon: "health" },
+      { label: "برامجنا التمكينية: التقنيات", label_en: "Techniques", href: "/cms/content/techniques", icon: "chip" },
+      { label: "مراكزنا (الفروع)", label_en: "Our Centers (Branches)", href: "/cms/content/branches", icon: "pin" },
+      { label: "رُوّادنا (الأخصائيون)", label_en: "Our Pioneers (Specialists)", href: "/cms/content/specialists", icon: "user" },
+      { label: "أبطال عبور (قصص النجاح)", label_en: "Oboor Champions (Success Stories)", href: "/cms/content/success", icon: "star" },
+      { label: "التقييم", label_en: "Assessment", href: "/cms/assessment", icon: "clipboard" },
+      { label: "انضم إلينا (الوظائف)", label_en: "Join Us (Careers)", href: "/cms/content/careers", icon: "megaphone" },
     ],
   },
   {
-    title: "الرئيسية والإعدادات",
+    title: "الرئيسية والإعدادات", title_en: "Sections & Settings",
     items: [
-      { label: "أقسام الصفحات", href: "/cms/content/sections", icon: "layers" },
-      { label: "إعدادات الموقع", href: "/cms/settings", icon: "cog" },
+      { label: "أقسام الصفحات", label_en: "Page Sections", href: "/cms/content/sections", icon: "layers" },
+      { label: "إعدادات الموقع", label_en: "Site Settings", href: "/cms/settings", icon: "cog" },
     ],
   },
 ];
@@ -51,6 +52,9 @@ const NAV: NavGroup[] = [
 export default function CmsShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
+  const { lang, dir, setLang } = useCmsLang();
+  const en = lang === "en";
+  const t = (ar: string, e: string) => (en ? e : ar);
   const [user, setUser] = useState<CmsUser | null>(null);
   const [ready, setReady] = useState(false);
   const [open, setOpen] = useState(false);
@@ -68,15 +72,16 @@ export default function CmsShell({ children }: { children: React.ReactNode }) {
     setReady(true);
   }, [router]);
 
-  // فلترة عناصر القائمة بالبحث
+  // فلترة عناصر القائمة بالبحث (بلغة اللوحة)
+  const lbl = (it: NavItem) => (en ? it.label_en : it.label);
   const groups = useMemo(() => {
-    const term = q.trim();
+    const term = q.trim().toLowerCase();
     if (!term) return NAV;
-    return NAV.map((g) => ({ ...g, items: g.items.filter((it) => it.label.includes(term)) })).filter((g) => g.items.length);
-  }, [q]);
+    return NAV.map((g) => ({ ...g, items: g.items.filter((it) => (en ? it.label_en : it.label).toLowerCase().includes(term)) })).filter((g) => g.items.length);
+  }, [q, en]);
 
   if (!ready) {
-    return <div className="flex min-h-screen items-center justify-center bg-[#F7FAFA] text-[#0F6C73]">جارٍ التحميل…</div>;
+    return <div className="flex min-h-screen items-center justify-center bg-[#F7FAFA] text-[#0F6C73]">{t("جارٍ التحميل…", "Loading…")}</div>;
   }
 
   const logout = () => {
@@ -86,29 +91,29 @@ export default function CmsShell({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div dir="rtl" className="flex min-h-screen bg-[#F7FAFA] text-ink">
+    <div dir={dir} className="flex min-h-screen bg-[#F7FAFA] text-ink">
       {/* Sidebar (فاتح بلمسات تركوازية — حسب تصميم الديزاينر) */}
-      <aside className={`fixed inset-y-0 right-0 z-40 flex w-72 transform flex-col border-l border-[#e6eff0] bg-white transition-transform lg:static lg:translate-x-0 ${open ? "translate-x-0" : "translate-x-full lg:translate-x-0"}`}>
+      <aside className={`fixed inset-y-0 z-40 flex w-72 transform flex-col border-[#e6eff0] bg-white transition-transform lg:static lg:translate-x-0 ${en ? "left-0 border-e" : "right-0 border-s"} ${open ? "translate-x-0" : `${en ? "-translate-x-full" : "translate-x-full"} lg:translate-x-0`}`}>
         {/* Brand */}
         <div className="flex items-center gap-3 px-6 pb-3 pt-6">
           <Image src="/logo.png" alt="عبور" width={140} height={92} className="h-12 w-auto object-contain" priority />
-          <div className="mr-auto flex items-center gap-1.5 text-[11px] font-semibold text-[#0F6C73]/70">
+          <div className="ms-auto flex items-center gap-1.5 text-[11px] font-semibold text-[#0F6C73]/70">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M9 3v18" /></svg>
-            إدارة الموقع
+            {t("إدارة الموقع", "Site Admin")}
           </div>
         </div>
         {/* Search */}
         <div className="px-4 pb-3">
           <div className="flex items-center gap-2 rounded-xl border border-[#e6eff0] bg-[#F7FAFA] px-3 py-2.5">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-[#0F6C73]/50"><circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3" /></svg>
-            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="ابحث في الأقسام والصفحات…" className="w-full bg-transparent text-sm text-ink outline-none placeholder:text-[#0F6C73]/40" />
+            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("ابحث في الأقسام والصفحات…", "Search sections and pages…")} className="w-full bg-transparent text-sm text-ink outline-none placeholder:text-[#0F6C73]/40" />
           </div>
         </div>
         {/* Nav */}
         <nav className="flex-1 overflow-y-auto px-3 pb-6">
           {groups.map((group) => (
             <div key={group.title} className="mb-5">
-              <p className="px-3 pb-2 text-[11px] font-bold tracking-wide text-[#0F6C73]/45">{group.title}</p>
+              <p className="px-3 pb-2 text-[11px] font-bold tracking-wide text-[#0F6C73]/45">{en ? group.title_en : group.title}</p>
               <ul className="space-y-1">
                 {group.items.map((it) => {
                   const active = pathname === it.href || (it.href !== "/cms" && pathname.startsWith(it.href));
@@ -119,9 +124,9 @@ export default function CmsShell({ children }: { children: React.ReactNode }) {
                         onClick={() => setOpen(false)}
                         className={`group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${active ? "bg-[#1FA6A8]/12 font-bold text-[#0F6C73]" : "text-ink-soft hover:bg-[#1FA6A8]/8 hover:text-[#0F6C73]"}`}
                       >
-                        {active && <span className="absolute inset-y-2 right-0 w-1 rounded-full bg-[#1FA6A8]" />}
+                        {active && <span className="absolute inset-y-2 start-0 w-1 rounded-full bg-[#1FA6A8]" />}
                         <span className={`shrink-0 ${active ? "text-[#1FA6A8]" : "text-[#0F6C73]/55 group-hover:text-[#1FA6A8]"}`}>{ICONS[it.icon]}</span>
-                        {it.label}
+                        {lbl(it)}
                       </Link>
                     </li>
                   );
@@ -129,7 +134,7 @@ export default function CmsShell({ children }: { children: React.ReactNode }) {
               </ul>
             </div>
           ))}
-          {groups.length === 0 && <p className="px-3 text-xs text-ink-soft">لا نتائج لـ«{q}»</p>}
+          {groups.length === 0 && <p className="px-3 text-xs text-ink-soft">{t(`لا نتائج لـ«${q}»`, `No results for "${q}"`)}</p>}
         </nav>
       </aside>
 
@@ -139,24 +144,34 @@ export default function CmsShell({ children }: { children: React.ReactNode }) {
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="sticky top-0 z-20 flex items-center justify-between gap-3 border-b border-[#e6eff0] bg-white/90 px-5 py-3 backdrop-blur">
           <div className="flex items-center gap-3">
-            <button onClick={() => setOpen((v) => !v)} className="rounded-lg p-2 text-[#0F6C73] hover:bg-[#1FA6A8]/10 lg:hidden" aria-label="القائمة">
+            <button onClick={() => setOpen((v) => !v)} className="rounded-lg p-2 text-[#0F6C73] hover:bg-[#1FA6A8]/10 lg:hidden" aria-label={t("القائمة", "Menu")}>
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 6h18M3 12h18M3 18h18" strokeLinecap="round" /></svg>
             </button>
             {pathname !== "/cms" && (
-              <button onClick={() => router.back()} className="flex items-center gap-1.5 rounded-xl border border-[#e6eff0] px-3 py-2 text-xs font-semibold text-[#0F6C73] transition-colors hover:bg-[#1FA6A8]/10" aria-label="رجوع للصفحة السابقة" title="رجوع للصفحة السابقة">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
-                رجوع
+              <button onClick={() => router.back()} className="flex items-center gap-1.5 rounded-xl border border-[#e6eff0] px-3 py-2 text-xs font-semibold text-[#0F6C73] transition-colors hover:bg-[#1FA6A8]/10" aria-label={t("رجوع للصفحة السابقة", "Back to previous page")} title={t("رجوع للصفحة السابقة", "Back to previous page")}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={en ? "" : "-scale-x-100"}><path d="M9 18l6-6-6-6" /></svg>
+                {t("رجوع", "Back")}
               </button>
             )}
           </div>
           <div className="flex items-center gap-3">
+            {/* تبديل لغة اللوحة */}
+            <button
+              onClick={() => setLang(en ? "ar" : "en")}
+              className="flex items-center gap-1.5 rounded-xl border border-[#e6eff0] px-3 py-2 text-xs font-bold text-[#0F6C73] transition-colors hover:bg-[#1FA6A8]/10"
+              aria-label={t("تغيير لغة اللوحة", "Change panel language")}
+              title={t("English", "العربية")}
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18" /></svg>
+              {en ? "العربية" : "EN"}
+            </button>
             <div className="text-end">
               <p className="text-sm font-bold leading-tight">{user?.name || "—"}</p>
-              <p className="text-[11px] text-ink-soft">مدير النظام</p>
+              <p className="text-[11px] text-ink-soft">{t("مدير النظام", "System Administrator")}</p>
             </div>
-            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#1FA6A8]/12 text-sm font-bold text-[#0F6C73]">{(user?.name || "ع").charAt(0)}</span>
-            <button onClick={logout} className="rounded-lg p-2 text-ink-soft transition-colors hover:bg-red-50 hover:text-red-600" aria-label="تسجيل الخروج" title="تسجيل الخروج">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" /></svg>
+            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#1FA6A8]/12 text-sm font-bold text-[#0F6C73]">{(user?.name || (en ? "A" : "ع")).charAt(0)}</span>
+            <button onClick={logout} className="rounded-lg p-2 text-ink-soft transition-colors hover:bg-red-50 hover:text-red-600" aria-label={t("تسجيل الخروج", "Log out")} title={t("تسجيل الخروج", "Log out")}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={en ? "" : "-scale-x-100"}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" /></svg>
             </button>
           </div>
         </header>

@@ -2,9 +2,13 @@
 
 import { usePathname } from "next/navigation";
 import CmsShell from "@/components/cms/CmsShell";
+import { CmsLangProvider } from "@/lib/cms/i18n";
 
 export default function CmsLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  if (pathname === "/cms/login") return <>{children}</>;
-  return <CmsShell>{children}</CmsShell>;
+  return (
+    <CmsLangProvider>
+      {pathname === "/cms/login" ? children : <CmsShell>{children}</CmsShell>}
+    </CmsLangProvider>
+  );
 }
