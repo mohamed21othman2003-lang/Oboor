@@ -101,7 +101,7 @@ export default async function AboutPage() {
             <div className="relative order-1 mx-auto w-full max-w-[480px]">
               <Image src={blk("hero")?.image || "/about-hero.png"} alt={pick(locale, "مركز عبور للرعاية والتأهيل", "Oboor Center for Care & Rehabilitation")} width={511} height={560} className="h-auto w-full" quality={90} priority />
               {/* شارة «تأسس عام» — تغطي البطاقة المطبوعة أعلى يسار الصورة (أكبر لتغطيتها بالكامل) */}
-              <StatBadge className="left-[1.5%] top-[16.5%] w-[42%] max-w-[210px] px-4 py-6" valueClassName="text-2xl sm:text-3xl" label={pick(locale, "تأسّس عام", "Established")} value={pick(locale, "٢٠٠٧", "2007")} />
+              <StatBadge className="left-[1.5%] top-[16.5%] w-[42%] max-w-[210px] px-4 py-6" valueClassName="text-2xl sm:text-3xl" iconClassName="h-5 w-5" iconSize={11} label={pick(locale, "تأسّس عام", "Established")} value={pick(locale, "٢٠٠٧", "2007")} />
               {/* شارة «تأهيل شامل» — أعلى يمين الصورة */}
               <StatBadge className="right-[3%] top-[4%] w-[58%] max-w-[270px] px-3.5 py-2.5" label={pick(locale, "برامج متخصصة", "Specialized Programs")} value={pick(locale, "تأهيل شامل ومتكامل", "Comprehensive Rehabilitation")} />
             </div>
@@ -304,18 +304,18 @@ function PinIcon() {
 function PhoneIcon() {
   return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z" /></svg>;
 }
-function CalendarIcon() {
-  return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18M9 16l2 2 4-4" /></svg>;
+function CalendarIcon({ size = 14 }: { size?: number }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18M9 16l2 2 4-4" /></svg>;
 }
 // شارة عائمة فوق صورة الـhero (ثنائية اللغة، تغطي النص المطبوع بالصورة)
-function StatBadge({ label, value, className, valueClassName }: { label: string; value: string; className?: string; valueClassName?: string }) {
+function StatBadge({ label, value, className, valueClassName, iconClassName, iconSize }: { label: string; value: string; className?: string; valueClassName?: string; iconClassName?: string; iconSize?: number }) {
   return (
     <div className={`absolute z-10 flex items-center justify-between gap-2 rounded-2xl bg-white text-start shadow-lg ${className || "px-3.5 py-2.5"}`}>
       <div className="min-w-0">
         <p className="text-[10px] leading-tight text-ink-soft">{label}</p>
         <p className={`font-extrabold leading-tight text-ink ${valueClassName || "text-sm sm:text-base"}`}>{value}</p>
       </div>
-      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-brand/10 text-brand"><CalendarIcon /></span>
+      <span className={`flex shrink-0 items-center justify-center rounded-md bg-brand/10 text-brand ${iconClassName || "h-6 w-6"}`}><CalendarIcon size={iconSize} /></span>
     </div>
   );
 }
