@@ -147,12 +147,63 @@ export const SERVICE_EN: Record<string, string> = {
   "دعم نفسي": "Psychological Services",
 };
 export const serviceEn = (s: string) => SERVICE_EN[s.trim()] || s;
-// النسخة الإنجليزية للنسخة الاحتياطية: نترجم المنطقة والخدمات (الأسماء/العناوين تبقى بالعربية كأسماء علم)
-export const ALL_BRANCHES_EN: Branch[] = ALL_BRANCHES.map((b) => ({
-  ...b,
-  region: REGION_EN[b.region] || b.region,
-  services: b.services.map(serviceEn),
-}));
+// النقل الصوتي الإنجليزي للفروع الـ43 (name / city / address / manager) — قابل للتعديل من الـCMS
+// المصدر نفسه في backend/content/management/commands/backfill_branch_en.py (يُحدّث قاعدة البيانات)
+const BRANCH_EN: Record<string, { name: string; city: string; address: string; manager: string }> = {
+  "branch-1": { name: "Oboor Al-Aziziyah Day Care Center", city: "Al-Aziziyah", address: "Riyadh Region – Al-Aziziyah District – Al-Nasr Road", manager: "Mariam Al-Olaiqi" },
+  "branch-2": { name: "Oboor Nammar Day Care Center", city: "Nammar", address: "Riyadh Region – Nammar District – Najm Al-Din Road", manager: "Amira Aidah Al-Malki" },
+  "branch-3": { name: "Oboor Dhahrat Laban Day Care Center", city: "Dhahrat Laban", address: "Riyadh Region – Dhahrat Laban District – Najran Street", manager: "Al-Anoud Al-Qahtani" },
+  "branch-4": { name: "Oboor Al-Rawdah Day Care Center", city: "Al-Rawdah", address: "Riyadh Region – Al-Rawdah District – Exit 11, Eastern Ring Road", manager: "Amani Al-Shehri" },
+  "branch-5": { name: "Oboor Al-Muaizilah Day Care Center", city: "Al-Muaizilah", address: "Riyadh Region – Al-Muaizilah District – Funun Street", manager: "Maha Mubarak Al-Shoghab" },
+  "branch-6": { name: "Oboor Al-Narjes Day Care Center", city: "Al-Narjes", address: "Riyadh Region – Al-Narjes District – Prince Saud Bin Abdullah Al-Jalawi Street", manager: "Aseel Saud Al-Rashed" },
+  "branch-7": { name: "Oboor Al-Malqa Day Care Center", city: "Al-Malqa", address: "Riyadh Region – Al-Malqa – Wadi Wej, Riyadh", manager: "Latifa Al-Saleh" },
+  "branch-8": { name: "Oboor Al-Mursalat Day Care Center", city: "Al-Mursalat", address: "Riyadh – Al-Mursalat District", manager: "Rajaa Saad Al-Qahtani" },
+  "branch-9": { name: "Oboor Al-Salam Day Care Center", city: "Al-Salam", address: "Riyadh – Al-Salam District", manager: "Shatha Al-Osaimi" },
+  "branch-10": { name: "Oboor Al-Majmaah Day Care Center", city: "Al-Majmaah", address: "Al-Majmaah Governorate – King Abdullah District – Prince Thunayan Bin Saud Street", manager: "Noura Al-Aibani" },
+  "branch-11": { name: "Oboor Wadi Al-Dawasir Day Care Center", city: "Wadi Al-Dawasir", address: "Dallah Road – Al-Wurud District", manager: "Abeer Marzouq" },
+  "branch-12": { name: "Oboor Al-Narjes South King Salman Day Care Center", city: "Al-Narjes South King Salman", address: "Riyadh – Al-Narjes, Prince Faisal Bin Bandar Bin Abdulaziz Road", manager: "Ashwaq Al-Muammar" },
+  "branch-13": { name: "Oboor Al-Uraija Day Care Center", city: "Al-Uraija", address: "Riyadh – Central Al-Uraija, Prince Musaid Bin Abdulrahman Bin Faisal Road", manager: "Bajdaa Al-Hadbani" },
+  "branch-14": { name: "Oboor Buraidah Day Care Center", city: "Buraidah", address: "Qassim Region – Buraidah – Al-Nahdah District – Abu Bakr Al-Siddiq Street", manager: "Amjad Al-Harbi" },
+  "branch-15": { name: "Oboor Al-Rass Day Care Center", city: "Al-Rass", address: "Qassim Region – Al-Rass Governorate – Al-Saadah District – Abdulrahman Bin Auf Street", manager: "Nada Al-Harbi" },
+  "branch-16": { name: "Oboor Muhayil Asir Day Care Center", city: "Muhayil Asir", address: "Asir Region – Muhayil Asir – Al-Waad", manager: "Shamaa Daabash" },
+  "branch-17": { name: "Oboor Bisha Day Care Center", city: "Bisha", address: "Asir Region – Bisha Governorate – Al-Khuzama District – King Saud Road", manager: "Badria Al-Maawi" },
+  "branch-18": { name: "Oboor Khamis Mushait Day Care Center", city: "Khamis Mushait", address: "Khamis Mushait Branch – Al-Diyafah Road – Salah Al-Din Street, opposite Kingdom Hall", manager: "Badria Marei Saeed Al-Sarhani" },
+  "branch-19": { name: "Oboor Abha Day Care Center", city: "Abha", address: "Abha – Al-Khalidiyah District – Sard Bin Abdullah Al-Azdi Road", manager: "Nawal Al-Qahtani" },
+  "branch-20": { name: "Oboor Jazan Day Care Center", city: "Jazan", address: "Jazan – Al-Suways District – Bishr Al-Nasibi", manager: "Raneem Omar" },
+  "branch-21": { name: "Oboor Al-Ahsa Day Care Center – Human Rehabilitation Co. Branch", city: "Al-Ahsa", address: "Eastern Province – Al-Ahsa Governorate – Al-Olaya District – Main Street", manager: "Maha Saleh Al-Taiban" },
+  "branch-22": { name: "Oboor Al-Ahsa VIP Day Care Center", city: "Al-Ahsa VIP", address: "Eastern Province – Asma Bint Kharijah, Mahasin Aramco 2 District, Al-Mubarraz", manager: "Al-Anoud Al-Ruwaished" },
+  "branch-23": { name: "Oboor Al-Nairyah Day Care Center", city: "Al-Nairyah", address: "Eastern Province – Al-Nairyah Governorate – Al-Rabee District – Abu Jaafar Al-Mansour Street", manager: "Kholoud Al-Otaibi" },
+  "branch-24": { name: "Oboor Hafar Al-Batin Day Care Center", city: "Hafar Al-Batin", address: "Eastern Province – Hafar Al-Batin Governorate – Al-Khalidiyah District – Main Street", manager: "Wafaa Midath Al-Sahli" },
+  "branch-25": { name: "Oboor Al-Dammam Day Care Center", city: "Al-Dammam", address: "Eastern Province – Al-Dammam – Al-Nawras District – Al-Zahra Street", manager: "Saja" },
+  "branch-26": { name: "Oboor Al-Jubail Day Care Center", city: "Al-Jubail", address: "Al-Jubail – Al-Fanateer District", manager: "Kholoud Al-Taweel" },
+  "branch-27": { name: "Oboor Al-Khobar Day Care Center", city: "Al-Khobar", address: "Al-Khobar – Al-Aqrabiyah – Al-Shura Street", manager: "Manal Al-Dosari" },
+  "branch-28": { name: "Oboor Taif Day Care Center", city: "Taif", address: "Makkah Region – Taif Governorate – Al-Sharafiyah District – Main Street", manager: "Mathayel Al-Hazmi" },
+  "branch-29": { name: "Oboor Makkah Day Care Center", city: "Makkah", address: "Makkah Region – Al-Shawqiyah District", manager: "Hanan Abdullah Al-Munabbhi" },
+  "branch-30": { name: "Oboor Madinah Day Care Center", city: "Madinah", address: "Bir Othman District – Rafi Bin Jadbah Street", manager: "Shadia Nayer Al-Harbi" },
+  "branch-31": { name: "Oboor Al-Jouf Day Care Center", city: "Al-Jouf", address: "Sakaka – Al-Aziziyah District – King Khalid Road", manager: "Deema Al-Kuwaikbi" },
+  "branch-32": { name: "Oboor Al-Ahsa Day Care Center – Male", city: "Al-Ahsa", address: "Abu Al-Tawq, Al-Hazm Al-Janoubi District, Al-Mubarraz", manager: "Omar Al-Khamis" },
+  "branch-33": { name: "Oboor Al-Nairyah Day Care Center – Male", city: "Al-Nairyah", address: "Eastern Province – Al-Nairyah Governorate – Al-Rabee District – Abu Jaafar Al-Mansour Street", manager: "Kholoud Al-Otaibi" },
+  "branch-34": { name: "Oboor Al-Dammam Day Care Center – Male", city: "Al-Dammam", address: "Al-Dammam – Badr District – Diya Al-Din Al-Bishiri", manager: "Ammar Bin Makki" },
+  "branch-35": { name: "Oboor Al-Majmaah Day Care Center – Male", city: "Al-Majmaah", address: "Al-Majmaah – King Abdulaziz District – Ubaidah Bin Al-Harith Street", manager: "Khalid Al-Osaimi" },
+  "branch-36": { name: "Oboor Al-Rimal Day Care Center – Male", city: "Al-Rimal", address: "Riyadh – Al-Rimal District", manager: "Adel Turki Bin Tanaf Al-Otaibi" },
+  "branch-37": { name: "Oboor Abha Day Care Center – Male", city: "Abha", address: "Sard Bin Abdullah Al-Azdi Road – Al-Khalidiyah District", manager: "Mohammed Al-Omari" },
+  "branch-38": { name: "Oboor Khamis Mushait Day Care Center – Male", city: "Khamis Mushait", address: "Abha Road, Khamis Mushait", manager: "Fahad Fayez Al-Shehri" },
+  "branch-39": { name: "Oboor South Abha Day Care Center – Male", city: "South Abha", address: "Abha – Al Ghaliz Villages – near Marhaban Alf Road", manager: "Azzam Amer Abu Alam" },
+  "branch-40": { name: "Oboor Jazan Day Care Center – Male", city: "Jazan", address: "Bishr Al-Nasibi, Al-Suways District, Jazan", manager: "Turki Bin Ali" },
+  "branch-41": { name: "Oboor Muhayil Asir Day Care Center – Male", city: "Muhayil Asir", address: "Muhayil Asir – Al-Waad District", manager: "Saud Al-Gharazi" },
+  "branch-42": { name: "Oboor Al-Jouf Day Care Center – Male", city: "Al-Jouf", address: "Sakaka – Al-Rabwah", manager: "Abdulaziz Al-Sayat" },
+  "branch-43": { name: "Oboor Al-Uraija Day Care Center – Male", city: "Al-Uraija", address: "Riyadh – Central Al-Uraija, Prince Musaid Bin Abdulrahman Bin Faisal Road", manager: "Rakan Abdullah Al-Dargham" },
+};
+// النسخة الإنجليزية للنسخة الاحتياطية: نترجم المنطقة والخدمات والاسم/المدينة/العنوان/المدير (نقل صوتي)
+export const ALL_BRANCHES_EN: Branch[] = ALL_BRANCHES.map((b) => {
+  const en = BRANCH_EN[b.slug];
+  return {
+    ...b,
+    region: REGION_EN[b.region] || b.region,
+    services: b.services.map(serviceEn),
+    ...(en ? { name: en.name, city: en.city, address: en.address, manager: en.manager } : {}),
+  };
+});
 
 export function getBranch(slug: string, locale: Locale = "ar"): Branch | undefined {
   const source = locale === "en" ? ALL_BRANCHES_EN : ALL_BRANCHES;
