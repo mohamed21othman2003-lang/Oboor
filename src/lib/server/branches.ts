@@ -2,7 +2,7 @@
 // يُستعمل من صفحات الفروع (server components) لتمرير القائمة للمكوّنات العميلة.
 
 import { fetchContent } from "@/lib/server/django";
-import { ALL_BRANCHES, ALL_BRANCHES_EN, REGION_EN, type Branch } from "@/lib/branchesData";
+import { ALL_BRANCHES, ALL_BRANCHES_EN, REGION_EN, serviceEn, type Branch } from "@/lib/branchesData";
 import { type Locale } from "@/i18n/config";
 
 // الشكل اللي بيرجع من Django (content/branches)
@@ -43,7 +43,8 @@ function toBranch(row: ApiBranch, locale: Locale): Branch {
     mapUrl: row.map_url || "",
     rating: row.rating || "",
     reviewsCount: row.reviews_count || "",
-    services: en ? (row.services_en?.length ? row.services_en : row.services_ar) : row.services_ar,
+    // خدمات إنجليزية إن وُجدت، وإلا نترجم القياسية، وإلا العربي كما هو
+    services: en ? (row.services_en?.length ? row.services_en : (row.services_ar || []).map(serviceEn)) : row.services_ar,
     gallery: Array.isArray(row.gallery) ? row.gallery : [],
     lat: row.lat ?? null,
     lng: row.lng ?? null,

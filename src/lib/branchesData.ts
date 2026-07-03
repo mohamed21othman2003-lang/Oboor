@@ -135,8 +135,24 @@ export const REGION_EN: Record<string, string> = {
   "جازان": "Jazan",
   "الجوف": "Al-Jouf",
 };
-// النسخة الإنجليزية للنسخة الاحتياطية: نترجم المنطقة فقط (الأسماء/العناوين تبقى بالعربية كأسماء علم)
-export const ALL_BRANCHES_EN: Branch[] = ALL_BRANCHES.map((b) => ({ ...b, region: REGION_EN[b.region] || b.region }));
+// أسماء الخدمات القياسية بالإنجليزية (خدمات عامة قابلة للترجمة — ليست أسماء علم)
+export const SERVICE_EN: Record<string, string> = {
+  "التدخل المبكر": "Early Intervention",
+  "تخاطب ولغة": "Speech & Language Therapy",
+  "علاج وظيفي": "Occupational Therapy",
+  "تكامل حسي": "Sensory Integration",
+  "تعديل سلوك": "Behavior Modification",
+  "تحليل سلوك": "Applied Behavior Analysis",
+  "علاج طبيعي": "Physical Therapy",
+  "دعم نفسي": "Psychological Services",
+};
+export const serviceEn = (s: string) => SERVICE_EN[s.trim()] || s;
+// النسخة الإنجليزية للنسخة الاحتياطية: نترجم المنطقة والخدمات (الأسماء/العناوين تبقى بالعربية كأسماء علم)
+export const ALL_BRANCHES_EN: Branch[] = ALL_BRANCHES.map((b) => ({
+  ...b,
+  region: REGION_EN[b.region] || b.region,
+  services: b.services.map(serviceEn),
+}));
 
 export function getBranch(slug: string, locale: Locale = "ar"): Branch | undefined {
   const source = locale === "en" ? ALL_BRANCHES_EN : ALL_BRANCHES;
