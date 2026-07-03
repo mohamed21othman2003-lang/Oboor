@@ -6,15 +6,21 @@ import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   getSchema, getItem, createItem, updateItem, uploadField, uploadImage, resetDefault,
-  savePreviewDraft, TYPE_LABELS, addLabelFor, type FieldSchema, type CmsItem,
+  savePreviewDraft, typeLabel, addLabelFor, type FieldSchema, type CmsItem,
 } from "@/lib/cms/api";
 import { CMS_ICONS, ICON_LABELS, iconNamesFor } from "@/lib/cms/icons";
 import { iconByKey, OFFER_ICON_KEYS } from "@/lib/areaIcon";
+import { useCmsLang } from "@/lib/cms/i18n";
+import { fieldLabelEn } from "@/lib/cms/fieldLabels";
 import CustomSelect from "@/components/ui/Select";
 // تحميل مكوّن قصّ الصورة عند الحاجة فقط (يقلّل حجم باندل المحرّر)
 const ImageCropModal = dynamic(() => import("@/components/cms/ImageCropModal"), { ssr: false });
 
 export default function CollectionEditor({ type, id }: { type: string; id: string }) {
+  const { lang } = useCmsLang();
+  const en = lang === "en";
+  const t = (ar: string, e: string) => (en ? e : ar);
+  const L = (f: FieldSchema) => (en ? (fieldLabelEn(f.name) || f.label) : f.label);
   const router = useRouter();
   const sp = useSearchParams();
   const isNew = id === "new";
@@ -30,7 +36,7 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
   const [ok, setOk] = useState("");
   const [previewing, setPreviewing] = useState(false);
 
-  const label = TYPE_LABELS[type] || type;
+  const label = typeLabel(type, lang);
 
   // معاينة التعديلات الحالية (غير المحفوظة) على الصفحة الحقيقية قبل الحفظ
   async function doPreview() {
@@ -42,7 +48,7 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
       await savePreviewDraft(type, id, values);
       window.open(`/api/preview?ref=${type}:${id}&to=${encodeURIComponent(to)}`, "_blank", "noopener");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "تعذّرت المعاينة.");
+      setError(e instanceof Error ? e.message : t("تعذّرت المعاينة.", "Could not open the preview."));
     } finally {
       setPreviewing(false);
     }
@@ -102,18 +108,18 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
     return Math.round((filled / counted.length) * 100);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [counted, values, imageFilled]);
-  const missing = useMemo(() => counted.filter((f) => !fieldFilled(f)).map((f) => f.label), [counted, values, imageFilled]); // eslint-disable-line react-hooks/exhaustive-deps
+  const missing = useMemo(() => counted.filter((f) => !fieldFilled(f)).map((f) => L(f)), [counted, values, imageFilled]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function discard() {
     if (!dirty) return;
-    if (!confirm("تجاهل كل التعديلات غير المحفوظة والرجوع لآخر نسخة محفوظة؟")) return;
+    if (!confirm(t("تجاهل كل التعديلات غير المحفوظة والرجوع لآخر نسخة محفوظة؟", "Discard all unsaved changes and return to the last saved version?"))) return;
     setValues(baseline);
     setError("");
     setOk("");
   }
 
   async function onResetDefault() {
-    if (!confirm("استرجاع النسخة الافتراضية الأصلية؟ سيُستبدل المحتوى الحالي بالكامل.")) return;
+    if (!confirm(t("استرجاع النسخة الافتراضية الأصلية؟ سيُستبدل المحتوى الحالي بالكامل.", "Restore the original default version? The current content will be completely replaced."))) return;
     setResetting(true);
     setError("");
     setOk("");
@@ -122,9 +128,9 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
       const v = restored as Record<string, unknown>;
       setValues(v);
       setBaseline(v);
-      setOk("تم استرجاع النسخة الافتراضية ✓");
+      setOk(t("تم استرجاع النسخة الافتراضية ✓", "Default version restored ✓"));
     } catch (e) {
-      setError(e instanceof Error ? e.message : "تعذّر الاسترجاع.");
+      setError(e instanceof Error ? e.message : t("تعذّر الاسترجاع.", "Could not restore."));
     } finally {
       setResetting(false);
     }
@@ -152,9 +158,15 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
       if (isLinkBlock) {
         if (f.base === "text") continue; // النص (عربي/إنجليزي) لا معنى له لعنصر رابط
         if (f.name === "value") {
-          const label = sectionBlock === "social" ? "رابط الحساب" : "الرابط (الوجهة عند الضغط)";
-          const help = "المكان الذي يفتحه هذا العنصر عند الضغط: رابط داخلي في الموقع مثل /about أو /news، أو رابط كامل يبدأ بـ https:// لموقع خارجي.";
-          out.push({ kind: "single", f: { ...f, label, help } });
+          const label = sectionBlock === "social"
+            ? t("رابط الحساب", "Account Link")
+            : t("الرابط (الوجهة عند الضغط)", "Link (destination on click)");
+          const help = t(
+            "المكان الذي يفتحه هذا العنصر عند الضغط: رابط داخلي في الموقع مثل /about أو /news، أو رابط كامل يبدأ بـ https:// لموقع خارجي.",
+            "Where this item opens when clicked: an internal site link such as /about or /news, or a full URL starting with https:// for an external site.",
+          );
+          // العنوان هنا مُترجَم مسبقاً (أدق من fieldLabelEn العام) — علّمه ليُعرض كما هو
+          out.push({ kind: "single", f: { ...f, label, help, _labelResolved: true } as FieldSchema });
           done.add(f.name);
           continue;
         }
@@ -172,7 +184,8 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
       }
     }
     return out;
-  }, [fields, baseline, type, values.section, sectionBlock, isLinkBlock]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fields, baseline, type, values.section, sectionBlock, isLinkBlock, en]);
 
   async function onSave() {
     setSaving(true);
@@ -187,7 +200,7 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
         if (f.type === "json") {
           if (typeof v === "string") {
             try { v = v.trim() ? JSON.parse(v) : (f.required ? [] : null); }
-            catch { throw new Error(`القيمة في «${f.label}» ليست JSON صحيحة.`); }
+            catch { throw new Error(en ? `The value in "${L(f)}" is not valid JSON.` : `القيمة في «${f.label}» ليست JSON صحيحة.`); }
           }
           // أزل عناصر القوائم الفارغة (نصوص فارغة أو كائنات كل قيمها فارغة)
           if (Array.isArray(v)) v = v.filter((x) => {
@@ -202,10 +215,10 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
       const v = saved as Record<string, unknown>;
       setValues(v);
       setBaseline(v);
-      setOk("تم الحفظ بنجاح ✓");
+      setOk(t("تم الحفظ بنجاح ✓", "Saved successfully ✓"));
       if (isNew) router.replace(`/cms/content/${type}/${(saved as CmsItem).id}`);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "تعذّر الحفظ.");
+      setError(e instanceof Error ? e.message : t("تعذّر الحفظ.", "Could not save."));
     } finally {
       setSaving(false);
     }
@@ -217,13 +230,13 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
       if (row.ar?.base === "help_section" || row.en?.base === "help_section") {
         return (
           <div key={i}>
-            <label className="mb-1.5 block text-sm font-semibold text-ink">قسم «كيف يساعد…» (عنوان + بطاقتان)</label>
+            <label className="mb-1.5 block text-sm font-semibold text-ink">{t("قسم «كيف يساعد…» (عنوان + بطاقتان)", "“How it helps…” Section (heading + two cards)")}</label>
             <HelpSectionEditor
               ar={blkObj(values.help_section_ar)}
               en={blkObj(values.help_section_en)}
               onChange={(a, e) => { set("help_section_ar", a); set("help_section_en", e); }}
             />
-            <Help text="السكشن الذي يشرح كيف تساعد التقنية الطفل — عدّل العنوان وعنوان كل بطاقة وعناصرها (عربي يمين / إنجليزي يسار)." />
+            <Help text={t("السكشن الذي يشرح كيف تساعد التقنية الطفل — عدّل العنوان وعنوان كل بطاقة وعناصرها (عربي يمين / إنجليزي يسار).", "The section explaining how the technique helps the child — edit the heading, each card's title, and its items (Arabic on the right / English on the left).")} />
           </div>
         );
       }
@@ -231,13 +244,13 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
       if (row.ar?.base === "blocks" || row.en?.base === "blocks") {
         return (
           <div key={i}>
-            <label className="mb-1.5 block text-sm font-semibold text-ink">أقسام محتوى الصفحة</label>
+            <label className="mb-1.5 block text-sm font-semibold text-ink">{t("أقسام محتوى الصفحة", "Page Content Sections")}</label>
             <BlocksEditor
               ar={Array.isArray(values.blocks_ar) ? (values.blocks_ar as unknown[]) : []}
               en={Array.isArray(values.blocks_en) ? (values.blocks_en as unknown[]) : []}
               onChange={(a, e) => { set("blocks_ar", a); set("blocks_en", e); }}
             />
-            <Help text="كل قسم من أقسام الصفحة (عناوين، بطاقات، قوائم، مربّعات…). عدّل النص العربي على اليمين والإنجليزي على اليسار. نوع القسم وشكله ثابتان للحفاظ على التصميم." />
+            <Help text={t("كل قسم من أقسام الصفحة (عناوين، بطاقات، قوائم، مربّعات…). عدّل النص العربي على اليمين والإنجليزي على اليسار. نوع القسم وشكله ثابتان للحفاظ على التصميم.", "Every section of the page (headings, cards, lists, tiles…). Edit the Arabic text on the right and the English on the left. The section's type and layout are fixed to preserve the design.")} />
           </div>
         );
       }
@@ -249,7 +262,7 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
         const f0 = (row.ar || row.en)!;
         return (
           <div key={i}>
-            <DateField label={f0.label} help={f0.help} value={cur} onChange={(v) => { if (arName) set(arName, v); if (enName) set(enName, v); }} />
+            <DateField label={L(f0)} help={f0.help} value={cur} onChange={(v) => { if (arName) set(arName, v); if (enName) set(enName, v); }} />
           </div>
         );
       }
@@ -261,13 +274,13 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
         const f0 = (row.ar || row.en)!;
         return (
           <div key={i}>
-            <TimeRangeField label={f0.label} help={f0.help} value={cur} onChange={(v) => { if (arName) set(arName, v); if (enName) set(enName, v); }} />
+            <TimeRangeField label={L(f0)} help={f0.help} value={cur} onChange={(v) => { if (arName) set(arName, v); if (enName) set(enName, v); }} />
           </div>
         );
       }
       return (
         <div key={i} className="grid gap-x-5 gap-y-2 sm:grid-cols-2">
-          {row.ar && <FieldInput f={row.ar} value={values[row.ar.name]} onChange={(v) => set(row.ar!.name, v)} badge="عربي" />}
+          {row.ar && <FieldInput f={row.ar} value={values[row.ar.name]} onChange={(v) => set(row.ar!.name, v)} badge={t("عربي", "Arabic")} />}
           {row.en && <FieldInput f={row.en} value={values[row.en.name]} onChange={(v) => set(row.en!.name, v)} badge="English" dir="ltr" />}
         </div>
       );
@@ -293,14 +306,14 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
         <div key={i}>
           <Label f={f} />
           <GalleryEditor value={values[f.name]} onChange={(v) => set(f.name, v)} />
-          <Help text="ارفع صور هذا الفرع الحقيقية — تظهر في معرض صفحة الفرع." />
+          <Help text={t("ارفع صور هذا الفرع الحقيقية — تظهر في معرض صفحة الفرع.", "Upload the real photos of this branch — they appear in the branch page's gallery.")} />
         </div>
       );
     }
     if (f.name === "lat") {
       return (
         <div key={i} className="sm:col-span-2">
-          <label className="mb-1.5 block text-sm font-semibold text-ink">موقع الفرع على الخريطة</label>
+          <label className="mb-1.5 block text-sm font-semibold text-ink">{t("موقع الفرع على الخريطة", "Branch Location on the Map")}</label>
           <LocationEditor lat={values.lat} lng={values.lng} onLat={(v) => set("lat", v)} onLng={(v) => set("lng", v)} />
         </div>
       );
@@ -308,12 +321,12 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
     if (f.name === "lng") return null;
     // حقل مقفول (مكان المحتوى) — عرض فقط على العناصر الموجودة
     if (LOCKED_FIELDS.has(f.name) && !isNew) {
-      return <ReadOnlyField key={i} f={f} value={String(values[f.name] ?? "")} note="هذا يحدّد مكان ظهور المحتوى في الصفحة — لا يُعدّل لتجنّب اختفائه." />;
+      return <ReadOnlyField key={i} f={f} value={String(values[f.name] ?? "")} note={t("هذا يحدّد مكان ظهور المحتوى في الصفحة — لا يُعدّل لتجنّب اختفائه.", "This determines where the content appears on the page — it is not editable to prevent it from disappearing.")} />;
     }
     return <FieldInput key={i} f={f} value={values[f.name]} onChange={(v) => set(f.name, v)} />;
   }
 
-  if (loading) return <p className="text-ink-soft">جارٍ التحميل…</p>;
+  if (loading) return <p className="text-ink-soft">{t("جارٍ التحميل…", "Loading…")}</p>;
 
   const canPreview = !isNew && !readonly && previewHref(type, values) !== null;
   return (
@@ -321,18 +334,18 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <Link href={`/cms/content/${type}`} className="text-xs font-semibold text-brand hover:text-brand-dark">← {label}</Link>
-          <h1 className="mt-1 text-2xl font-extrabold text-ink">{isNew ? addLabelFor(type) : `تعديل: ${label}`}</h1>
+          <h1 className="mt-1 text-2xl font-extrabold text-ink">{isNew ? addLabelFor(type, lang) : (en ? `Edit: ${label}` : `تعديل: ${label}`)}</h1>
         </div>
         {canPreview && (
           <button
             type="button"
             onClick={doPreview}
             disabled={previewing}
-            title="افتح الصفحة الحقيقية وشاهد تعديلاتك الحالية قبل الحفظ — لا تظهر للزوّار"
+            title={t("افتح الصفحة الحقيقية وشاهد تعديلاتك الحالية قبل الحفظ — لا تظهر للزوّار", "Open the real page and see your current changes before saving — visitors won't see them")}
             className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-white px-3.5 py-2 text-sm font-semibold text-brand transition-colors hover:bg-brand hover:text-white disabled:opacity-60"
           >
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z" /><circle cx="12" cy="12" r="3" /></svg>
-            {previewing ? "جارٍ فتح المعاينة…" : "معاينة التعديلات"}
+            {previewing ? t("جارٍ فتح المعاينة…", "Opening preview…") : t("معاينة التعديلات", "Preview Changes")}
           </button>
         )}
       </div>
@@ -341,14 +354,14 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
       {!readonly && (
         <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-line">
           <div className="flex items-center justify-between text-sm">
-            <span className="font-semibold text-ink">اكتمال المحتوى</span>
-            <span className={`font-extrabold ${completion === 100 ? "text-emerald-600" : "text-brand"}`}>{completion}٪</span>
+            <span className="font-semibold text-ink">{t("اكتمال المحتوى", "Completion")}</span>
+            <span className={`font-extrabold ${completion === 100 ? "text-emerald-600" : "text-brand"}`}>{completion}{en ? "%" : "٪"}</span>
           </div>
           <div className="mt-2 h-2 overflow-hidden rounded-full bg-surface">
             <div className={`h-full rounded-full transition-all ${completion === 100 ? "bg-emerald-500" : "bg-brand"}`} style={{ width: `${completion}%` }} />
           </div>
           {completion < 100 && missing.length > 0 && (
-            <p className="mt-2 text-xs text-ink-soft">ناقص: {missing.slice(0, 4).join("، ")}{missing.length > 4 ? ` (+${missing.length - 4})` : ""}</p>
+            <p className="mt-2 text-xs text-ink-soft">{t("ناقص:", "Missing:")} {missing.slice(0, 4).join(en ? ", " : "، ")}{missing.length > 4 ? ` (+${missing.length - 4})` : ""}</p>
           )}
         </div>
       )}
@@ -364,7 +377,7 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
         <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <span className="text-sm font-semibold text-emerald-600">{ok}</span>
-            {dirty && !ok && <span className="text-sm font-semibold text-amber-600">• تعديلات غير محفوظة</span>}
+            {dirty && !ok && <span className="text-sm font-semibold text-amber-600">{t("• تعديلات غير محفوظة", "• Unsaved changes")}</span>}
           </div>
           <div className="flex flex-wrap items-center gap-2">
             {!isNew && hasDefault && (
@@ -373,7 +386,7 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
                 disabled={resetting || saving}
                 className="rounded-xl border border-line px-4 py-2.5 text-sm font-semibold text-ink-soft transition-colors hover:border-red-300 hover:bg-red-50 hover:text-red-600 disabled:opacity-60"
               >
-                {resetting ? "جارٍ الاسترجاع…" : "استرجاع النسخة الافتراضية"}
+                {resetting ? t("جارٍ الاسترجاع…", "Restoring…") : t("استرجاع النسخة الافتراضية", "Restore Default")}
               </button>
             )}
             <button
@@ -381,14 +394,14 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
               disabled={!dirty || saving}
               className="rounded-xl border border-line px-4 py-2.5 text-sm font-semibold text-ink-soft transition-colors hover:bg-surface disabled:opacity-40"
             >
-              تجاهل التعديلات
+              {t("تجاهل التعديلات", "Discard changes")}
             </button>
             <button
               onClick={onSave}
               disabled={saving || !dirty}
               className="rounded-xl bg-brand px-6 py-2.5 text-sm font-bold text-white shadow-sm transition-colors hover:bg-brand-dark disabled:opacity-60"
             >
-              {saving ? "جارٍ الحفظ…" : "حفظ"}
+              {saving ? t("جارٍ الحفظ…", "Saving…") : t("حفظ التعديلات", "Save Changes")}
             </button>
           </div>
         </div>
@@ -398,25 +411,30 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
 }
 
 // شارة «الدور» — توضّح للمحرّر كيف يظهر هذا الحقل في الموقع (عنوان كبير/فرعي/قائمة…)
-const ROLE_BY_BASE: Record<string, { t: string; c: string }> = {
-  title: { t: "عنوان رئيسي", c: "bg-brand/15 text-brand-dark" },
-  name: { t: "عنوان رئيسي", c: "bg-brand/15 text-brand-dark" },
-  heading: { t: "عنوان رئيسي", c: "bg-brand/15 text-brand-dark" },
-  subtitle: { t: "عنوان فرعي", c: "bg-amber-100 text-amber-700" },
-  about_heading: { t: "عنوان فرعي", c: "bg-amber-100 text-amber-700" },
-  badge: { t: "وسم صغير", c: "bg-violet-100 text-violet-700" },
+const ROLE_BY_BASE: Record<string, { t: string; e: string; c: string }> = {
+  title: { t: "عنوان رئيسي", e: "Main Heading", c: "bg-brand/15 text-brand-dark" },
+  name: { t: "عنوان رئيسي", e: "Main Heading", c: "bg-brand/15 text-brand-dark" },
+  heading: { t: "عنوان رئيسي", e: "Main Heading", c: "bg-brand/15 text-brand-dark" },
+  subtitle: { t: "عنوان فرعي", e: "Subheading", c: "bg-amber-100 text-amber-700" },
+  about_heading: { t: "عنوان فرعي", e: "Subheading", c: "bg-amber-100 text-amber-700" },
+  badge: { t: "وسم صغير", e: "Small Badge", c: "bg-violet-100 text-violet-700" },
 };
-function roleFor(f: FieldSchema): { t: string; c: string } | null {
-  if (f.type === "json") return { t: "قائمة / بطاقات", c: "bg-sky-100 text-sky-700" };
-  if (f.type === "textarea") return { t: "نص فقرة", c: "bg-slate-100 text-slate-600" };
-  return ROLE_BY_BASE[f.base] || null;
+function roleFor(f: FieldSchema, en: boolean): { t: string; c: string } | null {
+  if (f.type === "json") return { t: en ? "List / Cards" : "قائمة / بطاقات", c: "bg-sky-100 text-sky-700" };
+  if (f.type === "textarea") return { t: en ? "Paragraph Text" : "نص فقرة", c: "bg-slate-100 text-slate-600" };
+  const r = ROLE_BY_BASE[f.base];
+  return r ? { t: en ? r.e : r.t, c: r.c } : null;
 }
 
 function Label({ f, badge }: { f: FieldSchema; badge?: string }) {
-  const role = badge === "English" ? null : roleFor(f); // الشارة مرة واحدة (الجانب العربي)
+  const { lang } = useCmsLang();
+  const en = lang === "en";
+  const resolved = (f as FieldSchema & { _labelResolved?: boolean })._labelResolved;
+  const label = en ? (resolved ? f.label : (fieldLabelEn(f.name) || f.label)) : f.label;
+  const role = badge === "English" ? null : roleFor(f, en); // الشارة مرة واحدة (الجانب العربي)
   return (
     <label className="mb-2 flex flex-wrap items-center gap-2 text-sm font-semibold text-ink">
-      {f.label}
+      {label}
       {f.required && <span className="text-red-500">*</span>}
       {role && <span className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${role.c}`}>{role.t}</span>}
       {badge && <span className="rounded bg-surface px-1.5 py-0.5 text-[10px] font-bold text-ink-soft">{badge}</span>}
@@ -451,10 +469,10 @@ const isSimpleArray = (v: unknown): v is (string | number)[] =>
   Array.isArray(v) && v.every((x) => typeof x === "string" || typeof x === "number");
 
 // حقول JSON من نوع كائن (object) — تُحرَّر كخانات بسيطة بدل كود JSON
-const OBJECT_FIELDS: Record<string, { key: string; label: string }[]> = {
+const OBJECT_FIELDS: Record<string, { key: string; label: string; label_en?: string }[]> = {
   about_tag: [
-    { key: "heading", label: "عنوان البطاقة (مثال: الفئات المستهدفة)" },
-    { key: "label", label: "نص البطاقة (مثال: الأفراد من ذوي الإعاقة)" },
+    { key: "heading", label: "عنوان البطاقة (مثال: الفئات المستهدفة)", label_en: "Card title (e.g. Target Groups)" },
+    { key: "label", label: "نص البطاقة (مثال: الأفراد من ذوي الإعاقة)", label_en: "Card text (e.g. Individuals with disabilities)" },
   ],
 };
 
@@ -512,7 +530,19 @@ const LIST_ADD_LABELS: Record<string, string> = {
   bullets: "إضافة نقطة", tags: "إضافة وسم",
   qualifications: "إضافة مؤهّل", days: "إضافة يوم",
 };
-const listAdd = (base: string) => LIST_ADD_LABELS[base] || "إضافة عنصر";
+const LIST_ADD_LABELS_EN: Record<string, string> = {
+  target_tags: "Add Tag", target_list: "Add Point",
+  methods: "Add Method", training_areas: "Add Area",
+  about: "Add Paragraph", paragraphs: "Add Paragraph",
+  stations: "Add Station", responsibilities: "Add Responsibility",
+  requirements: "Add Requirement", question_list: "Add Question",
+  targets: "Add Group", offers: "Add Item",
+  values: "Add Outcome", benefits: "Add Item",
+  bullets: "Add Point", tags: "Add Tag",
+  qualifications: "Add Qualification", days: "Add Day",
+};
+const listAdd = (base: string, en = false) =>
+  (en ? (LIST_ADD_LABELS_EN[base] || "Add Item") : (LIST_ADD_LABELS[base] || "إضافة عنصر"));
 
 // حقول كارت الفعالية (في الأخبار) — تظهر فقط للفعاليات والورش
 const EVENT_FIELDS = new Set([
@@ -522,14 +552,14 @@ const EVENT_FIELDS = new Set([
 // حقول مقفولة (تُعرض للاطلاع فقط؛ تغييرها يكسر مكان المحتوى)
 const LOCKED_FIELDS = new Set(["block"]);
 // قوائم بطاقات — كل عنصر كائن بخانات معنونة بسيطة (بدل JSON)
-const CARD_LIST_FIELDS: Record<string, { key: string; label: string }[]> = {
+const CARD_LIST_FIELDS: Record<string, { key: string; label: string; label_en?: string }[]> = {
   methods: [
-    { key: "name", label: "اسم الأسلوب/المنهج (عنوان عريض — اختياري)" },
-    { key: "desc", label: "وصف الأسلوب" },
+    { key: "name", label: "اسم الأسلوب/المنهج (عنوان عريض — اختياري)", label_en: "Method/approach name (bold title — optional)" },
+    { key: "desc", label: "وصف الأسلوب", label_en: "Method description" },
   ],
   training_areas: [
-    { key: "title", label: "اسم المجال (عنوان عريض)" },
-    { key: "desc", label: "وصف المجال" },
+    { key: "title", label: "اسم المجال (عنوان عريض)", label_en: "Area name (bold title)" },
+    { key: "desc", label: "وصف المجال", label_en: "Area description" },
   ],
 };
 // حقول محتوى منظّم معقّد — للعرض فقط (تعديلها الخام يكسر الصفحة)
@@ -545,11 +575,18 @@ function Help({ text }: { text?: string }) {
 
 
 const AR_MONTHS = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
+const EN_MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const AR_DOW = ["أحد", "اثنين", "ثلاثاء", "أربعاء", "خميس", "جمعة", "سبت"];
+const EN_DOW = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const isoOf = (y: number, m: number, d: number) => `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
 
 // منتقي تاريخ (تقويم مخصّص) — اختيار فقط، بلا كتابة يدوية، ولا يسمح بتاريخ قبل اليوم. يخزّن ISO.
 function DateField({ label, help, value, onChange }: { label?: string; help?: string; value: string; onChange: (v: string) => void }) {
+  const { lang } = useCmsLang();
+  const en = lang === "en";
+  const t = (ar: string, e: string) => (en ? e : ar);
+  const MONTHS = en ? EN_MONTHS : AR_MONTHS;
+  const DOW = en ? EN_DOW : AR_DOW;
   const iso = /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : "";
   const sel = iso ? { y: +iso.slice(0, 4), m: +iso.slice(5, 7) - 1, d: +iso.slice(8, 10) } : null;
   const [open, setOpen] = useState(false);
@@ -574,7 +611,7 @@ function DateField({ label, help, value, onChange }: { label?: string; help?: st
   const isToday = (d: number) => new Date(y, m, d).getTime() === today.getTime();
   const isSel = (d: number) => !!sel && sel.y === y && sel.m === m && sel.d === d;
   const canPrev = y > today.getFullYear() || (y === today.getFullYear() && m > today.getMonth());
-  const display = sel ? `${sel.d} ${AR_MONTHS[sel.m]} ${sel.y}` : "اختر التاريخ";
+  const display = sel ? (en ? `${MONTHS[sel.m]} ${sel.d}, ${sel.y}` : `${sel.d} ${MONTHS[sel.m]} ${sel.y}`) : t("اختر التاريخ", "Pick a date");
   const pick = (d: number) => { onChange(isoOf(y, m, d)); setOpen(false); };
 
   return (
@@ -590,20 +627,20 @@ function DateField({ label, help, value, onChange }: { label?: string; help?: st
       </button>
 
       {open && (
-        <div className="absolute start-0 z-30 mt-2 w-[320px] rounded-2xl border border-line bg-white p-3 shadow-xl" dir="rtl">
+        <div className="absolute start-0 z-30 mt-2 w-[320px] rounded-2xl border border-line bg-white p-3 shadow-xl" dir={en ? "ltr" : "rtl"}>
           <div className="mb-2 flex items-center justify-between">
             <button type="button" disabled={!canPrev} onClick={() => setView(new Date(y, m - 1, 1))}
-              className="flex h-8 w-8 items-center justify-center rounded-lg text-ink transition-colors enabled:hover:bg-surface disabled:opacity-30" aria-label="الشهر السابق">
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-ink transition-colors enabled:hover:bg-surface disabled:opacity-30" aria-label={t("الشهر السابق", "Previous month")}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
             </button>
-            <span className="text-sm font-bold text-ink">{AR_MONTHS[m]} {y}</span>
+            <span className="text-sm font-bold text-ink">{MONTHS[m]} {y}</span>
             <button type="button" onClick={() => setView(new Date(y, m + 1, 1))}
-              className="flex h-8 w-8 items-center justify-center rounded-lg text-ink transition-colors hover:bg-surface" aria-label="الشهر التالي">
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-ink transition-colors hover:bg-surface" aria-label={t("الشهر التالي", "Next month")}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M15 6l-6 6 6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
             </button>
           </div>
           <div className="mb-1 grid grid-cols-7 gap-1">
-            {AR_DOW.map((w) => <div key={w} className="text-center text-[10px] font-medium text-ink-soft">{w}</div>)}
+            {DOW.map((w) => <div key={w} className="text-center text-[10px] font-medium text-ink-soft">{w}</div>)}
           </div>
           <div className="grid grid-cols-7 gap-1">
             {cells.map((d, i) => d === null ? <div key={i} /> : (
@@ -618,20 +655,23 @@ function DateField({ label, help, value, onChange }: { label?: string; help?: st
             ))}
           </div>
           <div className="mt-2 flex items-center justify-between border-t border-line pt-2">
-            <button type="button" onClick={() => { onChange(""); setOpen(false); }} className="text-xs text-ink-soft transition-colors hover:text-ink">مسح</button>
-            <button type="button" onClick={() => { const t = new Date(); onChange(isoOf(t.getFullYear(), t.getMonth(), t.getDate())); setOpen(false); }} className="text-xs font-semibold text-brand hover:underline">اليوم</button>
+            <button type="button" onClick={() => { onChange(""); setOpen(false); }} className="text-xs text-ink-soft transition-colors hover:text-ink">{t("مسح", "Clear")}</button>
+            <button type="button" onClick={() => { const d = new Date(); onChange(isoOf(d.getFullYear(), d.getMonth(), d.getDate())); setOpen(false); }} className="text-xs font-semibold text-brand hover:underline">{t("اليوم", "Today")}</button>
           </div>
         </div>
       )}
       {help && <Help text={help} />}
-      {value && !iso && <p className="mt-1 text-[11px] text-amber-600">القيمة الحالية «{value}» غير صالحة — اختر تاريخاً من التقويم.</p>}
+      {value && !iso && <p className="mt-1 text-[11px] text-amber-600">{en ? `The current value "${value}" is invalid — pick a date from the calendar.` : `القيمة الحالية «${value}» غير صالحة — اختر تاريخاً من التقويم.`}</p>}
     </div>
   );
 }
 
 // منتقي وقت (من / إلى) — يخزّن "HH:MM" أو "HH:MM - HH:MM"
 function TimeRangeField({ label, help, value, onChange }: { label?: string; help?: string; value: string; onChange: (v: string) => void }) {
-  const norm = (t: string) => { const m = /^(\d{1,2}):(\d{2})$/.exec(t.trim()); return m ? `${m[1].padStart(2, "0")}:${m[2]}` : ""; };
+  const { lang } = useCmsLang();
+  const en = lang === "en";
+  const t = (ar: string, e: string) => (en ? e : ar);
+  const norm = (s: string) => { const m = /^(\d{1,2}):(\d{2})$/.exec(s.trim()); return m ? `${m[1].padStart(2, "0")}:${m[2]}` : ""; };
   const range = /^(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})$/.exec(value.trim());
   const single = /^\d{1,2}:\d{2}$/.test(value.trim());
   const from = norm(range ? range[1] : single ? value : "");
@@ -643,17 +683,17 @@ function TimeRangeField({ label, help, value, onChange }: { label?: string; help
       {label && <label className="mb-1.5 block text-sm font-semibold text-ink">{label}</label>}
       <div className="flex items-end gap-2">
         <label className="flex-1">
-          <span className="mb-1 block text-[11px] text-ink-soft">من</span>
+          <span className="mb-1 block text-[11px] text-ink-soft">{t("من", "From")}</span>
           <input type="time" value={from} dir="ltr" onChange={(e) => emit(e.target.value, to)} className={INPUT + " [color-scheme:light]"} />
         </label>
         <span className="pb-2.5 text-ink-soft">—</span>
         <label className="flex-1">
-          <span className="mb-1 block text-[11px] text-ink-soft">إلى (اختياري)</span>
+          <span className="mb-1 block text-[11px] text-ink-soft">{t("إلى (اختياري)", "To (optional)")}</span>
           <input type="time" value={to} dir="ltr" onChange={(e) => emit(from, e.target.value)} className={INPUT + " [color-scheme:light]"} />
         </label>
       </div>
       {help && <Help text={help} />}
-      {value && !parsed && <p className="mt-1 text-[11px] text-amber-600">القيمة الحالية «{value}» نصّية — اختر الوقت من المنتقيين.</p>}
+      {value && !parsed && <p className="mt-1 text-[11px] text-amber-600">{en ? `The current value "${value}" is free text — pick a time from the pickers.` : `القيمة الحالية «${value}» نصّية — اختر الوقت من المنتقيين.`}</p>}
     </div>
   );
 }
@@ -664,9 +704,11 @@ const LOCK_ICON = (
 
 // حقل نصّي مقفول — عرض فقط
 function ReadOnlyField({ f, value, note }: { f: FieldSchema; value: string; note?: string }) {
+  const { lang } = useCmsLang();
+  const label = lang === "en" ? (fieldLabelEn(f.name) || f.label) : f.label;
   return (
     <div>
-      <label className="mb-1.5 flex items-center gap-1.5 text-sm font-semibold text-ink-soft">{LOCK_ICON} {f.label}</label>
+      <label className="mb-1.5 flex items-center gap-1.5 text-sm font-semibold text-ink-soft">{LOCK_ICON} {label}</label>
       <div className="w-full rounded-xl border border-line bg-surface px-4 py-2.5 text-sm text-ink-soft">{value || "—"}</div>
       {note && <p className="mt-1 text-[11px] text-amber-600">{note}</p>}
     </div>
@@ -675,27 +717,35 @@ function ReadOnlyField({ f, value, note }: { f: FieldSchema; value: string; note
 
 // محتوى منظّم معقّد — عرض فقط (آمن من الكسر)
 function ReadOnlyJson({ f, value }: { f: FieldSchema; value: unknown }) {
+  const { lang } = useCmsLang();
+  const en = lang === "en";
+  const t = (ar: string, e: string) => (en ? e : ar);
+  const label = en ? (fieldLabelEn(f.name) || f.label) : f.label;
   const count = Array.isArray(value) ? value.length : value && typeof value === "object" ? Object.keys(value).length : 0;
   return (
     <div>
-      <label className="mb-1.5 flex items-center gap-1.5 text-sm font-semibold text-ink-soft">{LOCK_ICON} {f.label}</label>
+      <label className="mb-1.5 flex items-center gap-1.5 text-sm font-semibold text-ink-soft">{LOCK_ICON} {label}</label>
       <details className="rounded-xl border border-line bg-surface">
-        <summary className="cursor-pointer px-4 py-2.5 text-sm text-ink-soft">محتوى منظّم ({count} عنصر) — اضغط للعرض</summary>
+        <summary className="cursor-pointer px-4 py-2.5 text-sm text-ink-soft">{en ? `Structured content (${count} items) — click to view` : `محتوى منظّم (${count} عنصر) — اضغط للعرض`}</summary>
         <pre dir="ltr" className="max-h-60 overflow-auto border-t border-line p-3 text-[11px] leading-5 text-ink-soft">{JSON.stringify(value, null, 2)}</pre>
       </details>
-      <p className="mt-1 text-[11px] text-amber-600">محتوى منظّم — للعرض فقط؛ لتعديله بأمان تواصل مع المطوّر.</p>
+      <p className="mt-1 text-[11px] text-amber-600">{t("محتوى منظّم — للعرض فقط؛ لتعديله بأمان تواصل مع المطوّر.", "Structured content — view only; contact the developer to edit it safely.")}</p>
     </div>
   );
 }
 
 function FieldInput({ f, value, onChange, badge, dir }: { f: FieldSchema; value: unknown; onChange: (v: unknown) => void; badge?: string; dir?: string }) {
+  const { lang } = useCmsLang();
+  const en = lang === "en";
+  const resolved = (f as FieldSchema & { _labelResolved?: boolean })._labelResolved;
+  const label = en ? (resolved ? f.label : (fieldLabelEn(f.name) || f.label)) : f.label;
   const showHelp = badge !== "English"; // لا نكرّر الشرح على الجانب الإنجليزي
   if (f.type === "bool") {
     return (
       <div>
         <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-line bg-surface px-4 py-3">
           <input type="checkbox" checked={Boolean(value)} onChange={(e) => onChange(e.target.checked)} className="h-5 w-5 accent-brand" />
-          <span className="text-sm font-semibold text-ink">{f.label}</span>
+          <span className="text-sm font-semibold text-ink">{label}</span>
         </label>
         {showHelp && <Help text={f.help} />}
       </div>
@@ -712,11 +762,11 @@ function FieldInput({ f, value, onChange, badge, dir }: { f: FieldSchema; value:
         ) : OBJECT_FIELDS[f.base] ? (
           <ObjectEditor value={value} onChange={onChange} fields={OBJECT_FIELDS[f.base]} dir={dir} />
         ) : CARD_LIST_FIELDS[f.base] ? (
-          <CardListEditor value={value} onChange={onChange} fields={CARD_LIST_FIELDS[f.base]} dir={dir} addLabel={listAdd(f.base)} />
+          <CardListEditor value={value} onChange={onChange} fields={CARD_LIST_FIELDS[f.base]} dir={dir} addLabel={listAdd(f.base, en)} />
         ) : COMPLEX_JSON.has(f.base) || isComplexJson(value) ? (
           <ReadOnlyJson f={f} value={value} />
         ) : isSimpleArray(value) || value == null ? (
-          <ListEditor value={isSimpleArray(value) ? value : []} onChange={onChange} dir={dir} addLabel={listAdd(f.base)} />
+          <ListEditor value={isSimpleArray(value) ? value : []} onChange={onChange} dir={dir} addLabel={listAdd(f.base, en)} />
         ) : (
           <ReadOnlyJson f={f} value={value} />
         )
@@ -724,7 +774,7 @@ function FieldInput({ f, value, onChange, badge, dir }: { f: FieldSchema; value:
         <CustomSelect
           value={String(value ?? "")}
           onChange={onChange}
-          placeholder="— اختر —"
+          placeholder={en ? "— Select —" : "— اختر —"}
           options={f.choices ?? []}
         />
       ) : f.type === "number" ? (
@@ -752,6 +802,8 @@ function FieldInput({ f, value, onChange, badge, dir }: { f: FieldSchema; value:
 
 // منتقي أيقونات بصري — اختيار بدل كتابة الاسم
 function IconPicker({ value, onChange, names }: { value: string; onChange: (v: string) => void; names: string[] }) {
+  const { lang } = useCmsLang();
+  const en = lang === "en";
   // اعرض القيمة الحالية دائماً حتى لو خارج المجموعة المقترحة
   const display = value && CMS_ICONS[value] && !names.includes(value) ? [value, ...names] : names;
   return (
@@ -763,7 +815,7 @@ function IconPicker({ value, onChange, names }: { value: string; onChange: (v: s
           className={`flex flex-col items-center justify-center gap-1 rounded-lg border p-2 text-[10px] transition-colors ${value === "" ? "border-brand bg-brand/10 text-brand" : "border-line bg-white text-ink-soft hover:border-brand/40"}`}
         >
           <span className="flex h-6 w-6 items-center justify-center text-base">✕</span>
-          بدون
+          {en ? "None" : "بدون"}
         </button>
         {display.map((name) => {
           const active = value === name;
@@ -782,7 +834,7 @@ function IconPicker({ value, onChange, names }: { value: string; onChange: (v: s
         })}
       </div>
       {value && !CMS_ICONS[value] && (
-        <p className="mt-1 text-[11px] text-amber-600">الأيقونة «{value}» غير معروفة — اختر واحدة من الأعلى.</p>
+        <p className="mt-1 text-[11px] text-amber-600">{en ? `The icon "${value}" is unknown — pick one from above.` : `الأيقونة «${value}» غير معروفة — اختر واحدة من الأعلى.`}</p>
       )}
     </div>
   );
@@ -790,6 +842,9 @@ function IconPicker({ value, onChange, names }: { value: string; onChange: (v: s
 
 // محرّر موقع — يلصق إحداثيات خرائط جوجل فتُقسَّم تلقائياً إلى خط عرض/طول
 function LocationEditor({ lat, lng, onLat, onLng }: { lat: unknown; lng: unknown; onLat: (v: number | null) => void; onLng: (v: number | null) => void }) {
+  const { lang } = useCmsLang();
+  const en = lang === "en";
+  const t = (ar: string, e: string) => (en ? e : ar);
   const num = (v: unknown) => (v === null || v === undefined || v === "" ? "" : String(v));
   const parsePaste = (s: string) => {
     const m = s.match(/(-?\d+(?:\.\d+)?)\s*[,\s]\s*(-?\d+(?:\.\d+)?)/);
@@ -798,27 +853,27 @@ function LocationEditor({ lat, lng, onLat, onLng }: { lat: unknown; lng: unknown
   return (
     <div className="space-y-3 rounded-xl border border-line bg-surface/50 p-3">
       <div>
-        <p className="mb-1 text-xs font-semibold text-ink-soft">الصق إحداثيات الموقع من خرائط جوجل</p>
+        <p className="mb-1 text-xs font-semibold text-ink-soft">{t("الصق إحداثيات الموقع من خرائط جوجل", "Paste the location coordinates from Google Maps")}</p>
         <input
           dir="ltr"
-          placeholder="مثال: 24.7136, 46.6753"
+          placeholder={t("مثال: 24.7136, 46.6753", "Example: 24.7136, 46.6753")}
           onChange={(e) => parsePaste(e.target.value)}
           className={INPUT + " bg-white font-mono"}
         />
-        <p className="mt-1 text-[11px] text-ink-soft">في خرائط جوجل: كليك يمين على موقع الفرع بالضبط ← انسخ أول سطر (الأرقام) ← الصقه هنا.</p>
+        <p className="mt-1 text-[11px] text-ink-soft">{t("في خرائط جوجل: كليك يمين على موقع الفرع بالضبط ← انسخ أول سطر (الأرقام) ← الصقه هنا.", "In Google Maps: right-click on the exact branch location → copy the first line (the numbers) → paste it here.")}</p>
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <p className="mb-1 text-xs font-semibold text-ink-soft">خط العرض (lat)</p>
+          <p className="mb-1 text-xs font-semibold text-ink-soft">{t("خط العرض (lat)", "Latitude (lat)")}</p>
           <input type="number" step="any" dir="ltr" value={num(lat)} onChange={(e) => onLat(e.target.value === "" ? null : Number(e.target.value))} className={INPUT + " bg-white"} />
         </div>
         <div>
-          <p className="mb-1 text-xs font-semibold text-ink-soft">خط الطول (lng)</p>
+          <p className="mb-1 text-xs font-semibold text-ink-soft">{t("خط الطول (lng)", "Longitude (lng)")}</p>
           <input type="number" step="any" dir="ltr" value={num(lng)} onChange={(e) => onLng(e.target.value === "" ? null : Number(e.target.value))} className={INPUT + " bg-white"} />
         </div>
       </div>
       {(num(lat) || num(lng)) && (
-        <a href={`https://www.google.com/maps/search/?api=1&query=${num(lat)},${num(lng)}`} target="_blank" rel="noopener" className="inline-block text-xs font-semibold text-brand hover:underline">معاينة الموقع على الخريطة ↗</a>
+        <a href={`https://www.google.com/maps/search/?api=1&query=${num(lat)},${num(lng)}`} target="_blank" rel="noopener" className="inline-block text-xs font-semibold text-brand hover:underline">{t("معاينة الموقع على الخريطة ↗", "Preview location on the map ↗")}</a>
       )}
     </div>
   );
@@ -826,6 +881,9 @@ function LocationEditor({ lat, lng, onLat, onLng }: { lat: unknown; lng: unknown
 
 // محرّر معرض صور — رفع متعدد + معاينة مصغّرة + حذف/ترتيب (يخزّن قائمة روابط)
 function GalleryEditor({ value, onChange }: { value: unknown; onChange: (v: unknown) => void }) {
+  const { lang } = useCmsLang();
+  const en = lang === "en";
+  const t = (ar: string, e: string) => (en ? e : ar);
   const urls = (Array.isArray(value) ? value : []).filter((x) => typeof x === "string") as string[];
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
@@ -837,13 +895,13 @@ function GalleryEditor({ value, onChange }: { value: unknown; onChange: (v: unkn
     const added: string[] = [];
     try {
       for (const f of files) {
-        if (f.size > 5 * 1024 * 1024) { setErr("بعض الصور أكبر من 5 ميجابايت — تم تخطّيها."); continue; }
+        if (f.size > 5 * 1024 * 1024) { setErr(t("بعض الصور أكبر من 5 ميجابايت — تم تخطّيها.", "Some images are larger than 5 MB — they were skipped.")); continue; }
         const r = await uploadImage(f);
         added.push(r.url);
       }
       if (added.length) onChange([...urls, ...added]);
     } catch (e) {
-      setErr(e instanceof Error ? e.message : "تعذّر رفع بعض الصور.");
+      setErr(e instanceof Error ? e.message : t("تعذّر رفع بعض الصور.", "Could not upload some images."));
     } finally {
       setBusy(false);
       e.target.value = "";
@@ -866,11 +924,11 @@ function GalleryEditor({ value, onChange }: { value: unknown; onChange: (v: unkn
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={u} alt="" className="h-full w-full object-cover" />
             <div className="absolute inset-x-0 bottom-0 flex items-center justify-between bg-black/45 px-1.5 py-1 opacity-0 transition-opacity group-hover:opacity-100">
-              <button type="button" onClick={() => move(i, -1)} disabled={i === 0} className="rounded p-0.5 text-white/90 hover:text-white disabled:opacity-30" title="لليمين">
+              <button type="button" onClick={() => move(i, -1)} disabled={i === 0} className="rounded p-0.5 text-white/90 hover:text-white disabled:opacity-30" title={t("لليمين", "Move earlier")}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" d="M9 6l6 6-6 6" /></svg>
               </button>
-              <button type="button" onClick={() => remove(i)} className="rounded bg-red-500/90 px-1.5 py-0.5 text-[10px] font-bold text-white" title="حذف">حذف</button>
-              <button type="button" onClick={() => move(i, 1)} disabled={i === urls.length - 1} className="rounded p-0.5 text-white/90 hover:text-white disabled:opacity-30" title="لليسار">
+              <button type="button" onClick={() => remove(i)} className="rounded bg-red-500/90 px-1.5 py-0.5 text-[10px] font-bold text-white" title={t("حذف", "Remove")}>{t("حذف", "Remove")}</button>
+              <button type="button" onClick={() => move(i, 1)} disabled={i === urls.length - 1} className="rounded p-0.5 text-white/90 hover:text-white disabled:opacity-30" title={t("لليسار", "Move later")}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" d="M15 6l-6 6 6 6" /></svg>
               </button>
             </div>
@@ -878,24 +936,27 @@ function GalleryEditor({ value, onChange }: { value: unknown; onChange: (v: unkn
         ))}
         <label className={`flex aspect-square cursor-pointer flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed border-line text-ink-soft transition-colors hover:border-brand/50 hover:text-brand ${busy ? "opacity-60" : ""}`}>
           {busy ? (
-            <span className="text-xs font-semibold">جارٍ الرفع…</span>
+            <span className="text-xs font-semibold">{t("جارٍ الرفع…", "Uploading…")}</span>
           ) : (
             <>
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>
-              <span className="text-xs font-semibold">إضافة صور</span>
+              <span className="text-xs font-semibold">{t("إضافة صور", "Add Images")}</span>
             </>
           )}
           <input type="file" accept="image/*" multiple onChange={onFiles} disabled={busy} className="hidden" />
         </label>
       </div>
-      {urls.length === 0 && <p className="mt-2 text-xs text-ink-soft">لا توجد صور بعد — اضغط «إضافة صور» لرفع صور هذا الفرع.</p>}
+      {urls.length === 0 && <p className="mt-2 text-xs text-ink-soft">{t("لا توجد صور بعد — اضغط «إضافة صور» لرفع صور هذا الفرع.", "No images yet — click “Add Images” to upload this branch's photos.")}</p>}
       {err && <p className="mt-1 text-xs text-red-600">{err}</p>}
     </div>
   );
 }
 
 // محرّر كائن — خانات بسيطة معنونة بدل كود JSON (مثل البطاقة المميّزة: عنوان + نص)
-function ObjectEditor({ value, onChange, fields, dir }: { value: unknown; onChange: (v: unknown) => void; fields: { key: string; label: string }[]; dir?: string }) {
+function ObjectEditor({ value, onChange, fields, dir }: { value: unknown; onChange: (v: unknown) => void; fields: { key: string; label: string; label_en?: string }[]; dir?: string }) {
+  const { lang } = useCmsLang();
+  const en = lang === "en";
+  const flLabel = (fl: { label: string; label_en?: string }) => (en ? (fl.label_en || fl.label) : fl.label);
   const obj = (value && typeof value === "object" && !Array.isArray(value)) ? (value as Record<string, unknown>) : {};
   const set = (k: string, v: string) => {
     const next = { ...obj, [k]: v };
@@ -907,34 +968,38 @@ function ObjectEditor({ value, onChange, fields, dir }: { value: unknown; onChan
     <div className="space-y-3 rounded-xl border border-line bg-surface/50 p-3">
       {fields.map((fl) => (
         <div key={fl.key}>
-          <p className="mb-1 text-xs font-semibold text-ink-soft">{fl.label}</p>
+          <p className="mb-1 text-xs font-semibold text-ink-soft">{flLabel(fl)}</p>
           <AutoTextarea value={String(obj[fl.key] ?? "")} onChange={(v) => set(fl.key, v)} dir={dir} className={INPUT + " bg-white"} />
         </div>
       ))}
-      <p className="text-[11px] text-ink-soft">اتركها فارغة إن لم تكن الخدمة تحتاج بطاقة مميّزة.</p>
+      <p className="text-[11px] text-ink-soft">{en ? "Leave empty if the service doesn't need a featured card." : "اتركها فارغة إن لم تكن الخدمة تحتاج بطاقة مميّزة."}</p>
     </div>
   );
 }
 
 // محرّر قائمة بطاقات — كل عنصر كائن بخانات معنونة (بدل قائمة JSON مركّبة)
-function CardListEditor({ value, onChange, fields, dir, addLabel = "إضافة عنصر" }: { value: unknown; onChange: (v: unknown) => void; fields: { key: string; label: string }[]; dir?: string; addLabel?: string }) {
+function CardListEditor({ value, onChange, fields, dir, addLabel }: { value: unknown; onChange: (v: unknown) => void; fields: { key: string; label: string; label_en?: string }[]; dir?: string; addLabel?: string }) {
+  const { lang } = useCmsLang();
+  const en = lang === "en";
+  const flLabel = (fl: { label: string; label_en?: string }) => (en ? (fl.label_en || fl.label) : fl.label);
+  const addTxt = addLabel ?? (en ? "Add Item" : "إضافة عنصر");
   const items = (Array.isArray(value) ? value : []).filter((x) => x && typeof x === "object" && !Array.isArray(x)) as Record<string, unknown>[];
   const update = (i: number, key: string, v: string) => onChange(items.map((it, j) => (j === i ? { ...it, [key]: v } : it)));
   const remove = (i: number) => onChange(items.filter((_, j) => j !== i));
   const add = () => onChange([...items, Object.fromEntries(fields.map((fl) => [fl.key, ""]))]);
   return (
     <div className="space-y-3">
-      {items.length === 0 && <p className="rounded-xl border border-dashed border-line bg-surface px-4 py-2.5 text-xs text-ink-soft">لا توجد عناصر — اضغط «إضافة عنصر».</p>}
+      {items.length === 0 && <p className="rounded-xl border border-dashed border-line bg-surface px-4 py-2.5 text-xs text-ink-soft">{en ? "No items — click “Add Item”." : "لا توجد عناصر — اضغط «إضافة عنصر»."}</p>}
       {items.map((it, i) => (
         <div key={i} className="rounded-xl border border-line bg-surface/50 p-3">
           <div className="mb-2 flex items-center justify-between">
-            <span className="flex h-6 min-w-6 items-center justify-center rounded-full bg-brand/10 px-2 text-[11px] font-bold text-brand">عنصر {i + 1}</span>
-            <button type="button" onClick={() => remove(i)} className="rounded-lg bg-red-50 px-2.5 py-1.5 text-xs font-semibold text-red-600 transition-colors hover:bg-red-600 hover:text-white">حذف</button>
+            <span className="flex h-6 min-w-6 items-center justify-center rounded-full bg-brand/10 px-2 text-[11px] font-bold text-brand">{en ? `Item ${i + 1}` : `عنصر ${i + 1}`}</span>
+            <button type="button" onClick={() => remove(i)} className="rounded-lg bg-red-50 px-2.5 py-1.5 text-xs font-semibold text-red-600 transition-colors hover:bg-red-600 hover:text-white">{en ? "Remove" : "حذف"}</button>
           </div>
           <div className="space-y-2">
             {fields.map((fl) => (
               <div key={fl.key}>
-                <p className="mb-1 text-xs font-semibold text-ink-soft">{fl.label}</p>
+                <p className="mb-1 text-xs font-semibold text-ink-soft">{flLabel(fl)}</p>
                 <AutoTextarea value={String(it[fl.key] ?? "")} onChange={(v) => update(i, fl.key, v)} dir={dir} className={INPUT + " bg-white"} />
               </div>
             ))}
@@ -943,31 +1008,34 @@ function CardListEditor({ value, onChange, fields, dir, addLabel = "إضافة �
       ))}
       <button type="button" onClick={add} className="inline-flex items-center gap-1.5 rounded-lg bg-brand/10 px-3 py-1.5 text-xs font-semibold text-brand transition-colors hover:bg-brand hover:text-white">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path strokeLinecap="round" d="M12 5v14M5 12h14" /></svg>
-        {addLabel}
+        {addTxt}
       </button>
     </div>
   );
 }
 
 // محرّر قوائم سهل — صفّ لكل عنصر مع زر حذف + زر إضافة (بدل JSON)
-function ListEditor({ value, onChange, dir, addLabel = "إضافة عنصر" }: { value: (string | number)[]; onChange: (v: unknown) => void; dir?: string; addLabel?: string }) {
+function ListEditor({ value, onChange, dir, addLabel }: { value: (string | number)[]; onChange: (v: unknown) => void; dir?: string; addLabel?: string }) {
+  const { lang } = useCmsLang();
+  const en = lang === "en";
+  const addTxt = addLabel ?? (en ? "Add Item" : "إضافة عنصر");
   const items = value.map(String);
   const update = (i: number, v: string) => { const copy = [...items]; copy[i] = v; onChange(copy); };
   const remove = (i: number) => onChange(items.filter((_, j) => j !== i));
   const add = () => onChange([...items, ""]);
   return (
     <div className="space-y-2">
-      {items.length === 0 && <p className="rounded-xl border border-dashed border-line bg-surface px-4 py-2.5 text-xs text-ink-soft">لا توجد عناصر — اضغط «إضافة عنصر».</p>}
+      {items.length === 0 && <p className="rounded-xl border border-dashed border-line bg-surface px-4 py-2.5 text-xs text-ink-soft">{en ? "No items — click “Add Item”." : "لا توجد عناصر — اضغط «إضافة عنصر»."}</p>}
       {items.map((it, i) => (
         <div key={i} className="flex items-start gap-2">
           <span className="mt-2 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-surface text-[11px] font-bold text-ink-soft">{i + 1}</span>
           <div className="flex-1"><AutoTextarea value={it} onChange={(v) => update(i, v)} dir={dir} /></div>
-          <button type="button" onClick={() => remove(i)} className="mt-1 shrink-0 rounded-lg bg-red-50 px-2.5 py-2 text-xs font-semibold text-red-600 transition-colors hover:bg-red-600 hover:text-white">حذف</button>
+          <button type="button" onClick={() => remove(i)} className="mt-1 shrink-0 rounded-lg bg-red-50 px-2.5 py-2 text-xs font-semibold text-red-600 transition-colors hover:bg-red-600 hover:text-white">{en ? "Remove" : "حذف"}</button>
         </div>
       ))}
       <button type="button" onClick={add} className="inline-flex items-center gap-1.5 rounded-lg bg-brand/10 px-3 py-1.5 text-xs font-semibold text-brand transition-colors hover:bg-brand hover:text-white">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path strokeLinecap="round" d="M12 5v14M5 12h14" /></svg>
-        {addLabel}
+        {addTxt}
       </button>
     </div>
   );
@@ -991,6 +1059,15 @@ const BLOCK_KIND_LABEL: Record<string, string> = {
   tiles: "مربّعات",
   checklist: "قائمة بعلامات صح ✓",
   areas: "مجالات (عنوان + وصف لكل مجال)",
+};
+const BLOCK_KIND_LABEL_EN: Record<string, string> = {
+  cards: "Cards (title + description per card)",
+  prose: "Text paragraphs",
+  agePrograms: "Programs by age group",
+  pills: "Pills (small buttons)",
+  tiles: "Tiles",
+  checklist: "Checklist with ✓ marks",
+  areas: "Areas (title + description per area)",
 };
 
 function blockSkeleton(kind: string): Rec {
@@ -1026,7 +1103,10 @@ function OptionalScalar({ label, addLabel, a, e, onA, onE }: { label: string; ad
 }
 
 // قائمة نصوص ثنائية اللغة (صفّ لكل عنصر: عربي + إنجليزي + حذف)
-function BiStrList({ a, e, onChange, addLabel = "إضافة عنصر" }: { a: string[]; e: string[]; onChange: (a: string[], e: string[]) => void; addLabel?: string }) {
+function BiStrList({ a, e, onChange, addLabel }: { a: string[]; e: string[]; onChange: (a: string[], e: string[]) => void; addLabel?: string }) {
+  const { lang } = useCmsLang();
+  const isEn = lang === "en";
+  const addTxt = addLabel ?? (isEn ? "Add Item" : "إضافة عنصر");
   const n = Math.max(a.length, e.length);
   const norm = (arr: string[]) => { const c = [...arr]; while (c.length < n) c.push(""); return c; };
   const setRow = (i: number, av: string, ev: string) => { const na = norm(a); const ne = norm(e); na[i] = av; ne[i] = ev; onChange(na, ne); };
@@ -1034,7 +1114,7 @@ function BiStrList({ a, e, onChange, addLabel = "إضافة عنصر" }: { a: st
   const add = () => onChange([...a, ""], [...e, ""]);
   return (
     <div className="space-y-2">
-      {n === 0 && <p className="rounded-xl border border-dashed border-line bg-surface px-3 py-2 text-[11px] text-ink-soft">لا توجد عناصر — اضغط «إضافة عنصر».</p>}
+      {n === 0 && <p className="rounded-xl border border-dashed border-line bg-surface px-3 py-2 text-[11px] text-ink-soft">{isEn ? "No items — click “Add Item”." : "لا توجد عناصر — اضغط «إضافة عنصر»."}</p>}
       {Array.from({ length: n }, (_, i) => (
         <div key={i} className="flex items-start gap-2">
           <span className="mt-2 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-surface text-[10px] font-bold text-ink-soft">{i + 1}</span>
@@ -1042,44 +1122,47 @@ function BiStrList({ a, e, onChange, addLabel = "إضافة عنصر" }: { a: st
             <AutoTextarea value={a[i] ?? ""} onChange={(v) => setRow(i, v, e[i] ?? "")} className={INPUT + " bg-white"} />
             <AutoTextarea value={e[i] ?? ""} onChange={(v) => setRow(i, a[i] ?? "", v)} dir="ltr" className={INPUT + " bg-white"} />
           </div>
-          <button type="button" onClick={() => removeRow(i)} className="mt-1 shrink-0 rounded-lg bg-red-50 px-2 py-1.5 text-[11px] font-semibold text-red-600 hover:bg-red-600 hover:text-white">حذف</button>
+          <button type="button" onClick={() => removeRow(i)} className="mt-1 shrink-0 rounded-lg bg-red-50 px-2 py-1.5 text-[11px] font-semibold text-red-600 hover:bg-red-600 hover:text-white">{isEn ? "Remove" : "حذف"}</button>
         </div>
       ))}
-      <button type="button" onClick={add} className="inline-flex items-center gap-1 rounded-lg bg-brand/10 px-2.5 py-1 text-[11px] font-semibold text-brand hover:bg-brand hover:text-white">+ {addLabel}</button>
+      <button type="button" onClick={add} className="inline-flex items-center gap-1 rounded-lg bg-brand/10 px-2.5 py-1 text-[11px] font-semibold text-brand hover:bg-brand hover:text-white">+ {addTxt}</button>
     </div>
   );
 }
 
-type ItemFieldSchema = { key: string; label: string; list?: boolean; optional?: boolean };
+type ItemFieldSchema = { key: string; label: string; label_en?: string; list?: boolean; optional?: boolean };
 
 // عنصر واحد داخل قائمة البطاقات/المجالات — يُظهر الحقول الأساسية فقط،
 // والحقول الاختيارية الفارغة تُخفى خلف زر صغير لتقليل التشويش
 function ObjItem({ index, ia, ie, schema, onChange, onRemove }: { index: number; ia: Rec; ie: Rec; schema: ItemFieldSchema[]; onChange: (av: Rec, ev: Rec) => void; onRemove: () => void }) {
+  const { lang } = useCmsLang();
+  const en = lang === "en";
   const hasVal = (s: ItemFieldSchema) => s.list
     ? (blkStrArr(ia[s.key]).length > 0 || blkStrArr(ie[s.key]).length > 0)
     : (blkStr(ia[s.key]).trim() !== "" || blkStr(ie[s.key]).trim() !== "");
   const [showExtra, setShowExtra] = useState(false);
+  const sLabel = (s: ItemFieldSchema) => (en ? (s.label_en || s.label) : s.label);
   const hiddenExtras = schema.filter((s) => s.optional && !hasVal(s));
   const visible = schema.filter((s) => !s.optional || hasVal(s) || showExtra);
   return (
     <div className="rounded-xl border border-line bg-white p-3">
       <div className="mb-2 flex items-center justify-between">
-        <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-brand/10 px-2 text-[10px] font-bold text-brand">عنصر {index + 1}</span>
-        <button type="button" onClick={onRemove} className="rounded-lg bg-red-50 px-2 py-1 text-[11px] font-semibold text-red-600 hover:bg-red-600 hover:text-white">حذف</button>
+        <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-brand/10 px-2 text-[10px] font-bold text-brand">{en ? `Item ${index + 1}` : `عنصر ${index + 1}`}</span>
+        <button type="button" onClick={onRemove} className="rounded-lg bg-red-50 px-2 py-1 text-[11px] font-semibold text-red-600 hover:bg-red-600 hover:text-white">{en ? "Remove" : "حذف"}</button>
       </div>
       <div className="space-y-2">
         {visible.map((s) => s.list ? (
           <div key={s.key}>
-            <p className="mb-1 text-xs font-semibold text-ink-soft">{s.label}</p>
-            <BiStrList a={blkStrArr(ia[s.key])} e={blkStrArr(ie[s.key])} addLabel={listAdd(s.key)} onChange={(av, ev) => onChange({ ...ia, [s.key]: av }, { ...ie, [s.key]: ev })} />
+            <p className="mb-1 text-xs font-semibold text-ink-soft">{sLabel(s)}</p>
+            <BiStrList a={blkStrArr(ia[s.key])} e={blkStrArr(ie[s.key])} addLabel={listAdd(s.key, en)} onChange={(av, ev) => onChange({ ...ia, [s.key]: av }, { ...ie, [s.key]: ev })} />
           </div>
         ) : (
-          <BiScalar key={s.key} label={s.label} a={blkStr(ia[s.key])} e={blkStr(ie[s.key])} onA={(v) => onChange({ ...ia, [s.key]: v }, { ...ie })} onE={(v) => onChange({ ...ia }, { ...ie, [s.key]: v })} />
+          <BiScalar key={s.key} label={sLabel(s)} a={blkStr(ia[s.key])} e={blkStr(ie[s.key])} onA={(v) => onChange({ ...ia, [s.key]: v }, { ...ie })} onE={(v) => onChange({ ...ia }, { ...ie, [s.key]: v })} />
         ))}
       </div>
       {hiddenExtras.length > 0 && (
         <button type="button" onClick={() => setShowExtra((s) => !s)} className="mt-2 text-[11px] font-semibold text-brand hover:underline">
-          {showExtra ? "إخفاء الحقول الإضافية" : `+ حقول إضافية اختيارية (${hiddenExtras.length})`}
+          {showExtra ? (en ? "Hide extra fields" : "إخفاء الحقول الإضافية") : (en ? `+ Optional extra fields (${hiddenExtras.length})` : `+ حقول إضافية اختيارية (${hiddenExtras.length})`)}
         </button>
       )}
     </div>
@@ -1088,6 +1171,8 @@ function ObjItem({ index, ia, ie, schema, onChange, onRemove }: { index: number;
 
 // محرّر قائمة بطاقات/مجالات ثنائي اللغة (كل عنصر كائن بخاناته)
 function ObjItemsEditor({ a, e, onChange, schema, addLabel }: { a: Rec[]; e: Rec[]; onChange: (a: Rec[], e: Rec[]) => void; schema: ItemFieldSchema[]; addLabel: string }) {
+  const { lang } = useCmsLang();
+  const isEn = lang === "en";
   const n = Math.max(a.length, e.length);
   const norm = (arr: Rec[]) => { const c = arr.map(blkObj); while (c.length < n) c.push({}); return c; };
   const patch = (i: number, av: Rec, ev: Rec) => { const na = norm(a); const ne = norm(e); na[i] = av; ne[i] = ev; onChange(na, ne); };
@@ -1097,7 +1182,7 @@ function ObjItemsEditor({ a, e, onChange, schema, addLabel }: { a: Rec[]; e: Rec
   const add = () => onChange([...a.map(blkObj), blank()], [...e.map(blkObj), blank()]);
   return (
     <div className="space-y-2">
-      {n === 0 && <p className="rounded-xl border border-dashed border-line bg-surface px-3 py-2 text-[11px] text-ink-soft">لا توجد عناصر — اضغط «{addLabel}».</p>}
+      {n === 0 && <p className="rounded-xl border border-dashed border-line bg-surface px-3 py-2 text-[11px] text-ink-soft">{isEn ? `No items — click “${addLabel}”.` : `لا توجد عناصر — اضغط «${addLabel}».`}</p>}
       {Array.from({ length: n }, (_, i) => (
         <ObjItem key={i} index={i} ia={blkObj(a[i])} ie={blkObj(e[i] ?? a[i])} schema={schema}
           onChange={(av, ev) => patch(i, av, ev)} onRemove={() => removeAt(i)} />
@@ -1108,6 +1193,9 @@ function ObjItemsEditor({ a, e, onChange, schema, addLabel }: { a: Rec[]; e: Rec
 }
 
 function BlocksEditor({ ar, en, onChange }: { ar: unknown[]; en: unknown[]; onChange: (ar: Rec[], en: Rec[]) => void }) {
+  const { lang } = useCmsLang();
+  const isEn = lang === "en";
+  const tt = (arTxt: string, e: string) => (isEn ? e : arTxt);
   const [addKind, setAddKind] = useState("cards");
   const n = Math.max(ar.length, en.length);
   const pairs = Array.from({ length: n }, (_, i) => ({ a: blkObj(ar[i]), e: blkObj(en[i] ?? ar[i]) }));
@@ -1119,7 +1207,7 @@ function BlocksEditor({ ar, en, onChange }: { ar: unknown[]; en: unknown[]; onCh
 
   return (
     <div className="space-y-4">
-      {n === 0 && <p className="rounded-xl border border-dashed border-line bg-surface px-4 py-3 text-xs text-ink-soft">لا توجد أقسام بعد — أضف قسماً من الأسفل.</p>}
+      {n === 0 && <p className="rounded-xl border border-dashed border-line bg-surface px-4 py-3 text-xs text-ink-soft">{tt("لا توجد أقسام بعد — أضف قسماً من الأسفل.", "No sections yet — add one from below.")}</p>}
       {pairs.map((p, i) => {
         const kind = blkStr(p.a.kind || p.e.kind);
         const sc = (key: string, label: string) => (
@@ -1129,11 +1217,11 @@ function BlocksEditor({ ar, en, onChange }: { ar: unknown[]; en: unknown[]; onCh
         const strList = (key: string, label: string) => (
           <div key={key}>
             <p className="mb-1 text-xs font-semibold text-ink-soft">{label}</p>
-            <BiStrList a={blkStrArr(p.a[key])} e={blkStrArr(p.e[key])} addLabel={listAdd(key)} onChange={(av, ev) => patch(i, { ...p.a, [key]: av }, { ...p.e, [key]: ev })} />
+            <BiStrList a={blkStrArr(p.a[key])} e={blkStrArr(p.e[key])} addLabel={listAdd(key, isEn)} onChange={(av, ev) => patch(i, { ...p.a, [key]: av }, { ...p.e, [key]: ev })} />
           </div>
         );
         const introField = (key: string) => (
-          <OptionalScalar key={key} label="مقدمة (سطر تعريفي تحت العنوان)" addLabel="إضافة مقدمة"
+          <OptionalScalar key={key} label={tt("مقدمة (سطر تعريفي تحت العنوان)", "Introduction (a short line under the heading)")} addLabel={tt("إضافة مقدمة", "Add introduction")}
             a={blkStr(p.a[key])} e={blkStr(p.e[key])}
             onA={(v) => patch(i, { ...p.a, [key]: v }, { ...p.e })} onE={(v) => patch(i, { ...p.a }, { ...p.e, [key]: v })} />
         );
@@ -1150,64 +1238,64 @@ function BlocksEditor({ ar, en, onChange }: { ar: unknown[]; en: unknown[]; onCh
         );
 
         let body: React.ReactNode;
-        if (kind === "prose") body = <>{sc("heading", "العنوان")}{strList("paragraphs", "الفقرات")}</>;
-        else if (kind === "pills") body = <>{sc("heading", "العنوان")}{introField("intro")}{strList("items", "الوسوم")}</>;
-        else if (kind === "tiles") body = <>{sc("heading", "العنوان")}{introField("intro")}{strList("items", "المربّعات")}</>;
-        else if (kind === "checklist") body = <>{sc("heading", "العنوان (اختياري)")}{introField("intro")}{strList("items", "عناصر القائمة")}</>;
-        else if (kind === "areas") body = <>{sc("heading", "العنوان")}{introField("intro")}{objList("items", [{ key: "title", label: "العنوان" }, { key: "desc", label: "الوصف" }], "إضافة مجال")}</>;
-        else if (kind === "cards") body = <>{sc("heading", "العنوان")}{introField("intro")}{objList("items", [{ key: "title", label: "عنوان البطاقة" }, { key: "desc", label: "الوصف" }, { key: "sub", label: "نص جانبي صغير", optional: true }, { key: "bullets", label: "نقاط", list: true, optional: true }, { key: "tags", label: "وسوم", list: true, optional: true }], "إضافة بطاقة")}</>;
+        if (kind === "prose") body = <>{sc("heading", tt("العنوان", "Heading"))}{strList("paragraphs", tt("الفقرات", "Paragraphs"))}</>;
+        else if (kind === "pills") body = <>{sc("heading", tt("العنوان", "Heading"))}{introField("intro")}{strList("items", tt("الوسوم", "Pills"))}</>;
+        else if (kind === "tiles") body = <>{sc("heading", tt("العنوان", "Heading"))}{introField("intro")}{strList("items", tt("المربّعات", "Tiles"))}</>;
+        else if (kind === "checklist") body = <>{sc("heading", tt("العنوان (اختياري)", "Heading (optional)"))}{introField("intro")}{strList("items", tt("عناصر القائمة", "Checklist items"))}</>;
+        else if (kind === "areas") body = <>{sc("heading", tt("العنوان", "Heading"))}{introField("intro")}{objList("items", [{ key: "title", label: "العنوان", label_en: "Title" }, { key: "desc", label: "الوصف", label_en: "Description" }], tt("إضافة مجال", "Add Area"))}</>;
+        else if (kind === "cards") body = <>{sc("heading", tt("العنوان", "Heading"))}{introField("intro")}{objList("items", [{ key: "title", label: "عنوان البطاقة", label_en: "Card title" }, { key: "desc", label: "الوصف", label_en: "Description" }, { key: "sub", label: "نص جانبي صغير", label_en: "Small side text", optional: true }, { key: "bullets", label: "نقاط", label_en: "Bullets", list: true, optional: true }, { key: "tags", label: "وسوم", label_en: "Tags", list: true, optional: true }], tt("إضافة بطاقة", "Add Card"))}</>;
         else if (kind === "agePrograms") body = (
           <>
-            {sc("heading", "العنوان")}
+            {sc("heading", tt("العنوان", "Heading"))}
             <div className="rounded-xl border border-line bg-white p-3">
-              <p className="mb-2 text-xs font-bold text-ink">بطاقة الكبار</p>
-              <div className="space-y-2">{nestScalar("adult", "title", "العنوان")}{nestScalar("adult", "sub", "الوصف")}{nestScalar("adult", "label", "الوسم")}</div>
+              <p className="mb-2 text-xs font-bold text-ink">{tt("بطاقة الكبار", "Adults Card")}</p>
+              <div className="space-y-2">{nestScalar("adult", "title", tt("العنوان", "Title"))}{nestScalar("adult", "sub", tt("الوصف", "Description"))}{nestScalar("adult", "label", tt("الوسم", "Badge"))}</div>
             </div>
             <div className="rounded-xl border border-line bg-white p-3">
-              <p className="mb-2 text-xs font-bold text-ink">بطاقة الأطفال</p>
+              <p className="mb-2 text-xs font-bold text-ink">{tt("بطاقة الأطفال", "Children Card")}</p>
               <div className="space-y-2">
-                {nestScalar("child", "title", "العنوان")}{nestScalar("child", "label", "الوصف")}
+                {nestScalar("child", "title", tt("العنوان", "Title"))}{nestScalar("child", "label", tt("الوصف", "Description"))}
                 <div>
-                  <p className="mb-1 text-xs font-semibold text-ink-soft">المستويات</p>
-                  <BiStrList a={blkStrArr(blkObj(p.a.child).levels)} e={blkStrArr(blkObj(p.e.child).levels)} addLabel="إضافة مستوى"
+                  <p className="mb-1 text-xs font-semibold text-ink-soft">{tt("المستويات", "Levels")}</p>
+                  <BiStrList a={blkStrArr(blkObj(p.a.child).levels)} e={blkStrArr(blkObj(p.e.child).levels)} addLabel={tt("إضافة مستوى", "Add Level")}
                     onChange={(av, ev) => patch(i, { ...p.a, child: { ...blkObj(p.a.child), levels: av } }, { ...p.e, child: { ...blkObj(p.e.child), levels: ev } })} />
                 </div>
               </div>
             </div>
           </>
         );
-        else body = sc("heading", "العنوان");
+        else body = sc("heading", tt("العنوان", "Heading"));
 
         return (
           <div key={i} className="rounded-2xl border border-line bg-surface/40 p-4">
             <div className="mb-3 flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
-                <span className="flex h-6 min-w-6 items-center justify-center rounded-full bg-brand px-2 text-[11px] font-bold text-white">قسم {i + 1}</span>
-                <span className="rounded-lg bg-brand/10 px-2 py-1 text-[11px] font-bold text-brand">{BLOCK_KIND_LABEL[kind] || kind}</span>
+                <span className="flex h-6 min-w-6 items-center justify-center rounded-full bg-brand px-2 text-[11px] font-bold text-white">{tt(`قسم ${i + 1}`, `Section ${i + 1}`)}</span>
+                <span className="rounded-lg bg-brand/10 px-2 py-1 text-[11px] font-bold text-brand">{(isEn ? BLOCK_KIND_LABEL_EN[kind] : BLOCK_KIND_LABEL[kind]) || kind}</span>
               </div>
               <div className="flex items-center gap-1">
-                <button type="button" onClick={() => move(i, -1)} disabled={i === 0} className="rounded-lg border border-line bg-white px-2 py-1 text-xs font-bold text-ink-soft hover:border-brand hover:text-brand disabled:opacity-30" title="أعلى">↑</button>
-                <button type="button" onClick={() => move(i, 1)} disabled={i === n - 1} className="rounded-lg border border-line bg-white px-2 py-1 text-xs font-bold text-ink-soft hover:border-brand hover:text-brand disabled:opacity-30" title="أسفل">↓</button>
-                <button type="button" onClick={() => removeAt(i)} className="rounded-lg bg-red-50 px-2.5 py-1 text-[11px] font-semibold text-red-600 hover:bg-red-600 hover:text-white">حذف القسم</button>
+                <button type="button" onClick={() => move(i, -1)} disabled={i === 0} className="rounded-lg border border-line bg-white px-2 py-1 text-xs font-bold text-ink-soft hover:border-brand hover:text-brand disabled:opacity-30" title={tt("أعلى", "Move up")}>↑</button>
+                <button type="button" onClick={() => move(i, 1)} disabled={i === n - 1} className="rounded-lg border border-line bg-white px-2 py-1 text-xs font-bold text-ink-soft hover:border-brand hover:text-brand disabled:opacity-30" title={tt("أسفل", "Move down")}>↓</button>
+                <button type="button" onClick={() => removeAt(i)} className="rounded-lg bg-red-50 px-2.5 py-1 text-[11px] font-semibold text-red-600 hover:bg-red-600 hover:text-white">{tt("حذف القسم", "Remove Section")}</button>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-2 px-1 pb-2 text-[10px] font-bold text-ink-soft">
-              <span>عربي</span><span dir="ltr">English</span>
+              <span>{tt("عربي", "Arabic")}</span><span dir="ltr">English</span>
             </div>
             <div className="space-y-3">{body}</div>
           </div>
         );
       })}
       <div className="flex flex-wrap items-center gap-2 border-t border-line pt-3">
-        <span className="text-xs font-semibold text-ink-soft">إضافة قسم جديد:</span>
+        <span className="text-xs font-semibold text-ink-soft">{tt("إضافة قسم جديد:", "Add a new section:")}</span>
         <div className="w-48">
           <CustomSelect
             value={addKind}
             onChange={setAddKind}
-            options={Object.entries(BLOCK_KIND_LABEL).map(([k, l]) => ({ value: k, label: String(l) }))}
+            options={Object.entries(isEn ? BLOCK_KIND_LABEL_EN : BLOCK_KIND_LABEL).map(([k, l]) => ({ value: k, label: String(l) }))}
           />
         </div>
-        <button type="button" onClick={add} className="inline-flex items-center gap-1 rounded-lg bg-brand px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-dark">+ إضافة القسم</button>
+        <button type="button" onClick={add} className="inline-flex items-center gap-1 rounded-lg bg-brand px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-dark">+ {tt("إضافة القسم", "Add Section")}</button>
       </div>
     </div>
   );
@@ -1215,6 +1303,9 @@ function BlocksEditor({ ar, en, onChange }: { ar: unknown[]; en: unknown[]; onCh
 
 // محرّر قسم «كيف يساعد…» في التقنيات — عنوان + بطاقتين (فوائد + قيمة تربوية)، عربي/إنجليزي
 function HelpSectionEditor({ ar, en, onChange }: { ar: Rec; en: Rec; onChange: (ar: Rec, en: Rec) => void }) {
+  const { lang } = useCmsLang();
+  const isEn = lang === "en";
+  const tt = (arTxt: string, e: string) => (isEn ? e : arTxt);
   const sc = (key: string, label: string) => (
     <BiScalar label={label} a={blkStr(ar[key])} e={blkStr(en[key])}
       onA={(v) => onChange({ ...ar, [key]: v }, { ...en })} onE={(v) => onChange({ ...ar }, { ...en, [key]: v })} />
@@ -1222,22 +1313,22 @@ function HelpSectionEditor({ ar, en, onChange }: { ar: Rec; en: Rec; onChange: (
   const list = (key: string, label: string) => (
     <div>
       <p className="mb-1 text-xs font-semibold text-ink-soft">{label}</p>
-      <BiStrList a={blkStrArr(ar[key])} e={blkStrArr(en[key])} addLabel={listAdd(key)} onChange={(av, ev) => onChange({ ...ar, [key]: av }, { ...en, [key]: ev })} />
+      <BiStrList a={blkStrArr(ar[key])} e={blkStrArr(en[key])} addLabel={listAdd(key, isEn)} onChange={(av, ev) => onChange({ ...ar, [key]: av }, { ...en, [key]: ev })} />
     </div>
   );
   return (
     <div className="space-y-3 rounded-2xl border border-line bg-surface/40 p-4">
-      <div className="grid grid-cols-2 gap-2 px-1 text-[10px] font-bold text-ink-soft"><span>عربي</span><span dir="ltr">English</span></div>
-      {sc("title", "عنوان القسم")}
+      <div className="grid grid-cols-2 gap-2 px-1 text-[10px] font-bold text-ink-soft"><span>{tt("عربي", "Arabic")}</span><span dir="ltr">English</span></div>
+      {sc("title", tt("عنوان القسم", "Section heading"))}
       <div className="space-y-2 rounded-xl border border-line bg-white p-3">
-        <p className="text-xs font-bold text-ink">البطاقة الأولى — الفوائد</p>
-        {sc("benefitsHeading", "عنوان البطاقة")}
-        {list("benefits", "عناصر البطاقة")}
+        <p className="text-xs font-bold text-ink">{tt("البطاقة الأولى — الفوائد", "First card — Benefits")}</p>
+        {sc("benefitsHeading", tt("عنوان البطاقة", "Card title"))}
+        {list("benefits", tt("عناصر البطاقة", "Card items"))}
       </div>
       <div className="space-y-2 rounded-xl border border-line bg-white p-3">
-        <p className="text-xs font-bold text-ink">البطاقة الثانية — القيمة التربوية</p>
-        {sc("valueHeading", "عنوان البطاقة")}
-        {list("values", "عناصر البطاقة")}
+        <p className="text-xs font-bold text-ink">{tt("البطاقة الثانية — القيمة التربوية", "Second card — Educational value")}</p>
+        {sc("valueHeading", tt("عنوان البطاقة", "Card title"))}
+        {list("values", tt("عناصر البطاقة", "Card items"))}
       </div>
     </div>
   );
@@ -1245,6 +1336,8 @@ function HelpSectionEditor({ ar, en, onChange }: { ar: Rec; en: Rec; onChange: (
 
 // صفّ أيقونة واحدة — معاينة + اختيار بصري من شبكة الأيقونات
 function IconRow({ index, value, onChange, onRemove }: { index: number; value: string; onChange: (k: string) => void; onRemove: () => void }) {
+  const { lang } = useCmsLang();
+  const en = lang === "en";
   const [pick, setPick] = useState(false);
   return (
     <div className="rounded-xl border border-line bg-surface/50 p-3">
@@ -1252,9 +1345,9 @@ function IconRow({ index, value, onChange, onRemove }: { index: number; value: s
         <div className="flex items-center gap-2">
           <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-surface text-[11px] font-bold text-ink-soft">{index + 1}</span>
           <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand/10 text-brand">{iconByKey(value)}</span>
-          <button type="button" onClick={() => setPick((p) => !p)} className="rounded-lg bg-brand/10 px-3 py-1.5 text-[11px] font-semibold text-brand hover:bg-brand hover:text-white">{pick ? "إغلاق" : "تغيير الأيقونة"}</button>
+          <button type="button" onClick={() => setPick((p) => !p)} className="rounded-lg bg-brand/10 px-3 py-1.5 text-[11px] font-semibold text-brand hover:bg-brand hover:text-white">{pick ? (en ? "Close" : "إغلاق") : (en ? "Change Icon" : "تغيير الأيقونة")}</button>
         </div>
-        <button type="button" onClick={onRemove} className="rounded-lg bg-red-50 px-2.5 py-1 text-[11px] font-semibold text-red-600 hover:bg-red-600 hover:text-white">حذف</button>
+        <button type="button" onClick={onRemove} className="rounded-lg bg-red-50 px-2.5 py-1 text-[11px] font-semibold text-red-600 hover:bg-red-600 hover:text-white">{en ? "Remove" : "حذف"}</button>
       </div>
       {pick && (
         <div className="mt-3 grid grid-cols-6 gap-2 sm:grid-cols-10">
@@ -1272,20 +1365,22 @@ function IconRow({ index, value, onChange, onRemove }: { index: number; value: s
 
 // محرّر قائمة أيقونات بصري — لكل بطاقة أيقونة تُختار من شبكة (بدل كتابة الاسم)
 function IconListEditor({ value, onChange }: { value: unknown; onChange: (v: unknown) => void }) {
+  const { lang } = useCmsLang();
+  const en = lang === "en";
   const items = (Array.isArray(value) ? value : []).map((x) => String(x ?? ""));
   const update = (i: number, k: string) => { const c = [...items]; c[i] = k; onChange(c); };
   const remove = (i: number) => onChange(items.filter((_, j) => j !== i));
   const add = () => onChange([...items, "check"]);
   return (
     <div className="space-y-2">
-      <p className="text-[11px] text-ink-soft">لكل بطاقة في القسم أيقونة — بنفس ترتيب البطاقات. اختر الأيقونة بصرياً.</p>
-      {items.length === 0 && <p className="rounded-xl border border-dashed border-line bg-surface px-3 py-2 text-xs text-ink-soft">لا توجد أيقونات — اضغط «إضافة أيقونة».</p>}
+      <p className="text-[11px] text-ink-soft">{en ? "Each card in the section has an icon — in the same order as the cards. Pick the icon visually." : "لكل بطاقة في القسم أيقونة — بنفس ترتيب البطاقات. اختر الأيقونة بصرياً."}</p>
+      {items.length === 0 && <p className="rounded-xl border border-dashed border-line bg-surface px-3 py-2 text-xs text-ink-soft">{en ? "No icons — click “Add Icon”." : "لا توجد أيقونات — اضغط «إضافة أيقونة»."}</p>}
       {items.map((k, i) => (
         <IconRow key={i} index={i} value={k} onChange={(nk) => update(i, nk)} onRemove={() => remove(i)} />
       ))}
       <button type="button" onClick={add} className="inline-flex items-center gap-1.5 rounded-lg bg-brand/10 px-3 py-1.5 text-xs font-semibold text-brand hover:bg-brand hover:text-white">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path strokeLinecap="round" d="M12 5v14M5 12h14" /></svg>
-        إضافة أيقونة
+        {en ? "Add Icon" : "إضافة أيقونة"}
       </button>
     </div>
   );
@@ -1299,6 +1394,9 @@ function resolveSrc(s: string): string {
 }
 
 function ImageInput({ f, value, pathFallback, type, id, isNew, onUploaded, onChange }: { f: FieldSchema; value: unknown; pathFallback: string; type: string; id: string; isNew: boolean; onUploaded: (it: CmsItem) => void; onChange: (v: string) => void }) {
+  const { lang } = useCmsLang();
+  const en = lang === "en";
+  const t = (ar: string, e: string) => (en ? e : ar);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
   const [localPreview, setLocalPreview] = useState("");
@@ -1314,7 +1412,7 @@ function ImageInput({ f, value, pathFallback, type, id, isNew, onUploaded, onCha
     const file = e.target.files?.[0];
     e.target.value = "";
     if (!file) return;
-    if (file.size > 5 * 1024 * 1024) { setErr("الحد الأقصى 5 ميجابايت."); return; }
+    if (file.size > 5 * 1024 * 1024) { setErr(t("الحد الأقصى 5 ميجابايت.", "Maximum size is 5 MB.")); return; }
     setErr("");
     setPending(file);
   }
@@ -1335,7 +1433,7 @@ function ImageInput({ f, value, pathFallback, type, id, isNew, onUploaded, onCha
         onUploaded(saved);
       }
     } catch (e) {
-      setErr(e instanceof Error ? e.message : "تعذّر الرفع.");
+      setErr(e instanceof Error ? e.message : t("تعذّر الرفع.", "Could not upload."));
       setLocalPreview("");
     } finally {
       setBusy(false);
@@ -1356,10 +1454,10 @@ function ImageInput({ f, value, pathFallback, type, id, isNew, onUploaded, onCha
         )}
         <div>
           <label className="inline-block cursor-pointer rounded-xl bg-brand/10 px-4 py-2.5 text-sm font-semibold text-brand transition-colors hover:bg-brand hover:text-white">
-            {busy ? "جارٍ الرفع…" : src ? "تغيير الصورة" : "رفع صورة"}
+            {busy ? t("جارٍ الرفع…", "Uploading…") : src ? t("تغيير الصورة", "Change Image") : t("رفع صورة", "Upload Image")}
             <input type="file" accept="image/*" onChange={onPick} disabled={busy} className="hidden" />
           </label>
-          {localPreview && !busy && <p className="mt-1.5 text-xs font-semibold text-emerald-600">تم رفع الصورة ✓</p>}
+          {localPreview && !busy && <p className="mt-1.5 text-xs font-semibold text-emerald-600">{t("تم رفع الصورة ✓", "Image uploaded ✓")}</p>}
         </div>
       </div>
       {err && <p className="mt-1 text-xs text-red-600">{err}</p>}

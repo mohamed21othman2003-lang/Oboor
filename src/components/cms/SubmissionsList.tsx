@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { listCollection, getSchema, deleteItem, TYPE_LABELS, type CmsItem, type FieldSchema } from "@/lib/cms/api";
+import { listCollection, getSchema, deleteItem, typeLabel, type CmsItem, type FieldSchema } from "@/lib/cms/api";
 import SubmissionsTable from "@/components/cms/SubmissionsTable";
 import ContactMessagesView from "@/components/cms/ContactMessagesView";
 import JobApplicationsTable from "@/components/cms/JobApplicationsTable";
 import AssessmentResultsTable from "@/components/cms/AssessmentResultsTable";
+import { useCmsLang } from "@/lib/cms/i18n";
+import { fieldLabelEn } from "@/lib/cms/fieldLabels";
 
 const isArabic = (v: string) => /[؀-ۿ]/.test(v);
 
@@ -16,6 +18,9 @@ function Ic({ d }: { d: React.ReactNode }) {
 
 // «نسخ الرقم»: بديل مفيد على الويب لزر الاتصال (الديسكتوب لا يتصل)
 function CopyPhone({ phone }: { phone: string }) {
+  const { lang } = useCmsLang();
+  const en = lang === "en";
+  const t = (ar: string, e: string) => (en ? e : ar);
   const [copied, setCopied] = useState(false);
   return (
     <button
@@ -26,7 +31,7 @@ function CopyPhone({ phone }: { phone: string }) {
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         {copied ? <path d="M20 6 9 17l-5-5" /> : <><rect x="9" y="9" width="13" height="13" rx="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></>}
       </svg>
-      {copied ? "تم النسخ" : "نسخ الرقم"}
+      {copied ? t("تم النسخ", "Copied") : t("نسخ الرقم", "Copy number")}
     </button>
   );
 }
@@ -56,6 +61,9 @@ function iconFor(name: string, type: string): React.ReactNode {
 }
 
 export default function SubmissionsList({ type }: { type: string }) {
+  const { lang } = useCmsLang();
+  const en = lang === "en";
+  const t = (ar: string, e: string) => (en ? e : ar);
   const [items, setItems] = useState<CmsItem[]>([]);
   const [fields, setFields] = useState<FieldSchema[]>([]);
   const [open, setOpen] = useState<number | null>(null);
@@ -63,7 +71,8 @@ export default function SubmissionsList({ type }: { type: string }) {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState<number | null>(null);
 
-  const label = TYPE_LABELS[type] || type;
+  const label = typeLabel(type, lang);
+  const fl = (f: FieldSchema) => (en ? (fieldLabelEn(f.name) || f.label) : f.label);
 
   useEffect(() => {
     setLoading(true);
@@ -80,13 +89,13 @@ export default function SubmissionsList({ type }: { type: string }) {
       await deleteItem(type, id);
       setItems((prev) => prev.filter((it) => it.id !== id));
     } catch (e) {
-      alert(e instanceof Error ? e.message : "تعذّر الحذف.");
+      alert(e instanceof Error ? e.message : t("تعذّر الحذف.", "Deletion failed."));
     } finally {
       setBusy(null);
     }
   }
   async function onDelete(id: number) {
-    if (!confirm("حذف هذا الطلب نهائياً؟")) return;
+    if (!confirm(t("حذف هذا الطلب نهائياً؟", "Delete this submission permanently?"))) return;
     await deleteById(id);
   }
 
@@ -98,7 +107,7 @@ export default function SubmissionsList({ type }: { type: string }) {
   const when = (it: CmsItem) => {
     const v = it["created_at"];
     if (!v) return "";
-    try { return new Date(String(v)).toLocaleString("ar-EG", { dateStyle: "medium", timeStyle: "short" }); }
+    try { return new Date(String(v)).toLocaleString(en ? "en-GB" : "ar-EG", { dateStyle: "medium", timeStyle: "short" }); }
     catch { return String(v); }
   };
 
@@ -107,7 +116,7 @@ export default function SubmissionsList({ type }: { type: string }) {
     return (
       <>
         {error && <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">{error}</p>}
-        {loading ? <p className="text-ink-soft">جارٍ التحميل…</p> : <SubmissionsTable items={items} fields={fields} label={label} onDelete={deleteById} busy={busy} />}
+        {loading ? <p className="text-ink-soft">{t("جارٍ التحميل…", "Loading…")}</p> : <SubmissionsTable items={items} fields={fields} label={label} onDelete={deleteById} busy={busy} />}
       </>
     );
   }
@@ -117,7 +126,7 @@ export default function SubmissionsList({ type }: { type: string }) {
     return (
       <>
         {error && <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">{error}</p>}
-        {loading ? <p className="text-ink-soft">جارٍ التحميل…</p> : <ContactMessagesView items={items} label={label} onDelete={deleteById} busy={busy} />}
+        {loading ? <p className="text-ink-soft">{t("جارٍ التحميل…", "Loading…")}</p> : <ContactMessagesView items={items} label={label} onDelete={deleteById} busy={busy} />}
       </>
     );
   }
@@ -127,7 +136,7 @@ export default function SubmissionsList({ type }: { type: string }) {
     return (
       <>
         {error && <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">{error}</p>}
-        {loading ? <p className="text-ink-soft">جارٍ التحميل…</p> : <JobApplicationsTable items={items} fields={fields} label={label} onDelete={deleteById} busy={busy} />}
+        {loading ? <p className="text-ink-soft">{t("جارٍ التحميل…", "Loading…")}</p> : <JobApplicationsTable items={items} fields={fields} label={label} onDelete={deleteById} busy={busy} />}
       </>
     );
   }
@@ -137,7 +146,7 @@ export default function SubmissionsList({ type }: { type: string }) {
     return (
       <>
         {error && <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">{error}</p>}
-        {loading ? <p className="text-ink-soft">جارٍ التحميل…</p> : <AssessmentResultsTable items={items} label={label} onDelete={deleteById} busy={busy} />}
+        {loading ? <p className="text-ink-soft">{t("جارٍ التحميل…", "Loading…")}</p> : <AssessmentResultsTable items={items} label={label} onDelete={deleteById} busy={busy} />}
       </>
     );
   }
@@ -145,16 +154,16 @@ export default function SubmissionsList({ type }: { type: string }) {
   return (
     <div className="space-y-6">
       <div>
-        <Link href="/cms" className="text-xs font-semibold text-[#0F6C73] hover:text-[#1FA6A8]">← لوحة التحكّم</Link>
+        <Link href="/cms" className="text-xs font-semibold text-[#0F6C73] hover:text-[#1FA6A8]">{t("← لوحة التحكّم", "← Dashboard")}</Link>
         <h1 className="mt-1 text-2xl font-extrabold text-ink">{label}</h1>
-        <p className="mt-1 text-sm text-ink-soft">{items.length} طلب</p>
+        <p className="mt-1 text-sm text-ink-soft">{items.length} {t("طلب", "submissions")}</p>
       </div>
 
       {error && <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">{error}</p>}
       {loading ? (
-        <p className="text-ink-soft">جارٍ التحميل…</p>
+        <p className="text-ink-soft">{t("جارٍ التحميل…", "Loading…")}</p>
       ) : items.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-line bg-white p-10 text-center text-ink-soft">لا توجد طلبات بعد.</div>
+        <div className="rounded-2xl border border-dashed border-line bg-white p-10 text-center text-ink-soft">{t("لا توجد طلبات بعد.", "No submissions yet.")}</div>
       ) : (
         <div className="space-y-3">
           {items.map((it) => {
@@ -175,7 +184,7 @@ export default function SubmissionsList({ type }: { type: string }) {
             return (
               <div key={it.id} className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-line transition-shadow hover:shadow-md">
                 {/* Header */}
-                <button onClick={() => setOpen(isOpen ? null : it.id)} className="flex w-full items-center gap-3 px-5 py-4 text-right transition-colors hover:bg-surface/50">
+                <button onClick={() => setOpen(isOpen ? null : it.id)} className="flex w-full items-center gap-3 px-5 py-4 text-start transition-colors hover:bg-surface/50">
                   <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#1FA6A8]/12 text-base font-extrabold text-[#0F6C73]">{primary(it).charAt(0)}</span>
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-bold text-ink">{primary(it)}</p>
@@ -190,8 +199,8 @@ export default function SubmissionsList({ type }: { type: string }) {
                     {(phone || email) && (
                       <div className="mb-4 flex flex-wrap gap-2">
                         {phone && <CopyPhone phone={phone} />}
-                        {wa && <a href={`https://wa.me/${wa}`} target="_blank" rel="noopener" className="inline-flex items-center gap-1.5 rounded-xl bg-[#25D366] px-3.5 py-2 text-xs font-bold text-white transition-opacity hover:opacity-90"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.5 15.3L2 22l4.8-1.5A10 10 0 1 0 12 2zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-1.7-.1-.4-.1-.9-.3-1.6-.6-2.7-1.2-4.5-4-4.6-4.2-.1-.2-1.1-1.5-1.1-2.8s.7-2 .9-2.2c.2-.2.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 1.9c.1.1.1.3 0 .5l-.4.5-.3.3c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.3.1.5.1.6-.1l.7-.9c.2-.2.4-.2.6-.1l1.8.9c.2.1.4.2.5.3.1.2.1.7-.1 1.1z" /></svg>واتساب</a>}
-                        {email && <a href={`mailto:${email}`} className="inline-flex items-center gap-1.5 rounded-xl bg-white px-3.5 py-2 text-xs font-bold text-[#0F6C73] ring-1 ring-line transition-colors hover:bg-[#1FA6A8]/10"><span className="h-4 w-4">{FIELD_ICONS.email}</span>إيميل</a>}
+                        {wa && <a href={`https://wa.me/${wa}`} target="_blank" rel="noopener" className="inline-flex items-center gap-1.5 rounded-xl bg-[#25D366] px-3.5 py-2 text-xs font-bold text-white transition-opacity hover:opacity-90"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.5 15.3L2 22l4.8-1.5A10 10 0 1 0 12 2zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-1.7-.1-.4-.1-.9-.3-1.6-.6-2.7-1.2-4.5-4-4.6-4.2-.1-.2-1.1-1.5-1.1-2.8s.7-2 .9-2.2c.2-.2.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 1.9c.1.1.1.3 0 .5l-.4.5-.3.3c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.3.1.5.1.6-.1l.7-.9c.2-.2.4-.2.6-.1l1.8.9c.2.1.4.2.5.3.1.2.1.7-.1 1.1z" /></svg>{t("واتساب", "WhatsApp")}</a>}
+                        {email && <a href={`mailto:${email}`} className="inline-flex items-center gap-1.5 rounded-xl bg-white px-3.5 py-2 text-xs font-bold text-[#0F6C73] ring-1 ring-line transition-colors hover:bg-[#1FA6A8]/10"><span className="h-4 w-4">{FIELD_ICONS.email}</span>{t("إيميل", "Email")}</a>}
                       </div>
                     )}
 
@@ -207,9 +216,9 @@ export default function SubmissionsList({ type }: { type: string }) {
                           <div key={f.name} className="flex items-start gap-3 rounded-xl bg-white p-3 ring-1 ring-line">
                             <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#1FA6A8]/10 text-[#1FA6A8]">{iconFor(f.name, f.type)}</span>
                             <div className="min-w-0">
-                              <p className="text-[11px] font-semibold text-ink-soft">{f.label}</p>
+                              <p className="text-[11px] font-semibold text-ink-soft">{fl(f)}</p>
                               <p className="mt-0.5 text-sm font-medium text-ink break-words">
-                                {isLink ? <a href={v} target="_blank" rel="noopener" className="font-bold text-[#1FA6A8] underline">فتح الملف ↗</a>
+                                {isLink ? <a href={v} target="_blank" rel="noopener" className="font-bold text-[#1FA6A8] underline">{t("فتح الملف ↗", "Open file ↗")}</a>
                                   : isEmail ? <a href={`mailto:${v}`} dir="ltr" className={`inline-block ${linkCls}`}>{v}</a>
                                   : isPhone ? <a href={`tel:${v.replace(/\s+/g, "")}`} dir="ltr" className={`inline-block ${linkCls}`}>{v}</a>
                                   : <span dir={isArabic(v) ? undefined : "ltr"} className="inline-block">{v}</span>}
@@ -225,7 +234,7 @@ export default function SubmissionsList({ type }: { type: string }) {
                       <div className="mt-3 rounded-xl bg-white p-4 ring-1 ring-line">
                         <p className="mb-3 flex items-center gap-1.5 text-[11px] font-semibold text-ink-soft">
                           <span className="text-[#1FA6A8]">{FIELD_ICONS.message}</span>
-                          الإجابات ({answers.length})
+                          {t("الإجابات", "Answers")} ({answers.length})
                         </p>
                         <ol className="space-y-2.5">
                           {answers.map((qa, i) => (
@@ -244,7 +253,7 @@ export default function SubmissionsList({ type }: { type: string }) {
                     {/* الرسائل / الملاحظات */}
                     {boxes.map((f) => (
                       <div key={f.name} className="mt-3 rounded-xl bg-white p-4 ring-1 ring-line">
-                        <p className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold text-ink-soft"><span className="text-[#1FA6A8]">{FIELD_ICONS.message}</span>{f.label}</p>
+                        <p className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold text-ink-soft"><span className="text-[#1FA6A8]">{FIELD_ICONS.message}</span>{fl(f)}</p>
                         <p className="text-sm leading-relaxed text-ink whitespace-pre-wrap break-words">{val(it, f.name)}</p>
                       </div>
                     ))}
@@ -252,7 +261,7 @@ export default function SubmissionsList({ type }: { type: string }) {
                     <div className="mt-4 flex justify-end">
                       <button onClick={() => onDelete(it.id)} disabled={busy === it.id} className="inline-flex items-center gap-1.5 rounded-xl bg-red-50 px-4 py-2 text-xs font-semibold text-red-600 transition-colors hover:bg-red-600 hover:text-white disabled:opacity-50">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></svg>
-                        {busy === it.id ? "…" : "حذف الطلب"}
+                        {busy === it.id ? "…" : t("حذف الطلب", "Delete")}
                       </button>
                     </div>
                   </div>

@@ -5,16 +5,19 @@ import Link from "next/link";
 import CustomSelect from "@/components/ui/Select";
 import { type CmsItem } from "@/lib/cms/api";
 import { exportSheet } from "@/lib/cms/exportSheet";
+import { useCmsLang } from "@/lib/cms/i18n";
 
 /* ===== نتائج التقييم — جدول بأكورديون داخلي (يتمدّد تحت الصف) — ديزاين فقط ===== */
 
 const MONTHS_AR = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
-function stamp(iso: string): { date: string; time: string } {
+const MONTHS_EN = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+function stamp(iso: string, en = false): { date: string; time: string } {
   if (!iso) return { date: "—", time: "" };
   const d = new Date(iso);
   if (isNaN(d.getTime())) return { date: iso, time: "" };
   const h = d.getHours(); const am = h < 12; const h12 = h % 12 === 0 ? 12 : h % 12;
-  return { date: `${d.getDate()} ${MONTHS_AR[d.getMonth()]} ${d.getFullYear()}`, time: `${h12}:${String(d.getMinutes()).padStart(2, "0")} ${am ? "ص" : "م"}` };
+  const months = en ? MONTHS_EN : MONTHS_AR;
+  return { date: `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`, time: `${h12}:${String(d.getMinutes()).padStart(2, "0")} ${en ? (am ? "AM" : "PM") : (am ? "ص" : "م")}` };
 }
 const uniq = (a: string[]) => [...new Set(a.filter(Boolean))];
 
@@ -24,7 +27,16 @@ const LEVEL: Record<string, { label: string; dot: string }> = {
   medium: { label: "متوسط", dot: "#f39c12" },
   high: { label: "شديد", dot: "#e74c3c" },
 };
-const levelInfo = (l: string) => LEVEL[l] || { label: l || "—", dot: "#94a3b8" };
+const LEVEL_EN: Record<string, string> = {
+  low: "Mild",
+  medium: "Moderate",
+  high: "Severe",
+};
+const levelInfo = (l: string, en = false) => {
+  const base = LEVEL[l];
+  if (!base) return { label: l || "—", dot: "#94a3b8" };
+  return { label: en ? (LEVEL_EN[l] || base.label) : base.label, dot: base.dot };
+};
 
 // لون الإجابة: نعم=أخضر · أحياناً=برتقالي · لا=أحمر
 function ansColor(a: string): string {
@@ -57,6 +69,9 @@ export default function AssessmentResultsTable({
 }: {
   items: CmsItem[]; label: string; onDelete: (id: number) => Promise<void>; busy: number | null;
 }) {
+  const { lang } = useCmsLang();
+  const en = lang === "en";
+  const t = (ar: string, e: string) => (en ? e : ar);
   const v = (it: CmsItem, k: string) => { const x = it[k]; return x === null || x === undefined ? "" : String(x); };
 
   const [query, setQuery] = useState("");
@@ -68,9 +83,9 @@ export default function AssessmentResultsTable({
   const [open, setOpen] = useState<number | null>(null);
   const [menu, setMenu] = useState<number | null>(null);
 
-  const typeOpts = useMemo(() => [{ value: "", label: "كل الأنواع" }, ...uniq(items.map((it) => v(it, "assessment"))).map((t) => ({ value: t, label: t }))], [items]);
-  const sevOpts = useMemo(() => [{ value: "", label: "كل المستويات" }, ...uniq(items.map((it) => v(it, "level"))).map((l) => ({ value: l, label: levelInfo(l).label }))], [items]);
-  const rangeOpts = [{ value: "", label: "كل الوقت" }, { value: "today", label: "اليوم" }, { value: "7", label: "آخر ٧ أيام" }, { value: "30", label: "آخر ٣٠ يوم" }];
+  const typeOpts = useMemo(() => [{ value: "", label: t("كل الأنواع", "All Types") }, ...uniq(items.map((it) => v(it, "assessment"))).map((tp) => ({ value: tp, label: tp }))], [items, en]);
+  const sevOpts = useMemo(() => [{ value: "", label: t("كل المستويات", "All Levels") }, ...uniq(items.map((it) => v(it, "level"))).map((l) => ({ value: l, label: levelInfo(l, en).label }))], [items, en]);
+  const rangeOpts = [{ value: "", label: t("كل الوقت", "All Time") }, { value: "today", label: t("اليوم", "Today") }, { value: "7", label: t("آخر ٧ أيام", "Last 7 Days") }, { value: "30", label: t("آخر ٣٠ يوم", "Last 30 Days") }];
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -98,18 +113,19 @@ export default function AssessmentResultsTable({
 
   const resetFilters = () => { setQuery(""); setAtype(""); setSev(""); setRange(""); setPage(1); };
   const onFilter = (fn: () => void) => { fn(); setPage(1); };
-  const del = async (id: number) => { setMenu(null); if (!confirm("حذف هذه النتيجة نهائياً؟")) return; await onDelete(id); };
+  const del = async (id: number) => { setMenu(null); if (!confirm(t("حذف هذه النتيجة نهائياً؟", "Delete this result permanently?"))) return; await onDelete(id); };
 
   const exportCsv = async () => {
+    const dateHeader = t("التاريخ", "Date");
     const cols: [string, (it: CmsItem) => string][] = [
-      ["الطفل", (it) => v(it, "child_name")], ["ولي الأمر", (it) => v(it, "parent_name")], ["الجوال", (it) => v(it, "phone")],
-      ["نوع التقييم", (it) => v(it, "assessment")], ["العمر", (it) => v(it, "age")], ["مستوى الحالة", (it) => levelInfo(v(it, "level")).label],
-      ["المدينة", (it) => v(it, "city")], ["التاريخ", (it) => v(it, "created_at")],
+      [t("الطفل", "Child"), (it) => v(it, "child_name")], [t("ولي الأمر", "Parent"), (it) => v(it, "parent_name")], [t("الجوال", "Phone"), (it) => v(it, "phone")],
+      [t("نوع التقييم", "Assessment Type"), (it) => v(it, "assessment")], [t("العمر", "Age"), (it) => v(it, "age")], [t("مستوى الحالة", "Severity Level"), (it) => levelInfo(v(it, "level"), en).label],
+      [t("المدينة", "City"), (it) => v(it, "city")], [dateHeader, (it) => v(it, "created_at")],
     ];
     await exportSheet({
       filename: "assessment-results",
-      sheetName: "نتائج التقييم",
-      columns: cols.map(([header]) => ({ header, date: header === "التاريخ" })),
+      sheetName: t("نتائج التقييم", "Assessment Results"),
+      columns: cols.map(([header]) => ({ header, date: header === dateHeader })),
       rows: filtered.map((it) => cols.map(([, acc]) => acc(it))),
     });
   };
@@ -122,9 +138,9 @@ export default function AssessmentResultsTable({
   return (
     <div className="space-y-5">
       <div>
-        <Link href="/cms" className="text-xs font-semibold text-[#0F6C73] hover:text-[#1FA6A8]">← لوحة التحكّم</Link>
+        <Link href="/cms" className="text-xs font-semibold text-[#0F6C73] hover:text-[#1FA6A8]">{t("← لوحة التحكّم", "← Dashboard")}</Link>
         <h1 className="mt-1 text-2xl font-extrabold text-ink">{label}</h1>
-        <p className="mt-1 text-sm text-ink-soft">عرض وإدارة جميع نتائج التقييم</p>
+        <p className="mt-1 text-sm text-ink-soft">{t("عرض وإدارة جميع نتائج التقييم", "View and manage all assessment results")}</p>
       </div>
 
       {/* الفلاتر */}
@@ -132,18 +148,18 @@ export default function AssessmentResultsTable({
         <div className="flex flex-wrap items-center gap-2.5">
           <div className="relative min-w-[220px] flex-1">
             <span className="pointer-events-none absolute inset-y-0 start-3 flex items-center text-ink-soft">{I.search}</span>
-            <input value={query} onChange={(e) => onFilter(() => setQuery(e.target.value))} placeholder="ابحث عن اسم الطفل أو ولي الأمر…" className="w-full rounded-xl border border-line bg-surface/60 py-2.5 pe-3 ps-10 text-sm text-ink outline-none transition-colors placeholder:text-ink-soft focus:border-brand focus:bg-white focus:ring-2 focus:ring-brand/20" />
+            <input value={query} onChange={(e) => onFilter(() => setQuery(e.target.value))} placeholder={t("ابحث عن اسم الطفل أو ولي الأمر…", "Search by child's or parent's name…")} className="w-full rounded-xl border border-line bg-surface/60 py-2.5 pe-3 ps-10 text-sm text-ink outline-none transition-colors placeholder:text-ink-soft focus:border-brand focus:bg-white focus:ring-2 focus:ring-brand/20" />
           </div>
-          <div className="w-[150px]"><CustomSelect value={range} onChange={(x) => onFilter(() => setRange(x))} options={rangeOpts} placeholder="كل الوقت" /></div>
-          <div className="w-[160px]"><CustomSelect value={sev} onChange={(x) => onFilter(() => setSev(x))} options={sevOpts} placeholder="كل المستويات" /></div>
-          <div className="w-[170px]"><CustomSelect value={atype} onChange={(x) => onFilter(() => setAtype(x))} options={typeOpts} placeholder="كل الأنواع" /></div>
-          <button onClick={resetFilters} className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-white px-3.5 py-2.5 text-xs font-bold text-ink-soft transition-colors hover:bg-surface">{I.reset} إعادة تعيين</button>
+          <div className="w-[150px]"><CustomSelect value={range} onChange={(x) => onFilter(() => setRange(x))} options={rangeOpts} placeholder={t("كل الوقت", "All Time")} /></div>
+          <div className="w-[160px]"><CustomSelect value={sev} onChange={(x) => onFilter(() => setSev(x))} options={sevOpts} placeholder={t("كل المستويات", "All Levels")} /></div>
+          <div className="w-[170px]"><CustomSelect value={atype} onChange={(x) => onFilter(() => setAtype(x))} options={typeOpts} placeholder={t("كل الأنواع", "All Types")} /></div>
+          <button onClick={resetFilters} className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-white px-3.5 py-2.5 text-xs font-bold text-ink-soft transition-colors hover:bg-surface">{I.reset} {t("إعادة تعيين", "Reset")}</button>
         </div>
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm font-semibold text-ink-soft">إجمالي النتائج: <span className="font-extrabold text-[#0F6C73]">{total}</span></p>
-        <button onClick={exportCsv} className="inline-flex items-center gap-1.5 rounded-xl bg-[#0F6C73] px-4 py-2.5 text-xs font-bold text-white transition-colors hover:bg-[#1FA6A8]">{I.export} تصدير</button>
+        <p className="text-sm font-semibold text-ink-soft">{t("إجمالي النتائج:", "Total Results:")} <span className="font-extrabold text-[#0F6C73]">{total}</span></p>
+        <button onClick={exportCsv} className="inline-flex items-center gap-1.5 rounded-xl bg-[#0F6C73] px-4 py-2.5 text-xs font-bold text-white transition-colors hover:bg-[#1FA6A8]">{I.export} {t("تصدير", "Export")}</button>
       </div>
 
       {/* الجدول */}
@@ -152,25 +168,25 @@ export default function AssessmentResultsTable({
           <table className="w-full border-collapse text-sm">
             <thead className="bg-surface text-ink-soft">
               <tr>
-                <th className="px-4 py-3 text-start text-xs font-bold">الطفل</th>
-                <th className="px-4 py-3 text-center text-xs font-bold">نوع التقييم</th>
-                <th className="px-4 py-3 text-center text-xs font-bold">العمر</th>
-                <th className="px-4 py-3 text-center text-xs font-bold">مستوى الحالة</th>
-                <th className="px-4 py-3 text-center text-xs font-bold">تاريخ التقييم</th>
-                <th className="px-4 py-3 text-center text-xs font-bold">الإجراءات</th>
+                <th className="px-4 py-3 text-start text-xs font-bold">{t("الطفل", "Child")}</th>
+                <th className="px-4 py-3 text-center text-xs font-bold">{t("نوع التقييم", "Assessment Type")}</th>
+                <th className="px-4 py-3 text-center text-xs font-bold">{t("العمر", "Age")}</th>
+                <th className="px-4 py-3 text-center text-xs font-bold">{t("مستوى الحالة", "Severity Level")}</th>
+                <th className="px-4 py-3 text-center text-xs font-bold">{t("تاريخ التقييم", "Assessment Date")}</th>
+                <th className="px-4 py-3 text-center text-xs font-bold">{t("الإجراءات", "Actions")}</th>
               </tr>
             </thead>
             <tbody>
               {pageItems.length === 0 ? (
-                <tr><td colSpan={6} className="px-4 py-12 text-center text-ink-soft">لا توجد نتائج مطابقة.</td></tr>
+                <tr><td colSpan={6} className="px-4 py-12 text-center text-ink-soft">{t("لا توجد نتائج مطابقة.", "No matching results.")}</td></tr>
               ) : pageItems.map((it) => {
                 const isOpen = open === it.id;
                 const name = v(it, "child_name") || v(it, "parent_name") || `#${it.id}`;
                 const phone = v(it, "phone");
                 const email = v(it, "email");
                 const wa = phone.replace(/[^\d]/g, "");
-                const s = stamp(v(it, "created_at"));
-                const lv = levelInfo(v(it, "level"));
+                const s = stamp(v(it, "created_at"), en);
+                const lv = levelInfo(v(it, "level"), en);
                 const answers = answersOf(it);
                 return (
                   <Fragment key={it.id}>
@@ -180,7 +196,7 @@ export default function AssessmentResultsTable({
                           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#1FA6A8]/12 text-sm font-extrabold text-[#0F6C73]">{name.charAt(0)}</span>
                           <div className="min-w-0">
                             <p className="font-bold text-ink">{name}</p>
-                            {v(it, "parent_name") && <p className="mt-0.5 text-[11px] text-ink-soft">ولي الأمر: {v(it, "parent_name")}</p>}
+                            {v(it, "parent_name") && <p className="mt-0.5 text-[11px] text-ink-soft">{t("ولي الأمر:", "Parent:")} {v(it, "parent_name")}</p>}
                           </div>
                         </div>
                       </td>
@@ -196,17 +212,17 @@ export default function AssessmentResultsTable({
                       <td className="px-4 py-3.5">
                         <div className="flex items-center justify-center gap-1.5">
                           <button onClick={() => setOpen(isOpen ? null : it.id)} className="inline-flex items-center gap-1 rounded-xl px-2.5 py-2 text-xs font-bold text-[#0F6C73] transition-colors hover:bg-[#1FA6A8]/10">
-                            عرض التفاصيل <span className={`transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}>{I.chevron}</span>
+                            {t("عرض التفاصيل", "View Details")} <span className={`transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}>{I.chevron}</span>
                           </button>
-                          {email && <a href={`mailto:${email}`} className={`${actBtn} text-[#1FA6A8] hover:border-[#1FA6A8] hover:bg-[#1FA6A8]/10`} title="إيميل" aria-label="إيميل">{I.mail}</a>}
-                          {wa && <a href={`https://wa.me/${wa}`} target="_blank" rel="noopener" className={`${actBtn} text-[#25D366] hover:border-[#25D366] hover:bg-[#25D366]/10`} title="واتساب" aria-label="واتساب">{I.wa}</a>}
+                          {email && <a href={`mailto:${email}`} className={`${actBtn} text-[#1FA6A8] hover:border-[#1FA6A8] hover:bg-[#1FA6A8]/10`} title={t("إيميل", "Email")} aria-label={t("إيميل", "Email")}>{I.mail}</a>}
+                          {wa && <a href={`https://wa.me/${wa}`} target="_blank" rel="noopener" className={`${actBtn} text-[#25D366] hover:border-[#25D366] hover:bg-[#25D366]/10`} title={t("واتساب", "WhatsApp")} aria-label={t("واتساب", "WhatsApp")}>{I.wa}</a>}
                           <div className="relative">
-                            <button onClick={() => setMenu(menu === it.id ? null : it.id)} className={`${actBtn} text-ink hover:bg-surface`} title="المزيد" aria-label="المزيد">{I.more}</button>
+                            <button onClick={() => setMenu(menu === it.id ? null : it.id)} className={`${actBtn} text-ink hover:bg-surface`} title={t("المزيد", "More")} aria-label={t("المزيد", "More")}>{I.more}</button>
                             {menu === it.id && (
                               <>
                                 <div className="fixed inset-0 z-20" onClick={() => setMenu(null)} />
                                 <div className="absolute end-0 z-30 mt-1 w-40 overflow-hidden rounded-xl border border-line bg-white py-1 shadow-xl">
-                                  <button onClick={() => del(it.id)} disabled={busy === it.id} className="flex w-full items-center gap-2 px-3 py-2 text-start text-xs font-semibold text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50">{I.trash}{busy === it.id ? "جارٍ الحذف…" : "حذف النتيجة"}</button>
+                                  <button onClick={() => del(it.id)} disabled={busy === it.id} className="flex w-full items-center gap-2 px-3 py-2 text-start text-xs font-semibold text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50">{I.trash}{busy === it.id ? t("جارٍ الحذف…", "Deleting…") : t("حذف النتيجة", "Delete Result")}</button>
                                 </div>
                               </>
                             )}
@@ -222,25 +238,25 @@ export default function AssessmentResultsTable({
                             <div className="grid gap-4 border-t border-line bg-surface/30 p-5 lg:grid-cols-3">
                               {/* معلومات الطفل */}
                               <div className="rounded-xl border border-line bg-white p-4">
-                                <p className="mb-3 text-sm font-extrabold text-ink">معلومات الطفل</p>
-                                <KV label="اسم الطفل" value={v(it, "child_name") || "—"} />
-                                <KV label="العمر" value={v(it, "age") || "—"} />
-                                <KV label="الجنس" value={v(it, "gender") || "—"} />
-                                <KV label="نوع التقييم" value={v(it, "assessment") || "—"} />
-                                <KV label="مستوى الحالة" value={<span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full" style={{ background: lv.dot }} />{lv.label}</span>} last />
+                                <p className="mb-3 text-sm font-extrabold text-ink">{t("معلومات الطفل", "Child Information")}</p>
+                                <KV label={t("اسم الطفل", "Child's Name")} value={v(it, "child_name") || "—"} />
+                                <KV label={t("العمر", "Age")} value={v(it, "age") || "—"} />
+                                <KV label={t("الجنس", "Gender")} value={v(it, "gender") || "—"} />
+                                <KV label={t("نوع التقييم", "Assessment Type")} value={v(it, "assessment") || "—"} />
+                                <KV label={t("مستوى الحالة", "Severity Level")} value={<span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full" style={{ background: lv.dot }} />{lv.label}</span>} last />
                               </div>
                               {/* معلومات ولي الأمر */}
                               <div className="rounded-xl border border-line bg-white p-4">
-                                <p className="mb-3 text-sm font-extrabold text-ink">معلومات ولي الأمر</p>
-                                <Info icon={I.user} label="ولي الأمر" value={v(it, "parent_name") || "—"} />
-                                <Info icon={I.phone} label="الجوال" value={phone || "—"} ltr />
-                                <Info icon={I.mail} label="البريد الإلكتروني" value={email || "—"} ltr />
-                                <Info icon={I.pin} label="المدينة" value={v(it, "city") || "—"} last />
+                                <p className="mb-3 text-sm font-extrabold text-ink">{t("معلومات ولي الأمر", "Parent Information")}</p>
+                                <Info icon={I.user} label={t("ولي الأمر", "Parent")} value={v(it, "parent_name") || "—"} />
+                                <Info icon={I.phone} label={t("الجوال", "Phone")} value={phone || "—"} ltr />
+                                <Info icon={I.mail} label={t("البريد الإلكتروني", "Email")} value={email || "—"} ltr />
+                                <Info icon={I.pin} label={t("المدينة", "City")} value={v(it, "city") || "—"} last />
                               </div>
                               {/* أسئلة التقييم */}
                               <div className="rounded-xl border border-line bg-white p-4">
-                                <p className="mb-3 flex items-center gap-1.5 text-sm font-extrabold text-ink"><span className="text-[#1FA6A8]">{I.msg}</span> أسئلة التقييم ({answers.length})</p>
-                                {answers.length === 0 ? <p className="text-xs text-ink-soft">لا توجد إجابات.</p> : (
+                                <p className="mb-3 flex items-center gap-1.5 text-sm font-extrabold text-ink"><span className="text-[#1FA6A8]">{I.msg}</span> {t("أسئلة التقييم", "Assessment Questions")} ({answers.length})</p>
+                                {answers.length === 0 ? <p className="text-xs text-ink-soft">{t("لا توجد إجابات.", "No answers.")}</p> : (
                                   <ol className="space-y-2.5">
                                     {answers.map((qa, i) => (
                                       <li key={i} className="flex items-start gap-2 border-b border-line/60 pb-2 last:border-0">
@@ -271,10 +287,10 @@ export default function AssessmentResultsTable({
       {total > 0 && (
         <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-line bg-white px-4 py-3 shadow-sm">
           <div className="flex items-center gap-2 text-xs text-ink-soft">
-            <span>عدد الصفوف:</span>
+            <span>{t("عدد الصفوف:", "Rows per page:")}</span>
             <div className="w-[72px]"><CustomSelect value={String(perPage)} onChange={(x) => { setPerPage(Number(x)); setPage(1); }} options={[{ value: "10", label: "10" }, { value: "25", label: "25" }, { value: "50", label: "50" }]} /></div>
           </div>
-          <p className="text-xs font-semibold text-ink-soft">عرض {total === 0 ? 0 : startIdx + 1} إلى {Math.min(startIdx + perPage, total)} من {total} نتيجة</p>
+          <p className="text-xs font-semibold text-ink-soft">{en ? `Showing ${total === 0 ? 0 : startIdx + 1} to ${Math.min(startIdx + perPage, total)} of ${total} results` : `عرض ${total === 0 ? 0 : startIdx + 1} إلى ${Math.min(startIdx + perPage, total)} من ${total} نتيجة`}</p>
           <div className="flex items-center gap-1" dir="ltr">
             <PgBtn onClick={() => setPage(1)} disabled={cur === 1}>«</PgBtn>
             <PgBtn onClick={() => setPage(cur - 1)} disabled={cur === 1}>‹</PgBtn>

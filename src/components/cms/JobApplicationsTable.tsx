@@ -5,18 +5,21 @@ import Link from "next/link";
 import CustomSelect from "@/components/ui/Select";
 import { type CmsItem, type FieldSchema } from "@/lib/cms/api";
 import { exportSheet } from "@/lib/cms/exportSheet";
+import { useCmsLang } from "@/lib/cms/i18n";
 
 /* ===== جدول طلبات التوظيف (CRM) — ديزاين فقط، نفس البيانات والأكشنز ===== */
 
 const MONTHS_AR = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
-function stamp(iso: string): { date: string; time: string } {
+const MONTHS_EN = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+function stamp(iso: string, en = false): { date: string; time: string } {
   if (!iso) return { date: "—", time: "" };
   const d = new Date(iso);
   if (isNaN(d.getTime())) return { date: iso, time: "" };
   const h = d.getHours();
   const am = h < 12;
   const h12 = h % 12 === 0 ? 12 : h % 12;
-  return { date: `${d.getDate()} ${MONTHS_AR[d.getMonth()]} ${d.getFullYear()}`, time: `${h12}:${String(d.getMinutes()).padStart(2, "0")} ${am ? "ص" : "م"}` };
+  const months = en ? MONTHS_EN : MONTHS_AR;
+  return { date: `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`, time: `${h12}:${String(d.getMinutes()).padStart(2, "0")} ${en ? (am ? "AM" : "PM") : (am ? "ص" : "م")}` };
 }
 const uniq = (a: string[]) => [...new Set(a.filter(Boolean))];
 
@@ -52,6 +55,10 @@ export default function JobApplicationsTable({
   onDelete: (id: number) => Promise<void>;
   busy: number | null;
 }) {
+  const { lang } = useCmsLang();
+  const en = lang === "en";
+  const t = (ar: string, e: string) => (en ? e : ar);
+
   const v = (it: CmsItem, k: string) => { const x = it[k]; return x === null || x === undefined ? "" : String(x); };
 
   const [query, setQuery] = useState("");
@@ -64,13 +71,13 @@ export default function JobApplicationsTable({
   const [copied, setCopied] = useState<number | null>(null);
   const [viewing, setViewing] = useState<CmsItem | null>(null);
 
-  const cityOpts = useMemo(() => [{ value: "", label: "كل المدن" }, ...uniq(items.map((it) => v(it, "city"))).map((c) => ({ value: c, label: c }))], [items]);
-  const jobOpts = useMemo(() => [{ value: "", label: "كل الوظائف" }, ...uniq(items.map((it) => v(it, "job"))).map((j) => ({ value: j, label: j }))], [items]);
+  const cityOpts = useMemo(() => [{ value: "", label: t("كل المدن", "All Cities") }, ...uniq(items.map((it) => v(it, "city"))).map((c) => ({ value: c, label: c }))], [items, en]);
+  const jobOpts = useMemo(() => [{ value: "", label: t("كل الوظائف", "All Positions") }, ...uniq(items.map((it) => v(it, "job"))).map((j) => ({ value: j, label: j }))], [items, en]);
   const rangeOpts = [
-    { value: "", label: "كل الوقت" },
-    { value: "today", label: "اليوم" },
-    { value: "7", label: "آخر ٧ أيام" },
-    { value: "30", label: "آخر ٣٠ يوم" },
+    { value: "", label: t("كل الوقت", "All Time") },
+    { value: "today", label: t("اليوم", "Today") },
+    { value: "7", label: t("آخر ٧ أيام", "Last 7 Days") },
+    { value: "30", label: t("آخر ٣٠ يوم", "Last 30 Days") },
   ];
 
   const filtered = useMemo(() => {
@@ -100,19 +107,20 @@ export default function JobApplicationsTable({
   const resetFilters = () => { setQuery(""); setCity(""); setJob(""); setRange(""); setPage(1); };
   const onFilter = (fn: () => void) => { fn(); setPage(1); };
   const copyPhone = (id: number, phone: string) => navigator.clipboard?.writeText(phone).then(() => { setCopied(id); setTimeout(() => setCopied((c) => (c === id ? null : c)), 1500); });
-  const del = async (id: number) => { setMenu(null); if (!confirm("حذف هذا الطلب نهائياً؟")) return; await onDelete(id); };
+  const del = async (id: number) => { setMenu(null); if (!confirm(t("حذف هذا الطلب نهائياً؟", "Permanently delete this application?"))) return; await onDelete(id); };
 
   const exportCsv = async () => {
     const cols: [string, (it: CmsItem) => string, boolean?][] = [
-      ["الاسم", (it) => v(it, "name")], ["البريد", (it) => v(it, "email")], ["الجوال", (it) => v(it, "phone")],
-      ["الوظيفة", (it) => v(it, "job")], ["المدينة", (it) => v(it, "city")], ["المسمى الحالي", (it) => v(it, "current_role")],
-      ["الخبرة", (it) => v(it, "experience")], ["التاريخ", (it) => v(it, "created_at")],
-      ["السيرة الذاتية", (it) => v(it, "cv"), true],
+      [t("الاسم", "Name"), (it) => v(it, "name")], [t("البريد", "Email"), (it) => v(it, "email")], [t("الجوال", "Phone"), (it) => v(it, "phone")],
+      [t("الوظيفة", "Position"), (it) => v(it, "job")], [t("المدينة", "City"), (it) => v(it, "city")], [t("المسمى الحالي", "Current Role"), (it) => v(it, "current_role")],
+      [t("الخبرة", "Experience"), (it) => v(it, "experience")], [t("التاريخ", "Date"), (it) => v(it, "created_at")],
+      [t("السيرة الذاتية", "CV/Resume"), (it) => v(it, "cv"), true],
     ];
+    const dateHeader = t("التاريخ", "Date");
     await exportSheet({
       filename: "job-applications",
-      sheetName: "طلبات التوظيف",
-      columns: cols.map(([header, , link]) => ({ header, link, date: header === "التاريخ" })),
+      sheetName: t("طلبات التوظيف", "Job Applications"),
+      columns: cols.map(([header, , link]) => ({ header, link, date: header === dateHeader })),
       rows: filtered.map((it) => cols.map(([, acc]) => acc(it))),
     });
   };
@@ -120,15 +128,15 @@ export default function JobApplicationsTable({
   const actBtn = "flex h-9 w-9 items-center justify-center rounded-xl border border-line bg-white transition-colors";
   const cvLink = (it: CmsItem) => {
     const cv = v(it, "cv");
-    return cv ? <a href={cv} target="_blank" rel="noopener" onClick={(e) => e.stopPropagation()} className="inline-flex items-center gap-1 text-xs font-bold text-[#0F6C73] hover:text-[#1FA6A8]">فتح الملف {I.open}</a> : <span className="text-ink-soft">—</span>;
+    return cv ? <a href={cv} target="_blank" rel="noopener" onClick={(e) => e.stopPropagation()} className="inline-flex items-center gap-1 text-xs font-bold text-[#0F6C73] hover:text-[#1FA6A8]">{t("فتح الملف", "Open File")} {I.open}</a> : <span className="text-ink-soft">—</span>;
   };
 
   return (
     <div className="space-y-5">
       <div>
-        <Link href="/cms" className="text-xs font-semibold text-[#0F6C73] hover:text-[#1FA6A8]">← لوحة التحكّم</Link>
+        <Link href="/cms" className="text-xs font-semibold text-[#0F6C73] hover:text-[#1FA6A8]">{t("← لوحة التحكّم", "← Dashboard")}</Link>
         <h1 className="mt-1 text-2xl font-extrabold text-ink">{label}</h1>
-        <p className="mt-1 text-sm text-ink-soft">عرض وإدارة جميع طلبات التوظيف الواردة</p>
+        <p className="mt-1 text-sm text-ink-soft">{t("عرض وإدارة جميع طلبات التوظيف الواردة", "View and manage all incoming job applications")}</p>
       </div>
 
       {/* شريط الفلاتر */}
@@ -136,18 +144,18 @@ export default function JobApplicationsTable({
         <div className="flex flex-wrap items-center gap-2.5">
           <div className="relative min-w-[230px] flex-1">
             <span className="pointer-events-none absolute inset-y-0 start-3 flex items-center text-ink-soft">{I.search}</span>
-            <input value={query} onChange={(e) => onFilter(() => setQuery(e.target.value))} placeholder="ابحث عن اسم أو بريد إلكتروني أو هاتف…" className="w-full rounded-xl border border-line bg-surface/60 py-2.5 pe-3 ps-10 text-sm text-ink outline-none transition-colors placeholder:text-ink-soft focus:border-brand focus:bg-white focus:ring-2 focus:ring-brand/20" />
+            <input value={query} onChange={(e) => onFilter(() => setQuery(e.target.value))} placeholder={t("ابحث عن اسم أو بريد إلكتروني أو هاتف…", "Search by name, email or phone…")} className="w-full rounded-xl border border-line bg-surface/60 py-2.5 pe-3 ps-10 text-sm text-ink outline-none transition-colors placeholder:text-ink-soft focus:border-brand focus:bg-white focus:ring-2 focus:ring-brand/20" />
           </div>
-          <div className="w-[150px]"><CustomSelect value={range} onChange={(x) => onFilter(() => setRange(x))} options={rangeOpts} placeholder="كل الوقت" /></div>
-          <div className="w-[160px]"><CustomSelect value={city} onChange={(x) => onFilter(() => setCity(x))} options={cityOpts} placeholder="كل المدن" /></div>
-          <div className="w-[180px]"><CustomSelect value={job} onChange={(x) => onFilter(() => setJob(x))} options={jobOpts} placeholder="كل الوظائف" /></div>
-          <button onClick={resetFilters} className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-white px-3.5 py-2.5 text-xs font-bold text-ink-soft transition-colors hover:bg-surface">{I.reset} إعادة تعيين</button>
+          <div className="w-[150px]"><CustomSelect value={range} onChange={(x) => onFilter(() => setRange(x))} options={rangeOpts} placeholder={t("كل الوقت", "All Time")} /></div>
+          <div className="w-[160px]"><CustomSelect value={city} onChange={(x) => onFilter(() => setCity(x))} options={cityOpts} placeholder={t("كل المدن", "All Cities")} /></div>
+          <div className="w-[180px]"><CustomSelect value={job} onChange={(x) => onFilter(() => setJob(x))} options={jobOpts} placeholder={t("كل الوظائف", "All Positions")} /></div>
+          <button onClick={resetFilters} className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-white px-3.5 py-2.5 text-xs font-bold text-ink-soft transition-colors hover:bg-surface">{I.reset} {t("إعادة تعيين", "Reset")}</button>
         </div>
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm font-semibold text-ink-soft">إجمالي الطلبات: <span className="font-extrabold text-[#0F6C73]">{total}</span> طلب</p>
-        <button onClick={exportCsv} className="inline-flex items-center gap-1.5 rounded-xl bg-[#0F6C73] px-4 py-2.5 text-xs font-bold text-white transition-colors hover:bg-[#1FA6A8]">{I.export} تصدير</button>
+        <p className="text-sm font-semibold text-ink-soft">{t("إجمالي الطلبات:", "Total applications:")} <span className="font-extrabold text-[#0F6C73]">{total}</span> {t("طلب", "application(s)")}</p>
+        <button onClick={exportCsv} className="inline-flex items-center gap-1.5 rounded-xl bg-[#0F6C73] px-4 py-2.5 text-xs font-bold text-white transition-colors hover:bg-[#1FA6A8]">{I.export} {t("تصدير", "Export")}</button>
       </div>
 
       {/* جدول (ديسكتوب) */}
@@ -156,25 +164,25 @@ export default function JobApplicationsTable({
           <table className="w-full border-collapse text-sm">
             <thead className="sticky top-0 z-10 bg-surface text-ink-soft">
               <tr>
-                <th className="px-4 py-3 text-start text-xs font-bold">المتقدم</th>
-                <th className="px-4 py-3 text-center text-xs font-bold">الوظيفة</th>
-                <th className="px-4 py-3 text-center text-xs font-bold">المدينة</th>
-                <th className="px-4 py-3 text-center text-xs font-bold">المسمى الحالي</th>
-                <th className="px-4 py-3 text-center text-xs font-bold">الخبرة</th>
-                <th className="px-4 py-3 text-center text-xs font-bold">تاريخ التقديم</th>
-                <th className="px-4 py-3 text-center text-xs font-bold">السيرة الذاتية</th>
-                <th className="px-4 py-3 text-center text-xs font-bold">الإجراءات</th>
+                <th className="px-4 py-3 text-start text-xs font-bold">{t("المتقدم", "Applicant")}</th>
+                <th className="px-4 py-3 text-center text-xs font-bold">{t("الوظيفة", "Position")}</th>
+                <th className="px-4 py-3 text-center text-xs font-bold">{t("المدينة", "City")}</th>
+                <th className="px-4 py-3 text-center text-xs font-bold">{t("المسمى الحالي", "Current Role")}</th>
+                <th className="px-4 py-3 text-center text-xs font-bold">{t("الخبرة", "Experience")}</th>
+                <th className="px-4 py-3 text-center text-xs font-bold">{t("تاريخ التقديم", "Application Date")}</th>
+                <th className="px-4 py-3 text-center text-xs font-bold">{t("السيرة الذاتية", "CV/Resume")}</th>
+                <th className="px-4 py-3 text-center text-xs font-bold">{t("الإجراءات", "Actions")}</th>
               </tr>
             </thead>
             <tbody>
               {pageItems.length === 0 ? (
-                <tr><td colSpan={8} className="px-4 py-12 text-center text-ink-soft">لا توجد طلبات مطابقة.</td></tr>
+                <tr><td colSpan={8} className="px-4 py-12 text-center text-ink-soft">{t("لا توجد طلبات مطابقة.", "No matching applications.")}</td></tr>
               ) : pageItems.map((it) => {
                 const name = v(it, "name") || `#${it.id}`;
                 const phone = v(it, "phone");
                 const email = v(it, "email");
                 const wa = phone.replace(/[^\d]/g, "");
-                const s = stamp(v(it, "created_at"));
+                const s = stamp(v(it, "created_at"), en);
                 return (
                   <tr key={it.id} onClick={() => setViewing(it)} className="cursor-pointer border-t border-line transition-colors hover:bg-surface/50">
                     <td className="px-4 py-3.5">
@@ -198,18 +206,18 @@ export default function JobApplicationsTable({
                     <td className="px-4 py-3.5 text-center">{cvLink(it)}</td>
                     <td className="px-4 py-3.5" onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center justify-center gap-1.5">
-                        {email && <a href={`mailto:${email}`} className={`${actBtn} text-[#1FA6A8] hover:border-[#1FA6A8] hover:bg-[#1FA6A8]/10`} title="إيميل" aria-label="إيميل">{I.mail}</a>}
-                        {wa && <a href={`https://wa.me/${wa}`} target="_blank" rel="noopener" className={`${actBtn} text-[#25D366] hover:border-[#25D366] hover:bg-[#25D366]/10`} title="واتساب" aria-label="واتساب">{I.wa}</a>}
-                        <button onClick={() => setViewing(it)} className={`${actBtn} text-[#0F6C73] hover:border-[#1FA6A8] hover:bg-[#1FA6A8]/10`} title="عرض التفاصيل" aria-label="عرض التفاصيل">{I.eye}</button>
+                        {email && <a href={`mailto:${email}`} className={`${actBtn} text-[#1FA6A8] hover:border-[#1FA6A8] hover:bg-[#1FA6A8]/10`} title={t("إيميل", "Email")} aria-label={t("إيميل", "Email")}>{I.mail}</a>}
+                        {wa && <a href={`https://wa.me/${wa}`} target="_blank" rel="noopener" className={`${actBtn} text-[#25D366] hover:border-[#25D366] hover:bg-[#25D366]/10`} title={t("واتساب", "WhatsApp")} aria-label={t("واتساب", "WhatsApp")}>{I.wa}</a>}
+                        <button onClick={() => setViewing(it)} className={`${actBtn} text-[#0F6C73] hover:border-[#1FA6A8] hover:bg-[#1FA6A8]/10`} title={t("عرض التفاصيل", "View Details")} aria-label={t("عرض التفاصيل", "View Details")}>{I.eye}</button>
                         <div className="relative">
-                          <button onClick={() => setMenu(menu === it.id ? null : it.id)} className={`${actBtn} text-ink hover:bg-surface`} title="المزيد" aria-label="المزيد">{I.more}</button>
+                          <button onClick={() => setMenu(menu === it.id ? null : it.id)} className={`${actBtn} text-ink hover:bg-surface`} title={t("المزيد", "More")} aria-label={t("المزيد", "More")}>{I.more}</button>
                           {menu === it.id && (
                             <>
                               <div className="fixed inset-0 z-20" onClick={() => setMenu(null)} />
                               <div className="absolute end-0 z-30 mt-1 w-44 overflow-hidden rounded-xl border border-line bg-white py-1 shadow-xl">
-                                <button onClick={() => { setMenu(null); setViewing(it); }} className="flex w-full items-center gap-2 px-3 py-2 text-start text-xs font-semibold text-ink transition-colors hover:bg-surface">{I.eye} عرض التفاصيل</button>
-                                {v(it, "cv") && <a href={v(it, "cv")} target="_blank" rel="noopener" className="flex w-full items-center gap-2 px-3 py-2 text-start text-xs font-semibold text-[#0F6C73] transition-colors hover:bg-surface">{I.file} فتح السيرة الذاتية</a>}
-                                <button onClick={() => del(it.id)} disabled={busy === it.id} className="flex w-full items-center gap-2 px-3 py-2 text-start text-xs font-semibold text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50">{I.trash}{busy === it.id ? "جارٍ الحذف…" : "حذف الطلب"}</button>
+                                <button onClick={() => { setMenu(null); setViewing(it); }} className="flex w-full items-center gap-2 px-3 py-2 text-start text-xs font-semibold text-ink transition-colors hover:bg-surface">{I.eye} {t("عرض التفاصيل", "View Details")}</button>
+                                {v(it, "cv") && <a href={v(it, "cv")} target="_blank" rel="noopener" className="flex w-full items-center gap-2 px-3 py-2 text-start text-xs font-semibold text-[#0F6C73] transition-colors hover:bg-surface">{I.file} {t("فتح السيرة الذاتية", "Open CV/Resume")}</a>}
+                                <button onClick={() => del(it.id)} disabled={busy === it.id} className="flex w-full items-center gap-2 px-3 py-2 text-start text-xs font-semibold text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50">{I.trash}{busy === it.id ? t("جارٍ الحذف…", "Deleting…") : t("حذف الطلب", "Delete Application")}</button>
                               </div>
                             </>
                           )}
@@ -227,13 +235,13 @@ export default function JobApplicationsTable({
       {/* كروت (موبايل) */}
       <div className="space-y-3 lg:hidden">
         {pageItems.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-line bg-white p-8 text-center text-ink-soft">لا توجد طلبات مطابقة.</div>
+          <div className="rounded-2xl border border-dashed border-line bg-white p-8 text-center text-ink-soft">{t("لا توجد طلبات مطابقة.", "No matching applications.")}</div>
         ) : pageItems.map((it) => {
           const name = v(it, "name") || `#${it.id}`;
           const phone = v(it, "phone");
           const email = v(it, "email");
           const wa = phone.replace(/[^\d]/g, "");
-          const s = stamp(v(it, "created_at"));
+          const s = stamp(v(it, "created_at"), en);
           return (
             <div key={it.id} onClick={() => setViewing(it)} className="cursor-pointer rounded-2xl border border-line bg-white p-4 shadow-sm">
               <div className="flex items-center gap-2.5">
@@ -250,10 +258,10 @@ export default function JobApplicationsTable({
                 <span onClick={(e) => e.stopPropagation()}>{cvLink(it)}</span>
               </div>
               <div className="mt-3 flex items-center gap-1.5 border-t border-line pt-3" onClick={(e) => e.stopPropagation()}>
-                {email && <a href={`mailto:${email}`} className={`${actBtn} text-[#1FA6A8]`} aria-label="إيميل">{I.mail}</a>}
-                {wa && <a href={`https://wa.me/${wa}`} target="_blank" rel="noopener" className={`${actBtn} text-[#25D366]`} aria-label="واتساب">{I.wa}</a>}
-                <button onClick={() => setViewing(it)} className={`${actBtn} text-[#0F6C73]`} aria-label="عرض التفاصيل">{I.eye}</button>
-                <button onClick={() => del(it.id)} disabled={busy === it.id} className="ms-auto inline-flex items-center gap-1.5 rounded-xl bg-red-50 px-3 py-2 text-xs font-semibold text-red-600 disabled:opacity-50">{I.trash} حذف</button>
+                {email && <a href={`mailto:${email}`} className={`${actBtn} text-[#1FA6A8]`} aria-label={t("إيميل", "Email")}>{I.mail}</a>}
+                {wa && <a href={`https://wa.me/${wa}`} target="_blank" rel="noopener" className={`${actBtn} text-[#25D366]`} aria-label={t("واتساب", "WhatsApp")}>{I.wa}</a>}
+                <button onClick={() => setViewing(it)} className={`${actBtn} text-[#0F6C73]`} aria-label={t("عرض التفاصيل", "View Details")}>{I.eye}</button>
+                <button onClick={() => del(it.id)} disabled={busy === it.id} className="ms-auto inline-flex items-center gap-1.5 rounded-xl bg-red-50 px-3 py-2 text-xs font-semibold text-red-600 disabled:opacity-50">{I.trash} {t("حذف", "Delete")}</button>
               </div>
             </div>
           );
@@ -264,10 +272,10 @@ export default function JobApplicationsTable({
       {total > 0 && (
         <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-line bg-white px-4 py-3 shadow-sm">
           <div className="flex items-center gap-2 text-xs text-ink-soft">
-            <span>عدد الصفوف:</span>
+            <span>{t("عدد الصفوف:", "Rows per page:")}</span>
             <div className="w-[72px]"><CustomSelect value={String(perPage)} onChange={(x) => { setPerPage(Number(x)); setPage(1); }} options={[{ value: "10", label: "10" }, { value: "25", label: "25" }, { value: "50", label: "50" }]} /></div>
           </div>
-          <p className="text-xs font-semibold text-ink-soft">عرض {total === 0 ? 0 : startIdx + 1} إلى {Math.min(startIdx + perPage, total)} من {total} طلب</p>
+          <p className="text-xs font-semibold text-ink-soft">{t("عرض", "Showing")} {total === 0 ? 0 : startIdx + 1} {t("إلى", "to")} {Math.min(startIdx + perPage, total)} {t("من", "of")} {total} {t("طلب", "application(s)")}</p>
           <div className="flex items-center gap-1" dir="ltr">
             <PgBtn onClick={() => setPage(1)} disabled={cur === 1}>«</PgBtn>
             <PgBtn onClick={() => setPage(cur - 1)} disabled={cur === 1}>‹</PgBtn>
@@ -284,11 +292,11 @@ export default function JobApplicationsTable({
         const phone = v(it, "phone");
         const email = v(it, "email");
         const wa = phone.replace(/[^\d]/g, "");
-        const s = stamp(v(it, "created_at"));
+        const s = stamp(v(it, "created_at"), en);
         const shown = fields.filter((f) => f.type !== "json" && v(it, f.name).trim() !== "");
         const rows = shown.filter((f) => f.type !== "textarea");
         const boxes = shown.filter((f) => f.type === "textarea");
-        const removeAndClose = async () => { if (!confirm("حذف هذا الطلب نهائياً؟")) return; await onDelete(it.id); setViewing(null); };
+        const removeAndClose = async () => { if (!confirm(t("حذف هذا الطلب نهائياً؟", "Permanently delete this application?"))) return; await onDelete(it.id); setViewing(null); };
         return (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setViewing(null)}>
             <div className="max-h-[88vh] w-full max-w-2xl overflow-auto rounded-2xl bg-white shadow-2xl" onClick={(e) => e.stopPropagation()}>
@@ -300,14 +308,14 @@ export default function JobApplicationsTable({
                     <p className="mt-0.5 text-xs text-ink-soft">{v(it, "job")}{v(it, "job") && " · "}{s.date} · {s.time}</p>
                   </div>
                 </div>
-                <button onClick={() => setViewing(null)} className="flex h-9 w-9 items-center justify-center rounded-xl border border-line text-ink-soft transition-colors hover:bg-surface" aria-label="إغلاق">{I.x}</button>
+                <button onClick={() => setViewing(null)} className="flex h-9 w-9 items-center justify-center rounded-xl border border-line text-ink-soft transition-colors hover:bg-surface" aria-label={t("إغلاق", "Close")}>{I.x}</button>
               </div>
 
               <div className="flex flex-wrap gap-2 px-5 pt-4">
-                {wa && <a href={`https://wa.me/${wa}`} target="_blank" rel="noopener" className="inline-flex items-center gap-1.5 rounded-xl bg-[#25D366] px-3.5 py-2 text-xs font-bold text-white transition-opacity hover:opacity-90">{I.wa} واتساب</a>}
-                {email && <a href={`mailto:${email}`} className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-white px-3.5 py-2 text-xs font-bold text-[#1FA6A8] transition-colors hover:bg-surface">{I.mail} إيميل</a>}
-                {phone && <button onClick={() => copyPhone(it.id, phone)} className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-white px-3.5 py-2 text-xs font-bold text-[#0F6C73] transition-colors hover:bg-surface">{copied === it.id ? I.check : I.copy}{copied === it.id ? "تم النسخ" : "نسخ الرقم"}</button>}
-                {v(it, "cv") && <a href={v(it, "cv")} target="_blank" rel="noopener" className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-white px-3.5 py-2 text-xs font-bold text-[#0F6C73] transition-colors hover:bg-surface">{I.file} السيرة الذاتية {I.open}</a>}
+                {wa && <a href={`https://wa.me/${wa}`} target="_blank" rel="noopener" className="inline-flex items-center gap-1.5 rounded-xl bg-[#25D366] px-3.5 py-2 text-xs font-bold text-white transition-opacity hover:opacity-90">{I.wa} {t("واتساب", "WhatsApp")}</a>}
+                {email && <a href={`mailto:${email}`} className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-white px-3.5 py-2 text-xs font-bold text-[#1FA6A8] transition-colors hover:bg-surface">{I.mail} {t("إيميل", "Email")}</a>}
+                {phone && <button onClick={() => copyPhone(it.id, phone)} className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-white px-3.5 py-2 text-xs font-bold text-[#0F6C73] transition-colors hover:bg-surface">{copied === it.id ? I.check : I.copy}{copied === it.id ? t("تم النسخ", "Copied") : t("نسخ الرقم", "Copy Number")}</button>}
+                {v(it, "cv") && <a href={v(it, "cv")} target="_blank" rel="noopener" className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-white px-3.5 py-2 text-xs font-bold text-[#0F6C73] transition-colors hover:bg-surface">{I.file} {t("السيرة الذاتية", "CV/Resume")} {I.open}</a>}
               </div>
 
               <div className="grid gap-2.5 p-5 sm:grid-cols-2">
@@ -320,7 +328,7 @@ export default function JobApplicationsTable({
                     <div key={f.name} className="rounded-xl bg-surface/50 p-3 ring-1 ring-line">
                       <p className="text-[11px] font-semibold text-ink-soft">{f.label}</p>
                       <p className="mt-0.5 break-words text-sm font-medium text-ink">
-                        {isLink ? <a href={val0} target="_blank" rel="noopener" className="font-bold text-[#1FA6A8] underline">فتح الملف ↗</a>
+                        {isLink ? <a href={val0} target="_blank" rel="noopener" className="font-bold text-[#1FA6A8] underline">{t("فتح الملف", "Open File")} ↗</a>
                           : isEmail ? <a href={`mailto:${val0}`} dir="ltr" className="font-bold text-[#0F6C73] underline">{val0}</a>
                           : isPhone ? <a href={`tel:${val0.replace(/\s+/g, "")}`} dir="ltr" className="font-bold text-[#0F6C73] underline">{val0}</a>
                           : <span dir={/[؀-ۿ]/.test(val0) ? undefined : "ltr"}>{val0}</span>}
@@ -338,7 +346,7 @@ export default function JobApplicationsTable({
               ))}
 
               <div className="flex justify-end border-t border-line px-5 py-4">
-                <button onClick={removeAndClose} disabled={busy === it.id} className="inline-flex items-center gap-1.5 rounded-xl bg-red-50 px-4 py-2 text-xs font-semibold text-red-600 transition-colors hover:bg-red-600 hover:text-white disabled:opacity-50">{I.trash}{busy === it.id ? "جارٍ الحذف…" : "حذف الطلب"}</button>
+                <button onClick={removeAndClose} disabled={busy === it.id} className="inline-flex items-center gap-1.5 rounded-xl bg-red-50 px-4 py-2 text-xs font-semibold text-red-600 transition-colors hover:bg-red-600 hover:text-white disabled:opacity-50">{I.trash}{busy === it.id ? t("جارٍ الحذف…", "Deleting…") : t("حذف الطلب", "Delete Application")}</button>
               </div>
             </div>
           </div>

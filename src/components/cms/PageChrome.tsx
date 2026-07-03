@@ -4,6 +4,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { listCollection, updateItem, createItem, deleteItem, uploadField, type CmsItem } from "@/lib/cms/api";
+import { useCmsLang } from "@/lib/cms/i18n";
 // تحميل مكوّن قصّ الصورة عند الحاجة فقط
 const ImageCropModal = dynamic(() => import("@/components/cms/ImageCropModal"), { ssr: false });
 
@@ -31,6 +32,14 @@ const BLOCK_ADD: Record<string, string> = {
   profile_stats: "إضافة إحصائية", join_cards: "إضافة بطاقة",
   features: "إضافة ميزة",
   stats: "إضافة رقم", steps: "إضافة خطوة", services: "إضافة خدمة",
+};
+const BLOCK_ADD_EN: Record<string, string> = {
+  answer_options: "Add answer option", prelim_questions: "Add question",
+  cities: "Add city", employment_types: "Add employment type",
+  accreditations: "Add accreditation", journey: "Add step",
+  profile_stats: "Add statistic", join_cards: "Add card",
+  features: "Add feature",
+  stats: "Add number", steps: "Add step", services: "Add service",
 };
 
 // أسماء ودّية لأقسام رأس الصفحة وعناصرها
@@ -60,6 +69,33 @@ const BLOCK_LABELS: Record<string, string> = {
   accreditations: "الاعتمادات (ملف الفرع)",
   profile_intro: "نبذة ملف الفرع",
   services: "كروت خدمات الفرع",
+};
+const BLOCK_LABELS_EN: Record<string, string> = {
+  hero: "Top intro (Hero)",
+  list: "List header",
+  cities: "Cities (search filters)",
+  employment_types: "Employment types (search filters)",
+  about: "“About Oboor” section",
+  smart_search: "Smart search section",
+  stats: "Numbers section",
+  why_us: "“Why Oboor?” section",
+  success: "Success stories section",
+  gallery: "Gallery section",
+  news: "News section",
+  certs: "Certificates & accreditations section",
+  highlights: "Featured story",
+  join_cards: "Join cards",
+  contact_prompt: "Contact call-to-action bar",
+  features: "Features",
+  steps: "Assessment steps",
+  prelim_questions: "Preliminary questions",
+  answer_options: "Answer options",
+  categories: "News categories",
+  profile_stats: "Branch profile statistics",
+  journey: "Rehabilitation journey (branch profile)",
+  accreditations: "Accreditations (branch profile)",
+  profile_intro: "Branch profile intro",
+  services: "Branch service cards",
 };
 const ITEM_LABELS: Record<string, string> = {
   "hero.badge": "الوسم العلوي",
@@ -93,6 +129,38 @@ const ITEM_LABELS: Record<string, string> = {
   "certs.cert3": "الشهادة الثالثة",
   "certs.cert4": "الشهادة الرابعة",
 };
+const ITEM_LABELS_EN: Record<string, string> = {
+  "hero.badge": "Top badge",
+  "hero.heading": "Heading + description + image",
+  "hero.stat": "Floating badge (counter)",
+  "hero.map_heading": "Map section heading",
+  "hero.features_heading": "Features section heading",
+  "hero.why_heading": "“Why this assessment” section heading",
+  "hero.steps_heading": "Steps section heading",
+  "list.header": "Jobs list header",
+  // Home page
+  "hero.chrome": "Badge + action button (fixed above all slides)",
+  "about.badge": "Badge and “Learn more” button",
+  "about.intro": "Heading + paragraphs",
+  "about.accred": "“Accredited center” card",
+  "about.img1": "Large image",
+  "about.img2": "Small image",
+  "smart_search.badge": "Top badge",
+  "smart_search.main": "Heading + descriptive line",
+  "stats.main": "Heading + descriptive line",
+  "why_us.badge": "Top badge",
+  "why_us.main": "Heading + descriptive line",
+  "success.badge": "Top badge",
+  "success.main": "Heading + descriptive line",
+  "gallery.badge": "Top badge",
+  "gallery.main": "Heading",
+  "news.main": "Heading + descriptive line",
+  "certs.heading": "Heading + descriptive line",
+  "certs.cert1": "First certificate",
+  "certs.cert2": "Second certificate",
+  "certs.cert3": "Third certificate",
+  "certs.cert4": "Fourth certificate",
+};
 // تسميات مخصّصة لحقلَي «العنوان/النص» حسب العنصر (لتوضيح ما يمثّله كل حقل)
 const FIELD_LABELS: Record<string, { title?: string; text?: string }> = {
   "hero.chrome": { title: "الوسم العلوي", text: "نص زر الإجراء" },
@@ -120,10 +188,40 @@ const FIELD_LABELS: Record<string, { title?: string; text?: string }> = {
   "certs.cert3": { title: "اسم/كود الشهادة", text: "التصنيف" },
   "certs.cert4": { title: "اسم/كود الشهادة", text: "التصنيف" },
 };
+const FIELD_LABELS_EN: Record<string, { title?: string; text?: string }> = {
+  "hero.chrome": { title: "Top badge", text: "Action button text" },
+  "hero.heading": { title: "Heading", text: "Descriptive line" },
+  "hero.map_heading": { title: "Heading", text: "Descriptive line" },
+  "hero.features_heading": { title: "Heading", text: "Descriptive line" },
+  "hero.why_heading": { title: "Heading", text: "Descriptive line" },
+  "hero.steps_heading": { title: "Heading", text: "Descriptive line" },
+  "about.badge": { title: "Badge", text: "Button text" },
+  "about.intro": { title: "Heading", text: "Paragraphs (each line = a paragraph)" },
+  "about.accred": { title: "Heading", text: "Small line" },
+  "smart_search.badge": { title: "Badge" },
+  "smart_search.main": { title: "Heading", text: "Descriptive line" },
+  "stats.main": { title: "Heading", text: "Descriptive line" },
+  "why_us.badge": { title: "Badge" },
+  "why_us.main": { title: "Heading", text: "Descriptive line" },
+  "success.badge": { title: "Badge" },
+  "success.main": { title: "Heading", text: "Descriptive line" },
+  "gallery.badge": { title: "Badge" },
+  "gallery.main": { title: "Heading" },
+  "news.main": { title: "Heading", text: "Descriptive line" },
+  "certs.heading": { title: "Heading", text: "Descriptive line" },
+  "certs.cert1": { title: "Certificate name/code", text: "Category" },
+  "certs.cert2": { title: "Certificate name/code", text: "Category" },
+  "certs.cert3": { title: "Certificate name/code", text: "Category" },
+  "certs.cert4": { title: "Certificate name/code", text: "Category" },
+};
 // ملاحظات توضيحية لبعض العناصر (مثل الرقم التلقائي)
 const ITEM_NOTES: Record<string, string> = {
   "hero.stat": "الرقم يُحسب تلقائياً = عدد الوظائف المنشورة (يتحدّث وحده عند الإضافة أو الحذف). أنت تتحكّم فقط في «العنوان» و«النص» حوله.",
   "list.header": "الرقم يُحسب تلقائياً = عدد الوظائف المنشورة. أنت تتحكّم فقط في النصوص حوله.",
+};
+const ITEM_NOTES_EN: Record<string, string> = {
+  "hero.stat": "The number is calculated automatically = the count of published jobs (it updates on its own when you add or delete). You only control the “title” and “text” around it.",
+  "list.header": "The number is calculated automatically = the count of published jobs. You only control the text around it.",
 };
 
 const INPUT = "w-full rounded-xl border border-line bg-surface px-4 py-2.5 text-sm text-ink outline-none transition-colors focus:border-brand focus:bg-white focus:ring-2 focus:ring-brand/20";
@@ -154,6 +252,9 @@ const PARAGRAPH_KEYS = new Set(["about.intro"]);
 
 // محرّر فقرات — كل فقرة في حقل مستقل (عربي/إنجليزي)؛ تُخزَّن مفصولة بأسطر
 function ParagraphsField({ ar, en, onChange }: { ar: string; en: string; onChange: (ar: string, en: string) => void }) {
+  const { lang } = useCmsLang();
+  const isEn = lang === "en";
+  const t = (arText: string, e: string) => (isEn ? e : arText);
   const a = ar ? ar.split("\n") : [];
   const e = en ? en.split("\n") : [];
   const n = Math.max(a.length, e.length, 1);
@@ -167,18 +268,21 @@ function ParagraphsField({ ar, en, onChange }: { ar: string; en: string; onChang
         <div key={i} className="flex items-start gap-2">
           <span className="mt-2 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-surface text-[10px] font-bold text-ink-soft">{i + 1}</span>
           <div className="grid flex-1 gap-2 sm:grid-cols-2">
-            <AutoTextarea value={a[i] ?? ""} onChange={(v) => setRow(i, v, e[i] ?? "")} placeholder="عربي" />
+            <AutoTextarea value={a[i] ?? ""} onChange={(v) => setRow(i, v, e[i] ?? "")} placeholder={t("عربي", "Arabic")} />
             <AutoTextarea value={e[i] ?? ""} onChange={(v) => setRow(i, a[i] ?? "", v)} dir="ltr" placeholder="English" />
           </div>
-          <button type="button" onClick={() => removeRow(i)} className="mt-1 shrink-0 rounded-lg bg-red-50 px-2 py-1.5 text-[11px] font-semibold text-red-600 hover:bg-red-600 hover:text-white">حذف</button>
+          <button type="button" onClick={() => removeRow(i)} className="mt-1 shrink-0 rounded-lg bg-red-50 px-2 py-1.5 text-[11px] font-semibold text-red-600 hover:bg-red-600 hover:text-white">{t("حذف", "Delete")}</button>
         </div>
       ))}
-      <button type="button" onClick={add} className="inline-flex items-center gap-1 rounded-lg bg-brand/10 px-2.5 py-1 text-[11px] font-semibold text-brand hover:bg-brand hover:text-white">+ إضافة فقرة</button>
+      <button type="button" onClick={add} className="inline-flex items-center gap-1 rounded-lg bg-brand/10 px-2.5 py-1 text-[11px] font-semibold text-brand hover:bg-brand hover:text-white">{t("+ إضافة فقرة", "+ Add paragraph")}</button>
     </div>
   );
 }
 
 export default function PageChrome({ page }: { page: string }) {
+  const { lang } = useCmsLang();
+  const en = lang === "en";
+  const t = (ar: string, e: string) => (en ? e : ar);
   const [items, setItems] = useState<CmsItem[]>([]);
   const [edits, setEdits] = useState<Record<number, Record<string, string>>>({});
   const [open, setOpen] = useState(false);
@@ -215,13 +319,13 @@ export default function PageChrome({ page }: { page: string }) {
         setEdits((p) => { const c = { ...p }; delete c[it.id]; return c; });
       }
       setOkId(it.id);
-    } catch (e) { setErr(e instanceof Error ? e.message : "تعذّر الحفظ."); }
+    } catch (e) { setErr(e instanceof Error ? e.message : t("تعذّر الحفظ.", "Could not save.")); }
     finally { setSavingId(null); }
   }
 
   // اختيار صورة → فتح المعاينة قبل الرفع
   function pickImage(it: CmsItem, file: File) {
-    if (file.size > 5 * 1024 * 1024) { setErr("الحد الأقصى 5 ميجابايت."); return; }
+    if (file.size > 5 * 1024 * 1024) { setErr(t("الحد الأقصى 5 ميجابايت.", "Maximum size is 5 MB.")); return; }
     setErr("");
     setPendingImg({ it, file });
   }
@@ -234,7 +338,7 @@ export default function PageChrome({ page }: { page: string }) {
       const saved = await uploadField("sections", it.id, "image_file", file) as CmsItem;
       setItems((prev) => prev.map((x) => (x.id === it.id ? saved : x)));
       setOkId(it.id);
-    } catch (e) { setErr(e instanceof Error ? e.message : "تعذّر رفع الصورة."); }
+    } catch (e) { setErr(e instanceof Error ? e.message : t("تعذّر رفع الصورة.", "Could not upload the image.")); }
     finally { setSavingId(null); }
   }
 
@@ -246,17 +350,17 @@ export default function PageChrome({ page }: { page: string }) {
       const order = (orders.length ? Math.max(...orders) : -1) + 1;
       const created = await createItem("sections", { page, block, order, title_ar: "", title_en: "" }) as CmsItem;
       setItems((prev) => [...prev, created]);
-    } catch (e) { setErr(e instanceof Error ? e.message : "تعذّر الإضافة."); }
+    } catch (e) { setErr(e instanceof Error ? e.message : t("تعذّر الإضافة.", "Could not add.")); }
     finally { setAddingBlock(null); }
   }
 
   async function removeItem(it: CmsItem) {
-    if (typeof window !== "undefined" && !window.confirm("حذف هذا العنصر نهائياً؟")) return;
+    if (typeof window !== "undefined" && !window.confirm(t("حذف هذا العنصر نهائياً؟", "Delete this item permanently?"))) return;
     setSavingId(it.id); setErr("");
     try {
       await deleteItem("sections", it.id);
       setItems((prev) => prev.filter((x) => x.id !== it.id));
-    } catch (e) { setErr(e instanceof Error ? e.message : "تعذّر الحذف."); }
+    } catch (e) { setErr(e instanceof Error ? e.message : t("تعذّر الحذف.", "Could not delete.")); }
     finally { setSavingId(null); }
   }
 
@@ -272,14 +376,14 @@ export default function PageChrome({ page }: { page: string }) {
 
   return (
     <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-line">
-      <button onClick={() => setOpen((v) => !v)} className="flex w-full items-center justify-between gap-3 px-5 py-4 text-right transition-colors hover:bg-surface/60">
+      <button onClick={() => setOpen((v) => !v)} className="flex w-full items-center justify-between gap-3 px-5 py-4 text-start transition-colors hover:bg-surface/60">
         <div className="flex items-center gap-2">
           <span className="flex h-8 w-8 items-center justify-center rounded-full bg-brand/10 text-brand">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="7" rx="1.5" /><path d="M3 14h18M3 18h12" /></svg>
           </span>
           <div className="text-start">
-            <span className="block font-bold text-ink">محتوى وعناوين الصفحة</span>
-            <span className="block text-[11px] text-ink-soft">العناوين والنصوص والأرقام والصور — مرتّبة حسب ظهورها في الصفحة</span>
+            <span className="block font-bold text-ink">{t("محتوى وعناوين الصفحة", "Page content & headings")}</span>
+            <span className="block text-[11px] text-ink-soft">{t("العناوين والنصوص والأرقام والصور — مرتّبة حسب ظهورها في الصفحة", "Headings, text, numbers and images — ordered by their appearance on the page")}</span>
           </div>
         </div>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={`shrink-0 text-ink-soft transition-transform ${open ? "rotate-180" : ""}`}><path strokeLinecap="round" d="M6 9l6 6 6-6" /></svg>
@@ -290,7 +394,7 @@ export default function PageChrome({ page }: { page: string }) {
           {PAGE_URL[page] && (
             <a href={PAGE_URL[page]} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-white px-3 py-1.5 text-xs font-semibold text-brand transition-colors hover:bg-brand hover:text-white">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3" /></svg>
-              عاين الصفحة
+              {t("عاين الصفحة", "Preview page")}
             </a>
           )}
           {err && <p className="rounded-xl bg-red-50 px-4 py-2.5 text-sm text-red-600">{err}</p>}
@@ -298,10 +402,10 @@ export default function PageChrome({ page }: { page: string }) {
             const isOpen = openBlock[g.block] ?? false;
             return (
             <div key={g.block} className="overflow-hidden rounded-xl border border-line">
-              <button onClick={() => setOpenBlock((p) => ({ ...p, [g.block]: !isOpen }))} className="flex w-full items-center justify-between gap-3 bg-surface/60 px-4 py-3 text-right transition-colors hover:bg-surface">
+              <button onClick={() => setOpenBlock((p) => ({ ...p, [g.block]: !isOpen }))} className="flex w-full items-center justify-between gap-3 bg-surface/60 px-4 py-3 text-start transition-colors hover:bg-surface">
                 <span className="flex items-center gap-2">
                   <span className="flex h-6 w-6 items-center justify-center rounded-full bg-brand text-[11px] font-bold text-white">{gi + 1}</span>
-                  <span className="text-sm font-bold text-ink">{BLOCK_LABELS[g.block] || g.block}</span>
+                  <span className="text-sm font-bold text-ink">{(en ? BLOCK_LABELS_EN[g.block] : BLOCK_LABELS[g.block]) || BLOCK_LABELS[g.block] || g.block}</span>
                   <span className="text-[11px] text-ink-soft">({g.items.length})</span>
                 </span>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={`shrink-0 text-ink-soft transition-transform ${isOpen ? "rotate-180" : ""}`}><path strokeLinecap="round" d="M6 9l6 6 6-6" /></svg>
@@ -315,11 +419,11 @@ export default function PageChrome({ page }: { page: string }) {
                       <div key={it.id} className="flex items-center justify-between gap-3 rounded-xl border border-line bg-surface/40 p-3">
                         <div className="text-start">
                           <p className="text-xs font-bold text-ink">{String(it.title_ar || it.key || "")}</p>
-                          <p className="mt-0.5 text-[11px] text-ink-soft">محتوى منظّم (عناوين + قائمة) — يُحرّر بالمحرّر الكامل.</p>
+                          <p className="mt-0.5 text-[11px] text-ink-soft">{t("محتوى منظّم (عناوين + قائمة) — يُحرّر بالمحرّر الكامل.", "Structured content (headings + list) — edited in the full editor.")}</p>
                         </div>
                         <div className="flex shrink-0 items-center gap-2">
-                          <Link href={`/cms/content/sections/${it.id}`} className="rounded-lg bg-brand/10 px-3 py-1.5 text-xs font-semibold text-brand hover:bg-brand hover:text-white">فتح المحرّر ←</Link>
-                          {LIST_BLOCKS.has(g.block) && <button type="button" onClick={() => removeItem(it)} className="rounded-lg bg-red-50 px-2.5 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-600 hover:text-white">حذف</button>}
+                          <Link href={`/cms/content/sections/${it.id}`} className="rounded-lg bg-brand/10 px-3 py-1.5 text-xs font-semibold text-brand hover:bg-brand hover:text-white">{t("فتح المحرّر ←", "Open editor →")}</Link>
+                          {LIST_BLOCKS.has(g.block) && <button type="button" onClick={() => removeItem(it)} className="rounded-lg bg-red-50 px-2.5 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-600 hover:text-white">{t("حذف", "Delete")}</button>}
                         </div>
                       </div>
                     );
@@ -332,26 +436,26 @@ export default function PageChrome({ page }: { page: string }) {
                   const imgSrc = resolveSrc(String(it.image ?? ""));
                   return (
                     <div key={it.id} className="rounded-xl border border-line bg-surface/40 p-3">
-                      <p className="mb-2 text-xs font-bold text-ink">{ITEM_LABELS[key] || String(it.title_ar || it.key || "")}</p>
-                      {ITEM_NOTES[key] && <p className="mb-2 rounded-lg bg-brand/5 px-3 py-2 text-[11px] leading-5 text-ink-soft">ℹ️ {ITEM_NOTES[key]}</p>}
+                      <p className="mb-2 text-xs font-bold text-ink">{(en ? ITEM_LABELS_EN[key] : ITEM_LABELS[key]) || ITEM_LABELS[key] || String(it.title_ar || it.key || "")}</p>
+                      {ITEM_NOTES[key] && <p className="mb-2 rounded-lg bg-brand/5 px-3 py-2 text-[11px] leading-5 text-ink-soft">ℹ️ {(en ? ITEM_NOTES_EN[key] : ITEM_NOTES[key]) || ITEM_NOTES[key]}</p>}
                       <div className="space-y-2">
                         {showTitle && (
                           <div>
-                            <p className="mb-1 text-xs font-semibold text-ink-soft">{FIELD_LABELS[key]?.title || "العنوان"}</p>
+                            <p className="mb-1 text-xs font-semibold text-ink-soft">{(en ? FIELD_LABELS_EN[key]?.title : FIELD_LABELS[key]?.title) || t("العنوان", "Title")}</p>
                             <div className="grid gap-2 sm:grid-cols-2">
-                              <input value={val(it, "title_ar")} onChange={(e) => setVal(it.id, "title_ar", e.target.value)} className={INPUT} placeholder="عربي" />
+                              <input value={val(it, "title_ar")} onChange={(e) => setVal(it.id, "title_ar", e.target.value)} className={INPUT} placeholder={t("عربي", "Arabic")} />
                               <input value={val(it, "title_en")} onChange={(e) => setVal(it.id, "title_en", e.target.value)} dir="ltr" className={INPUT} placeholder="English" />
                             </div>
                           </div>
                         )}
                         {hasText && (
                           <div>
-                            <p className="mb-1 text-xs font-semibold text-ink-soft">{FIELD_LABELS[key]?.text || "النص"}</p>
+                            <p className="mb-1 text-xs font-semibold text-ink-soft">{(en ? FIELD_LABELS_EN[key]?.text : FIELD_LABELS[key]?.text) || t("النص", "Text")}</p>
                             {PARAGRAPH_KEYS.has(key) ? (
                               <ParagraphsField ar={val(it, "text_ar")} en={val(it, "text_en")} onChange={(a, e) => { setVal(it.id, "text_ar", a); setVal(it.id, "text_en", e); }} />
                             ) : (
                               <div className="grid gap-2 sm:grid-cols-2">
-                                <AutoTextarea value={val(it, "text_ar")} onChange={(v) => setVal(it.id, "text_ar", v)} placeholder="عربي" />
+                                <AutoTextarea value={val(it, "text_ar")} onChange={(v) => setVal(it.id, "text_ar", v)} placeholder={t("عربي", "Arabic")} />
                                 <AutoTextarea value={val(it, "text_en")} onChange={(v) => setVal(it.id, "text_en", v)} dir="ltr" placeholder="English" />
                               </div>
                             )}
@@ -359,20 +463,20 @@ export default function PageChrome({ page }: { page: string }) {
                         )}
                         {(String(it.value ?? "").trim() !== "" || g.block === "stats") && (
                           <div>
-                            <p className="mb-1 text-xs font-semibold text-ink-soft">الرقم</p>
-                            <input value={val(it, "value")} onChange={(e) => setVal(it.id, "value", e.target.value)} dir="ltr" className={INPUT} placeholder="مثال: 500" />
+                            <p className="mb-1 text-xs font-semibold text-ink-soft">{t("الرقم", "Number")}</p>
+                            <input value={val(it, "value")} onChange={(e) => setVal(it.id, "value", e.target.value)} dir="ltr" className={INPUT} placeholder={t("مثال: 500", "e.g. 500")} />
                           </div>
                         )}
                         {hasImage && (
                           <div>
-                            <p className="mb-1 text-xs font-semibold text-ink-soft">الصورة</p>
+                            <p className="mb-1 text-xs font-semibold text-ink-soft">{t("الصورة", "Image")}</p>
                             <div className="flex items-center gap-3">
                               {imgSrc && (
                                 // eslint-disable-next-line @next/next/no-img-element
                                 <img src={imgSrc} alt="" className="h-16 w-24 shrink-0 rounded-lg object-cover ring-1 ring-line" />
                               )}
                               <label className="cursor-pointer rounded-lg bg-brand/10 px-3 py-2 text-xs font-semibold text-brand hover:bg-brand hover:text-white">
-                                تغيير الصورة
+                                {t("تغيير الصورة", "Change image")}
                                 <input type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) pickImage(it, f); e.target.value = ""; }} />
                               </label>
                             </div>
@@ -381,11 +485,11 @@ export default function PageChrome({ page }: { page: string }) {
                       </div>
                       <div className="mt-3 flex items-center gap-3">
                         <button type="button" onClick={() => save(it)} disabled={savingId === it.id || !dirty(it.id)} className="rounded-lg bg-brand px-4 py-1.5 text-xs font-bold text-white hover:bg-brand-dark disabled:opacity-40">
-                          {savingId === it.id ? "جارٍ الحفظ…" : "حفظ"}
+                          {savingId === it.id ? t("جارٍ الحفظ…", "Saving…") : t("حفظ", "Save")}
                         </button>
-                        {okId === it.id && <span className="text-xs font-semibold text-emerald-600">تم الحفظ ✓</span>}
-                        {dirty(it.id) && okId !== it.id && <span className="text-xs font-semibold text-amber-600">تعديلات غير محفوظة</span>}
-                        {LIST_BLOCKS.has(g.block) && <button type="button" onClick={() => removeItem(it)} className="mr-auto rounded-lg bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-600 hover:text-white">حذف</button>}
+                        {okId === it.id && <span className="text-xs font-semibold text-emerald-600">{t("تم الحفظ ✓", "Saved ✓")}</span>}
+                        {dirty(it.id) && okId !== it.id && <span className="text-xs font-semibold text-amber-600">{t("تعديلات غير محفوظة", "Unsaved changes")}</span>}
+                        {LIST_BLOCKS.has(g.block) && <button type="button" onClick={() => removeItem(it)} className="ms-auto rounded-lg bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-600 hover:text-white">{t("حذف", "Delete")}</button>}
                       </div>
                     </div>
                   );
@@ -393,7 +497,7 @@ export default function PageChrome({ page }: { page: string }) {
                 {LIST_BLOCKS.has(g.block) && (
                   <button type="button" onClick={() => addItem(g.block)} disabled={addingBlock === g.block} className="inline-flex items-center gap-1 rounded-lg bg-brand px-3.5 py-2 text-xs font-bold text-white hover:bg-brand-dark disabled:opacity-50">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path strokeLinecap="round" d="M12 5v14M5 12h14" /></svg>
-                    {addingBlock === g.block ? "جارٍ الإضافة…" : (BLOCK_ADD[g.block] || "إضافة عنصر جديد")}
+                    {addingBlock === g.block ? t("جارٍ الإضافة…", "Adding…") : ((en ? BLOCK_ADD_EN[g.block] : BLOCK_ADD[g.block]) || BLOCK_ADD[g.block] || t("إضافة عنصر جديد", "Add new item"))}
                   </button>
                 )}
               </div>
@@ -401,7 +505,7 @@ export default function PageChrome({ page }: { page: string }) {
             </div>
             );
           })}
-          <p className="px-1 text-[11px] text-ink-soft">تلميح: في العنوان الرئيسي، ضع الجزء الذي تريده باللون المميّز بين نجمتين **هكذا**.</p>
+          <p className="px-1 text-[11px] text-ink-soft">{t("تلميح: في العنوان الرئيسي، ضع الجزء الذي تريده باللون المميّز بين نجمتين **هكذا**.", "Tip: in the main heading, wrap the part you want highlighted between two asterisks **like this**.")}</p>
         </div>
       )}
       {pendingImg && <ImageCropModal file={pendingImg.file} onCancel={() => setPendingImg(null)} onConfirm={(out) => onImage(pendingImg.it, out)} />}

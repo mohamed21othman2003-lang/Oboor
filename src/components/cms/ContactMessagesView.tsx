@@ -4,29 +4,32 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import CustomSelect from "@/components/ui/Select";
 import { type CmsItem } from "@/lib/cms/api";
+import { useCmsLang } from "@/lib/cms/i18n";
 
 /* ===== رسائل التواصل — تصميم Inbox مقسوم (قائمة + تفاصيل) — ديزاين فقط ===== */
 
 const MONTHS_AR = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
+const MONTHS_EN = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-function stamp(iso: string): string {
+function stamp(iso: string, en: boolean): string {
   if (!iso) return "";
   const d = new Date(iso);
   if (isNaN(d.getTime())) return iso;
   const h = d.getHours();
   const am = h < 12;
   const h12 = h % 12 === 0 ? 12 : h % 12;
-  const t = `${h12}:${String(d.getMinutes()).padStart(2, "0")} ${am ? "ص" : "م"}`;
-  return `${d.getDate()} ${MONTHS_AR[d.getMonth()]} ${d.getFullYear()} · ${t}`;
+  const t = `${h12}:${String(d.getMinutes()).padStart(2, "0")} ${en ? (am ? "AM" : "PM") : (am ? "ص" : "م")}`;
+  const months = en ? MONTHS_EN : MONTHS_AR;
+  return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()} · ${t}`;
 }
 
-function relTime(iso: string): string {
+function relTime(iso: string, en: boolean): string {
   const d = new Date(iso);
   if (isNaN(d.getTime())) return "";
   const diff = (d.getTime() - Date.now()) / 1000;
   const abs = Math.abs(diff);
-  const rtf = new Intl.RelativeTimeFormat("ar", { numeric: "auto" });
-  if (abs < 60) return "الآن";
+  const rtf = new Intl.RelativeTimeFormat(en ? "en" : "ar", { numeric: "auto" });
+  if (abs < 60) return en ? "now" : "الآن";
   if (abs < 3600) return rtf.format(Math.round(diff / 60), "minute");
   if (abs < 86400) return rtf.format(Math.round(diff / 3600), "hour");
   if (abs < 2592000) return rtf.format(Math.round(diff / 86400), "day");
@@ -64,6 +67,10 @@ export default function ContactMessagesView({
   onDelete: (id: number) => Promise<void>;
   busy: number | null;
 }) {
+  const { lang } = useCmsLang();
+  const en = lang === "en";
+  const t = (ar: string, e: string) => (en ? e : ar);
+
   const v = (it: CmsItem, k: string) => { const x = it[k]; return x === null || x === undefined ? "" : String(x); };
 
   const [query, setQuery] = useState("");
@@ -75,13 +82,13 @@ export default function ContactMessagesView({
   const [selId, setSelId] = useState<number | null>(items[0]?.id ?? null);
   const [copied, setCopied] = useState(false);
 
-  const branchOpts = useMemo(() => [{ value: "", label: "كل الفروع" }, ...uniq(items.map((it) => v(it, "branch"))).map((b) => ({ value: b, label: b }))], [items]);
-  const typeOpts = useMemo(() => [{ value: "", label: "كل الأنواع" }, ...uniq(items.map((it) => v(it, "type"))).map((t) => ({ value: t, label: t }))], [items]);
+  const branchOpts = useMemo(() => [{ value: "", label: t("كل الفروع", "All branches") }, ...uniq(items.map((it) => v(it, "branch"))).map((b) => ({ value: b, label: b }))], [items, en]);
+  const typeOpts = useMemo(() => [{ value: "", label: t("كل الأنواع", "All types") }, ...uniq(items.map((it) => v(it, "type"))).map((ty) => ({ value: ty, label: ty }))], [items, en]);
   const rangeOpts = [
-    { value: "", label: "كل الوقت" },
-    { value: "today", label: "اليوم" },
-    { value: "7", label: "آخر ٧ أيام" },
-    { value: "30", label: "آخر ٣٠ يوم" },
+    { value: "", label: t("كل الوقت", "All time") },
+    { value: "today", label: t("اليوم", "Today") },
+    { value: "7", label: t("آخر ٧ أيام", "Last 7 days") },
+    { value: "30", label: t("آخر ٣٠ يوم", "Last 30 days") },
   ];
 
   const filtered = useMemo(() => {
@@ -119,22 +126,22 @@ export default function ContactMessagesView({
   const selected = filtered.find((it) => it.id === selId) || filtered[0] || null;
   const reset = () => { setQuery(""); setBranch(""); setMtype(""); setRange(""); };
   const copyPhone = (phone: string) => navigator.clipboard?.writeText(phone).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1500); });
-  const removeSelected = async () => { if (!selected || !confirm("حذف هذه الرسالة نهائياً؟")) return; await onDelete(selected.id); setSelId(null); };
+  const removeSelected = async () => { if (!selected || !confirm(t("حذف هذه الرسالة نهائياً؟", "Delete this message permanently?"))) return; await onDelete(selected.id); setSelId(null); };
 
   return (
     <div className="space-y-5">
       {/* رأس الصفحة */}
       <div>
-        <Link href="/cms" className="text-xs font-semibold text-[#0F6C73] hover:text-[#1FA6A8]">← لوحة التحكّم</Link>
+        <Link href="/cms" className="text-xs font-semibold text-[#0F6C73] hover:text-[#1FA6A8]">← {t("لوحة التحكّم", "Dashboard")}</Link>
         <h1 className="mt-1 text-2xl font-extrabold text-ink">{label}</h1>
-        <p className="mt-1 text-sm text-ink-soft">عرض وإدارة جميع رسائل التواصل الواردة من المستخدمين</p>
+        <p className="mt-1 text-sm text-ink-soft">{t("عرض وإدارة جميع رسائل التواصل الواردة من المستخدمين", "View and manage all incoming contact messages from users")}</p>
       </div>
 
       {/* عدّادات */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <Counter icon={I.inbox} value={counts.total} label="إجمالي الرسائل" />
-        <Counter icon={I.chats} value={counts.week} label="آخر ٧ أيام" />
-        <Counter icon={I.mail} value={counts.today} label="رسائل اليوم" />
+        <Counter icon={I.inbox} value={counts.total} label={t("إجمالي الرسائل", "Total messages")} />
+        <Counter icon={I.chats} value={counts.week} label={t("آخر ٧ أيام", "Last 7 days")} />
+        <Counter icon={I.mail} value={counts.today} label={t("رسائل اليوم", "Today's messages")} />
       </div>
 
       {/* شريط الفلاتر */}
@@ -142,17 +149,17 @@ export default function ContactMessagesView({
         <div className="flex flex-wrap items-center gap-2.5">
           <div className="relative min-w-[220px] flex-1">
             <span className="pointer-events-none absolute inset-y-0 start-3 flex items-center text-ink-soft">{I.search}</span>
-            <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="ابحث في الرسائل…" className="w-full rounded-xl border border-line bg-surface/60 py-2.5 pe-3 ps-10 text-sm text-ink outline-none transition-colors placeholder:text-ink-soft focus:border-brand focus:bg-white focus:ring-2 focus:ring-brand/20" />
+            <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t("ابحث في الرسائل…", "Search messages…")} className="w-full rounded-xl border border-line bg-surface/60 py-2.5 pe-3 ps-10 text-sm text-ink outline-none transition-colors placeholder:text-ink-soft focus:border-brand focus:bg-white focus:ring-2 focus:ring-brand/20" />
           </div>
           {showFilters && (
             <>
-              <div className="w-[150px]"><CustomSelect value={range} onChange={setRange} options={rangeOpts} placeholder="كل الوقت" /></div>
-              <div className="w-[160px]"><CustomSelect value={mtype} onChange={setMtype} options={typeOpts} placeholder="كل الأنواع" /></div>
-              <div className="w-[170px]"><CustomSelect value={branch} onChange={setBranch} options={branchOpts} placeholder="كل الفروع" /></div>
+              <div className="w-[150px]"><CustomSelect value={range} onChange={setRange} options={rangeOpts} placeholder={t("كل الوقت", "All time")} /></div>
+              <div className="w-[160px]"><CustomSelect value={mtype} onChange={setMtype} options={typeOpts} placeholder={t("كل الأنواع", "All types")} /></div>
+              <div className="w-[170px]"><CustomSelect value={branch} onChange={setBranch} options={branchOpts} placeholder={t("كل الفروع", "All branches")} /></div>
             </>
           )}
-          <button onClick={() => setShowFilters((s) => !s)} className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-white px-3.5 py-2.5 text-xs font-bold text-ink-soft transition-colors hover:bg-surface">{I.filter} فلترة</button>
-          <button onClick={reset} className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-white px-3.5 py-2.5 text-xs font-bold text-ink-soft transition-colors hover:bg-surface">{I.reset} إعادة تعيين</button>
+          <button onClick={() => setShowFilters((s) => !s)} className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-white px-3.5 py-2.5 text-xs font-bold text-ink-soft transition-colors hover:bg-surface">{I.filter} {t("فلترة", "Filter")}</button>
+          <button onClick={reset} className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-white px-3.5 py-2.5 text-xs font-bold text-ink-soft transition-colors hover:bg-surface">{I.reset} {t("إعادة تعيين", "Reset")}</button>
         </div>
       </div>
 
@@ -160,9 +167,9 @@ export default function ContactMessagesView({
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_340px]">
         {/* قائمة الرسائل (يسار على الديسكتوب، وأول عنصر على الموبايل) */}
         <div className="rounded-2xl border border-line bg-white shadow-sm lg:order-2">
-          <div className="border-b border-line px-4 py-3 text-sm font-extrabold text-ink">الرسائل ({filtered.length})</div>
+          <div className="border-b border-line px-4 py-3 text-sm font-extrabold text-ink">{t("الرسائل", "Messages")} ({filtered.length})</div>
           {filtered.length === 0 ? (
-            <p className="p-8 text-center text-sm text-ink-soft">لا توجد رسائل مطابقة.</p>
+            <p className="p-8 text-center text-sm text-ink-soft">{t("لا توجد رسائل مطابقة.", "No matching messages.")}</p>
           ) : (
             <div className="max-h-[64vh] overflow-auto">
               {filtered.slice(0, visible).map((it) => {
@@ -178,7 +185,7 @@ export default function ContactMessagesView({
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-2">
                         <p className="truncate font-bold text-ink">{name}</p>
-                        <span className="shrink-0 text-[10px] text-ink-soft">{relTime(v(it, "created_at"))}</span>
+                        <span className="shrink-0 text-[10px] text-ink-soft">{relTime(v(it, "created_at"), en)}</span>
                       </div>
                       <p className="mt-0.5 truncate text-xs text-ink-soft">{v(it, "message") || "—"}</p>
                     </div>
@@ -186,7 +193,7 @@ export default function ContactMessagesView({
                 );
               })}
               {visible < filtered.length && (
-                <button onClick={() => setVisible((n) => n + 10)} className="flex w-full items-center justify-center gap-1.5 py-3 text-xs font-bold text-[#0F6C73] transition-colors hover:bg-surface">عرض المزيد <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" d="M6 9l6 6 6-6" /></svg></button>
+                <button onClick={() => setVisible((n) => n + 10)} className="flex w-full items-center justify-center gap-1.5 py-3 text-xs font-bold text-[#0F6C73] transition-colors hover:bg-surface">{t("عرض المزيد", "Show more")} <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" d="M6 9l6 6 6-6" /></svg></button>
               )}
             </div>
           )}
@@ -197,7 +204,7 @@ export default function ContactMessagesView({
           {!selected ? (
             <div className="flex h-full min-h-[300px] flex-col items-center justify-center text-center text-ink-soft">
               <span className="mb-2 text-[#1FA6A8]/40">{I.inbox}</span>
-              اختر رسالة من القائمة لعرض تفاصيلها.
+              {t("اختر رسالة من القائمة لعرض تفاصيلها.", "Select a message from the list to view its details.")}
             </div>
           ) : (() => {
             const name = v(selected, "name") || `#${selected.id}`;
@@ -212,27 +219,27 @@ export default function ContactMessagesView({
                     <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[#1FA6A8]/12 text-lg font-extrabold text-[#0F6C73]">{name.charAt(0)}</span>
                     <div>
                       <p className="text-lg font-extrabold text-ink">{name}</p>
-                      <p className="mt-0.5 text-xs text-ink-soft">{stamp(v(selected, "created_at"))}</p>
+                      <p className="mt-0.5 text-xs text-ink-soft">{stamp(v(selected, "created_at"), en)}</p>
                     </div>
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
-                    {wa && <a href={`https://wa.me/${wa}`} target="_blank" rel="noopener" className="inline-flex items-center gap-1.5 rounded-xl bg-[#25D366] px-3.5 py-2 text-xs font-bold text-white transition-opacity hover:opacity-90">{I.wa} واتساب</a>}
-                    {phone && <button onClick={() => copyPhone(phone)} className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-white px-3.5 py-2 text-xs font-bold text-[#0F6C73] transition-colors hover:bg-surface">{copied ? I.check : I.copy}{copied ? "تم النسخ" : "نسخ الرقم"}</button>}
-                    <button onClick={removeSelected} disabled={busy === selected.id} className="inline-flex items-center gap-1.5 rounded-xl bg-red-50 px-3.5 py-2 text-xs font-bold text-red-600 transition-colors hover:bg-red-600 hover:text-white disabled:opacity-50">{I.trash}{busy === selected.id ? "…" : "حذف"}</button>
+                    {wa && <a href={`https://wa.me/${wa}`} target="_blank" rel="noopener" className="inline-flex items-center gap-1.5 rounded-xl bg-[#25D366] px-3.5 py-2 text-xs font-bold text-white transition-opacity hover:opacity-90">{I.wa} {t("واتساب", "WhatsApp")}</a>}
+                    {phone && <button onClick={() => copyPhone(phone)} className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-white px-3.5 py-2 text-xs font-bold text-[#0F6C73] transition-colors hover:bg-surface">{copied ? I.check : I.copy}{copied ? t("تم النسخ", "Copied") : t("نسخ الرقم", "Copy number")}</button>}
+                    <button onClick={removeSelected} disabled={busy === selected.id} className="inline-flex items-center gap-1.5 rounded-xl bg-red-50 px-3.5 py-2 text-xs font-bold text-red-600 transition-colors hover:bg-red-600 hover:text-white disabled:opacity-50">{I.trash}{busy === selected.id ? "…" : t("حذف", "Delete")}</button>
                   </div>
                 </div>
 
                 {/* بطاقات المعلومات */}
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                  <InfoCard icon={I.phone} label="الجوال" value={phone || "—"} ltr />
-                  <InfoCard icon={I.pin} label="الفرع" value={v(selected, "branch") || "—"} />
-                  <InfoCard icon={I.tag} label="نوع الخدمة" value={v(selected, "type") || "—"} />
+                  <InfoCard icon={I.phone} label={t("الجوال", "Mobile")} value={phone || "—"} ltr />
+                  <InfoCard icon={I.pin} label={t("الفرع", "Branch")} value={v(selected, "branch") || "—"} />
+                  <InfoCard icon={I.tag} label={t("نوع الخدمة", "Service type")} value={v(selected, "type") || "—"} />
                 </div>
-                {email && <InfoCard icon={I.mail} label="البريد" value={email} ltr />}
+                {email && <InfoCard icon={I.mail} label={t("البريد", "Email")} value={email} ltr />}
 
                 {/* الرسالة */}
                 <div className="rounded-xl border border-line bg-surface/40 p-4">
-                  <p className="mb-2 flex items-center gap-1.5 text-xs font-bold text-ink-soft"><span className="text-[#1FA6A8]">{I.msg}</span> الرسالة</p>
+                  <p className="mb-2 flex items-center gap-1.5 text-xs font-bold text-ink-soft"><span className="text-[#1FA6A8]">{I.msg}</span> {t("الرسالة", "Message")}</p>
                   <p className="whitespace-pre-wrap break-words text-sm leading-relaxed text-ink">{v(selected, "message") || "—"}</p>
                 </div>
               </div>

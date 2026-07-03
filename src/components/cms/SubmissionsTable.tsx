@@ -5,20 +5,23 @@ import Link from "next/link";
 import CustomSelect from "@/components/ui/Select";
 import { type CmsItem, type FieldSchema } from "@/lib/cms/api";
 import { exportSheet } from "@/lib/cms/exportSheet";
+import { useCmsLang } from "@/lib/cms/i18n";
 
 /* ===== جدول إدارة طلبات الالتحاق (شكل CRM) — ديزاين فقط، نفس البيانات والأكشنز ===== */
 
 const MONTHS_AR = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
+const MONTHS_EN = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-function stamp(iso: string): { date: string; time: string } {
+function stamp(iso: string, en = false): { date: string; time: string } {
   if (!iso) return { date: "—", time: "" };
   const d = new Date(iso);
   if (isNaN(d.getTime())) return { date: iso, time: "" };
   const h = d.getHours();
   const am = h < 12;
   const h12 = h % 12 === 0 ? 12 : h % 12;
-  const time = `${h12}:${String(d.getMinutes()).padStart(2, "0")} ${am ? "ص" : "م"}`;
-  return { date: `${d.getDate()} ${MONTHS_AR[d.getMonth()]} ${d.getFullYear()}`, time };
+  const time = `${h12}:${String(d.getMinutes()).padStart(2, "0")} ${en ? (am ? "AM" : "PM") : am ? "ص" : "م"}`;
+  const months = en ? MONTHS_EN : MONTHS_AR;
+  return { date: `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`, time };
 }
 
 /* أيقونات */
@@ -58,6 +61,10 @@ export default function SubmissionsTable({
   onDelete: (id: number) => Promise<void>;
   busy: number | null;
 }) {
+  const { lang } = useCmsLang();
+  const en = lang === "en";
+  const t = (ar: string, e: string) => (en ? e : ar);
+
   const v = (it: CmsItem, k: string) => { const x = it[k]; return x === null || x === undefined ? "" : String(x); };
 
   const [query, setQuery] = useState("");
@@ -72,13 +79,13 @@ export default function SubmissionsTable({
   const [copied, setCopied] = useState<number | null>(null);
   const [viewing, setViewing] = useState<CmsItem | null>(null);
 
-  const branchOpts = useMemo(() => [{ value: "", label: "كل الفروع" }, ...uniq(items.map((it) => v(it, "branch"))).map((b) => ({ value: b, label: b }))], [items]);
-  const condOpts = useMemo(() => [{ value: "", label: "كل أنواع الحالات" }, ...uniq(items.map((it) => v(it, "case_type"))).map((c) => ({ value: c, label: c }))], [items]);
+  const branchOpts = useMemo(() => [{ value: "", label: t("كل الفروع", "All branches") }, ...uniq(items.map((it) => v(it, "branch"))).map((b) => ({ value: b, label: b }))], [items, en]);
+  const condOpts = useMemo(() => [{ value: "", label: t("كل أنواع الحالات", "All case types") }, ...uniq(items.map((it) => v(it, "case_type"))).map((c) => ({ value: c, label: c }))], [items, en]);
   const rangeOpts = [
-    { value: "", label: "كل الوقت" },
-    { value: "today", label: "اليوم" },
-    { value: "7", label: "آخر ٧ أيام" },
-    { value: "30", label: "آخر ٣٠ يوم" },
+    { value: "", label: t("كل الوقت", "All time") },
+    { value: "today", label: t("اليوم", "Today") },
+    { value: "7", label: t("آخر ٧ أيام", "Last 7 days") },
+    { value: "30", label: t("آخر ٣٠ يوم", "Last 30 days") },
   ];
 
   const filtered = useMemo(() => {
@@ -126,27 +133,28 @@ export default function SubmissionsTable({
   };
   const toggleOne = (id: number) => setSelected((prev) => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
 
-  const del = async (id: number) => { setMenu(null); if (!confirm("حذف هذا الطلب نهائياً؟")) return; await onDelete(id); setSelected((p) => { const n = new Set(p); n.delete(id); return n; }); };
+  const del = async (id: number) => { setMenu(null); if (!confirm(t("حذف هذا الطلب نهائياً؟", "Permanently delete this request?"))) return; await onDelete(id); setSelected((p) => { const n = new Set(p); n.delete(id); return n; }); };
   const bulkDelete = async () => {
     const ids = [...selected];
-    if (!ids.length || !confirm(`حذف ${ids.length} طلب نهائياً؟`)) return;
+    if (!ids.length || !confirm(t(`حذف ${ids.length} طلب نهائياً؟`, `Permanently delete ${ids.length} request(s)?`))) return;
     for (const id of ids) await onDelete(id);
     setSelected(new Set());
   };
 
   const exportCsv = async () => {
+    const dateHeader = t("التاريخ", "Date");
     const cols: [string, (it: CmsItem) => string][] = [
-      ["ولي الأمر", (it) => v(it, "parent_name")],
-      ["الجوال", (it) => v(it, "phone")],
-      ["نوع الحالة", (it) => v(it, "case_type")],
-      ["الفرع", (it) => v(it, "branch")],
-      ["البريد", (it) => v(it, "email")],
-      ["التاريخ", (it) => v(it, "created_at")],
+      [t("ولي الأمر", "Parent"), (it) => v(it, "parent_name")],
+      [t("الجوال", "Phone"), (it) => v(it, "phone")],
+      [t("نوع الحالة", "Case type"), (it) => v(it, "case_type")],
+      [t("الفرع", "Branch"), (it) => v(it, "branch")],
+      [t("البريد", "Email"), (it) => v(it, "email")],
+      [dateHeader, (it) => v(it, "created_at")],
     ];
     await exportSheet({
       filename: "admission-requests",
-      sheetName: "طلبات الالتحاق",
-      columns: cols.map(([header]) => ({ header, date: header === "التاريخ" })),
+      sheetName: t("طلبات الالتحاق", "Admission Requests"),
+      columns: cols.map(([header]) => ({ header, date: header === dateHeader })),
       rows: filtered.map((it) => cols.map(([, acc]) => acc(it))),
     });
   };
@@ -157,11 +165,11 @@ export default function SubmissionsTable({
     <div className="space-y-5">
       {/* رأس الصفحة */}
       <div>
-        <Link href="/cms" className="text-xs font-semibold text-[#0F6C73] hover:text-[#1FA6A8]">← لوحة التحكّم</Link>
+        <Link href="/cms" className="text-xs font-semibold text-[#0F6C73] hover:text-[#1FA6A8]">{t("← لوحة التحكّم", "← Dashboard")}</Link>
         <div className="mt-1 flex items-end justify-between gap-3">
           <div>
             <h1 className="text-2xl font-extrabold text-ink">{label}</h1>
-            <p className="mt-1 text-sm text-ink-soft">عرض وإدارة جميع طلبات الالتحاق الواردة</p>
+            <p className="mt-1 text-sm text-ink-soft">{t("عرض وإدارة جميع طلبات الالتحاق الواردة", "View and manage all incoming admission requests")}</p>
           </div>
         </div>
       </div>
@@ -174,30 +182,30 @@ export default function SubmissionsTable({
             <input
               value={query}
               onChange={(e) => onFilterChange(() => setQuery(e.target.value))}
-              placeholder="ابحث عن اسم الطفل أو ولي الأمر…"
+              placeholder={t("ابحث عن اسم الطفل أو ولي الأمر…", "Search by child or parent name…")}
               className="w-full rounded-xl border border-line bg-surface/60 py-2.5 pe-3 ps-10 text-sm text-ink outline-none transition-colors placeholder:text-ink-soft focus:border-brand focus:bg-white focus:ring-2 focus:ring-brand/20"
             />
           </div>
           {showFilters && (
             <>
-              <div className="w-[150px]"><CustomSelect value={range} onChange={(x) => onFilterChange(() => setRange(x))} options={rangeOpts} placeholder="كل الوقت" /></div>
-              <div className="w-[170px]"><CustomSelect value={branch} onChange={(x) => onFilterChange(() => setBranch(x))} options={branchOpts} placeholder="كل الفروع" /></div>
-              <div className="w-[190px]"><CustomSelect value={condition} onChange={(x) => onFilterChange(() => setCondition(x))} options={condOpts} placeholder="كل أنواع الحالات" /></div>
+              <div className="w-[150px]"><CustomSelect value={range} onChange={(x) => onFilterChange(() => setRange(x))} options={rangeOpts} placeholder={t("كل الوقت", "All time")} /></div>
+              <div className="w-[170px]"><CustomSelect value={branch} onChange={(x) => onFilterChange(() => setBranch(x))} options={branchOpts} placeholder={t("كل الفروع", "All branches")} /></div>
+              <div className="w-[190px]"><CustomSelect value={condition} onChange={(x) => onFilterChange(() => setCondition(x))} options={condOpts} placeholder={t("كل أنواع الحالات", "All case types")} /></div>
             </>
           )}
-          <button onClick={() => setShowFilters((s) => !s)} className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-white px-3.5 py-2.5 text-xs font-bold text-ink-soft transition-colors hover:bg-surface">{I.filter} فلترة</button>
-          <button onClick={resetFilters} className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-white px-3.5 py-2.5 text-xs font-bold text-ink-soft transition-colors hover:bg-surface">{I.reset} إعادة تعيين</button>
+          <button onClick={() => setShowFilters((s) => !s)} className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-white px-3.5 py-2.5 text-xs font-bold text-ink-soft transition-colors hover:bg-surface">{I.filter} {t("فلترة", "Filter")}</button>
+          <button onClick={resetFilters} className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-white px-3.5 py-2.5 text-xs font-bold text-ink-soft transition-colors hover:bg-surface">{I.reset} {t("إعادة تعيين", "Reset")}</button>
         </div>
       </div>
 
       {/* الإجمالي (يمين) + التصدير + حذف المحدد (شمال) */}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm font-semibold text-ink-soft">إجمالي الطلبات: <span className="font-extrabold text-[#0F6C73]">{total}</span> طلب</p>
+        <p className="text-sm font-semibold text-ink-soft">{t("إجمالي الطلبات:", "Total requests:")} <span className="font-extrabold text-[#0F6C73]">{total}</span> {t("طلب", "request(s)")}</p>
         <div className="flex items-center gap-2">
           {selected.size > 0 && (
-            <button onClick={bulkDelete} className="inline-flex items-center gap-1.5 rounded-xl bg-red-50 px-4 py-2.5 text-xs font-bold text-red-600 transition-colors hover:bg-red-600 hover:text-white">{I.trash} حذف المحدد ({selected.size})</button>
+            <button onClick={bulkDelete} className="inline-flex items-center gap-1.5 rounded-xl bg-red-50 px-4 py-2.5 text-xs font-bold text-red-600 transition-colors hover:bg-red-600 hover:text-white">{I.trash} {t("حذف المحدد", "Delete selected")} ({selected.size})</button>
           )}
-          <button onClick={exportCsv} className="inline-flex items-center gap-1.5 rounded-xl bg-[#0F6C73] px-4 py-2.5 text-xs font-bold text-white transition-colors hover:bg-[#1FA6A8]">{I.export} تصدير</button>
+          <button onClick={exportCsv} className="inline-flex items-center gap-1.5 rounded-xl bg-[#0F6C73] px-4 py-2.5 text-xs font-bold text-white transition-colors hover:bg-[#1FA6A8]">{I.export} {t("تصدير", "Export")}</button>
         </div>
       </div>
 
@@ -207,26 +215,26 @@ export default function SubmissionsTable({
           <table className="w-full border-collapse text-sm">
             <thead className="sticky top-0 z-10 bg-surface">
               <tr className="text-ink-soft">
-                <th className="w-12 px-4 py-3 text-center"><input type="checkbox" checked={allOnPage} onChange={toggleAll} className="h-4 w-4 accent-[#1FA6A8]" aria-label="تحديد الكل" /></th>
-                <th className="px-4 py-3 text-start text-xs font-bold">ولي الأمر</th>
-                <th className="px-4 py-3 text-center text-xs font-bold">نوع الحالة</th>
-                <th className="px-4 py-3 text-center text-xs font-bold">الفرع</th>
-                <th className="px-4 py-3 text-center text-xs font-bold">تاريخ الطلب</th>
-                <th className="px-4 py-3 text-center text-xs font-bold">الإجراءات</th>
+                <th className="w-12 px-4 py-3 text-center"><input type="checkbox" checked={allOnPage} onChange={toggleAll} className="h-4 w-4 accent-[#1FA6A8]" aria-label={t("تحديد الكل", "Select all")} /></th>
+                <th className="px-4 py-3 text-start text-xs font-bold">{t("ولي الأمر", "Parent")}</th>
+                <th className="px-4 py-3 text-center text-xs font-bold">{t("نوع الحالة", "Case type")}</th>
+                <th className="px-4 py-3 text-center text-xs font-bold">{t("الفرع", "Branch")}</th>
+                <th className="px-4 py-3 text-center text-xs font-bold">{t("تاريخ الطلب", "Request date")}</th>
+                <th className="px-4 py-3 text-center text-xs font-bold">{t("الإجراءات", "Actions")}</th>
               </tr>
             </thead>
             <tbody>
               {pageItems.length === 0 ? (
-                <tr><td colSpan={6} className="px-4 py-12 text-center text-ink-soft">لا توجد طلبات مطابقة.</td></tr>
+                <tr><td colSpan={6} className="px-4 py-12 text-center text-ink-soft">{t("لا توجد طلبات مطابقة.", "No matching requests.")}</td></tr>
               ) : pageItems.map((it) => {
                 const phone = v(it, "phone");
                 const email = v(it, "email");
                 const wa = phone.replace(/[^\d]/g, "");
-                const s = stamp(v(it, "created_at"));
+                const s = stamp(v(it, "created_at"), en);
                 const checked = selected.has(it.id);
                 return (
                   <tr key={it.id} onClick={() => setViewing(it)} className={`cursor-pointer border-t border-line transition-colors hover:bg-surface/50 ${checked ? "bg-[#1FA6A8]/5" : ""}`}>
-                    <td className="px-4 py-3.5 text-center" onClick={(e) => e.stopPropagation()}><input type="checkbox" checked={checked} onChange={() => toggleOne(it.id)} className="h-4 w-4 accent-[#1FA6A8]" aria-label="تحديد" /></td>
+                    <td className="px-4 py-3.5 text-center" onClick={(e) => e.stopPropagation()}><input type="checkbox" checked={checked} onChange={() => toggleOne(it.id)} className="h-4 w-4 accent-[#1FA6A8]" aria-label={t("تحديد", "Select")} /></td>
                     <td className="px-4 py-3.5">
                       <div className="flex items-center justify-start gap-2.5 text-start">
                         <span className="shrink-0 text-ink-soft">{I.user}</span>
@@ -248,17 +256,17 @@ export default function SubmissionsTable({
                     </td>
                     <td className="px-4 py-3.5" onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center justify-center gap-1.5">
-                        {email && <a href={`mailto:${email}`} className={`${actBtn} text-[#1FA6A8] hover:border-[#1FA6A8] hover:bg-[#1FA6A8]/10`} title="إيميل" aria-label="إيميل">{I.mail}</a>}
-                        {wa && <a href={`https://wa.me/${wa}`} target="_blank" rel="noopener" className={`${actBtn} text-[#25D366] hover:border-[#25D366] hover:bg-[#25D366]/10`} title="واتساب" aria-label="واتساب">{I.wa}</a>}
-                        <button onClick={() => setViewing(it)} className={`${actBtn} text-[#0F6C73] hover:border-[#1FA6A8] hover:bg-[#1FA6A8]/10`} title="عرض التفاصيل" aria-label="عرض التفاصيل">{I.eye}</button>
+                        {email && <a href={`mailto:${email}`} className={`${actBtn} text-[#1FA6A8] hover:border-[#1FA6A8] hover:bg-[#1FA6A8]/10`} title={t("إيميل", "Email")} aria-label={t("إيميل", "Email")}>{I.mail}</a>}
+                        {wa && <a href={`https://wa.me/${wa}`} target="_blank" rel="noopener" className={`${actBtn} text-[#25D366] hover:border-[#25D366] hover:bg-[#25D366]/10`} title={t("واتساب", "WhatsApp")} aria-label={t("واتساب", "WhatsApp")}>{I.wa}</a>}
+                        <button onClick={() => setViewing(it)} className={`${actBtn} text-[#0F6C73] hover:border-[#1FA6A8] hover:bg-[#1FA6A8]/10`} title={t("عرض التفاصيل", "View details")} aria-label={t("عرض التفاصيل", "View details")}>{I.eye}</button>
                         <div className="relative">
-                          <button onClick={() => setMenu(menu === it.id ? null : it.id)} className={`${actBtn} text-ink hover:bg-surface`} title="المزيد" aria-label="المزيد">{I.more}</button>
+                          <button onClick={() => setMenu(menu === it.id ? null : it.id)} className={`${actBtn} text-ink hover:bg-surface`} title={t("المزيد", "More")} aria-label={t("المزيد", "More")}>{I.more}</button>
                           {menu === it.id && (
                             <>
                               <div className="fixed inset-0 z-20" onClick={() => setMenu(null)} />
                               <div className="absolute end-0 z-30 mt-1 w-44 overflow-hidden rounded-xl border border-line bg-white py-1 shadow-xl">
-                                <button onClick={() => { setMenu(null); setViewing(it); }} className="flex w-full items-center gap-2 px-3 py-2 text-start text-xs font-semibold text-ink transition-colors hover:bg-surface">{I.eye} عرض التفاصيل</button>
-                                <button onClick={() => del(it.id)} disabled={busy === it.id} className="flex w-full items-center gap-2 px-3 py-2 text-start text-xs font-semibold text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50">{I.trash}{busy === it.id ? "جارٍ الحذف…" : "حذف الطلب"}</button>
+                                <button onClick={() => { setMenu(null); setViewing(it); }} className="flex w-full items-center gap-2 px-3 py-2 text-start text-xs font-semibold text-ink transition-colors hover:bg-surface">{I.eye} {t("عرض التفاصيل", "View details")}</button>
+                                <button onClick={() => del(it.id)} disabled={busy === it.id} className="flex w-full items-center gap-2 px-3 py-2 text-start text-xs font-semibold text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50">{I.trash}{busy === it.id ? t("جارٍ الحذف…", "Deleting…") : t("حذف الطلب", "Delete request")}</button>
                               </div>
                             </>
                           )}
@@ -276,12 +284,12 @@ export default function SubmissionsTable({
       {/* ===== كروت (موبايل) ===== */}
       <div className="space-y-3 md:hidden">
         {pageItems.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-line bg-white p-8 text-center text-ink-soft">لا توجد طلبات مطابقة.</div>
+          <div className="rounded-2xl border border-dashed border-line bg-white p-8 text-center text-ink-soft">{t("لا توجد طلبات مطابقة.", "No matching requests.")}</div>
         ) : pageItems.map((it) => {
           const phone = v(it, "phone");
           const email = v(it, "email");
           const wa = phone.replace(/[^\d]/g, "");
-          const s = stamp(v(it, "created_at"));
+          const s = stamp(v(it, "created_at"), en);
           return (
             <div key={it.id} onClick={() => setViewing(it)} className="cursor-pointer rounded-2xl border border-line bg-white p-4 shadow-sm">
               <div className="flex items-start justify-between gap-3">
@@ -292,7 +300,7 @@ export default function SubmissionsTable({
                     {phone && <p dir="ltr" className="mt-0.5 text-start text-xs text-ink-soft">{phone}</p>}
                   </div>
                 </div>
-                <input type="checkbox" checked={selected.has(it.id)} onChange={() => toggleOne(it.id)} onClick={(e) => e.stopPropagation()} className="mt-1 h-4 w-4 accent-[#1FA6A8]" aria-label="تحديد" />
+                <input type="checkbox" checked={selected.has(it.id)} onChange={() => toggleOne(it.id)} onClick={(e) => e.stopPropagation()} className="mt-1 h-4 w-4 accent-[#1FA6A8]" aria-label={t("تحديد", "Select")} />
               </div>
               <div className="mt-3 flex flex-wrap gap-2 text-xs">
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-[#1FA6A8]/10 px-3 py-1 font-bold text-[#0F6C73]"><span className="text-[#1FA6A8]">{I.tag}</span>{v(it, "case_type") || "—"}</span>
@@ -300,10 +308,10 @@ export default function SubmissionsTable({
               </div>
               <p className="mt-2 flex items-center gap-1.5 text-xs text-ink-soft"><span className="text-[#1FA6A8]">{I.cal}</span>{s.date}{s.time ? ` · ${s.time}` : ""}</p>
               <div className="mt-3 flex items-center gap-1.5 border-t border-line pt-3" onClick={(e) => e.stopPropagation()}>
-                <button onClick={() => setViewing(it)} className={`${actBtn} text-[#0F6C73] hover:border-[#1FA6A8]`} aria-label="عرض التفاصيل">{I.eye}</button>
-                {wa && <a href={`https://wa.me/${wa}`} target="_blank" rel="noopener" className={`${actBtn} text-[#25D366] hover:border-[#25D366]`} aria-label="واتساب">{I.wa}</a>}
-                {email && <a href={`mailto:${email}`} className={`${actBtn} text-[#1FA6A8]`} aria-label="إيميل">{I.mail}</a>}
-                <button onClick={() => del(it.id)} disabled={busy === it.id} className="ms-auto inline-flex items-center gap-1.5 rounded-xl bg-red-50 px-3 py-2 text-xs font-semibold text-red-600 disabled:opacity-50">{I.trash} حذف</button>
+                <button onClick={() => setViewing(it)} className={`${actBtn} text-[#0F6C73] hover:border-[#1FA6A8]`} aria-label={t("عرض التفاصيل", "View details")}>{I.eye}</button>
+                {wa && <a href={`https://wa.me/${wa}`} target="_blank" rel="noopener" className={`${actBtn} text-[#25D366] hover:border-[#25D366]`} aria-label={t("واتساب", "WhatsApp")}>{I.wa}</a>}
+                {email && <a href={`mailto:${email}`} className={`${actBtn} text-[#1FA6A8]`} aria-label={t("إيميل", "Email")}>{I.mail}</a>}
+                <button onClick={() => del(it.id)} disabled={busy === it.id} className="ms-auto inline-flex items-center gap-1.5 rounded-xl bg-red-50 px-3 py-2 text-xs font-semibold text-red-600 disabled:opacity-50">{I.trash} {t("حذف", "Delete")}</button>
               </div>
             </div>
           );
@@ -314,10 +322,10 @@ export default function SubmissionsTable({
       {total > 0 && (
         <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-line bg-white px-4 py-3 shadow-sm">
           <div className="flex items-center gap-2 text-xs text-ink-soft">
-            <span>عدد الصفوف:</span>
+            <span>{t("عدد الصفوف:", "Rows per page:")}</span>
             <div className="w-[72px]"><CustomSelect value={String(perPage)} onChange={(x) => { setPerPage(Number(x)); setPage(1); }} options={[{ value: "10", label: "10" }, { value: "25", label: "25" }, { value: "50", label: "50" }]} /></div>
           </div>
-          <p className="text-xs font-semibold text-ink-soft">عرض {total === 0 ? 0 : startIdx + 1} إلى {Math.min(startIdx + perPage, total)} من {total} طلب</p>
+          <p className="text-xs font-semibold text-ink-soft">{t("عرض", "Showing")} {total === 0 ? 0 : startIdx + 1} {t("إلى", "to")} {Math.min(startIdx + perPage, total)} {t("من", "of")} {total} {t("طلب", "request(s)")}</p>
           <div className="flex items-center gap-1" dir="ltr">
             <PgBtn onClick={() => setPage(1)} disabled={cur === 1}>«</PgBtn>
             <PgBtn onClick={() => setPage(cur - 1)} disabled={cur === 1}>‹</PgBtn>
@@ -334,11 +342,11 @@ export default function SubmissionsTable({
         const phone = v(it, "phone");
         const email = v(it, "email");
         const wa = phone.replace(/[^\d]/g, "");
-        const s = stamp(v(it, "created_at"));
+        const s = stamp(v(it, "created_at"), en);
         const shown = fields.filter((f) => f.type !== "json" && v(it, f.name).trim() !== "");
         const rows = shown.filter((f) => f.type !== "textarea");
         const boxes = shown.filter((f) => f.type === "textarea");
-        const removeAndClose = async () => { if (!confirm("حذف هذا الطلب نهائياً؟")) return; await onDelete(it.id); setSelected((p) => { const n = new Set(p); n.delete(it.id); return n; }); setViewing(null); };
+        const removeAndClose = async () => { if (!confirm(t("حذف هذا الطلب نهائياً؟", "Permanently delete this request?"))) return; await onDelete(it.id); setSelected((p) => { const n = new Set(p); n.delete(it.id); return n; }); setViewing(null); };
         return (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setViewing(null)}>
             <div className="max-h-[88vh] w-full max-w-2xl overflow-auto rounded-2xl bg-white shadow-2xl" onClick={(e) => e.stopPropagation()}>
@@ -350,14 +358,14 @@ export default function SubmissionsTable({
                     <p className="mt-0.5 flex items-center gap-1.5 text-xs text-ink-soft"><span className="text-[#1FA6A8]">{I.cal}</span>{s.date}{s.time ? ` · ${s.time}` : ""}</p>
                   </div>
                 </div>
-                <button onClick={() => setViewing(null)} className="flex h-9 w-9 items-center justify-center rounded-xl border border-line text-ink-soft transition-colors hover:bg-surface" aria-label="إغلاق">{I.x}</button>
+                <button onClick={() => setViewing(null)} className="flex h-9 w-9 items-center justify-center rounded-xl border border-line text-ink-soft transition-colors hover:bg-surface" aria-label={t("إغلاق", "Close")}>{I.x}</button>
               </div>
 
               {(phone || email) && (
                 <div className="flex flex-wrap gap-2 px-5 pt-4">
-                  {phone && <button onClick={() => copyPhone(it.id, phone)} className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-white px-3.5 py-2 text-xs font-bold text-[#0F6C73] transition-colors hover:bg-surface">{copied === it.id ? I.check : I.copy}{copied === it.id ? "تم النسخ" : "نسخ الرقم"}</button>}
-                  {wa && <a href={`https://wa.me/${wa}`} target="_blank" rel="noopener" className="inline-flex items-center gap-1.5 rounded-xl bg-[#25D366] px-3.5 py-2 text-xs font-bold text-white transition-opacity hover:opacity-90">{I.wa} واتساب</a>}
-                  {email && <a href={`mailto:${email}`} className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-white px-3.5 py-2 text-xs font-bold text-[#0F6C73] transition-colors hover:bg-surface">{I.mail} إيميل</a>}
+                  {phone && <button onClick={() => copyPhone(it.id, phone)} className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-white px-3.5 py-2 text-xs font-bold text-[#0F6C73] transition-colors hover:bg-surface">{copied === it.id ? I.check : I.copy}{copied === it.id ? t("تم النسخ", "Copied") : t("نسخ الرقم", "Copy number")}</button>}
+                  {wa && <a href={`https://wa.me/${wa}`} target="_blank" rel="noopener" className="inline-flex items-center gap-1.5 rounded-xl bg-[#25D366] px-3.5 py-2 text-xs font-bold text-white transition-opacity hover:opacity-90">{I.wa} {t("واتساب", "WhatsApp")}</a>}
+                  {email && <a href={`mailto:${email}`} className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-white px-3.5 py-2 text-xs font-bold text-[#0F6C73] transition-colors hover:bg-surface">{I.mail} {t("إيميل", "Email")}</a>}
                 </div>
               )}
 
@@ -387,7 +395,7 @@ export default function SubmissionsTable({
               ))}
 
               <div className="flex justify-end border-t border-line px-5 py-4">
-                <button onClick={removeAndClose} disabled={busy === it.id} className="inline-flex items-center gap-1.5 rounded-xl bg-red-50 px-4 py-2 text-xs font-semibold text-red-600 transition-colors hover:bg-red-600 hover:text-white disabled:opacity-50">{I.trash}{busy === it.id ? "جارٍ الحذف…" : "حذف الطلب"}</button>
+                <button onClick={removeAndClose} disabled={busy === it.id} className="inline-flex items-center gap-1.5 rounded-xl bg-red-50 px-4 py-2 text-xs font-semibold text-red-600 transition-colors hover:bg-red-600 hover:text-white disabled:opacity-50">{I.trash}{busy === it.id ? t("جارٍ الحذف…", "Deleting…") : t("حذف الطلب", "Delete request")}</button>
               </div>
             </div>
           </div>
