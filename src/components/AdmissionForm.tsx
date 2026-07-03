@@ -6,8 +6,8 @@ import { validateName, validatePhone, validateRequired, validateEmail, stripDigi
 import CustomSelect from "@/components/ui/Select";
 import LimitedTextarea from "@/components/ui/LimitedTextarea";
 
-const CITIES = ["الرياض", "جدة", "الدمام", "مكة المكرمة", "المدينة المنورة", "القصيم", "عسير"];
-const CITIES_EN = ["Riyadh", "Jeddah", "Dammam", "Makkah", "Madinah", "Qassim", "Asir"];
+const CITIES = ["الرياض", "مكة المكرمة", "المدينة المنورة", "الشرقية", "القصيم", "عسير", "جازان", "الجوف"];
+const CITIES_EN = ["Riyadh", "Makkah", "Madinah", "Eastern Province", "Qassim", "Asir", "Jazan", "Al-Jouf"];
 const BRANCHES = ["فرع النرجس", "فرع العليا", "فرع الروضة", "فرع جدة", "فرع الشرقية", "فرع مكة"];
 const BRANCHES_EN = ["Al-Narjis Branch", "Al-Olaya Branch", "Al-Rawdah Branch", "Jeddah Branch", "Eastern Branch", "Makkah Branch"];
 const CASES = ["اضطراب طيف التوحد", "نقص الانتباه وفرط الحركة (ADHD)", "تأخر النطق واللغة", "صعوبات التعلم", "إعاقة حركية", "أخرى"];
@@ -20,12 +20,15 @@ export default function AdmissionForm({ locale, branchOptions }: { locale: Local
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState("");
   const [caseType, setCaseType] = useState(""); // لإظهار حقل «حدّد» عند اختيار «أخرى»
+  const [city, setCity] = useState(""); // لإظهار حقل كتابة المدينة عند اختيار «أخرى»
   const cities = locale === "en" ? CITIES_EN : CITIES;
   const branches = locale === "en" ? BRANCHES_EN : BRANCHES;
   // الفروع من الـCMS (تُمرَّر من الصفحة) مع fallback للقائمة الثابتة
   const branchList = branchOptions?.length ? branchOptions : branches;
   const cases = locale === "en" ? CASES_EN : CASES;
   const otherCase = pick(locale, "أخرى", "Other");
+  const otherCity = pick(locale, "أخرى", "Other");
+  const cityOptions = [...cities, otherCity];
 
   // مسح خطأ حقل بمجرّد أن يبدأ المستخدم تعديله
   const clearError = (name: string) =>
@@ -63,11 +66,18 @@ export default function AdmissionForm({ locale, branchOptions }: { locale: Local
       else fd.set("caseType", other);
     }
 
+    // عند اختيار «أخرى» للمدينة يجب كتابتها، ونرسلها بدل كلمة «أخرى»
+    if (g("city") === otherCity) {
+      const other = g("cityOther").trim();
+      if (!other) nextErrors.cityOther = pick(locale, "الرجاء كتابة اسم المدينة.", "Please type your city.");
+      else fd.set("city", other);
+    }
+
     if (Object.keys(nextErrors).length) {
       setErrors(nextErrors);
       setFormError("");
       // سكرول + تركيز على أول حقل فيه خطأ ليلاحظه المستخدم
-      const order = [...checks.map(([f]) => f), "caseTypeOther"];
+      const order = [...checks.map(([f]) => f), "cityOther", "caseTypeOther"];
       const first = order.find((f) => nextErrors[f]);
       if (first) {
         const el = document.getElementById(first);
@@ -117,7 +127,31 @@ export default function AdmissionForm({ locale, branchOptions }: { locale: Local
         <Field name="childName" label={pick(locale, "اسم الطفل", "Child's Name")} required placeholder={pick(locale, "أدخل اسم طفلك", "Enter your child's name")} error={errors.childName} onClear={clearError} filter="name" />
         <Field name="childAge" label={pick(locale, "العمر (بالسنوات)", "Age (years)")} required placeholder={pick(locale, "مثال: 4", "Example: 4")} error={errors.childAge} onClear={clearError} filter="digits" />
         <Select name="gender" label={pick(locale, "الجنس", "Gender")} required options={[pick(locale, "ذكر", "Male"), pick(locale, "أنثى", "Female")]} locale={locale} error={errors.gender} onClear={clearError} />
-        <Select name="city" label={pick(locale, "المدينة", "City")} required options={cities} locale={locale} error={errors.city} onClear={clearError} />
+        <div>
+          <Label>{pick(locale, "المدينة", "City")} <span className="text-danger">*</span></Label>
+          <div className="mt-1.5">
+            <CustomSelect
+              name="city"
+              options={cityOptions}
+              placeholder={pick(locale, "اختر", "Select")}
+              onChange={(v) => { setCity(v); clearError("city"); if (v !== otherCity) clearError("cityOther"); }}
+            />
+          </div>
+          {city === otherCity && (
+            <div className="mt-2">
+              <input
+                id="cityOther"
+                name="cityOther"
+                placeholder={pick(locale, "اكتب اسم مدينتك…", "Type your city…")}
+                aria-invalid={!!errors.cityOther}
+                onInput={() => clearError("cityOther")}
+                className={`w-full rounded-xl border bg-white px-3 py-2.5 text-start text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 ${errors.cityOther ? "border-red-400 ring-2 ring-red-100 focus:ring-red-200" : "border-line focus:ring-brand/30"}`}
+              />
+              <FieldError name="cityOther" error={errors.cityOther} />
+            </div>
+          )}
+          <FieldError name="city" error={errors.city} />
+        </div>
         <Select name="branch" label={pick(locale, "الفرع المطلوب", "Preferred Branch")} required options={branchList} locale={locale} error={errors.branch} onClear={clearError} />
       </Section>
 
