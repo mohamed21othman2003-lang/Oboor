@@ -181,6 +181,35 @@ export const TYPE_LABELS: Record<string, string> = {
   assessment: "نتائج التقييم",
 };
 
+// أسماء الأنواع بالإنجليزية (تُختار حسب لغة اللوحة)
+export const TYPE_LABELS_EN: Record<string, string> = {
+  news: "Our Media (News & Articles)",
+  programs: "Programs",
+  services: "Clinical Services",
+  techniques: "Techniques",
+  branches: "Our Centers (Branches)",
+  specialists: "Our Pioneers (Specialists)",
+  success: "Oboor Champions (Success Stories)",
+  careers: "Join Us (Careers)",
+  "assessment-cards": "Assessment (Cards)",
+  hero: "Hero Slides",
+  stats: "Achievement Numbers",
+  features: "«Why Oboor» Features",
+  gallery: "Gallery Images",
+  "service-cards": "Service Cards",
+  sections: "Page Section Items",
+  site: "Site Settings",
+  contact: "Contact Messages",
+  admission: "Admission Requests",
+  career: "Job Applications",
+  assessment: "Assessment Results",
+};
+
+export type CmsLangKey = "ar" | "en";
+// اسم النوع حسب لغة اللوحة (إنجليزي إن توفّر، وإلا العربي)
+export const typeLabel = (key: string, lang: CmsLangKey = "ar") =>
+  (lang === "en" ? TYPE_LABELS_EN[key] : TYPE_LABELS[key]) ?? TYPE_LABELS[key] ?? key;
+
 // نص زر الإضافة محدّد لكل نوع (اليوزر يعرف بالظبط بيضيف إيه)
 export const ADD_LABELS: Record<string, string> = {
   news: "إضافة خبر جديد",
@@ -199,4 +228,22 @@ export const ADD_LABELS: Record<string, string> = {
   "service-cards": "إضافة بطاقة خدمة",
   sections: "إضافة قسم جديد",
 };
-export const addLabelFor = (type: string) => ADD_LABELS[type] || "إضافة جديد";
+export const ADD_LABELS_EN: Record<string, string> = {
+  news: "Add News",
+  programs: "Add Program",
+  services: "Add Service",
+  techniques: "Add Technique",
+  branches: "Add Branch",
+  specialists: "Add Specialist",
+  success: "Add Success Story",
+  careers: "Add Job",
+  "assessment-cards": "Add Assessment Card",
+  hero: "Add Hero Slide",
+  stats: "Add Achievement Number",
+  features: "Add Feature",
+  gallery: "Add Image",
+  "service-cards": "Add Service Card",
+  sections: "Add Section",
+};
+export const addLabelFor = (type: string, lang: CmsLangKey = "ar") =>
+  (lang === "en" ? ADD_LABELS_EN[type] : ADD_LABELS[type]) ?? (lang === "en" ? "Add New" : "إضافة جديد");

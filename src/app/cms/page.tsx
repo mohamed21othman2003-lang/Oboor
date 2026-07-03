@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { getStats, type DashboardStats, TYPE_LABELS } from "@/lib/cms/api";
+import { getStats, type DashboardStats, typeLabel } from "@/lib/cms/api";
+import { useCmsLang } from "@/lib/cms/i18n";
 
 // ===== خريطة الأيقونات =====
 function I({ children }: { children: React.ReactNode }) {
@@ -40,10 +41,10 @@ const CONTENT_ICON: Record<string, string> = {
 };
 
 // تجميع المحتوى في 3 أقسام (حسب تصميم الديزاينر)
-const GROUPS: { title: string; keys: string[] }[] = [
-  { title: "محتوى الموقع", keys: ["gallery", "hero", "success", "news", "settings", "sections", "features", "stats"] },
-  { title: "البرامج والخدمات", keys: ["service-cards", "services", "techniques", "programs", "assessment-cards"] },
-  { title: "الموارد", keys: ["branches", "careers", "specialists"] },
+const GROUPS: { title: string; title_en: string; keys: string[] }[] = [
+  { title: "محتوى الموقع", title_en: "Site Content", keys: ["gallery", "hero", "success", "news", "settings", "sections", "features", "stats"] },
+  { title: "البرامج والخدمات", title_en: "Programs & Services", keys: ["service-cards", "services", "techniques", "programs", "assessment-cards"] },
+  { title: "الموارد", title_en: "Resources", keys: ["branches", "careers", "specialists"] },
 ];
 
 // ألوان كروت الإحصائيات (KPI)
@@ -56,13 +57,16 @@ const KPI_TONE: Record<string, { icon: string; bg: string; bar: string }> = {
 const KPI_ICON: Record<string, string> = { contact: "mail", admission: "admission", career: "briefcase", assessment: "clipboard" };
 
 const QUICK = [
-  { label: "إضافة خبر", desc: "انشر مقالاً أو فعالية جديدة", href: "/cms/content/news/new", icon: "news" },
-  { label: "إضافة أخصائي", desc: "أضف عضواً للفريق الطبي", href: "/cms/content/specialists/new", icon: "user" },
-  { label: "إضافة برنامج", desc: "أنشئ برنامجاً تأهيلياً", href: "/cms/content/programs/new", icon: "cap" },
-  { label: "رفع صورة", desc: "أضف صورة إلى المعرض", href: "/cms/content/gallery/new", icon: "image" },
+  { label: "إضافة خبر", label_en: "Add News", desc: "انشر مقالاً أو فعالية جديدة", desc_en: "Publish a new article or event", href: "/cms/content/news/new", icon: "news" },
+  { label: "إضافة أخصائي", label_en: "Add Specialist", desc: "أضف عضواً للفريق الطبي", desc_en: "Add a medical team member", href: "/cms/content/specialists/new", icon: "user" },
+  { label: "إضافة برنامج", label_en: "Add Program", desc: "أنشئ برنامجاً تأهيلياً", desc_en: "Create a rehabilitation program", href: "/cms/content/programs/new", icon: "cap" },
+  { label: "رفع صورة", label_en: "Upload Image", desc: "أضف صورة إلى المعرض", desc_en: "Add an image to the gallery", href: "/cms/content/gallery/new", icon: "image" },
 ];
 
 export default function CmsDashboard() {
+  const { lang } = useCmsLang();
+  const en = lang === "en";
+  const t = (ar: string, e: string) => (en ? e : ar);
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [user, setUser] = useState<string>("");
   const [error, setError] = useState("");
@@ -76,12 +80,12 @@ export default function CmsDashboard() {
   }, []);
 
   if (error) return <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">{error}</p>;
-  if (!stats) return <p className="text-[#0F6C73]">جارٍ التحميل…</p>;
+  if (!stats) return <p className="text-[#0F6C73]">{t("جارٍ التحميل…", "Loading…")}</p>;
 
   // كل عناصر المحتوى مفهرسة بالمفتاح + بطاقة الإعدادات
   const byKey: Record<string, { key: string; label: string; count: number }> = {};
-  [...stats.content, ...stats.home].forEach((c) => (byKey[c.key] = { ...c, label: TYPE_LABELS[c.key] ?? c.label }));
-  byKey["settings"] = { key: "settings", label: "إعدادات الموقع", count: stats.totals.site_configured ? 1 : 0 };
+  [...stats.content, ...stats.home].forEach((c) => (byKey[c.key] = { ...c, label: typeLabel(c.key, lang) }));
+  byKey["settings"] = { key: "settings", label: t("إعدادات الموقع", "Site Settings"), count: stats.totals.site_configured ? 1 : 0 };
 
   const maxSub = Math.max(1, ...stats.submissions.map((s) => s.count));
 
@@ -92,13 +96,13 @@ export default function CmsDashboard() {
         <div aria-hidden className="pointer-events-none absolute -bottom-6 left-4 h-40 w-60 bg-contain bg-[left_bottom] bg-no-repeat opacity-10 invert" style={{ backgroundImage: "url(/logo.png)" }} />
         <div className="absolute -right-10 -top-10 h-48 w-48 rounded-full bg-white/10" aria-hidden />
         <div className="relative">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold">لوحة تحكّم مركز عبور</span>
-          <h1 className="mt-4 text-2xl font-extrabold sm:text-3xl">مرحبًا بعودتك، {user || "admin"} 👋</h1>
-          <p className="mt-2 max-w-lg text-sm text-white/85">نظرة شاملة على نشاط المنصة — الطلبات الواردة والمحتوى المنشور في مكان واحد.</p>
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold">{t("لوحة تحكّم مركز عبور", "Oboor Center Dashboard")}</span>
+          <h1 className="mt-4 text-2xl font-extrabold sm:text-3xl">{t(`مرحبًا بعودتك، ${user || "admin"} 👋`, `Welcome back, ${user || "admin"} 👋`)}</h1>
+          <p className="mt-2 max-w-lg text-sm text-white/85">{t("نظرة شاملة على نشاط المنصة — الطلبات الواردة والمحتوى المنشور في مكان واحد.", "A complete overview of platform activity — incoming requests and published content in one place.")}</p>
           <div className="mt-5 flex flex-wrap gap-3">
-            <HeroStat icon={ICONS.cards} value={stats.totals.content} label="عنصر محتوى" />
-            <HeroStat icon={ICONS.mail} value={stats.totals.submissions} label="إجمالي الطلبات" />
-            <HeroStat icon={ICONS.cog} value={stats.totals.site_configured ? "مُهيّأة" : "غير مُهيّأة"} label="إعدادات الموقع" />
+            <HeroStat icon={ICONS.cards} value={stats.totals.content} label={t("عنصر محتوى", "Content Items")} />
+            <HeroStat icon={ICONS.mail} value={stats.totals.submissions} label={t("إجمالي الطلبات", "Total Requests")} />
+            <HeroStat icon={ICONS.cog} value={stats.totals.site_configured ? t("مُهيّأة", "Configured") : t("غير مُهيّأة", "Not configured")} label={t("إعدادات الموقع", "Site Settings")} />
           </div>
         </div>
       </section>
@@ -111,7 +115,7 @@ export default function CmsDashboard() {
             <Link key={s.key} href={`/cms/submissions/${s.key}`} className="group rounded-2xl bg-white p-5 shadow-sm ring-1 ring-[#e6eff0] transition-all hover:-translate-y-0.5 hover:shadow-md">
               <span className={`flex h-11 w-11 items-center justify-center rounded-xl ${tone.bg} ${tone.icon}`}>{ICONS[KPI_ICON[s.key]]}</span>
               <p className="mt-4 text-3xl font-extrabold text-ink">{s.count}</p>
-              <p className="mt-1 text-sm font-medium text-ink-soft">{s.label}</p>
+              <p className="mt-1 text-sm font-medium text-ink-soft">{typeLabel(s.key, lang)}</p>
               <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[#F7FAFA]">
                 <div className={`h-full rounded-full ${tone.bar}`} style={{ width: `${Math.round((s.count / maxSub) * 100)}%` }} />
               </div>
@@ -122,7 +126,7 @@ export default function CmsDashboard() {
 
       {/* ===== إجراءات سريعة ===== */}
       <div>
-        <SectionTitle icon={ICONS.stats}>إجراءات سريعة</SectionTitle>
+        <SectionTitle icon={ICONS.stats}>{t("إجراءات سريعة", "Quick Actions")}</SectionTitle>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {QUICK.map((a) => (
             <Link key={a.href} href={a.href} className="group flex items-center gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-[#e6eff0] transition-all hover:-translate-y-0.5 hover:shadow-md hover:ring-[#1FA6A8]/40">
@@ -133,8 +137,8 @@ export default function CmsDashboard() {
                 </span>
               </span>
               <div className="min-w-0">
-                <p className="truncate text-sm font-bold text-ink">{a.label}</p>
-                <p className="truncate text-xs text-ink-soft">{a.desc}</p>
+                <p className="truncate text-sm font-bold text-ink">{en ? a.label_en : a.label}</p>
+                <p className="truncate text-xs text-ink-soft">{en ? a.desc_en : a.desc}</p>
               </div>
             </Link>
           ))}
@@ -148,10 +152,10 @@ export default function CmsDashboard() {
         const total = items.reduce((s, it) => s + it.count, 0);
         return (
           <div key={g.title}>
-            <SectionTitle icon={ICONS.cards} meta={`${items.length} أقسام · ${total} عنصر`}>{g.title}</SectionTitle>
+            <SectionTitle icon={ICONS.cards} meta={t(`${items.length} أقسام · ${total} عنصر`, `${items.length} sections · ${total} items`)}>{en ? g.title_en : g.title}</SectionTitle>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {items.map((it) => (
-                <ContentCard key={it.key} itemKey={it.key} label={it.label} count={it.count} />
+                <ContentCard key={it.key} itemKey={it.key} label={it.label} count={it.count} countLabel={t("عنصر", "items")} />
               ))}
             </div>
           </div>
@@ -183,7 +187,7 @@ function SectionTitle({ icon, meta, children }: { icon: React.ReactNode; meta?: 
   );
 }
 
-function ContentCard({ itemKey, label, count }: { itemKey: string; label: string; count: number }) {
+function ContentCard({ itemKey, label, count, countLabel }: { itemKey: string; label: string; count: number; countLabel: string }) {
   const href = itemKey === "settings" ? "/cms/settings" : `/cms/content/${itemKey}`;
   const icon = ICONS[CONTENT_ICON[itemKey] || "cards"];
   return (
@@ -191,9 +195,9 @@ function ContentCard({ itemKey, label, count }: { itemKey: string; label: string
       <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#1FA6A8]/10 text-[#1FA6A8] transition-colors group-hover:bg-[#1FA6A8] group-hover:text-white">{icon}</span>
       <div className="min-w-0">
         <p className="truncate text-sm font-bold text-ink">{label}</p>
-        <p className="mt-0.5 text-xs text-ink-soft">{count} عنصر</p>
+        <p className="mt-0.5 text-xs text-ink-soft">{count} {countLabel}</p>
       </div>
-      <span className="mr-auto shrink-0 text-ink-soft transition-colors group-hover:text-[#1FA6A8]">
+      <span className="ms-auto shrink-0 text-ink-soft transition-colors group-hover:text-[#1FA6A8]">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="dir-flip"><path strokeLinecap="round" strokeLinejoin="round" d="M15 18l-6-6 6-6" /></svg>
       </span>
     </Link>
