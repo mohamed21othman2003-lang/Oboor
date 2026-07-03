@@ -14,7 +14,7 @@ const BLOCK_LABELS: Record<string, string> = {
   hero: "المقدمة العلوية", intro: "نبذة تعريفية", about: "نبذة", mission: "الرسالة", vision: "الرؤية",
   programs: "قسم البرامج (العنوان + القائمة)", services: "الخدمات",
   specialists: "قسم الأخصائيين", branches: "قسم الفروع", cta: "شريط الدعوة للتواصل",
-  stats: "الأرقام", features: "المميزات", categories: "التصنيفات", map_regions: "مناطق الخريطة",
+  stats: "الأرقام", features: "المميزات", categories: "التصنيفات",
   join_cards: "بطاقات الانضمام", contact_prompt: "دعوة التواصل", steps: "خطوات", highlights: "أبرز النقاط",
   prelim_questions: "أسئلة أولية", answer_options: "خيارات الإجابة", cities: "المدن", employment_types: "أنواع الدوام",
   quick_links: "روابط سريعة", social: "روابط التواصل", nav: "روابط القائمة",

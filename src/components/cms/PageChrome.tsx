@@ -8,7 +8,7 @@ import { listCollection, updateItem, createItem, deleteItem, uploadField, type C
 const ImageCropModal = dynamic(() => import("@/components/cms/ImageCropModal"), { ssr: false });
 
 // ترتيب الأقسام كما تظهر على الصفحة (لعرضها مرتّبة بدل ترتيب قاعدة البيانات)
-const BLOCK_ORDER = ["hero", "about", "smart_search", "stats", "join_cards", "why_us", "success", "gallery", "news", "certs", "map_regions", "features", "services", "profile_intro", "profile_stats", "journey", "accreditations", "steps", "prelim_questions", "answer_options", "categories", "list", "cities", "employment_types", "contact_prompt", "highlights"];
+const BLOCK_ORDER = ["hero", "about", "smart_search", "stats", "join_cards", "why_us", "success", "gallery", "news", "certs", "features", "services", "profile_intro", "profile_stats", "journey", "accreditations", "steps", "prelim_questions", "answer_options", "categories", "list", "cities", "employment_types", "contact_prompt", "highlights"];
 const blockRank = (b: string) => { const i = BLOCK_ORDER.indexOf(b); return i === -1 ? 999 : i; };
 // أقسام محتواها منظّم معقّد ⇒ تُحرّر بالمحرّر الكامل (رابط) بدل الحقول المبسّطة
 const COMPLEX_BLOCKS = new Set(["highlights", "services"]);
@@ -16,7 +16,7 @@ const COMPLEX_BLOCKS = new Set(["highlights", "services"]);
 const LIST_BLOCKS = new Set([
   "answer_options", "prelim_questions", "cities", "employment_types",
   "accreditations", "journey", "profile_stats", "join_cards",
-  "map_regions", "features", "stats", "steps", "services",
+  "features", "stats", "steps", "services",
 ]);
 // نص زر الإضافة محدّد لكل قسم
 // رابط الصفحة الحقيقية لكل صفحة (لزر «عاين الصفحة»)
@@ -29,7 +29,7 @@ const BLOCK_ADD: Record<string, string> = {
   cities: "إضافة مدينة", employment_types: "إضافة نوع دوام",
   accreditations: "إضافة اعتماد", journey: "إضافة خطوة",
   profile_stats: "إضافة إحصائية", join_cards: "إضافة بطاقة",
-  map_regions: "إضافة منطقة", features: "إضافة ميزة",
+  features: "إضافة ميزة",
   stats: "إضافة رقم", steps: "إضافة خطوة", services: "إضافة خدمة",
 };
 
@@ -54,7 +54,6 @@ const BLOCK_LABELS: Record<string, string> = {
   steps: "خطوات التقييم",
   prelim_questions: "الأسئلة الأولية",
   answer_options: "خيارات الإجابة",
-  map_regions: "مناطق الخريطة (وعدد الفروع)",
   categories: "تصنيفات الأخبار",
   profile_stats: "إحصائيات ملف الفرع",
   journey: "رحلة التأهيل (ملف الفرع)",
