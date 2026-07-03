@@ -165,7 +165,7 @@ export default function AssessmentWizard({
               <Field name="email" label={pick(locale, "البريد الإلكتروني", "Email")} type="email" placeholder="name@example.com" />
             </div>
             <Field name="childName" label={pick(locale, "اسم الطفل", "Child's Name")} required placeholder={pick(locale, "اسم الطفل", "Child's name")} filter="name" />
-            <Field name="age" label={pick(locale, "العمر", "Age")} required placeholder={pick(locale, "مثال: 6 سنوات", "Example: 6 years")} />
+            <Field name="age" label={pick(locale, "العمر (بالسنوات)", "Age (years)")} required placeholder={pick(locale, "مثال: 6", "Example: 6")} filter="digits" />
             <Select name="gender" label={pick(locale, "الجنس", "Gender")} placeholder={pick(locale, "اختر الجنس", "Select gender")} options={[pick(locale, "ذكر", "Male"), pick(locale, "أنثى", "Female")]} />
             <Select name="city" label={pick(locale, "المدينة", "City")} placeholder={pick(locale, "اختر المدينة", "Select city")} options={[pick(locale, "الرياض", "Riyadh"), pick(locale, "جدة", "Jeddah"), pick(locale, "الشرقية", "Eastern Province"), pick(locale, "مكة المكرمة", "Makkah"), pick(locale, "المدينة المنورة", "Madinah")]} />
           </div>
@@ -232,11 +232,11 @@ function Meta({ icon, label, value }: { icon: React.ReactNode; label: string; va
   );
 }
 
-function Field({ label, name, required, type = "text", placeholder, filter }: { label: string; name: string; required?: boolean; type?: string; placeholder?: string; filter?: "name" | "phone" }) {
+function Field({ label, name, required, type = "text", placeholder, filter }: { label: string; name: string; required?: boolean; type?: string; placeholder?: string; filter?: "name" | "phone" | "digits" }) {
   return (
     <div>
       <label className="block text-start text-sm font-semibold text-ink">{label} {required && <span className="text-danger">*</span>}</label>
-      <input name={name} type={type} required={required} placeholder={placeholder} inputMode={filter === "phone" ? "numeric" : undefined} onInput={filter ? (e) => { e.currentTarget.value = filter === "name" ? stripDigits(e.currentTarget.value) : digitsOnly(e.currentTarget.value); } : undefined} className="mt-1.5 w-full rounded-xl border border-line bg-white px-3 py-2.5 text-start text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-brand/30" />
+      <input name={name} type={type} required={required} placeholder={placeholder} inputMode={filter === "phone" || filter === "digits" ? "numeric" : undefined} onInput={filter ? (e) => { e.currentTarget.value = filter === "name" ? stripDigits(e.currentTarget.value) : digitsOnly(e.currentTarget.value); } : undefined} className="mt-1.5 w-full rounded-xl border border-line bg-white px-3 py-2.5 text-start text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-brand/30" />
     </div>
   );
 }

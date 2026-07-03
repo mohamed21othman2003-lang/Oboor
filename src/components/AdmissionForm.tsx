@@ -115,7 +115,7 @@ export default function AdmissionForm({ locale, branchOptions }: { locale: Local
       {/* بيانات الطفل */}
       <Section title={pick(locale, "بيانات الطفل", "Child's Information")}>
         <Field name="childName" label={pick(locale, "اسم الطفل", "Child's Name")} required placeholder={pick(locale, "أدخل اسم طفلك", "Enter your child's name")} error={errors.childName} onClear={clearError} filter="name" />
-        <Field name="childAge" label={pick(locale, "العمر", "Age")} required placeholder={pick(locale, "مثال: 4 سنوات", "Example: 4 years")} error={errors.childAge} onClear={clearError} />
+        <Field name="childAge" label={pick(locale, "العمر (بالسنوات)", "Age (years)")} required placeholder={pick(locale, "مثال: 4", "Example: 4")} error={errors.childAge} onClear={clearError} filter="digits" />
         <Select name="gender" label={pick(locale, "الجنس", "Gender")} required options={[pick(locale, "ذكر", "Male"), pick(locale, "أنثى", "Female")]} locale={locale} error={errors.gender} onClear={clearError} />
         <Select name="city" label={pick(locale, "المدينة", "City")} required options={cities} locale={locale} error={errors.city} onClear={clearError} />
         <Select name="branch" label={pick(locale, "الفرع المطلوب", "Preferred Branch")} required options={branchList} locale={locale} error={errors.branch} onClear={clearError} />
@@ -207,7 +207,7 @@ function FieldError({ name, error }: { name: string; error?: string }) {
   );
 }
 
-function Field({ label, name, required, type = "text", placeholder, error, onClear, filter }: { label: string; name: string; required?: boolean; type?: string; placeholder?: string; error?: string; onClear?: (name: string) => void; filter?: "name" | "phone" }) {
+function Field({ label, name, required, type = "text", placeholder, error, onClear, filter }: { label: string; name: string; required?: boolean; type?: string; placeholder?: string; error?: string; onClear?: (name: string) => void; filter?: "name" | "phone" | "digits" }) {
   return (
     <div>
       <Label>{label} {required && <span className="text-danger">*</span>}</Label>
@@ -217,12 +217,12 @@ function Field({ label, name, required, type = "text", placeholder, error, onCle
         type={type}
         required={required}
         placeholder={placeholder}
-        inputMode={filter === "phone" ? "numeric" : undefined}
+        inputMode={filter === "phone" || filter === "digits" ? "numeric" : undefined}
         aria-invalid={!!error}
         aria-describedby={error ? `${name}-error` : undefined}
         onInput={(e) => {
           if (filter === "name") e.currentTarget.value = stripDigits(e.currentTarget.value);
-          else if (filter === "phone") e.currentTarget.value = digitsOnly(e.currentTarget.value);
+          else if (filter === "phone" || filter === "digits") e.currentTarget.value = digitsOnly(e.currentTarget.value);
           onClear?.(name);
         }}
         className={`mt-1.5 w-full rounded-xl border bg-white px-3 py-2.5 text-start text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 ${error ? "border-red-400 ring-2 ring-red-100 focus:ring-red-200" : "border-line focus:ring-brand/30"}`}
