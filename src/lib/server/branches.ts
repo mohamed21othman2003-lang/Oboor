@@ -2,7 +2,7 @@
 // يُستعمل من صفحات الفروع (server components) لتمرير القائمة للمكوّنات العميلة.
 
 import { fetchContent } from "@/lib/server/django";
-import { ALL_BRANCHES, ALL_BRANCHES_EN, type Branch } from "@/lib/branchesData";
+import { ALL_BRANCHES, ALL_BRANCHES_EN, REGION_EN, type Branch } from "@/lib/branchesData";
 import { type Locale } from "@/i18n/config";
 
 // الشكل اللي بيرجع من Django (content/branches)
@@ -25,13 +25,15 @@ type ApiBranch = {
 
 function toBranch(row: ApiBranch, locale: Locale): Branch {
   const en = locale === "en";
-  const f = (ar: string, e: string) => (en ? (e ?? ar) : ar);
+  // النص الإنجليزي فارغ ⇒ نرجع للعربي (لا نترك الحقل فارغاً) — || وليس ?? لأن الفارغ ليس nullish
+  const f = (ar: string, e: string) => (en ? (e || ar) : ar);
   return {
     slug: row.slug,
     name: f(row.name_ar, row.name_en),
     area: f(row.area_ar, row.area_en),
     city: f(row.city_ar, row.city_en),
-    region: f(row.region_ar, row.region_en),
+    // المنطقة: إنجليزي إن وُجد، وإلا خريطة الترجمة القياسية، وإلا العربي — لتظل التابات/الليجند/التجميع إنجليزية
+    region: en ? (row.region_en || REGION_EN[row.region_ar] || row.region_ar) : row.region_ar,
     address: f(row.address_ar, row.address_en),
     hours: f(row.hours_ar, row.hours_en),
     phone: row.phone,
@@ -41,7 +43,7 @@ function toBranch(row: ApiBranch, locale: Locale): Branch {
     mapUrl: row.map_url || "",
     rating: row.rating || "",
     reviewsCount: row.reviews_count || "",
-    services: en ? (row.services_en ?? row.services_ar) : row.services_ar,
+    services: en ? (row.services_en?.length ? row.services_en : row.services_ar) : row.services_ar,
     gallery: Array.isArray(row.gallery) ? row.gallery : [],
     lat: row.lat ?? null,
     lng: row.lng ?? null,

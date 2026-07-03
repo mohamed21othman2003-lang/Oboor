@@ -124,7 +124,19 @@ export const ALL_BRANCHES: Branch[] = [
   { slug: "branch-42", name: "مركز   فرع عبور شباب الجوف  للرعاية النهارية", area: "", city: "الجوف", region: "الجوف", address: "سكاكا -الربوة", hours: "", phone: "534198732", phoneEvening: "", email: "oboor.aljouf.male@hdc.edu.sa", manager: "أ.عبدالعزيز السياط", mapUrl: "https://maps.app.goo.gl/TmuxT18CS4rh7Umf9?g_st=com.google.maps.preview.copy", services: DEF_SERVICES, lat: null, lng: null, isNew: false },
   { slug: "branch-43", name: "مركز   فرع عبور شباب العريجاء  للرعاية النهارية", area: "", city: "العريجاء", region: "الرياض", address: "الرياض  العريجاء الوسطى، طريق الامير مساعد بن عبدالرحمن بن فيصل،", hours: "", phone: "551920536", phoneEvening: "", email: "oboor.aluraija.male@hdc.edu.sa", manager: "أ.راكان عبدالله الضرغام", mapUrl: "https://maps.app.goo.gl/j5BbNp299tg1NTYQA", services: DEF_SERVICES, lat: null, lng: null, isNew: false },
 ];
-export const ALL_BRANCHES_EN: Branch[] = ALL_BRANCHES;
+// أسماء المناطق بالإنجليزية (البيانات عربية فقط؛ نترجم المنطقة للعرض/التجميع في الوضع الإنجليزي)
+export const REGION_EN: Record<string, string> = {
+  "الرياض": "Riyadh",
+  "مكة المكرمة": "Makkah",
+  "المدينة المنورة": "Madinah",
+  "الشرقية": "Eastern Province",
+  "القصيم": "Qassim",
+  "عسير": "Asir",
+  "جازان": "Jazan",
+  "الجوف": "Al-Jouf",
+};
+// النسخة الإنجليزية للنسخة الاحتياطية: نترجم المنطقة فقط (الأسماء/العناوين تبقى بالعربية كأسماء علم)
+export const ALL_BRANCHES_EN: Branch[] = ALL_BRANCHES.map((b) => ({ ...b, region: REGION_EN[b.region] || b.region }));
 
 export function getBranch(slug: string, locale: Locale = "ar"): Branch | undefined {
   const source = locale === "en" ? ALL_BRANCHES_EN : ALL_BRANCHES;
