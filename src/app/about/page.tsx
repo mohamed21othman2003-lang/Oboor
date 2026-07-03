@@ -99,7 +99,8 @@ export default async function AboutPage() {
           <div className="grid items-center gap-12 lg:grid-cols-2">
             {/* Image (right) — صورة نظيفة بدون بطاقات مطبوعة؛ الشارتان بطاقات HTML صغيرة ثنائية اللغة */}
             <div className="relative order-1 mx-auto w-full max-w-[480px]">
-              <Image src={blk("hero")?.image || "/about-hero.png"} alt={pick(locale, "مركز عبور للرعاية والتأهيل", "Oboor Center for Care & Rehabilitation")} width={511} height={560} className="h-auto w-full" quality={90} priority />
+              {/* الصورة النظيفة (بدون الكارت المطبوع) على مسار جديد لتفادي كاش الصورة القديمة */}
+              <Image src={((h) => !h || h.includes("about-hero") ? "/about-hero-v2.png" : h)(blk("hero")?.image)} alt={pick(locale, "مركز عبور للرعاية والتأهيل", "Oboor Center for Care & Rehabilitation")} width={511} height={560} className="h-auto w-full" quality={90} priority />
               {/* شارة «تأهيل شامل» — أعلى يمين */}
               <StatBadge className="right-[3%] top-[5%] w-[54%] max-w-[248px] px-3.5 py-2.5" iconClassName="h-5 w-5" iconSize={12} label={pick(locale, "برامج متخصصة", "Specialized Programs")} value={pick(locale, "تأهيل شامل ومتكامل", "Comprehensive Rehabilitation")} />
               {/* شارة «تأسس عام» — أسفل يسار، ضيّقة حتى لا تتلامس مع الأولى */}
