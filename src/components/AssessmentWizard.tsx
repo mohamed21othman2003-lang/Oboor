@@ -7,6 +7,11 @@ import { getAssessments, getQuestionsFor, getAnswerOptions, type Assessment } fr
 import { pick, type Locale } from "@/i18n/config";
 import { waUrl } from "@/lib/site";
 
+// مدن فروع المؤسسة + خيار «أخرى» (يكتب المستخدم مدينته)
+const CITY_OTHER = "__other__";
+const CITIES = ["الرياض", "مكة المكرمة", "المدينة المنورة", "الشرقية", "القصيم", "عسير", "جازان", "الجوف"];
+const CITIES_EN = ["Riyadh", "Makkah", "Madinah", "Eastern Province", "Qassim", "Asir", "Jazan", "Al-Jouf"];
+
 export default function AssessmentWizard({
   locale,
   assessments,
@@ -34,6 +39,8 @@ export default function AssessmentWizard({
   const ANSWER_OPTIONS = answerOptions?.length ? answerOptions : getAnswerOptions(locale);
 
   const [step, setStep] = useState(0);
+  const [city, setCity] = useState("");
+  const [cityOther, setCityOther] = useState("");
   const rootRef = useRef<HTMLDivElement>(null);
   // عند الانتقال بين خطوات المعالج (خصوصاً عرض النتيجة) مرّر لأعلى المعالج
   useEffect(() => { if (step > 0) rootRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }); }, [step]);
@@ -67,7 +74,7 @@ export default function AssessmentWizard({
       childName: String(fd.get("childName") || ""),
       age: String(fd.get("age") || ""),
       gender: String(fd.get("gender") || ""),
-      city: String(fd.get("city") || ""),
+      city: city === CITY_OTHER ? cityOther.trim() : city,
     };
     setStep(3); // النتيجة تظهر فورًا
     fetch("/api/assessment", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) }).catch(() => {});
@@ -170,7 +177,28 @@ export default function AssessmentWizard({
             <Field name="childName" label={pick(locale, "اسم الطفل", "Child's Name")} required placeholder={pick(locale, "اسم الطفل", "Child's name")} filter="name" />
             <Field name="age" label={pick(locale, "العمر (بالسنوات)", "Age (years)")} required placeholder={pick(locale, "مثال: 6", "Example: 6")} filter="digits" />
             <Select name="gender" label={pick(locale, "الجنس", "Gender")} placeholder={pick(locale, "اختر الجنس", "Select gender")} options={[pick(locale, "ذكر", "Male"), pick(locale, "أنثى", "Female")]} />
-            <Select name="city" label={pick(locale, "المدينة", "City")} placeholder={pick(locale, "اختر المدينة", "Select city")} options={[pick(locale, "الرياض", "Riyadh"), pick(locale, "جدة", "Jeddah"), pick(locale, "الشرقية", "Eastern Province"), pick(locale, "مكة المكرمة", "Makkah"), pick(locale, "المدينة المنورة", "Madinah")]} />
+            <div>
+              <label className="block text-start text-sm font-semibold text-ink">{pick(locale, "المدينة", "City")}</label>
+              <div className="mt-1.5">
+                <CustomSelect
+                  value={city}
+                  onChange={setCity}
+                  placeholder={pick(locale, "اختر المدينة", "Select city")}
+                  options={[
+                    ...(locale === "en" ? CITIES_EN : CITIES).map((c) => ({ value: c, label: c })),
+                    { value: CITY_OTHER, label: pick(locale, "أخرى…", "Other…") },
+                  ]}
+                />
+              </div>
+              {city === CITY_OTHER && (
+                <input
+                  value={cityOther}
+                  onChange={(e) => setCityOther(e.target.value)}
+                  placeholder={pick(locale, "اكتب اسم مدينتك", "Type your city")}
+                  className="mt-2 w-full rounded-xl border border-line bg-white px-3 py-2.5 text-start text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-brand/30"
+                />
+              )}
+            </div>
           </div>
           {error && <p className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-center text-sm font-medium text-red-600">{error}</p>}
           <div className="mt-6 flex items-center justify-between gap-3">
