@@ -83,12 +83,21 @@ export default function LeafletMap({ locale, branches, regions }: { locale: Loca
   return (
     <div className="relative overflow-hidden rounded-3xl border border-line shadow-sm">
       <MapContainer ref={setMap} center={[24.5, 45]} zoom={5} scrollWheelZoom attributionControl={false} className="z-0 h-[520px] w-full">
-        {/* حقوق OpenStreetMap فقط (إلزامية) — بدون شعار Leaflet وعلمه */}
+        {/* حقوق الخريطة (إلزامية) — بدون شعار Leaflet وعلمه */}
         <AttributionControl prefix={false} position="bottomright" />
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
+        {locale === "en" ? (
+          // خريطة بأسماء لاتينية (إنجليزية) للنسخة الإنجليزية — Esri World Street Map
+          <TileLayer
+            attribution='Tiles &copy; <a href="https://www.esri.com/">Esri</a>'
+            url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}"
+            maxZoom={19}
+          />
+        ) : (
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
+        )}
         {placed.map(({ b, pos }) => {
           const color = colorOf(b);
           return (
