@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { validateName, validatePhone, stripDigits, digitsOnly } from "@/lib/validate";
 import CustomSelect from "@/components/ui/Select";
 import { getAssessments, getQuestionsFor, getAnswerOptions, type Assessment } from "@/lib/assessmentData";
@@ -34,6 +34,9 @@ export default function AssessmentWizard({
   const ANSWER_OPTIONS = answerOptions?.length ? answerOptions : getAnswerOptions(locale);
 
   const [step, setStep] = useState(0);
+  const rootRef = useRef<HTMLDivElement>(null);
+  // عند الانتقال بين خطوات المعالج (خصوصاً عرض النتيجة) مرّر لأعلى المعالج
+  useEffect(() => { if (step > 0) rootRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }); }, [step]);
   const [active, setActive] = useState<Assessment | null>(null);
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [error, setError] = useState("");
@@ -81,7 +84,7 @@ export default function AssessmentWizard({
   }[level];
 
   return (
-    <div className="mx-auto max-w-4xl rounded-3xl border border-line bg-white p-6 shadow-lg sm:p-8">
+    <div ref={rootRef} className="mx-auto max-w-4xl scroll-mt-24 rounded-3xl border border-line bg-white p-6 shadow-lg sm:p-8">
       {/* Step indicator */}
       <div className="mb-8 flex items-center">
         {STEPS.map((s, i) => (

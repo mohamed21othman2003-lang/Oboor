@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { pick, type Locale } from "@/i18n/config";
 import { validateName, validatePhone, validateRequired, validateEmail, stripDigits, digitsOnly } from "@/lib/validate";
 import CustomSelect from "@/components/ui/Select";
@@ -21,6 +21,9 @@ export default function AdmissionForm({ locale, branchOptions }: { locale: Local
   const [formError, setFormError] = useState("");
   const [caseType, setCaseType] = useState(""); // لإظهار حقل «حدّد» عند اختيار «أخرى»
   const [city, setCity] = useState(""); // لإظهار حقل كتابة المدينة عند اختيار «أخرى»
+  const successRef = useRef<HTMLDivElement>(null);
+  // بعد الإرسال بنجاح: مرّر الصفحة لرسالة التأكيد (النماذج طويلة والمستخدم يكون في الأسفل)
+  useEffect(() => { if (sent) successRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }); }, [sent]);
   const cities = locale === "en" ? CITIES_EN : CITIES;
   const branches = locale === "en" ? BRANCHES_EN : BRANCHES;
   // الفروع من الـCMS (تُمرَّر من الصفحة) مع fallback للقائمة الثابتة
@@ -104,7 +107,7 @@ export default function AdmissionForm({ locale, branchOptions }: { locale: Local
 
   if (sent) {
     return (
-      <div className="mx-auto max-w-2xl rounded-3xl border border-brand/20 bg-white p-10 text-center shadow-sm">
+      <div ref={successRef} className="mx-auto max-w-2xl scroll-mt-28 rounded-3xl border border-brand/20 bg-white p-10 text-center shadow-sm">
         <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-brand/10 text-brand">
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
         </span>

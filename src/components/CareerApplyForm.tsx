@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { CITIES, CITIES_EN } from "@/lib/careersData";
 import { pick, type Locale } from "@/i18n/config";
 import { validateName, validatePhone, stripDigits, digitsOnly } from "@/lib/validate";
@@ -22,6 +22,8 @@ export default function CareerApplyForm({ jobTitle, locale }: { jobTitle: string
   const [roleOther, setRoleOther] = useState("");
   const [city, setCity] = useState("");
   const [cityOther, setCityOther] = useState("");
+  const successRef = useRef<HTMLDivElement>(null);
+  useEffect(() => { if (sent) successRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }); }, [sent]);
 
   const MAX = 10 * 1024 * 1024; // 10MB
 
@@ -118,7 +120,7 @@ export default function CareerApplyForm({ jobTitle, locale }: { jobTitle: string
         </div>
 
         {sent ? (
-          <div className="mt-8 rounded-2xl border border-brand/20 bg-white p-10 text-center shadow-sm">
+          <div ref={successRef} className="mt-8 scroll-mt-28 rounded-2xl border border-brand/20 bg-white p-10 text-center shadow-sm">
             <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-brand/10 text-brand">
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
             </span>
