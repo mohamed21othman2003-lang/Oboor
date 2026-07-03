@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { Fragment, useEffect, useId, useRef, useState } from "react";
 
-export type SelectOption = { value: string; label: string };
+export type SelectOption = { value: string; label: string; group?: string };
 
 /**
  * منسدلة مخصّصة بستايل الهوية (بديل عن <select> الأصلي القبيح).
@@ -68,12 +68,11 @@ export default function Select({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
-  // إبقاء العنصر المُميَّز ظاهراً أثناء التمرير
+  // إبقاء العنصر المُميَّز ظاهراً أثناء التمرير (بالمعرّف حتى لا تُخلّ رؤوس المجموعات بالفهرسة)
   useEffect(() => {
     if (!open || active < 0) return;
-    const el = listRef.current?.children[active] as HTMLElement | undefined;
-    el?.scrollIntoView({ block: "nearest" });
-  }, [active, open]);
+    document.getElementById(`${listId}-${active}`)?.scrollIntoView({ block: "nearest" });
+  }, [active, open, listId]);
 
   const onKeyDown = (e: React.KeyboardEvent) => {
     if (!open) {
@@ -131,25 +130,33 @@ export default function Select({
           {opts.map((o, i) => {
             const isSel = o.value === value;
             const isActive = i === active;
+            const showHeader = !!o.group && o.group !== opts[i - 1]?.group;
             return (
-              <li
-                key={o.value}
-                id={`${listId}-${i}`}
-                role="option"
-                aria-selected={isSel}
-                onMouseEnter={() => setActive(i)}
-                onClick={() => choose(o.value)}
-                className={`flex cursor-pointer items-center justify-between gap-2 rounded-lg px-3 py-2 text-start text-sm transition-colors ${
-                  isActive ? "bg-brand/10 text-brand-deep" : "text-ink"
-                } ${isSel ? "font-semibold text-brand-dark" : ""}`}
-              >
-                <span>{o.label}</span>
-                {isSel && (
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="shrink-0 text-brand">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M20 6L9 17l-5-5" />
-                  </svg>
+              <Fragment key={o.value}>
+                {showHeader && (
+                  <li role="presentation" className="sticky top-0 z-10 flex items-center gap-1.5 bg-white px-3 pb-1 pt-2 text-[11px] font-bold text-brand-dark first:pt-1">
+                    <span className="h-1.5 w-1.5 rounded-full bg-brand/60" />
+                    {o.group}
+                  </li>
                 )}
-              </li>
+                <li
+                  id={`${listId}-${i}`}
+                  role="option"
+                  aria-selected={isSel}
+                  onMouseEnter={() => setActive(i)}
+                  onClick={() => choose(o.value)}
+                  className={`flex cursor-pointer items-center justify-between gap-2 rounded-lg py-2 pe-3 ps-4 text-start text-sm transition-colors ${
+                    isActive ? "bg-brand/10 text-brand-deep" : "text-ink"
+                  } ${isSel ? "font-semibold text-brand-dark" : ""}`}
+                >
+                  <span>{o.label}</span>
+                  {isSel && (
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="shrink-0 text-brand">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M20 6L9 17l-5-5" />
+                    </svg>
+                  )}
+                </li>
+              </Fragment>
             );
           })}
         </ul>

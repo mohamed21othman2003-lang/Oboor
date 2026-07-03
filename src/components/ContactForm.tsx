@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { pick, type Locale } from "@/i18n/config";
 import { validateName, validatePhone, stripDigits, digitsOnly } from "@/lib/validate";
-import CustomSelect from "@/components/ui/Select";
+import CustomSelect, { type SelectOption } from "@/components/ui/Select";
 import LimitedTextarea from "@/components/ui/LimitedTextarea";
 
 const BRANCHES: { ar: string; en: string }[] = [
@@ -18,7 +18,7 @@ const MESSAGE_TYPES: { value: string; ar: string; en: string }[] = [
   { value: "شكوى", ar: "شكوى", en: "Complaint" },
 ];
 
-export default function ContactForm({ locale, branches }: { locale: Locale; branches?: string[] }) {
+export default function ContactForm({ locale, branches }: { locale: Locale; branches?: (string | SelectOption)[] }) {
   // قائمة الفروع من الـCMS (تمرَّر من الصفحة) مع fallback للقائمة الثابتة
   const branchOptions = branches?.length ? branches : BRANCHES.map((b) => pick(locale, b.ar, b.en));
   const [type, setType] = useState("خدمة");

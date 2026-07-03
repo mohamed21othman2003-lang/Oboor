@@ -3,7 +3,8 @@ import type { Metadata } from "next";
 import ContactForm from "@/components/ContactForm";
 import BranchesMapSection from "@/components/BranchesMapSection";
 import { loadBranches } from "@/lib/server/branches";
-import { mapRegionsFrom, type Branch } from "@/lib/branchesData";
+import { mapRegionsFrom, branchSelectOptions, type Branch } from "@/lib/branchesData";
+import type { SelectOption } from "@/components/ui/Select";
 import { CONTACT } from "@/lib/site";
 import { fetchContent } from "@/lib/server/django";
 import { getLocale } from "@/i18n/locale";
@@ -130,7 +131,7 @@ function FeatureCard({ icon, title, note }: { icon: React.ReactNode; title: stri
   );
 }
 
-function FormSection({ locale, branches }: { locale: Locale; branches: string[] }) {
+function FormSection({ locale, branches }: { locale: Locale; branches: SelectOption[] }) {
   return (
     <section className="bg-surface">
       <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:px-8">
@@ -243,7 +244,7 @@ export default async function ContactPage() {
     <>
       <Hero locale={locale} />
       <ContactCards locale={locale} site={site} />
-      <FormSection locale={locale} branches={branches.map((b) => b.name)} />
+      <FormSection locale={locale} branches={branchSelectOptions(branches)} />
       <BranchesSection locale={locale} branches={branches} regions={mapRegions} />
       <SocialSection locale={locale} site={site} />
     </>

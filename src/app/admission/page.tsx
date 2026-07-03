@@ -5,6 +5,7 @@ import CtaSection from "@/components/CtaSection";
 import { getLocale } from "@/i18n/locale";
 import { pick } from "@/i18n/config";
 import { loadBranches } from "@/lib/server/branches";
+import { branchSelectOptions } from "@/lib/branchesData";
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
@@ -58,7 +59,7 @@ export default async function AdmissionPage() {
       {/* Form */}
       <section className="bg-surface py-14">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <AdmissionForm locale={locale} branchOptions={branches.map((b) => b.name)} />
+          <AdmissionForm locale={locale} branchOptions={branchSelectOptions(branches)} />
         </div>
       </section>
 

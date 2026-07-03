@@ -147,6 +147,21 @@ export function regionTabs(locale: Locale = "ar"): { name: string; count: number
 // مناطق خريطة الفروع (الليجند) — تُشتقّ من الفروع الفعلية مع لون لكل منطقة.
 // تُستخدم في صفحتَي الفروع والتواصل لتظل الخريطة متطابقة دائماً مع الفروع.
 const MAP_REGION_PALETTE = ["#2cbcc8", "#f59e0b", "#8b5cf6", "#ec4899", "#10b981", "#3b82f6", "#ef4444", "#eab308"];
+
+// خيارات منسدلة الفروع مجمّعة حسب المنطقة (لتسهيل اختيار الفرع من بين عشرات الفروع).
+// القيمة = اسم الفرع (كما يُرسَل في النماذج)، و group = المنطقة (رأس المجموعة).
+export function branchSelectOptions(source: Branch[]): { value: string; label: string; group: string }[] {
+  const order: string[] = [];
+  const byRegion: Record<string, Branch[]> = {};
+  for (const b of source) {
+    const g = b.region || b.city || "";
+    if (!(g in byRegion)) { byRegion[g] = []; order.push(g); }
+    byRegion[g].push(b);
+  }
+  order.sort((a, b) => byRegion[b].length - byRegion[a].length); // الأكبر أولاً
+  return order.flatMap((g) => byRegion[g].map((b) => ({ value: b.name, label: b.name, group: g })));
+}
+
 export function mapRegionsFrom(source: Branch[]): { name: string; count: number; color: string }[] {
   const order: string[] = [];
   const counts: Record<string, number> = {};

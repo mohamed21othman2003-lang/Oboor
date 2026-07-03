@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { pick, type Locale } from "@/i18n/config";
 import { validateName, validatePhone, validateRequired, validateEmail, stripDigits, digitsOnly } from "@/lib/validate";
-import CustomSelect from "@/components/ui/Select";
+import CustomSelect, { type SelectOption } from "@/components/ui/Select";
 import LimitedTextarea from "@/components/ui/LimitedTextarea";
 
 const CITIES = ["الرياض", "مكة المكرمة", "المدينة المنورة", "الشرقية", "القصيم", "عسير", "جازان", "الجوف"];
@@ -13,7 +13,7 @@ const BRANCHES_EN = ["Al-Narjis Branch", "Al-Olaya Branch", "Al-Rawdah Branch", 
 const CASES = ["اضطراب طيف التوحد", "نقص الانتباه وفرط الحركة (ADHD)", "تأخر النطق واللغة", "صعوبات التعلم", "إعاقة حركية", "أخرى"];
 const CASES_EN = ["Autism Spectrum Disorder", "ADHD", "Speech & Language Delay", "Learning Difficulties", "Physical Disability", "Other"];
 
-export default function AdmissionForm({ locale, branchOptions }: { locale: Locale; branchOptions?: string[] }) {
+export default function AdmissionForm({ locale, branchOptions }: { locale: Locale; branchOptions?: (string | SelectOption)[] }) {
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
   // أخطاء لكل حقل (تظهر فوق الحقل نفسه) + خطأ عام للإرسال (شبكة)
@@ -269,7 +269,7 @@ function Field({ label, name, required, type = "text", placeholder, error, onCle
   );
 }
 
-function Select({ label, name, required, options, locale, error, onClear }: { label: string; name: string; required?: boolean; options: string[]; locale: Locale; error?: string; onClear?: (name: string) => void }) {
+function Select({ label, name, required, options, locale, error, onClear }: { label: string; name: string; required?: boolean; options: (string | SelectOption)[]; locale: Locale; error?: string; onClear?: (name: string) => void }) {
   return (
     <div>
       <Label>{label} {required && <span className="text-danger">*</span>}</Label>
