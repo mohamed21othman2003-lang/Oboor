@@ -155,17 +155,17 @@ export default async function SpecialistsPage() {
             </p>
           </div>
 
-          {/* Stats */}
-          <div dir="ltr" className="mt-8 flex items-center justify-center gap-12">
+          {/* Stats — الأيقونة قبل الرقم؛ يتبع اتجاه الصفحة (LTR: أيقونة يسار، RTL: أيقونة يمين) */}
+          <div className="mt-8 flex items-center justify-center gap-12">
             {stats.map((s, i) => (
               <div key={s.label} className="flex items-center gap-3">
-                <div className="text-end">
-                  <p className="text-2xl font-extrabold text-brand">{s.value}</p>
-                  <p className="text-xs text-ink-muted">{s.label}</p>
-                </div>
                 <span className="flex h-11 w-11 items-center justify-center rounded-full bg-brand/10 text-brand">
                   {i === 0 ? <RibbonIcon /> : <UsersIcon />}
                 </span>
+                <div className="text-start">
+                  <p className="text-2xl font-extrabold text-brand"><bdi dir="ltr">{s.value}</bdi></p>
+                  <p className="text-xs text-ink-muted">{s.label}</p>
+                </div>
               </div>
             ))}
           </div>
