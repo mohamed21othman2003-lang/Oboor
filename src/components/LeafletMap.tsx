@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
-import { MapContainer, TileLayer, CircleMarker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, CircleMarker, Popup, AttributionControl } from "react-leaflet";
 import type { Map as LeafletMapType, CircleMarker as LeafletCircleMarker } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { useRouter } from "next/navigation";
@@ -84,7 +84,9 @@ export default function LeafletMap({ locale, branches, regions }: { locale: Loca
 
   return (
     <div className="relative overflow-hidden rounded-3xl border border-line shadow-sm">
-      <MapContainer ref={setMap} center={[24.5, 45]} zoom={5} scrollWheelZoom className="z-0 h-[520px] w-full">
+      <MapContainer ref={setMap} center={[24.5, 45]} zoom={5} scrollWheelZoom attributionControl={false} className="z-0 h-[520px] w-full">
+        {/* حقوق OpenStreetMap فقط (إلزامية) — بدون شعار Leaflet وعلمه */}
+        <AttributionControl prefix={false} position="bottomright" />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
