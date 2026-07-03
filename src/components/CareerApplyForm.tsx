@@ -20,6 +20,8 @@ export default function CareerApplyForm({ jobTitle, locale }: { jobTitle: string
   const [fileName, setFileName] = useState("");
   const [role, setRole] = useState("");
   const [roleOther, setRoleOther] = useState("");
+  const [city, setCity] = useState("");
+  const [cityOther, setCityOther] = useState("");
 
   const MAX = 10 * 1024 * 1024; // 10MB
 
@@ -46,6 +48,9 @@ export default function CareerApplyForm({ jobTitle, locale }: { jobTitle: string
     const finalRole = role === OTHER ? roleOther.trim() : role;
     if (!finalRole) { setError(pick(locale, "الرجاء اختيار أو إدخال المسمى الوظيفي الحالي.", "Please select or enter your current job title.")); return; }
     fd.set("currentRole", finalRole);
+    const finalCity = city === OTHER ? cityOther.trim() : city;
+    if (!finalCity) { setError(pick(locale, "الرجاء اختيار أو إدخال المدينة.", "Please select or enter your city.")); return; }
+    fd.set("city", finalCity);
     const cv = fd.get("cv");
     // السيرة الذاتية إجبارية فعلياً
     if (!(cv instanceof File) || cv.size === 0) {
@@ -136,7 +141,28 @@ export default function CareerApplyForm({ jobTitle, locale }: { jobTitle: string
               <Field name="name" label={pick(locale, "الاسم الكامل", "Full Name")} required placeholder={pick(locale, "أدخل اسمك الكامل", "Enter your full name")} filter="name" />
               <Field name="phone" label={pick(locale, "رقم الجوال", "Mobile Number")} required type="tel" placeholder="05XXXXXXXX" filter="phone" />
               <Field name="email" label={pick(locale, "البريد الإلكتروني", "Email")} required type="email" placeholder="example@gmail.com" />
-              <SelectField name="city" label={pick(locale, "المدينة", "City")} required options={cities} />
+              <div>
+                <Label required>{pick(locale, "المدينة", "City")}</Label>
+                <div className="mt-1.5">
+                  <CustomSelect
+                    value={city}
+                    onChange={setCity}
+                    placeholder={pick(locale, "اختر مدينتك…", "Select your city…")}
+                    options={[
+                      ...cities.map((c) => ({ value: c, label: c })),
+                      { value: OTHER, label: pick(locale, "أخرى…", "Other…") },
+                    ]}
+                  />
+                </div>
+                {city === OTHER && (
+                  <input
+                    value={cityOther}
+                    onChange={(e) => setCityOther(e.target.value)}
+                    placeholder={pick(locale, "اكتب اسم مدينتك", "Type your city")}
+                    className="mt-2 w-full rounded-xl border border-line bg-white px-3 py-2.5 text-start text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-brand/30"
+                  />
+                )}
+              </div>
               <div>
                 <Label required>{pick(locale, "تخصصك / مجالك الحالي", "Your current field / specialty")}</Label>
                 <div className="mt-1.5">

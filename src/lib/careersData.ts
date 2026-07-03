@@ -18,7 +18,7 @@ export type Job = {
   requirements: string[];
 };
 
-export const CITIES = ["الكل", "الرياض", "الشرقية", "القصيم", "جازان", "المدينة المنورة", "عسير", "الخرج"];
+export const CITIES = ["الكل", "الرياض", "مكة المكرمة", "المدينة المنورة", "الشرقية", "القصيم", "عسير", "جازان", "الجوف"];
 export const EMPLOYMENT_TYPES = ["الكل", "دوام كامل", "دوام جزئي", "عن بُعد"];
 
 export const JOBS: Job[] = [
@@ -168,7 +168,7 @@ export const JOBS: Job[] = [
   },
 ];
 
-export const CITIES_EN = ["All", "Riyadh", "Eastern Province", "Qassim", "Jazan", "Madinah", "Asir", "Al-Kharj"];
+export const CITIES_EN = ["All", "Riyadh", "Makkah", "Madinah", "Eastern Province", "Qassim", "Asir", "Jazan", "Al-Jouf"];
 export const EMPLOYMENT_TYPES_EN = ["All", "Full-time", "Part-time", "Remote"];
 
 export const JOBS_EN: Job[] = [
