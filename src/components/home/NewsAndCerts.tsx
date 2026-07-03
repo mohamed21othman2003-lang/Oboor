@@ -47,6 +47,8 @@ export default function NewsAndCerts({ locale, news: newsProp, certs: certsProp,
   const certs: Cert[] = certsProp?.length ? certsProp : [0, 1, 2, 3].map(() => ({ name: "ISO 9001", label: pick(locale, "إدارة الجودة", "Quality Mgmt.") }));
   const trackRef = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0);
+  // عدد صفحات التمرير الفعلية (وليس عدد الكروت) — لتفادي نقاط زائدة تصل لنفس نهاية التمرير
+  const [pages, setPages] = useState(1);
   // حواف التلاشي: نُظهر التلاشي فقط على الجهة التي خلفها محتوى مخفي،
   // ونزيله عند النهاية حتى يظهر آخر كارت كاملاً (لا مقصوصاً تحت القناع).
   const [edge, setEdge] = useState({ start: true, end: false });
@@ -54,12 +56,18 @@ export default function NewsAndCerts({ locale, news: newsProp, certs: certsProp,
     const card = el.children[0] as HTMLElement | undefined;
     return card ? card.offsetWidth + 20 : 1; // gap-5
   };
+  // عدد الكروت المرئية في المرة = عرض المسار ÷ خطوة الكارت؛ الصفحات = الكروت − المرئي + 1
+  const pageCountOf = (el: HTMLDivElement) => {
+    const visible = Math.max(1, Math.round(el.clientWidth / stepOf(el)));
+    return Math.max(1, el.children.length - visible + 1);
+  };
   const recomputeEdges = () => {
     const el = trackRef.current;
     if (!el) return;
     const pos = Math.abs(el.scrollLeft);
     const max = el.scrollWidth - el.clientWidth;
     setEdge({ start: pos <= 2, end: pos >= max - 2 });
+    setPages(pageCountOf(el));
   };
   useEffect(() => {
     recomputeEdges();
@@ -75,11 +83,13 @@ export default function NewsAndCerts({ locale, news: newsProp, certs: certsProp,
   const goTo = (idx: number) => {
     const el = trackRef.current;
     if (!el) return;
-    const i = Math.min(Math.max(idx, 0), el.children.length - 1);
+    const last = pageCountOf(el) - 1;
+    const i = Math.min(Math.max(idx, 0), last);
     const step = stepOf(el);
     const max = el.scrollWidth - el.clientWidth;
     const rtl = getComputedStyle(el).direction === "rtl";
-    let target = i * step * (rtl ? -1 : 1);
+    // آخر صفحة تذهب لنهاية التمرير الفعلية حتى يظهر آخر كارت كاملاً
+    let target = i >= last ? max * (rtl ? -1 : 1) : i * step * (rtl ? -1 : 1);
     target = rtl ? Math.max(target, -max) : Math.min(target, max);
     el.scrollTo({ left: target, behavior: "smooth" });
     setActive(i);
@@ -88,7 +98,7 @@ export default function NewsAndCerts({ locale, news: newsProp, certs: certsProp,
   const onScroll = () => {
     const el = trackRef.current;
     if (!el) return;
-    setActive(Math.round(Math.abs(el.scrollLeft) / stepOf(el)));
+    setActive(Math.min(pageCountOf(el) - 1, Math.round(Math.abs(el.scrollLeft) / stepOf(el))));
     recomputeEdges();
   };
   const navBtn = "flex h-10 w-10 items-center justify-center rounded-full border border-white/30 bg-white/10 text-white transition-colors hover:bg-white hover:text-brand-deep";
@@ -125,11 +135,11 @@ export default function NewsAndCerts({ locale, news: newsProp, certs: certsProp,
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M9 18l6-6-6-6" /></svg>
             </button>
             <div className="flex items-center gap-1.5">
-              {news.map((_, i) => (
+              {Array.from({ length: pages }).map((_, i) => (
                 <button
                   key={i}
                   onClick={() => goTo(i)}
-                  aria-label={pick(locale, `الخبر ${i + 1}`, `News ${i + 1}`)}
+                  aria-label={pick(locale, `الصفحة ${i + 1}`, `Page ${i + 1}`)}
                   className={`h-2 rounded-full transition-all ${i === active ? "w-5 bg-white" : "w-2 bg-white/40 hover:bg-white/60"}`}
                 />
               ))}
