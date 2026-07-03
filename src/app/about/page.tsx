@@ -103,7 +103,7 @@ export default async function AboutPage() {
               {/* شارة «تأسس عام» — تغطي البطاقة المطبوعة أعلى يسار الصورة (أكبر لتغطيتها بالكامل) */}
               <StatBadge className="left-[1.5%] top-[16.5%] w-[42%] max-w-[210px] px-4 py-6" valueClassName="text-2xl sm:text-3xl" iconClassName="h-5 w-5" iconSize={11} label={pick(locale, "تأسّس عام", "Established")} value={pick(locale, "٢٠٠٧", "2007")} />
               {/* شارة «تأهيل شامل» — أعلى يمين الصورة */}
-              <StatBadge className="right-[3%] top-[4%] w-[58%] max-w-[270px] px-3.5 py-2.5" label={pick(locale, "برامج متخصصة", "Specialized Programs")} value={pick(locale, "تأهيل شامل ومتكامل", "Comprehensive Rehabilitation")} />
+              <StatBadge className="right-[3%] top-[4%] w-[58%] max-w-[270px] px-3.5 py-2.5" iconClassName="h-5 w-5" iconSize={11} label={pick(locale, "برامج متخصصة", "Specialized Programs")} value={pick(locale, "تأهيل شامل ومتكامل", "Comprehensive Rehabilitation")} />
             </div>
 
             {/* Text (left) */}
