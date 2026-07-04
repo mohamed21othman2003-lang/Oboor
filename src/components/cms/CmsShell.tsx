@@ -45,6 +45,7 @@ const NAV: NavGroup[] = [
     items: [
       { label: "أقسام الصفحات", label_en: "Page Sections", href: "/cms/content/sections", icon: "layers" },
       { label: "إعدادات الموقع", label_en: "Site Settings", href: "/cms/settings", icon: "cog" },
+      { label: "دليل الاستخدام", label_en: "User Guide", href: "/cms/guide", icon: "book" },
     ],
   },
 ];
@@ -199,6 +200,7 @@ const ICONS: Record<string, React.ReactNode> = {
   star: <Svg><path d="M12 3l2.9 6.3 6.6.6-5 4.4 1.5 6.4L12 17.8 6 21l1.5-6.4-5-4.4 6.6-.6z" /></Svg>,
   megaphone: <Svg><path d="M3 11l16-7v16L3 13zM3 11v2M8 13v6l4-1" /></Svg>,
   layers: <Svg><path d="M12 2l9 5-9 5-9-5z" /><path d="M3 12l9 5 9-5M3 17l9 5 9-5" /></Svg>,
+  book: <Svg><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" /></Svg>,
   cog: <Svg><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 0 1-4 0v-.1A1.6 1.6 0 0 0 7 19.4a1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.6 1.6 0 0 0 3 14a2 2 0 0 1 0-4h.1A1.6 1.6 0 0 0 4.6 7a1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.6 1.6 0 0 0 10 3.6 2 2 0 0 1 14 3.6a1.6 1.6 0 0 0 2.7-1.1L17 2a2 2 0 0 1 4 0v.1A1.6 1.6 0 0 0 22 4.6" /></Svg>,
 };
 
