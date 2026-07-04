@@ -160,12 +160,13 @@ export default function GuidePage() {
         <div className="flex flex-col gap-10 lg:flex-row lg:items-start">
           {/* الفهرس الجانبي + البحث */}
           <nav className="guide-toc lg:sticky lg:top-24 lg:w-80 lg:shrink-0">
-            <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-[#e6eff0]">
-              <div className="mb-3 flex items-center gap-2 rounded-xl border border-[#e6eff0] bg-[#f7fafa] px-3 py-2">
+            <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-[#e6eff0] lg:flex lg:max-h-[calc(100vh-7rem)] lg:flex-col">
+              <div className="mb-3 flex shrink-0 items-center gap-2 rounded-xl border border-[#e6eff0] bg-[#f7fafa] px-3 py-2">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-[#0F6C73]/50"><circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3" /></svg>
                 <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t("ابحث في الدليل…", "Search the guide…")} className="w-full bg-transparent text-sm text-ink outline-none placeholder:text-[#0F6C73]/40" />
                 {query && <button onClick={() => setQuery("")} className="text-ink-soft hover:text-ink" aria-label={t("مسح", "Clear")}>✕</button>}
               </div>
+              <div className="lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:pe-1">
               {filtered.map((part) => (
                 <div key={part.id} className="mb-4 last:mb-0">
                   <p className="mb-1.5 flex items-center gap-2 px-1 text-xs font-extrabold text-[#0F6C73]">
@@ -188,6 +189,7 @@ export default function GuidePage() {
                 </div>
               ))}
               {filtered.length === 0 && <p className="px-1 text-xs text-ink-soft">{t(`لا نتائج لـ«${query}»`, `No results for "${query}"`)}</p>}
+              </div>
             </div>
           </nav>
 
