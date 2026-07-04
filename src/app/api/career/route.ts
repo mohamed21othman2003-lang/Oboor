@@ -4,6 +4,7 @@ import { DJANGO_API_URL, forwardForm } from "@/lib/server/django";
 
 export const runtime = "nodejs";
 const MAX = 10 * 1024 * 1024; // 10 MB
+const CV_EXT = [".pdf", ".doc", ".docx"]; // صيغ السيرة الذاتية المسموحة
 
 export async function POST(req: Request) {
   try {
@@ -13,6 +14,17 @@ export async function POST(req: Request) {
     const phone = get("phone");
     if (!name || !phone) {
       return NextResponse.json({ ok: false, error: "الاسم ورقم الجوال مطلوبان" }, { status: 400 });
+    }
+    // تحقّق مبكّر من ملف السيرة الذاتية (يسري على كل المسارات: التوجيه والتخزين الاحتياطي)
+    const cvFile = form.get("cv");
+    if (cvFile && cvFile instanceof File && cvFile.size > 0) {
+      const nameLower = cvFile.name.toLowerCase();
+      if (!CV_EXT.some((e) => nameLower.endsWith(e))) {
+        return NextResponse.json({ ok: false, error: "صيغة الملف غير مدعومة — المسموح: PDF أو DOC أو DOCX" }, { status: 400 });
+      }
+      if (cvFile.size > MAX) {
+        return NextResponse.json({ ok: false, error: "حجم الملف أكبر من 10 ميغابايت" }, { status: 400 });
+      }
     }
 
     // forward to Django when configured (maps currentRole -> current_role, includes the CV file)
@@ -27,8 +39,8 @@ export async function POST(req: Request) {
         if (cv.size > MAX) return NextResponse.json({ ok: false, error: "حجم الملف أكبر من 10 ميغابايت" }, { status: 400 });
         fd.set("cv", cv, cv.name);
       }
-      await forwardForm("career", fd);
-      return NextResponse.json({ ok: true });
+      // إن فشل التوجيه (باك إند بارد/معطّل) نسقط لتخزين الطلب فلا يضيع
+      if (await forwardForm("career", fd)) return NextResponse.json({ ok: true });
     }
 
     let cvId = "";

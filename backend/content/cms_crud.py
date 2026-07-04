@@ -1,5 +1,5 @@
 """CRUD عام للـCMS مبني على سجل أنواع المحتوى — قائمة/تفاصيل/إضافة/تعديل/حذف + مخطّط الحقول."""
-from django.db import models as djm
+from django.db import models as djm, transaction, IntegrityError
 from rest_framework import serializers, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
@@ -220,11 +220,18 @@ def collection(request, type_key):
     # POST (create) — للمحتوى فقط
     if is_sub:
         return Response({"detail": "غير مسموح."}, status=403)
+    # «إعدادات الموقع» عنصر مفرد (singleton) — لا يُنشأ، يُعدَّل فقط، حتى لا يُستبدل بالخطأ
+    if type_key == "site":
+        return Response({"detail": "إعدادات الموقع عنصر واحد — عدّله بدل إنشاء عنصر جديد."}, status=400)
     data = request.data.copy() if hasattr(request.data, "copy") else dict(request.data)
     _autofill_identifiers(Model, data)
     ser = Ser(data=data, context={"request": request})
     ser.is_valid(raise_exception=True)
-    ser.save()
+    try:
+        with transaction.atomic():
+            ser.save()
+    except IntegrityError:
+        return Response({"detail": "تعذّر الحفظ — قد يكون هناك عنصر بنفس المعرّف. حاول مجدداً."}, status=400)
     return Response(ser.data, status=status.HTTP_201_CREATED)
 
 
@@ -252,7 +259,11 @@ def item(request, type_key, pk):
         return Response({"detail": "غير مسموح."}, status=403)
     ser = Ser(obj, data=request.data, partial=(request.method == "PATCH"), context={"request": request})
     ser.is_valid(raise_exception=True)
-    ser.save()
+    try:
+        with transaction.atomic():
+            ser.save()
+    except IntegrityError:
+        return Response({"detail": "تعذّر الحفظ — قد يكون هناك تعارض في البيانات. حاول مجدداً."}, status=400)
     return Response(ser.data)
 
 

@@ -96,6 +96,14 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
     return false;
   }, [fields, values, baseline]);
 
+  // تحذير قبل إغلاق التبويب/إعادة التحميل مع وجود تعديلات غير محفوظة (منع فقدان العمل)
+  useEffect(() => {
+    if (!dirty) return;
+    const handler = (e: BeforeUnloadEvent) => { e.preventDefault(); e.returnValue = ""; };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [dirty]);
+
   // نسبة الاكتمال = الحقول الإلزامية (المعلَّمة بنجمة) + حقل الصورة (محتوى أساسي وإن لم يكن إلزامياً)
   const isEmpty = (v: unknown) => v === null || v === undefined || v === "" || (Array.isArray(v) && v.length === 0) || (typeof v === "object" && v !== null && !Array.isArray(v) && Object.keys(v as object).length === 0);
   // الصورة تُعتبر مكتملة إن وُجد ملف مرفوع أو مسار (نتحقق من كل صيغ حقل الصورة)

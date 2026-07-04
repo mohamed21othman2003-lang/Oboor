@@ -8,8 +8,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".env")
 
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "dev-insecure-change-me")
-DEBUG = os.environ.get("DJANGO_DEBUG", "1") == "1"
-ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "*").split(",")
+# افتراضات آمنة: DEBUG مطفأ والمضيفات محدّدة ما لم تُضبط البيئة صراحةً
+# (الإنتاج والتطوير المحلي كلاهما يضبط هذه المتغيّرات — الافتراض يحمي أي نشر ينساها).
+DEBUG = os.environ.get("DJANGO_DEBUG", "0") == "1"
+ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
 CSRF_TRUSTED_ORIGINS = [o for o in os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",") if o]
 
 INSTALLED_APPS = [
@@ -142,7 +144,25 @@ REST_FRAMEWORK = {
     ],
     # القراءة العامة مفتوحة؛ نقاط الـCMS تتطلب IsAuthenticated صراحةً
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.AllowAny"],
+    # ملاحظة: لا نضع throttle افتراضياً عاماً لأن قراءات المحتوى تأتي من خادم Next
+    # (نفس الـIP) فتُحسب كمستخدم واحد. الحدّ يُطبَّق حيث ينفع (تسجيل الدخول من المتصفح مباشرةً).
+    "DEFAULT_THROTTLE_RATES": {
+        "login": os.environ.get("LOGIN_THROTTLE_RATE", "10/min"),
+    },
 }
+
+# ===================== تقوية أمان الإنتاج =====================
+# تُفعَّل تلقائياً خارج وضع DEBUG. خلف بروكسي (Render/Nginx) نثق بترويسة البروتوكول.
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    # إعادة التوجيه لـHTTPS قابلة للإطفاء بمتغيّر بيئة لتجنّب حلقات إعادة توجيه على بروكسي غير مضبوط
+    SECURE_SSL_REDIRECT = os.environ.get("SECURE_SSL_REDIRECT", "1") == "1"
+    SECURE_HSTS_SECONDS = int(os.environ.get("SECURE_HSTS_SECONDS", "31536000"))
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
 
 # ===================== هوية لوحة التحكّم (Unfold) =====================
 from django.templatetags.static import static  # noqa: E402

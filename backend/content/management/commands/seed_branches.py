@@ -570,9 +570,18 @@ DATA = json.loads(r"""[
 
 
 class Command(BaseCommand):
-    help = "استبدال كل الفروع ببيانات الشركة الرسمية (الفروع الحقيقية)"
+    help = "استبدال كل الفروع ببيانات الشركة الرسمية (الفروع الحقيقية) — مُدمِّر: يحذف كل الفروع الحالية"
+
+    def add_arguments(self, parser):
+        parser.add_argument("--confirm", action="store_true",
+                            help="مطلوب للتأكيد لأن الأمر يحذف كل الفروع الحالية ويعيد إنشاءها")
 
     def handle(self, *args, **opts):
+        if not opts.get("confirm"):
+            self.stderr.write(self.style.ERROR(
+                "أمر مُدمِّر: سيحذف كل الفروع الحالية (وأي تعديلات/صور مرتبطة). "
+                "أعد التشغيل مع --confirm للمتابعة."))
+            return
         Branch.objects.all().delete()
         for i, b in enumerate(DATA, 1):
             Branch.objects.create(

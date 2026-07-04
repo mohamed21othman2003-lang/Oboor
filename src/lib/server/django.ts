@@ -19,22 +19,36 @@ async function previewParam(): Promise<string> {
   }
 }
 
+// توجيه الطلب لـ Django. يرجّع true عند النجاح، و false عند أي فشل
+// (باك إند غير مفعّل، خطأ شبكة، timeout، أو رد غير 2xx) — بدون رمي استثناء،
+// حتى يسقط مسار الاستدعاء تلقائيًا لتخزين الطلب في قاعدة البيانات فلا يضيع.
 export async function forwardJson(path: string, payload: Record<string, unknown>): Promise<boolean> {
   if (!DJANGO_API_URL) return false;
-  const res = await fetch(`${DJANGO_API_URL}/${path}/`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-  if (!res.ok) throw new Error(`django ${path} ${res.status}`);
-  return true;
+  try {
+    const res = await fetch(`${DJANGO_API_URL}/${path}/`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(8000),
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
 }
 
 export async function forwardForm(path: string, form: FormData): Promise<boolean> {
   if (!DJANGO_API_URL) return false;
-  const res = await fetch(`${DJANGO_API_URL}/${path}/`, { method: "POST", body: form });
-  if (!res.ok) throw new Error(`django ${path} ${res.status}`);
-  return true;
+  try {
+    const res = await fetch(`${DJANGO_API_URL}/${path}/`, {
+      method: "POST",
+      body: form,
+      signal: AbortSignal.timeout(15000),
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
 }
 
 // جلب محتوى الـ CMS من Django. يرجّع null لو الجسر غير مفعّل أو فشل الطلب،

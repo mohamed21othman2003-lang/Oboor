@@ -2,9 +2,15 @@
 from django.contrib.auth import authenticate
 from rest_framework import status
 from rest_framework.authtoken.models import Token
-from rest_framework.decorators import api_view, permission_classes, authentication_classes
+from rest_framework.decorators import api_view, permission_classes, authentication_classes, throttle_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
+from rest_framework.throttling import AnonRateThrottle
+
+
+# حدّ محاولات تسجيل الدخول بالـIP (المتصفح يستدعي Django مباشرةً فالحدّ فعّال ضد التخمين)
+class LoginRateThrottle(AnonRateThrottle):
+    scope = "login"
 
 from submissions.models import ContactMessage, AdmissionRequest, JobApplication, AssessmentResult
 from content.models import (
@@ -26,6 +32,7 @@ def _user_payload(user):
 @api_view(["POST"])
 @permission_classes([AllowAny])
 @authentication_classes([])
+@throttle_classes([LoginRateThrottle])
 def login(request):
     username = (request.data.get("username") or "").strip()
     password = request.data.get("password") or ""

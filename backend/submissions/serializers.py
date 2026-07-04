@@ -1,5 +1,10 @@
+import os
 from rest_framework import serializers
 from .models import ContactMessage, AdmissionRequest, AssessmentResult, JobApplication
+
+# أنواع ملفات السيرة الذاتية المسموحة وحدّ الحجم
+CV_ALLOWED_EXT = {".pdf", ".doc", ".docx"}
+CV_MAX_BYTES = 10 * 1024 * 1024  # 10 ميجابايت
 
 
 class ContactMessageSerializer(serializers.ModelSerializer):
@@ -31,3 +36,13 @@ class JobApplicationSerializer(serializers.ModelSerializer):
         fields = ["id", "job", "name", "phone", "email", "city", "current_role",
                   "experience", "about", "cv", "created_at"]
         read_only_fields = ["id", "created_at"]
+
+    def validate_cv(self, f):
+        if not f:
+            return f
+        ext = os.path.splitext(getattr(f, "name", ""))[1].lower()
+        if ext not in CV_ALLOWED_EXT:
+            raise serializers.ValidationError("صيغة الملف غير مدعومة — المسموح: PDF أو DOC أو DOCX.")
+        if getattr(f, "size", 0) > CV_MAX_BYTES:
+            raise serializers.ValidationError("حجم الملف أكبر من 10 ميجابايت.")
+        return f
