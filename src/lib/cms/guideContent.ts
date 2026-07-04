@@ -11,113 +11,252 @@ export type GuideSection = {
 };
 export type GuidePart = { id: string; title_ar: string; title_en: string; sections: GuideSection[] };
 
+// اختصار لإنشاء خطوة بلقطة CMS
+const cms = (name: string, ar: string, en: string, cap_ar?: string, cap_en?: string): GuideStep =>
+  ({ ar, en, shot: { area: "cms", name, caption_ar: cap_ar, caption_en: cap_en } });
+const site = (name: string, ar: string, en: string): GuideStep =>
+  ({ ar, en, shot: { area: "site", name } });
+const p = (ar: string, en: string): GuideStep => ({ ar, en });
+
 export const GUIDE: GuidePart[] = [
+  // ============================ الجزء 1: الأساسيات ============================
   {
-    id: "cms",
-    title_ar: "إدارة لوحة التحكّم",
-    title_en: "Managing the Control Panel",
+    id: "basics",
+    title_ar: "أساسيات لوحة التحكّم",
+    title_en: "Control Panel Basics",
     sections: [
       {
         id: "login",
-        title_ar: "تسجيل الدخول",
-        title_en: "Signing In",
-        intro_ar: "لوحة التحكّم محميّة باسم مستخدم وكلمة مرور. لن يستطيع أحد الوصول إليها أو تعديل الموقع دون تسجيل دخول.",
-        intro_en: "The control panel is protected by a username and password. No one can access it or change the site without signing in.",
+        title_ar: "تسجيل الدخول والخروج",
+        title_en: "Signing In & Out",
+        intro_ar: "لوحة التحكّم محميّة باسم مستخدم وكلمة مرور، فلا يستطيع أحد تعديل الموقع دون تسجيل دخول.",
+        intro_en: "The control panel is protected by a username and password, so no one can change the site without signing in.",
         steps: [
-          { ar: "افتح رابط لوحة التحكّم المنتهي بـ /cms. إن لم تكن مسجّلاً للدخول ستظهر لك شاشة الدخول.", en: "Open the control-panel link ending with /cms. If you're not signed in, the sign-in screen appears.", shot: { area: "cms", name: "login" } },
-          { ar: "اكتب اسم المستخدم وكلمة المرور ثم اضغط «تسجيل الدخول».", en: "Enter your username and password, then click “Sign in”." },
-          { ar: "لتغيير لغة اللوحة نفسها (عربي/إنجليزي) استخدم زر الكرة الأرضية أعلى الشاشة — وهو متاح حتى قبل الدخول.", en: "To switch the panel's own language (Arabic/English), use the globe button at the top — available even before signing in." },
-          { ar: "عند الانتهاء، اضغط زر الخروج (السهم) أعلى يمين/يسار الشريط العلوي لتسجيل الخروج بأمان.", en: "When done, click the log-out (arrow) button in the top bar to sign out safely." },
+          cms("login", "افتح رابط لوحة التحكّم المنتهي بـ /cms. إن لم تكن مسجّلاً ستظهر شاشة الدخول.", "Open the control-panel link ending with /cms. If you're not signed in, the sign-in screen appears."),
+          p("اكتب اسم المستخدم وكلمة المرور ثم اضغط «تسجيل الدخول».", "Enter your username and password, then click “Sign in”."),
+          p("زر الكرة الأرضية أعلى الشاشة يبدّل لغة اللوحة نفسها بين العربية والإنجليزية في أي وقت.", "The globe button at the top switches the panel's own language between Arabic and English at any time."),
+          p("عند الانتهاء اضغط زر الخروج (السهم) أعلى الشريط لتسجيل الخروج بأمان — خاصة على جهاز مشترك.", "When done, click the log-out (arrow) button in the top bar to sign out safely — especially on a shared device."),
         ],
       },
       {
         id: "dashboard",
         title_ar: "لوحة التحكّم الرئيسية",
         title_en: "The Dashboard",
-        intro_ar: "أول شاشة تظهر بعد الدخول. تعطيك نظرة سريعة على نشاط الموقع وتوصلك لكل شيء.",
-        intro_en: "The first screen after signing in. It gives you a quick overview of site activity and links to everything.",
+        intro_ar: "أول شاشة بعد الدخول؛ تعطيك نظرة سريعة وتوصلك لكل شيء.",
+        intro_en: "The first screen after signing in; it gives a quick overview and links to everything.",
         steps: [
-          { ar: "في الأعلى ترى ترحيباً وملخّصاً: إجمالي عناصر المحتوى، إجمالي الطلبات الواردة، وحالة إعدادات الموقع.", en: "At the top you see a welcome and a summary: total content items, total incoming requests, and the site-settings status.", shot: { area: "cms", name: "dashboard" } },
-          { ar: "بطاقات «الطلبات» تعرض أعداد الرسائل وطلبات الالتحاق والتوظيف والتقييم — اضغط أيّها للانتقال إليه مباشرة.", en: "The “Requests” cards show the counts of messages, admission, job, and assessment requests — click any to jump straight to it." },
-          { ar: "«إجراءات سريعة» اختصارات لإضافة خبر أو أخصائي أو برنامج أو صورة بضغطة واحدة.", en: "“Quick Actions” are one-click shortcuts to add a news item, specialist, program, or image." },
-          { ar: "أسفل الصفحة كل أقسام المحتوى مجمّعة (محتوى الموقع، البرامج والخدمات، الموارد) — اضغط أي قسم لإدارته.", en: "Lower down, all content areas are grouped (Site Content, Programs & Services, Resources) — click any to manage it." },
-          { ar: "القائمة الجانبية موجودة دائماً للتنقّل بين كل الأقسام. يمكنك البحث فيها من خانة البحث أعلاها.", en: "The sidebar is always available to move between all areas. You can filter it from the search box at its top." },
+          cms("dashboard", "في الأعلى ترحيب وملخّص: إجمالي عناصر المحتوى، إجمالي الطلبات، وحالة إعدادات الموقع.", "At the top: a welcome and summary — total content items, total requests, and site-settings status."),
+          p("بطاقات «الطلبات» تعرض أعداد الرسائل والالتحاق والتوظيف والتقييم — اضغط أيّها للانتقال إليه.", "The “Requests” cards show counts of messages, admission, jobs, and assessments — click any to open it."),
+          p("«إجراءات سريعة» اختصارات لإضافة خبر أو أخصائي أو برنامج أو صورة بضغطة.", "“Quick Actions” are one-click shortcuts to add a news item, specialist, program, or image."),
+          p("أسفل الصفحة كل أقسام المحتوى مجمّعة — اضغط أي قسم لإدارته.", "Lower down, all content areas are grouped — click any to manage it."),
         ],
       },
+      {
+        id: "navigation",
+        title_ar: "التنقّل والبحث وتبديل اللغة",
+        title_en: "Navigating, Searching & Switching Language",
+        steps: [
+          p("القائمة الجانبية مقسّمة إلى مجموعات: الطلبات والرسائل، صفحات الموقع، والإعدادات. اضغط أي عنصر للانتقال إليه.", "The sidebar is split into groups: Requests & Messages, Site Pages, and Settings. Click any item to go to it."),
+          p("خانة البحث أعلى القائمة تصفّي الأقسام بالاسم — اكتب جزءاً من الاسم لتصل بسرعة.", "The search box at the top of the sidebar filters areas by name — type part of a name to jump quickly."),
+          p("زر الكرة الأرضية أعلى الشريط يبدّل لغة اللوحة. هذا يغيّر لغة الأزرار والقوائم فقط — لا يؤثّر على محتوى الموقع.", "The globe button in the top bar switches the panel language. This changes only buttons and menus — it does not affect the site's content."),
+          p("زر «رجوع» يعيدك للصفحة السابقة، وشعار «عبور» يعيدك للوحة الرئيسية.", "The “Back” button returns to the previous page, and the Oboor logo returns to the main dashboard."),
+        ],
+      },
+    ],
+  },
+
+  // ==================== الجزء 2: التحكّم في المحتوى والعناصر ====================
+  {
+    id: "content",
+    title_ar: "التحكّم في المحتوى والعناصر",
+    title_en: "Managing Content & Elements",
+    sections: [
       {
         id: "page-text",
         title_ar: "تعديل نصوص وعناوين الصفحات",
         title_en: "Editing Page Texts & Headings",
-        intro_ar: "كل صفحة في الموقع لها «نصوص وعناوين» ثابتة (مثل عنوان الصفحة، الفقرات، نصوص الأزرار). تُعدّل من محرّر مخصّص أعلى صفحة القسم.",
-        intro_en: "Every page has fixed “texts & headings” (page title, paragraphs, button labels). You edit these from a dedicated editor at the top of the section page.",
+        intro_ar: "لكل صفحة نصوص وعناوين ثابتة (عنوان الصفحة، الفقرات، نصوص الأزرار). تُعدَّل من لوحة «محتوى وعناوين الصفحة» أعلى صفحة القسم.",
+        intro_en: "Each page has fixed texts and headings (page title, paragraphs, button labels). Edit them from the “Page content & headings” panel at the top of the section page.",
         steps: [
-          { ar: "افتح الصفحة المطلوبة من القائمة (مثل «الصفحة الرئيسية» أو «عن عبور»). في الأعلى ستجد لوحة «محتوى وعناوين الصفحة».", en: "Open the target page from the sidebar (e.g. “Home Page” or “About Oboor”). At the top you'll find the “Page content & headings” panel.", shot: { area: "cms", name: "page-content-home" } },
-          { ar: "كل حقل نصّي له خانتان جنباً إلى جنب: العربية والإنجليزية. اكتب النص في كل لغة كما تريده أن يظهر للزائر.", en: "Each text field has two boxes side by side: Arabic and English. Type the text in each language as you want visitors to see it." },
-          { ar: "بعض العناصر لها صورة أو رقم — عدّلها من نفس المكان. الصور تُرفع بالضغط على «تغيير الصورة».", en: "Some items have an image or a number — edit them in the same place. Images are uploaded by clicking “Change image”." },
-          { ar: "اضغط «حفظ» بعد كل تعديل. سيظهر تأكيد «تم الحفظ ✓»، ويظهر التعديل على الموقع خلال لحظات.", en: "Click “Save” after each change. A “Saved ✓” confirmation appears, and the change shows on the site within moments." },
+          cms("page-content-home", "افتح الصفحة من القائمة (مثل «الصفحة الرئيسية»). في الأعلى تجد لوحة «محتوى وعناوين الصفحة» مقسّمة إلى أقسام الصفحة.", "Open the page from the sidebar (e.g. “Home Page”). At the top is the “Page content & headings” panel, split into the page's sections."),
+          p("كل قسم قابل للطيّ — اضغط رأسه لفتحه وتظهر حقوله. عدّل النص الذي تريده واضغط «حفظ».", "Each section is collapsible — click its header to open it and reveal its fields. Edit the text you want, then click “Save”."),
+          p("العناصر ذات الصور أو الأرقام تُعدَّل من نفس المكان مباشرة.", "Items with images or numbers are edited right there in the same place."),
         ],
       },
       {
         id: "collections",
-        title_ar: "إدارة المحتوى (القوائم): إضافة وتعديل وحذف وترتيب",
-        title_en: "Managing Content (Lists): Add, Edit, Delete, Reorder",
-        intro_ar: "الأقسام المتكرّرة (الفروع، الأخبار، الأخصائيون، البرامج…) تُدار كقوائم. كل عنصر في القائمة يمكن تعديله أو حذفه، ويمكنك إضافة عناصر جديدة.",
-        intro_en: "Repeating areas (branches, news, specialists, programs…) are managed as lists. Each list item can be edited or deleted, and you can add new items.",
+        title_ar: "إدارة القوائم: إضافة وتعديل وحذف وترتيب",
+        title_en: "Managing Lists: Add, Edit, Delete, Reorder",
+        intro_ar: "الأقسام المتكرّرة (الفروع، الأخبار، الأخصائيون، البرامج…) تُدار كقوائم من عناصر.",
+        intro_en: "Repeating areas (branches, news, specialists, programs…) are managed as lists of items.",
         steps: [
-          { ar: "افتح القسم من القائمة الجانبية. ستظهر قائمة بكل العناصر مع حالتها (منشور/مخفي).", en: "Open the area from the sidebar. A list of all items appears with each item's status (Published/Hidden).", shot: { area: "cms", name: "list-branches" } },
-          { ar: "للإضافة: اضغط الزر الأزرق أعلى الصفحة (مثل «إضافة فرع»). لتعديل عنصر: اضغط «تعديل» بجانبه. للحذف: اضغط «حذف» (سيطلب تأكيداً).", en: "To add: click the blue button at the top (e.g. “Add Branch”). To edit an item: click “Edit” next to it. To delete: click “Delete” (it asks for confirmation)." },
-          { ar: "القوائم الكبيرة (مثل الفروع) مقسّمة إلى مجموعات قابلة للطيّ (حسب المنطقة مثلاً) — اضغط رأس المجموعة لفتحها.", en: "Large lists (like branches) are split into collapsible groups (e.g. by region) — click a group header to expand it." },
-          { ar: "لإعادة الترتيب: استخدم سهمَي الأعلى/الأسفل بجانب العنصر. الترتيب هنا هو نفسه ترتيب الظهور على الموقع.", en: "To reorder: use the up/down arrows next to an item. The order here is the same order shown on the site." },
-          { ar: "الأخبار والوظائف تُرتَّب تلقائياً بالأحدث أولاً، لذلك لا تظهر لها أسهم ترتيب.", en: "News and jobs are ordered automatically (newest first), so they don't show reorder arrows." },
-          { ar: "بعض القوائم يظهر أعلاها محرّر «محتوى وعناوين الصفحة» للتحكّم في عنوان القسم ووصفه على الموقع.", en: "Some lists show a “Page content & headings” editor at the top to control that section's title and description on the site." },
+          cms("list-branches", "افتح القسم من القائمة. تظهر كل العناصر مع حالتها (منشور/مخفي). القوائم الكبيرة مقسّمة لمجموعات قابلة للطيّ.", "Open the area from the sidebar. All items show with their status (Published/Hidden). Large lists are split into collapsible groups."),
+          cms("detail-list-rows", "اضغط رأس مجموعة لفتحها. بجانب كل عنصر: سهمَا ترتيب (لأعلى/أسفل)، زر «تعديل»، وزر «حذف».", "Click a group header to open it. Next to each item: up/down reorder arrows, an “Edit” button, and a “Delete” button."),
+          p("للإضافة: اضغط الزر الأزرق أعلى الصفحة (مثل «إضافة فرع»). ستفتح شاشة المحرّر بحقول فارغة.", "To add: click the blue button at the top (e.g. “Add Branch”). The editor opens with empty fields."),
+          p("للحذف: اضغط «حذف» ثم أكّد. الحذف نهائي، فتأكّد قبل التأكيد.", "To delete: click “Delete” then confirm. Deletion is permanent, so be sure before confirming."),
+          p("ملاحظة: الأخبار والوظائف تُرتَّب تلقائياً بالأحدث أولاً، لذلك لا تظهر لها أسهم ترتيب.", "Note: news and jobs are auto-ordered (newest first), so they don't show reorder arrows."),
         ],
       },
       {
         id: "editor",
-        title_ar: "محرّر العنصر: الحقول ثنائية اللغة، الاكتمال، الصور، الحفظ والمعاينة",
-        title_en: "The Item Editor: Bilingual Fields, Completion, Images, Save & Preview",
-        intro_ar: "عند إضافة أو تعديل أي عنصر تفتح شاشة المحرّر. هي أهم شاشة في اللوحة، وهذه شرحها بالتفصيل.",
-        intro_en: "Adding or editing any item opens the editor screen. It's the most important screen in the panel — here it is in detail.",
+        title_ar: "محرّر العنصر: نظرة عامة",
+        title_en: "The Item Editor: Overview",
+        intro_ar: "عند الإضافة أو التعديل تفتح شاشة المحرّر — أهم شاشة في اللوحة. الأقسام التالية تشرح كل نوع من الحقول بالتفصيل.",
+        intro_en: "Adding or editing opens the editor — the most important screen in the panel. The next sections explain each field type in detail.",
         steps: [
-          { ar: "الحقول ثنائية اللغة تظهر في عمودين متجاورين: العربية والإنجليزية. املأ اللغتين معاً حتى يظهر المحتوى صحيحاً في نسختَي الموقع.", en: "Bilingual fields appear in two adjacent columns: Arabic and English. Fill both so the content shows correctly in both site versions.", shot: { area: "cms", name: "editor" } },
-          { ar: "أعلى المحرّر شريط «نسبة الاكتمال». يحسب الحقول الأساسية المطلوبة، ويكتب لك تحته «الحقول الناقصة» إن وُجدت — استهدف الوصول إلى 100%.", en: "At the top is a “Completion” bar. It counts the essential required fields and lists any “Missing” fields below it — aim for 100%." },
-          { ar: "حقل الصورة: اضغط لرفع صورة من جهازك. بعض الأنواع تدعم قصّ الصورة قبل الحفظ. تظهر معاينة فور الرفع.", en: "Image field: click to upload an image from your device. Some types let you crop before saving. A preview shows immediately after upload." },
-          { ar: "حقول التاريخ تفتح تقويماً للاختيار (بدل الكتابة اليدوية)، وحقول الوقت تعطيك «من / إلى». هذا يمنع أخطاء التنسيق.", en: "Date fields open a calendar picker (instead of typing), and time fields give you a “from / to” pair. This prevents formatting mistakes." },
-          { ar: "القوائم (مثل الخدمات أو النقاط) تُحرَّر كعناصر تُضاف وتُحذف بزر — لا داعي لكتابة أكواد. الصفوف الفارغة تُحذف تلقائياً عند الحفظ.", en: "Lists (like services or bullet points) are edited as add/remove items with a button — no code needed. Empty rows are dropped automatically on save." },
-          { ar: "زر «حفظ التعديلات» يعمل فقط عند وجود تغيير فعلي. بعد الحفظ يظهر «تم الحفظ ✓».", en: "The “Save Changes” button is active only when there's a real change. After saving, “Saved ✓” appears." },
-          { ar: "«تجاهل التغييرات» يرجّع الحقول لآخر نسخة محفوظة. «استرجاع النسخة الافتراضية» يعيد العنصر لمحتواه الأصلي بالكامل (استخدمه بحذر).", en: "“Discard changes” reverts fields to the last saved version. “Restore Default” resets the item to its original content entirely (use with care)." },
-          { ar: "زر «معاينة» يفتح الصفحة الحقيقية على الموقع بتعديلاتك الحالية قبل الحفظ — لتتأكد من الشكل النهائي.", en: "The “Preview” button opens the real site page with your current unsaved changes — to check the final look before saving." },
-          { ar: "الحقول التقنية النادرة (مثل المعرّف) مخفيّة في لوحة «إعدادات متقدمة» وتُملأ تلقائياً — لا تحتاج للتعامل معها عادةً.", en: "Rare technical fields (like the identifier) are hidden in an “Advanced settings” panel and filled automatically — you normally don't need them." },
+          cms("editor", "أعلى المحرّر شريط «نسبة الاكتمال» يقيس الحقول الأساسية المطلوبة ويكتب تحته «الحقول الناقصة». الحقول تظهر في عمودين: عربي وإنجليزي.", "At the top is a “Completion” bar measuring the essential required fields, listing any “Missing” below. Fields appear in two columns: Arabic and English."),
+          p("أسفل الشاشة دائماً أزرار: «حفظ التعديلات» و«تجاهل التغييرات» و«معاينة». كل تعديل يحتاج ضغط «حفظ» ليُطبّق.", "At the bottom are always: “Save Changes”, “Discard changes”, and “Preview”. Every edit needs a “Save” click to apply."),
+        ],
+      },
+      {
+        id: "titles",
+        title_ar: "العناوين والعناوين الفرعية",
+        title_en: "Titles & Subtitles",
+        intro_ar: "العنوان هو النص الكبير الأبرز في العنصر، والعنوان الفرعي نص أصغر أعلاه أو تحته.",
+        intro_en: "The title is the item's most prominent large text; the subtitle is a smaller text above or below it.",
+        steps: [
+          cms("editor", "الحقل المعنون «الاسم» أو «العنوان» هو العنوان الرئيسي. لاحظ الشارة الصغيرة «Main Heading» التي تدل على أنه العنوان البارز.", "The field labeled “Name” or “Title” is the main heading. Notice the small “Main Heading” badge indicating it's the prominent title."),
+          p("اكتب العنوان في الخانة العربية (يمين) والإنجليزية (يسار) معاً — كلٌّ يظهر في نسخة الموقع بلغته.", "Type the title in both the Arabic box (right) and the English box (left) — each shows in the matching site version."),
+          p("العناوين الفرعية أو الشارات (Badge/Pill) لها حقول منفصلة مثل «العنوان الفرعي» أو «الوسم» — عدّلها بنفس الطريقة.", "Subtitles or badges/pills have separate fields like “Subtitle” or “Tag” — edit them the same way."),
+          p("اجعل العناوين قصيرة وواضحة؛ العنوان الطويل جداً قد يبدو غير متناسق في التصميم.", "Keep titles short and clear; a very long title may look inconsistent in the design."),
+        ],
+      },
+      {
+        id: "text",
+        title_ar: "النصوص والفقرات والأوصاف",
+        title_en: "Text, Paragraphs & Descriptions",
+        intro_ar: "الحقول الطويلة (الوصف، الفقرة، النبذة) تُكتب في مربّع نص أكبر ويظهر تحته عدّاد للأحرف.",
+        intro_en: "Longer fields (description, paragraph, intro) are typed in a larger text box with a character counter below.",
+        steps: [
+          cms("editor", "الحقل المعنون «الوصف» أو «العنوان» بشارة «Paragraph Text» هو نص طويل — اكتب فيه الفقرة كاملة.", "The field labeled “Description”, or a field with a “Paragraph Text” badge, is a long text — type the full paragraph there."),
+          p("بعض المربّعات لها حد أقصى (مثل 500 حرف) ويظهر عدّاد يخبرك بالمتبقّي — اكتب ضمن الحد.", "Some boxes have a maximum (e.g. 500 characters) with a counter showing what's left — stay within the limit."),
+          p("اكتب النص في اللغتين. إن تركت الإنجليزية فارغة، سيظهر النص العربي في النسخة الإنجليزية كبديل — لكن يُفضّل تعبئة الاثنين.", "Write the text in both languages. If you leave English empty, the Arabic shows in the English version as a fallback — but filling both is preferred."),
+        ],
+      },
+      {
+        id: "icons",
+        title_ar: "الأيقونات",
+        title_en: "Icons",
+        intro_ar: "كثير من العناصر (المميزات، بطاقات الخدمات، الخطوات…) لها أيقونة صغيرة تظهر بجانب العنوان. تُختار من مكتبة جاهزة — لا حاجة لرفع صور.",
+        intro_en: "Many items (features, service cards, steps…) have a small icon shown next to the title. It's picked from a ready library — no image upload needed.",
+        steps: [
+          cms("detail-icon", "في محرّر العنصر انزل إلى حقل «الأيقونة». ستجد شبكة أيقونات جاهزة.", "In the item editor scroll to the “Icon” field. You'll find a grid of ready-made icons."),
+          p("اضغط أي أيقونة لاختيارها — تُظلَّل باللون التركوازي لتأكيد الاختيار. لإزالة الأيقونة اضغط «بدون».", "Click any icon to select it — it highlights teal to confirm. To remove the icon, click “None”."),
+          p("الأيقونة تظهر مباشرة على الموقع في مكان العنصر، وتتبع ألوان التصميم تلقائياً.", "The icon appears directly on the site at the item's place and follows the design colors automatically."),
+          p("لا تنسَ الضغط على «حفظ» بعد تغيير الأيقونة.", "Don't forget to click “Save” after changing the icon."),
+        ],
+      },
+      {
+        id: "images",
+        title_ar: "الصور",
+        title_en: "Images",
+        intro_ar: "الصور (صورة الفرع، الأخصائي، الخبر، شريحة الهيرو، صور المعرض) تُرفع من جهازك مباشرة.",
+        intro_en: "Images (a branch, specialist, news, hero slide, gallery photos) are uploaded straight from your device.",
+        steps: [
+          cms("detail-image", "في المحرّر اضغط منطقة الصورة أو زر «رفع صورة»، ثم اختر الملف من جهازك.", "In the editor click the image area or the “Upload image” button, then choose the file from your device."),
+          p("بعض الأنواع تسمح بقصّ الصورة (تحديد الجزء الظاهر) قبل الحفظ — اضبط الإطار ثم أكّد.", "Some types let you crop the image (choose the visible part) before saving — adjust the frame then confirm."),
+          p("تظهر معاينة فور الرفع. لتغيير الصورة ارفع صورة جديدة فوق القديمة.", "A preview appears right after upload. To change it, upload a new image over the old one."),
+          p("الحد الأقصى لحجم الصورة 5 ميجابايت. استخدم صوراً واضحة وبأبعاد مناسبة لأفضل ظهور.", "Maximum image size is 5 MB. Use clear, well-proportioned images for the best look."),
+          p("المعرض (Gallery) يقبل عدة صور لنفس العنصر — أضف أو احذف صوراً منه بنفس الطريقة.", "A gallery accepts multiple images for one item — add or remove photos from it the same way."),
+        ],
+      },
+      {
+        id: "cards-lists",
+        title_ar: "الكروت والقوائم",
+        title_en: "Cards & Lists",
+        intro_ar: "بعض الحقول عبارة عن قائمة عناصر متكرّرة (مثل قائمة الخدمات، النقاط، الخطوات، أو بطاقات داخل قسم). تُحرَّر بأزرار إضافة وحذف — دون كتابة أي أكواد.",
+        intro_en: "Some fields are a list of repeating items (like a services list, bullet points, steps, or cards inside a section). They're edited with add/remove buttons — no code at all.",
+        steps: [
+          cms("detail-list", "انزل إلى الحقل الذي يظهر كقائمة (مثل «الخدمات»). كل سطر عنصر مستقل بخانته.", "Scroll to the field shown as a list (e.g. “Services”). Each row is a separate item with its own box."),
+          p("لإضافة عنصر: اضغط زر «إضافة». لحذف عنصر: اضغط زر الحذف بجانب سطره. الأسطر الفارغة تُحذف تلقائياً عند الحفظ.", "To add an item: click the “Add” button. To delete: click the delete button beside its row. Empty rows are dropped automatically on save."),
+          p("البطاقات المركّبة (لها عنوان + وصف + أيقونة معاً) تُحرَّر كمجموعة حقول لكل بطاقة، بالعربية والإنجليزية.", "Composite cards (with a title + description + icon together) are edited as a group of fields per card, in Arabic and English."),
+          p("شكل البطاقة وتصميمها ثابتان للحفاظ على مظهر الموقع — أنت تتحكّم في المحتوى فقط، لا التصميم.", "A card's shape and design are fixed to keep the site consistent — you control the content only, not the design."),
+        ],
+      },
+      {
+        id: "buttons-links",
+        title_ar: "الأزرار والروابط",
+        title_en: "Buttons & Links",
+        intro_ar: "بعض العناصر لها نص زر ووجهة (الرابط الذي يفتح عند الضغط).",
+        intro_en: "Some items have a button label and a destination (the link that opens on click).",
+        steps: [
+          p("حقل «نص الزر» أو «العنوان» يحدّد الكلمات الظاهرة على الزر — اكتبها بالعربية والإنجليزية.", "The “Button label” or “Title” field sets the words shown on the button — write them in Arabic and English."),
+          p("حقل «الرابط» أو «القيمة» يحدّد الوجهة: رابط داخلي في الموقع يبدأ بـ / مثل ‎/about، أو رابط خارجي كامل يبدأ بـ https://‎.", "The “Link” or “Value” field sets the destination: an internal link starting with / like /about, or a full external link starting with https://."),
+          p("لروابط التواصل الاجتماعي والقائمة العلوية والفوتر، حقل «القيمة» هو عنوان الرابط.", "For social links and the top/footer menus, the “Value” field is the link address."),
+        ],
+      },
+      {
+        id: "numbers",
+        title_ar: "الأرقام والإحصائيات",
+        title_en: "Numbers & Statistics",
+        steps: [
+          p("أرقام الإنجاز (مثل «+30 أخصائي») تُدار من قسم «أرقام الإنجاز». كل رقم عنصر له «القيمة» و«التسمية».", "Achievement numbers (like “+30 specialists”) are managed from the “Achievement Numbers” area. Each is an item with a “Value” and a “Label”."),
+          p("اكتب الرقم في حقل «القيمة» (يمكن أن يتضمّن + أو نصاً)، والوصف في حقل «التسمية» بالعربية والإنجليزية.", "Type the number in the “Value” field (it may include + or text), and the description in the “Label” field in Arabic and English."),
+          p("لإضافة رقم جديد اضغط «إضافة رقم إنجاز»، ولإخفاء رقم اجعله «مخفي» بدل حذفه إن أردت إرجاعه لاحقاً.", "To add a new number click “Add Achievement Number”; to hide one, set it to “Hidden” instead of deleting if you may restore it later."),
+        ],
+      },
+      {
+        id: "order-publish",
+        title_ar: "الترتيب والنشر والإخفاء",
+        title_en: "Ordering, Publishing & Hiding",
+        steps: [
+          cms("detail-list-rows", "الترتيب: استخدم سهمَي الأعلى/الأسفل بجانب العنصر في القائمة. الترتيب هنا هو نفسه ترتيب الظهور على الموقع.", "Order: use the up/down arrows next to an item in the list. The order here is the same order shown on the site."),
+          p("النشر/الإخفاء: كل عنصر له حالة «منشور» (يظهر للزوّار) أو «مخفي» (لا يظهر). غيّرها من داخل المحرّر.", "Publish/Hide: each item has a “Published” status (visible to visitors) or “Hidden” (not shown). Change it inside the editor."),
+          p("الإخفاء أفضل من الحذف عندما تريد إيقاف عنصر مؤقتاً مع إمكانية إرجاعه لاحقاً.", "Hiding is better than deleting when you want to pause an item temporarily but keep the option to restore it."),
+        ],
+      },
+      {
+        id: "bilingual",
+        title_ar: "الكتابة بلغتين (عربي وإنجليزي)",
+        title_en: "Writing in Two Languages (Arabic & English)",
+        intro_ar: "الموقع بنسختين: عربية وإنجليزية. أغلب الحقول لها خانتان جنباً إلى جنب.",
+        intro_en: "The site has two versions: Arabic and English. Most fields have two boxes side by side.",
+        steps: [
+          cms("editor", "الخانة العربية والخانة الإنجليزية تظهران بشارة «Arabic» و«English». املأ الاثنتين حتى يظهر المحتوى صحيحاً في نسختَي الموقع.", "The Arabic and English boxes are marked with “Arabic” and “English” badges. Fill both so the content shows correctly in both site versions."),
+          p("الأسماء العلمية (أسماء أشخاص أو أماكن) يمكن تركها كما هي إن لم يكن لها مقابل، لكن العناوين والنصوص العامة يُفضّل ترجمتها.", "Proper names (people or places) can stay as they are if they have no equivalent, but general titles and texts are best translated."),
+          p("لمعاينة النسخة الإنجليزية من الموقع، بدّل لغة الموقع من زر اللغة في الموقع نفسه (منفصل عن لغة اللوحة).", "To preview the English site, switch the site language from the language button on the site itself (separate from the panel language)."),
+        ],
+      },
+      {
+        id: "save-preview",
+        title_ar: "الاكتمال والحفظ والمعاينة والاسترجاع",
+        title_en: "Completion, Saving, Preview & Restore",
+        steps: [
+          p("شريط «نسبة الاكتمال» أعلى المحرّر يوضّح كم حقلاً أساسياً تبقّى، ويكتب أسماء «الحقول الناقصة». استهدف 100%.", "The “Completion” bar at the top shows how many essential fields remain and lists the “Missing” fields. Aim for 100%."),
+          p("«حفظ التعديلات» يعمل فقط عند وجود تغيير فعلي. بعد الحفظ يظهر «تم الحفظ ✓» ويظهر التعديل على الموقع خلال لحظات.", "“Save Changes” is active only when there's a real change. After saving, “Saved ✓” appears and the change shows on the site within moments."),
+          p("زر «معاينة» يفتح الصفحة الحقيقية بتعديلاتك الحالية قبل الحفظ — لتتأكّد من الشكل النهائي.", "The “Preview” button opens the real page with your current unsaved changes — to check the final look before saving."),
+          p("«تجاهل التغييرات» يرجّع الحقول لآخر نسخة محفوظة. «استرجاع النسخة الافتراضية» يعيد العنصر لمحتواه الأصلي بالكامل (استخدمه بحذر).", "“Discard changes” reverts to the last saved version. “Restore Default” resets the item to its original content entirely (use with care)."),
+          p("الحقول التقنية النادرة (مثل المعرّف الداخلي) تُملأ تلقائياً وتبقى مخفيّة ما دامت فارغة — لا تحتاج للتعامل معها عادةً.", "Rare technical fields (like the internal identifier) are filled automatically and stay hidden while empty — you normally don't deal with them."),
         ],
       },
       {
         id: "submissions",
         title_ar: "الطلبات والرسائل: العرض والفلترة والتصدير",
         title_en: "Requests & Messages: View, Filter, Export",
-        intro_ar: "كل ما يرسله الزوّار (رسائل تواصل، طلبات التحاق، طلبات توظيف، نتائج تقييم) يصلك هنا في جداول منظّمة. هذه البيانات للقراءة والإدارة فقط.",
-        intro_en: "Everything visitors send (contact messages, admission requests, job applications, assessment results) arrives here in organized tables. This data is for viewing and managing only.",
+        intro_ar: "كل ما يرسله الزوّار (رسائل، طلبات التحاق وتوظيف، نتائج تقييم) يصلك هنا في جداول للقراءة والإدارة.",
+        intro_en: "Everything visitors send (messages, admission and job requests, assessment results) arrives here in tables for viewing and managing.",
         steps: [
-          { ar: "افتح النوع المطلوب من مجموعة «الطلبات والرسائل» في القائمة. يظهر جدول بكل الطلبات وأحدثها أولاً.", en: "Open the type from the “Requests & Messages” group in the sidebar. A table shows all requests, newest first.", shot: { area: "cms", name: "submissions-admission" } },
-          { ar: "استخدم خانة البحث والفلاتر (المنطقة/الفرع، نوع الحالة، الفترة الزمنية) لتضييق النتائج بسرعة، و«إعادة تعيين» لمسح الفلاتر.", en: "Use the search box and filters (region/branch, case type, time range) to narrow results quickly, and “Reset” to clear filters." },
-          { ar: "لكل طلب أزرار سريعة: مراسلة عبر الإيميل، واتساب، وعرض التفاصيل الكاملة. في طلبات التوظيف يظهر أيضاً زر لفتح ملف السيرة الذاتية.", en: "Each request has quick buttons: email, WhatsApp, and view full details. Job applications also show a button to open the CV file." },
-          { ar: "زر «تصدير» ينزّل كل الطلبات كملف Excel منسّق (مع روابط السير الذاتية في طلبات التوظيف) — مناسب للأرشفة أو المشاركة.", en: "The “Export” button downloads all requests as a formatted Excel file (with CV links for job applications) — handy for archiving or sharing." },
-          { ar: "يمكنك حذف طلب من زر «حذف» (بعد تأكيد). ملاحظة: بيانات الطلبات هي ما كتبه الزائر، لذلك تظهر بلغته كما أرسلها.", en: "You can delete a request via “Delete” (after confirmation). Note: request data is what the visitor typed, so it appears in their language as sent." },
+          cms("submissions-admission", "افتح النوع من مجموعة «الطلبات والرسائل». يظهر جدول بكل الطلبات، الأحدث أولاً، مع بحث وفلاتر (الفرع، النوع، الفترة).", "Open the type from the “Requests & Messages” group. A table shows all requests newest-first, with search and filters (branch, type, period)."),
+          cms("detail-submission", "اضغط زر «عرض التفاصيل» (العين) لأي طلب لفتح كل بياناته. وتجد أزرار مراسلة سريعة: إيميل وواتساب.", "Click the “View details” (eye) button on any request to open all its data. There are also quick contact buttons: email and WhatsApp."),
+          p("في طلبات التوظيف يظهر زر لفتح ملف السيرة الذاتية المرفق.", "Job applications also show a button to open the attached CV file."),
+          p("زر «تصدير» ينزّل كل الطلبات كملف Excel منسّق (مع روابط السير الذاتية) — مناسب للأرشفة أو المشاركة.", "The “Export” button downloads all requests as a formatted Excel file (with CV links) — handy for archiving or sharing."),
+          p("بيانات الطلبات هي ما كتبه الزائر، لذلك تظهر بلغته كما أرسلها. يمكنك حذف طلب من زر «حذف» بعد تأكيد.", "Request data is what the visitor typed, so it appears in their language as sent. You can delete a request via “Delete” after confirmation."),
         ],
       },
       {
         id: "settings",
         title_ar: "إعدادات الموقع",
         title_en: "Site Settings",
-        intro_ar: "الإعدادات العامة التي تؤثّر على الموقع كله من مكان واحد.",
-        intro_en: "Global settings that affect the whole site from one place.",
         steps: [
-          { ar: "افتح «إعدادات الموقع» من أسفل القائمة. ستجد حقولاً مثل رقم الواتساب الموحّد وبيانات التواصل.", en: "Open “Site Settings” from the bottom of the sidebar. You'll find fields like the unified WhatsApp number and contact details.", shot: { area: "cms", name: "settings" } },
-          { ar: "مثال مهم: حقل رقم الواتساب يتحكّم في كل أزرار الواتساب على مستوى الموقع كله — غيّره من هنا مرة واحدة.", en: "Key example: the WhatsApp number field controls every WhatsApp button across the entire site — change it here once." },
-          { ar: "اضغط «حفظ» بعد التعديل. التغيير يسري على كل صفحات الموقع فوراً.", en: "Click “Save” after editing. The change applies to all site pages immediately." },
+          cms("settings", "«إعدادات الموقع» تجمع الإعدادات العامة في مكان واحد، مثل رقم الواتساب الموحّد وبيانات التواصل.", "“Site Settings” gathers global settings in one place, like the unified WhatsApp number and contact details."),
+          p("مثال مهم: حقل رقم الواتساب يتحكّم في كل أزرار الواتساب على مستوى الموقع كله — غيّره من هنا مرة واحدة.", "Key example: the WhatsApp field controls every WhatsApp button across the whole site — change it here once."),
+          p("اضغط «حفظ» بعد التعديل ليسري التغيير على كل الصفحات فوراً.", "Click “Save” after editing so the change applies to all pages immediately."),
         ],
       },
     ],
   },
+
+  // ======================== الجزء 3: صفحات الموقع ========================
   {
     id: "site",
     title_ar: "صفحات الموقع ومن أين تُدار",
@@ -127,8 +266,8 @@ export const GUIDE: GuidePart[] = [
         id: "site-overview",
         title_ar: "نظرة عامة",
         title_en: "Overview",
-        intro_ar: "هذا الجزء مرجع بصري: شكل كل صفحة في الموقع، وأي قسم في لوحة التحكّم يتحكّم فيها. كل الصفحات متاحة بالعربية والإنجليزية تلقائياً.",
-        intro_en: "This part is a visual reference: how each site page looks, and which control-panel area manages it. All pages are available in Arabic and English automatically.",
+        intro_ar: "هذا الجزء مرجع بصري: شكل كل صفحة، ومن أي قسم في اللوحة تتحكّم في كل جزء منها. كل الصفحات متاحة بالعربية والإنجليزية تلقائياً.",
+        intro_en: "This part is a visual reference: how each page looks, and which panel area controls each part of it. All pages are available in Arabic and English automatically.",
         steps: [],
       },
       {
@@ -136,8 +275,10 @@ export const GUIDE: GuidePart[] = [
         title_ar: "الصفحة الرئيسية",
         title_en: "Home Page",
         steps: [
-          { ar: "واجهة الموقع: شرائح متحركة (هيرو)، نبذة، بحث ذكي، لماذا عبور، أرقام الإنجاز، قصص النجاح، المعرض، وأحدث الأخبار.", en: "The site's front page: a rotating hero, intro, smart search, why-Oboor, achievement numbers, success stories, gallery, and latest news.", shot: { area: "site", name: "home" } },
-          { ar: "تُدار من: «الصفحة الرئيسية» في اللوحة (لكل قسم قائمته: الشرائح، الأرقام، المميزات، بطاقات البحث، المعرض…).", en: "Controlled from: “Home Page” in the panel (each part has its own list: slides, numbers, features, search cards, gallery…)." },
+          site("home", "واجهة الموقع وأكثر صفحاته أقساماً.", "The site's front page and its most section-rich page."),
+          p("الشرائح المتحركة (الهيرو) ← «الصفحة الرئيسية» ثم قسم «شرائح الهيرو» (صورة + عنوان + زر لكل شريحة).", "The rotating hero ← “Home Page” → “Hero Slides” (image + title + button per slide)."),
+          p("أرقام الإنجاز ← «أرقام الإنجاز» · مميزات «لماذا عبور» ← «المميزات» (أيقونة + عنوان + وصف لكل ميزة).", "Achievement numbers ← “Achievement Numbers” · “Why Oboor” features ← “Features” (icon + title + description each)."),
+          p("بطاقات البحث الذكي ← «بطاقات الخدمات» · المعرض ← «صور المعرض» · قصص النجاح ← «أبطال عبور» · الأخبار ← «إعلامنا».", "Smart-search cards ← “Service Cards” · gallery ← “Gallery Images” · success stories ← “Oboor Champions” · news ← “Our Media”."),
         ],
       },
       {
@@ -145,8 +286,8 @@ export const GUIDE: GuidePart[] = [
         title_ar: "عن عبور",
         title_en: "About Oboor",
         steps: [
-          { ar: "صفحة التعريف بالمركز: النبذة، الرؤية والرسالة، والمناطق.", en: "The center's about page: intro, vision & mission, and regions.", shot: { area: "site", name: "about" } },
-          { ar: "تُدار من: «عن عبور (من نحن)» — نصوص وعناوين الصفحة.", en: "Controlled from: “About Oboor” — the page's texts and headings." },
+          site("about", "صفحة التعريف بالمركز: النبذة، الرؤية والرسالة، والمناطق.", "The center's about page: intro, vision & mission, and regions."),
+          p("تُدار من «عن عبور (من نحن)» — عناوين ونصوص وصور الأقسام من لوحة «محتوى وعناوين الصفحة».", "Controlled from “About Oboor” — section headings, texts and images via the “Page content & headings” panel."),
         ],
       },
       {
@@ -154,8 +295,8 @@ export const GUIDE: GuidePart[] = [
         title_ar: "برامجنا التمكينية",
         title_en: "Our Programs",
         steps: [
-          { ar: "تعرض البرامج والخدمات العيادية والتقنيات في تبويبات.", en: "Shows programs, clinical services, and techniques in tabs.", shot: { area: "site", name: "programs" } },
-          { ar: "تُدار من: «البرامج»، «الخدمات العيادية»، و«التقنيات» في اللوحة.", en: "Controlled from: “Programs”, “Clinical Services”, and “Techniques” in the panel." },
+          site("programs", "تعرض البرامج والخدمات العيادية والتقنيات في تبويبات.", "Shows programs, clinical services, and techniques in tabs."),
+          p("تُدار من ثلاثة أقسام: «البرامج»، «الخدمات العيادية»، و«التقنيات». لكل عنصر عنوان ووصف وأيقونة/صورة.", "Controlled from three areas: “Programs”, “Clinical Services”, and “Techniques”. Each item has a title, description, and icon/image."),
         ],
       },
       {
@@ -163,9 +304,9 @@ export const GUIDE: GuidePart[] = [
         title_ar: "مراكزنا (الفروع)",
         title_en: "Our Centers (Branches)",
         steps: [
-          { ar: "قائمة الفروع مع خريطة تفاعلية وبحث وتصفية حسب المنطقة، ولكل فرع صفحة تفاصيل.", en: "The branch list with an interactive map, search, and filtering by region, plus a details page per branch.", shot: { area: "site", name: "branches" } },
-          { ar: "صفحة الفرع تعرض العنوان والمواعيد والمدير وأرقام التواصل والخدمات وزر الاتجاهات.", en: "A branch page shows address, hours, manager, contact numbers, services, and a Directions button.", shot: { area: "site", name: "branch-detail" } },
-          { ar: "تُدار من: «مراكزنا (الفروع)» — كل فرع عنصر في القائمة بكل بياناته.", en: "Controlled from: “Our Centers (Branches)” — each branch is a list item with all its data." },
+          site("branches", "قائمة الفروع مع خريطة تفاعلية وبحث وتصفية بالمنطقة.", "The branch list with an interactive map, search, and filtering by region."),
+          site("branch-detail", "صفحة الفرع تعرض العنوان والمواعيد والمدير وأرقام التواصل والخدمات وزر الاتجاهات.", "A branch page shows address, hours, manager, contact numbers, services, and a Directions button."),
+          p("تُدار من «مراكزنا (الفروع)» — كل فرع عنصر بكل بياناته (الاسم، المدينة، المنطقة، العنوان، الهاتف، المدير، رابط الخريطة، الخدمات).", "Controlled from “Our Centers (Branches)” — each branch is an item with all its data (name, city, region, address, phone, manager, map link, services)."),
         ],
       },
       {
@@ -173,8 +314,8 @@ export const GUIDE: GuidePart[] = [
         title_ar: "روّادنا (الأخصائيون)",
         title_en: "Our Pioneers (Specialists)",
         steps: [
-          { ar: "يعرض فريق الأخصائيين مع فلترة بالتخصص والفرع، ولكل أخصائي بطاقة تفاصيل.", en: "Shows the specialists team with filtering by specialty and branch, and a details card per specialist.", shot: { area: "site", name: "specialists" } },
-          { ar: "تُدار من: «روّادنا (الأخصائيون)».", en: "Controlled from: “Our Pioneers (Specialists)”." },
+          site("specialists", "فريق الأخصائيين مع فلترة بالتخصص والفرع، ولكل أخصائي بطاقة تفاصيل.", "The specialists team with filtering by specialty and branch, and a details card per specialist."),
+          p("تُدار من «روّادنا (الأخصائيون)» — لكل أخصائي صورة واسم وتخصص ونبذة.", "Controlled from “Our Pioneers (Specialists)” — each has an image, name, specialty, and bio."),
         ],
       },
       {
@@ -182,8 +323,8 @@ export const GUIDE: GuidePart[] = [
         title_ar: "أبطال عبور (قصص النجاح)",
         title_en: "Oboor Champions (Success Stories)",
         steps: [
-          { ar: "يعرض قصص نجاح المستفيدين.", en: "Shows beneficiaries' success stories.", shot: { area: "site", name: "success-stories" } },
-          { ar: "تُدار من: «أبطال عبور (قصص النجاح)».", en: "Controlled from: “Oboor Champions (Success Stories)”." },
+          site("success-stories", "قصص نجاح المستفيدين.", "Beneficiaries' success stories."),
+          p("تُدار من «أبطال عبور (قصص النجاح)».", "Controlled from “Oboor Champions (Success Stories)”."),
         ],
       },
       {
@@ -191,9 +332,9 @@ export const GUIDE: GuidePart[] = [
         title_ar: "إعلامنا (الأخبار والمقالات)",
         title_en: "Our Media (News & Articles)",
         steps: [
-          { ar: "قائمة الأخبار والمقالات والفعاليات، ولكل خبر صفحة مقال كاملة.", en: "The list of news, articles, and events, with a full article page per item.", shot: { area: "site", name: "news" } },
-          { ar: "صفحة المقال تعرض الصورة والعنوان والمحتوى، وللفعاليات بيانات المكان والوقت.", en: "An article page shows the image, title, and content; events also show location and time.", shot: { area: "site", name: "news-article" } },
-          { ar: "تُدار من: «إعلامنا (الأخبار والمقالات)».", en: "Controlled from: “Our Media (News & Articles)”." },
+          site("news", "قائمة الأخبار والمقالات والفعاليات، ولكل خبر صفحة مقال كاملة.", "The list of news, articles, and events, each with a full article page."),
+          site("news-article", "صفحة المقال تعرض الصورة والعنوان والمحتوى، وللفعاليات مكاناً ووقتاً.", "An article page shows the image, title, and content; events also show location and time."),
+          p("تُدار من «إعلامنا (الأخبار والمقالات)». حقول الفعالية (المكان/الوقت) تظهر عند اختيار القسم «فعاليات» أو «ورش».", "Controlled from “Our Media”. Event fields (place/time) appear when the section is set to “Events” or “Workshops”."),
         ],
       },
       {
@@ -201,8 +342,8 @@ export const GUIDE: GuidePart[] = [
         title_ar: "انضم إلينا (الوظائف)",
         title_en: "Join Us (Careers)",
         steps: [
-          { ar: "قائمة الوظائف المتاحة، ولكل وظيفة صفحة تفاصيل ونموذج تقديم.", en: "The list of open jobs, each with a details page and an application form.", shot: { area: "site", name: "careers" } },
-          { ar: "طلبات المتقدّمين تصل إلى «طلبات التوظيف» في اللوحة. الوظائف نفسها تُدار من «انضم إلينا (الوظائف)».", en: "Applicants' submissions arrive in “Job Applications” in the panel. The jobs themselves are managed from “Join Us (Careers)”." },
+          site("careers", "قائمة الوظائف المتاحة، ولكل وظيفة صفحة تفاصيل ونموذج تقديم.", "The list of open jobs, each with a details page and an application form."),
+          p("الوظائف تُدار من «انضم إلينا (الوظائف)». وطلبات المتقدّمين تصل إلى «طلبات التوظيف».", "Jobs are managed from “Join Us (Careers)”. Applicants' submissions arrive in “Job Applications”."),
         ],
       },
       {
@@ -210,9 +351,9 @@ export const GUIDE: GuidePart[] = [
         title_ar: "نماذج التواصل والالتحاق والتقييم",
         title_en: "Contact, Admission & Assessment Forms",
         steps: [
-          { ar: "«خذ الخطوة» (تواصل) و«طلب الالتحاق» و«التقييم» نماذج يملؤها الزائر لإرسال طلبه.", en: "“Take the step” (contact), “Admission”, and “Assessment” are forms visitors fill to send a request.", shot: { area: "site", name: "admission" } },
-          { ar: "نموذج التقييم عبارة عن خطوات متتابعة (Wizard) تنتهي بإرسال النتيجة.", en: "The assessment form is a step-by-step wizard that ends by submitting the result.", shot: { area: "site", name: "assessment" } },
-          { ar: "كل ما يُرسَل من هذه النماذج يصلك في مجموعة «الطلبات والرسائل» في اللوحة.", en: "Everything sent from these forms arrives in the “Requests & Messages” group in the panel." },
+          site("admission", "«خذ الخطوة» (تواصل) و«طلب الالتحاق» نماذج يملؤها الزائر لإرسال طلبه.", "“Take the step” (contact) and “Admission” are forms visitors fill to send a request."),
+          site("assessment", "نموذج التقييم خطوات متتابعة (Wizard) تنتهي بإرسال النتيجة.", "The assessment form is a step-by-step wizard that ends by submitting the result."),
+          p("كل ما يُرسَل من هذه النماذج يصلك في مجموعة «الطلبات والرسائل» في اللوحة.", "Everything sent from these forms arrives in the “Requests & Messages” group in the panel."),
         ],
       },
     ],

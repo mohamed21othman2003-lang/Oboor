@@ -7,7 +7,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { clearToken, getToken, type CmsUser } from "@/lib/cms/api";
 import { useCmsLang, type CmsLang } from "@/lib/cms/i18n";
 
-type NavItem = { label: string; label_en: string; href: string; icon: keyof typeof ICONS };
+type NavItem = { label: string; label_en: string; href: string; icon: keyof typeof ICONS; newTab?: boolean };
 type NavGroup = { title: string; title_en: string; items: NavItem[] };
 
 const NAV: NavGroup[] = [
@@ -45,7 +45,7 @@ const NAV: NavGroup[] = [
     items: [
       { label: "أقسام الصفحات", label_en: "Page Sections", href: "/cms/content/sections", icon: "layers" },
       { label: "إعدادات الموقع", label_en: "Site Settings", href: "/cms/settings", icon: "cog" },
-      { label: "دليل الاستخدام", label_en: "User Guide", href: "/cms/guide", icon: "book" },
+      { label: "دليل الاستخدام", label_en: "User Guide", href: "/cms/guide", icon: "book", newTab: true },
     ],
   },
 ];
@@ -122,12 +122,15 @@ export default function CmsShell({ children }: { children: React.ReactNode }) {
                     <li key={it.href}>
                       <Link
                         href={it.href}
+                        target={it.newTab ? "_blank" : undefined}
+                        rel={it.newTab ? "noopener" : undefined}
                         onClick={() => setOpen(false)}
                         className={`group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${active ? "bg-[#1FA6A8]/12 font-bold text-[#0F6C73]" : "text-ink-soft hover:bg-[#1FA6A8]/8 hover:text-[#0F6C73]"}`}
                       >
                         {active && <span className="absolute inset-y-2 start-0 w-1 rounded-full bg-[#1FA6A8]" />}
                         <span className={`shrink-0 ${active ? "text-[#1FA6A8]" : "text-[#0F6C73]/55 group-hover:text-[#1FA6A8]"}`}>{ICONS[it.icon]}</span>
                         {lbl(it)}
+                        {it.newTab && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ms-auto shrink-0 opacity-50"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14 21 3" /></svg>}
                       </Link>
                     </li>
                   );

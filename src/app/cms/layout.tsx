@@ -6,9 +6,11 @@ import { CmsLangProvider } from "@/lib/cms/i18n";
 
 export default function CmsLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  // اللوجين والدليل صفحات مستقلة بدون شِل الـCMS (الدليل يُفتح في تاب منفصلة)
+  const bare = pathname === "/cms/login" || pathname === "/cms/guide";
   return (
     <CmsLangProvider>
-      {pathname === "/cms/login" ? children : <CmsShell>{children}</CmsShell>}
+      {bare ? children : <CmsShell>{children}</CmsShell>}
     </CmsLangProvider>
   );
 }
