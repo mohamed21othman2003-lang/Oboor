@@ -80,6 +80,13 @@ select {
     print-color-adjust: exact;
   }
   @page { margin: 14mm; }
+
+  /* دليل الاستخدام: إخفاء الشريط العلوي والفهرس، وطباعة الألوان/الصور كما هي */
+  .guide-chrome, .guide-toc { display: none !important; }
+  .guide-hero, .guide-hero * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body:has(.guide-hero) * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  /* تجنّب قطع بطاقات الخطوات بين الصفحات */
+  .guide-hero + div li, article { break-inside: avoid; }
 }
 
 /* Hero slide transition */
