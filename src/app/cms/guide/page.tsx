@@ -45,7 +45,7 @@ export default function GuidePage() {
     <div dir={dir} className="min-h-screen bg-[#f4f9fa] text-ink">
       {/* شريط علوي مستقل + شريط تقدّم القراءة */}
       <header className="guide-chrome sticky top-0 z-30 border-b border-[#e6eff0] bg-white/85 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
+        <div className="mx-auto flex max-w-[1400px] items-center justify-between gap-3 px-4 py-3 sm:px-6">
           <div className="flex items-center gap-3">
             <Image src="/logo.png" alt="عبور" width={120} height={78} className="h-9 w-auto object-contain" priority />
             <div className="hidden border-s border-[#e6eff0] ps-3 sm:block">
@@ -73,7 +73,7 @@ export default function GuidePage() {
       <section className="guide-hero relative overflow-hidden bg-gradient-to-br from-[#0F6C73] via-[#137e86] to-[#1FA6A8] text-white">
         <div aria-hidden className="pointer-events-none absolute -top-16 end-[-40px] h-72 w-72 rounded-full bg-white/10" />
         <div aria-hidden className="pointer-events-none absolute bottom-[-60px] start-10 h-52 w-52 rounded-full bg-white/5" />
-        <div className="relative mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
+        <div className="relative mx-auto max-w-[1400px] px-4 py-12 sm:px-6 sm:py-16">
           <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold ring-1 ring-white/20">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" /></svg>
             {t("دليل تشغيل لوحة التحكّم", "Control-Panel Operating Guide")}
@@ -99,10 +99,10 @@ export default function GuidePage() {
         </div>
       </section>
 
-      <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
-        <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
+      <div className="mx-auto max-w-[1400px] px-4 py-12 sm:px-6 lg:px-10">
+        <div className="flex flex-col gap-10 lg:flex-row lg:items-start">
           {/* الفهرس الجانبي */}
-          <nav className="guide-toc lg:sticky lg:top-24 lg:w-72 lg:shrink-0">
+          <nav className="guide-toc lg:sticky lg:top-24 lg:w-80 lg:shrink-0">
             <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-[#e6eff0]">
               <p className="mb-3 px-1 text-[11px] font-bold uppercase tracking-wider text-[#0F6C73]/50">{t("المحتويات", "Contents")}</p>
               {GUIDE.map((part) => (
