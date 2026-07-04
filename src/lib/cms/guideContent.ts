@@ -3,13 +3,20 @@
 
 export type GuideShot = { area: "cms" | "site"; name: string; caption_ar?: string; caption_en?: string };
 export type GuideStep = { ar: string; en: string; shot?: GuideShot };
+export type FaqItem = { q_ar: string; q_en: string; a_ar: string; a_en: string };
+export type GlossaryItem = { term_ar: string; term_en: string; def_ar: string; def_en: string };
 export type GuideSection = {
   id: string;
   title_ar: string; title_en: string;
   intro_ar?: string; intro_en?: string;
-  steps: GuideStep[];
+  steps?: GuideStep[];
+  faq?: FaqItem[];
+  glossary?: GlossaryItem[];
 };
 export type GuidePart = { id: string; title_ar: string; title_en: string; sections: GuideSection[] };
+
+const faq = (q_ar: string, q_en: string, a_ar: string, a_en: string): FaqItem => ({ q_ar, q_en, a_ar, a_en });
+const term = (term_ar: string, term_en: string, def_ar: string, def_en: string): GlossaryItem => ({ term_ar, term_en, def_ar, def_en });
 
 // اختصار لإنشاء خطوة بلقطة CMS
 const cms = (name: string, ar: string, en: string, cap_ar?: string, cap_en?: string): GuideStep =>
@@ -354,6 +361,155 @@ export const GUIDE: GuidePart[] = [
           site("admission", "«خذ الخطوة» (تواصل) و«طلب الالتحاق» نماذج يملؤها الزائر لإرسال طلبه.", "“Take the step” (contact) and “Admission” are forms visitors fill to send a request."),
           site("assessment", "نموذج التقييم خطوات متتابعة (Wizard) تنتهي بإرسال النتيجة.", "The assessment form is a step-by-step wizard that ends by submitting the result."),
           p("كل ما يُرسَل من هذه النماذج يصلك في مجموعة «الطلبات والرسائل» في اللوحة.", "Everything sent from these forms arrives in the “Requests & Messages” group in the panel."),
+        ],
+      },
+    ],
+  },
+
+  // ======================== الجزء 4: مهام شائعة (وصفات جاهزة) ========================
+  {
+    id: "recipes",
+    title_ar: "مهام شائعة (خطوة بخطوة)",
+    title_en: "Common Tasks (Step by Step)",
+    sections: [
+      {
+        id: "recipe-branch",
+        title_ar: "إضافة فرع جديد",
+        title_en: "Add a New Branch",
+        intro_ar: "وصفة كاملة لإضافة فرع من الصفر حتى يظهر على الموقع.",
+        intro_en: "A complete recipe to add a branch from scratch until it appears on the site.",
+        steps: [
+          cms("list-branches", "من القائمة الجانبية افتح «مراكزنا (الفروع)» واضغط «إضافة فرع».", "From the sidebar open “Our Centers (Branches)” and click “Add Branch”."),
+          cms("editor", "املأ الاسم والمدينة والمنطقة والعنوان — بالعربية والإنجليزية معاً. راقب شريط الاكتمال حتى يصل 100%.", "Fill the name, city, region, and address — in both Arabic and English. Watch the completion bar reach 100%."),
+          p("أضف رقم التواصل، المدير، رابط الخريطة، والخدمات. اختر الخدمات من قائمة الإضافة.", "Add the phone number, manager, map link, and services. Pick services from the add-list."),
+          p("تأكّد أن الحالة «منشور»، ثم اضغط «حفظ». سيظهر الفرع في صفحة «مراكزنا» على الموقع خلال لحظات.", "Make sure the status is “Published”, then click “Save”. The branch appears on the site's Centers page within moments."),
+        ],
+      },
+      {
+        id: "recipe-news",
+        title_ar: "نشر خبر أو فعالية",
+        title_en: "Publish a News Item or Event",
+        steps: [
+          cms("list-news", "افتح «إعلامنا (الأخبار والمقالات)» واضغط «إضافة خبر».", "Open “Our Media (News & Articles)” and click “Add News”."),
+          p("اكتب العنوان والمحتوى بالعربية والإنجليزية، وارفع صورة الخبر.", "Write the title and content in Arabic and English, and upload the article image."),
+          p("لفعالية أو ورشة: اختر القسم «فعاليات» أو «ورش» فتظهر حقول المكان والوقت — املأها.", "For an event or workshop: set the section to “Events” or “Workshops” to reveal place/time fields — fill them."),
+          p("اضغط «حفظ». الأخبار تظهر بالأحدث أولاً في صفحة «إعلامنا» وفي الصفحة الرئيسية.", "Click “Save”. News shows newest-first on the “Our Media” page and on the home page."),
+        ],
+      },
+      {
+        id: "recipe-hero",
+        title_ar: "تغيير صورة أو محتوى الصفحة الرئيسية",
+        title_en: "Change a Home-Page Image or Text",
+        steps: [
+          cms("page-content-home", "افتح «الصفحة الرئيسية». عدّل العناوين والنصوص من لوحة «محتوى وعناوين الصفحة» أعلى الصفحة.", "Open “Home Page”. Edit headings and texts from the “Page content & headings” panel at the top."),
+          cms("detail-image", "لتغيير صورة (مثل شريحة الهيرو): افتح القسم المطلوب من قوائم الصفحة، اضغط منطقة الصورة وارفع صورة جديدة.", "To change an image (e.g. a hero slide): open the relevant list, click the image area, and upload a new image."),
+          p("اضغط «حفظ» بعد كل تعديل. استخدم «معاينة» لرؤية الشكل قبل النشر.", "Click “Save” after each change. Use “Preview” to see the look before publishing."),
+        ],
+      },
+      {
+        id: "recipe-submission",
+        title_ar: "الرد على طلب وارد",
+        title_en: "Respond to an Incoming Request",
+        steps: [
+          cms("submissions-admission", "افتح النوع المطلوب من «الطلبات والرسائل» (مثل «طلبات الالتحاق»).", "Open the type from “Requests & Messages” (e.g. “Admission Requests”)."),
+          cms("detail-submission", "اضغط «عرض التفاصيل» (العين) لقراءة كل بيانات الطلب، ثم راسل مقدّم الطلب عبر زر الواتساب أو الإيميل مباشرةً.", "Click “View details” (eye) to read all the request data, then contact the applicant via the WhatsApp or email button directly."),
+          p("لأرشفة أو مشاركة الطلبات، استخدم زر «تصدير» لتنزيلها كملف Excel منسّق.", "To archive or share requests, use the “Export” button to download them as a formatted Excel file."),
+        ],
+      },
+    ],
+  },
+
+  // ======================== الجزء 5: نصائح وأسئلة شائعة ومسرد ========================
+  {
+    id: "help",
+    title_ar: "نصائح وأسئلة شائعة",
+    title_en: "Tips & FAQ",
+    sections: [
+      {
+        id: "tips",
+        title_ar: "نصائح وأخطاء شائعة",
+        title_en: "Tips & Common Mistakes",
+        steps: [
+          p("✅ املأ الحقول بالعربية والإنجليزية معاً دائماً حتى يظهر المحتوى صحيحاً في نسختَي الموقع.", "✅ Always fill fields in both Arabic and English so content shows correctly in both site versions."),
+          p("✅ استخدم زر «معاينة» قبل الحفظ لترى الشكل النهائي على الموقع.", "✅ Use “Preview” before saving to see the final look on the site."),
+          p("✅ للإيقاف المؤقت اجعل العنصر «مخفي» بدل حذفه — الحذف نهائي بلا تراجع.", "✅ To pause an item, set it to “Hidden” instead of deleting — deletion is permanent with no undo."),
+          p("✅ اجعل العناوين قصيرة وواضحة، وحافظ على صور بحجم أقل من 5 ميجابايت وأبعاد مناسبة.", "✅ Keep titles short and clear, and use images under 5 MB with suitable dimensions."),
+          p("⚠️ لا تنسَ الضغط على «حفظ» بعد كل تعديل — التعديل لا يُطبّق قبل الحفظ.", "⚠️ Don't forget to click “Save” after each change — an edit is not applied until saved."),
+          p("⚠️ لا تمسح نصّ قسم بالكامل إن كنت تريده أن يظهر — القسم الفارغ تماماً قد يختفي من الموقع.", "⚠️ Don't clear a section's text entirely if you want it visible — a fully empty section may disappear from the site."),
+        ],
+      },
+      {
+        id: "faq",
+        title_ar: "الأسئلة الشائعة",
+        title_en: "Frequently Asked Questions",
+        intro_ar: "أكثر الأسئلة تكراراً وإجاباتها المختصرة.",
+        intro_en: "The most common questions and their short answers.",
+        faq: [
+          faq("عدّلت وضغطت «حفظ»، لكن التعديل لم يظهر على الموقع؟",
+              "I edited and clicked “Save”, but the change isn't showing on the site?",
+              "المحتوى يتحدّث خلال دقائق قليلة (يوجد تخزين مؤقت). حدّث الصفحة بعد قليل، وتأكّد أنك ضغطت «حفظ» وظهرت لك رسالة «تم الحفظ ✓».",
+              "Content updates within a few minutes (there's a short cache). Refresh the page shortly, and confirm you clicked “Save” and saw the “Saved ✓” message."),
+          faq("زر «حفظ» باهت ولا يُضغط؟",
+              "The “Save” button is greyed out and won't click?",
+              "لأنه يعمل فقط عند وجود تعديل فعلي. اكتب أي تغيير في أحد الحقول وسيتفعّل.",
+              "Because it only activates when there's a real change. Type any change in a field and it will enable."),
+          faq("أريد استرجاع المحتوى الأصلي بعد أن غيّرته؟",
+              "I want to restore the original content after changing it?",
+              "«استرجاع النسخة الافتراضية» يعيد العنصر لمحتواه الأصلي، و«تجاهل التغييرات» يلغي التعديلات غير المحفوظة فقط.",
+              "“Restore Default” returns the item to its original content; “Discard changes” cancels only unsaved edits."),
+          faq("حذفت عنصراً بالخطأ، كيف أرجعه؟",
+              "I deleted an item by mistake, how do I get it back?",
+              "الحذف نهائي ولا يمكن التراجع عنه، لذلك ستحتاج لإضافته من جديد. لهذا يُفضّل جعل العنصر «مخفي» بدل حذفه إن كنت قد تحتاجه لاحقاً.",
+              "Deletion is permanent and can't be undone, so you'll need to add it again. That's why hiding an item is better than deleting if you might need it later."),
+          faq("هل يجب أن أملأ العربية والإنجليزية؟",
+              "Do I have to fill both Arabic and English?",
+              "يُفضّل ملء الاثنين. إن تركت الإنجليزية فارغة يظهر النص العربي بدلاً منها في النسخة الإنجليزية كحل بديل.",
+              "Filling both is preferred. If you leave English empty, the Arabic text shows instead in the English version as a fallback."),
+          faq("غيّرت لغة اللوحة، هل أثّر ذلك على الموقع؟",
+              "I switched the panel language, did that affect the site?",
+              "لا إطلاقاً — لغة اللوحة منفصلة تماماً عن لغة الموقع، وتغيّر واجهة اللوحة فقط.",
+              "Not at all — the panel language is completely separate from the site language and only changes the panel's interface."),
+          faq("كيف أغيّر رقم الواتساب على الموقع كله؟",
+              "How do I change the WhatsApp number across the whole site?",
+              "من «إعدادات الموقع» → حقل رقم الواتساب. مكان واحد يتحكّم في كل أزرار الواتساب في الموقع.",
+              "From “Site Settings” → the WhatsApp number field. One place controls every WhatsApp button on the site."),
+          faq("لماذا لا تظهر أسهم الترتيب في الأخبار؟",
+              "Why don't the reorder arrows show for news?",
+              "لأن الأخبار والوظائف تُرتَّب تلقائياً بالأحدث أولاً، فلا تحتاج لترتيب يدوي.",
+              "Because news and jobs are ordered automatically (newest first), so they don't need manual ordering."),
+          faq("رفع صورة السيرة الذاتية أعطى خطأ؟",
+              "Uploading a CV file gave an error?",
+              "يجب أن يكون الملف بصيغة PDF أو DOC أو DOCX وحجمه أقل من 10 ميجابايت.",
+              "The file must be a PDF, DOC, or DOCX and under 10 MB."),
+          faq("نسبة الاكتمال ليست 100%، هل هذه مشكلة؟",
+              "Completion isn't 100%, is that a problem?",
+              "لا، هي مجرد تنبيه للحقول الأساسية الناقصة. املأ ما هو مكتوب في «الحقول الناقصة» للوصول إلى 100%.",
+              "No, it just flags the essential missing fields. Fill what's listed under “Missing” to reach 100%."),
+          faq("لماذا تظهر بيانات الطلبات بالعربية حتى في النسخة الإنجليزية؟",
+              "Why do request details appear in Arabic even in the English panel?",
+              "لأنها ما كتبه الزائر نفسه في النموذج، فتُعرض كما أرسلها بلغته.",
+              "Because it's what the visitor typed in the form, so it's shown as sent, in their language."),
+          faq("نسيت كلمة المرور أو أريد تغييرها؟",
+              "I forgot the password or want to change it?",
+              "تواصل مع فريق الدعم التقني لتغيير كلمة المرور بأمان.",
+              "Contact the technical support team to change the password safely."),
+        ],
+      },
+      {
+        id: "glossary",
+        title_ar: "مسرد المصطلحات",
+        title_en: "Glossary",
+        intro_ar: "تعريفات سريعة لأهم المصطلحات في اللوحة.",
+        intro_en: "Quick definitions of the main terms used in the panel.",
+        glossary: [
+          term("منشور / مخفي", "Published / Hidden", "«منشور» يعني أن العنصر يظهر للزوّار، و«مخفي» يعني أنه محفوظ لكن لا يظهر على الموقع.", "“Published” means the item is visible to visitors; “Hidden” means it's saved but not shown on the site."),
+          term("نسبة الاكتمال", "Completion", "مؤشّر أعلى المحرّر يوضّح كم من الحقول الأساسية تم ملؤه، ويذكّرك بالحقول الناقصة.", "A meter at the top of the editor showing how many essential fields are filled, reminding you of missing ones."),
+          term("بطاقة (Card)", "Card", "عنصر مركّب يجمع عنوان + وصف + أيقونة/صورة معاً، ويظهر ككرت على الموقع.", "A composite item that groups a title + description + icon/image together, shown as a card on the site."),
+          term("قسم / بلوك", "Section / Block", "جزء من صفحة (مثل الهيرو أو قسم المميزات) تُدار عناصره ونصوصه معاً.", "A part of a page (like the hero or features section) whose items and texts are managed together."),
+          term("معاينة (Preview)", "Preview", "فتح الصفحة الحقيقية بتعديلاتك الحالية قبل الحفظ للتأكّد من الشكل النهائي.", "Opening the real page with your current unsaved changes to check the final look before saving."),
+          term("المعرّف (slug)", "Identifier (slug)", "اسم تقني فريد يُنشأ تلقائياً لكل عنصر — لا تحتاج للتعامل معه عادةً.", "A unique technical name generated automatically for each item — you normally don't deal with it."),
+          term("الطلبات والرسائل", "Requests & Messages", "كل ما يرسله الزوّار عبر النماذج (تواصل، التحاق، توظيف، تقييم) ويصلك في اللوحة.", "Everything visitors send via the forms (contact, admission, jobs, assessment) that arrives in the panel."),
+          term("تصدير (Export)", "Export", "تنزيل الطلبات كملف Excel منسّق للأرشفة أو المشاركة.", "Downloading requests as a formatted Excel file for archiving or sharing."),
         ],
       },
     ],

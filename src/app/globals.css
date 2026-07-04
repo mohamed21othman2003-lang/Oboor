@@ -87,6 +87,11 @@ select {
   body:has(.guide-hero) * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   /* تجنّب قطع بطاقات الخطوات بين الصفحات */
   .guide-hero + div li, article { break-inside: avoid; }
+  /* غلاف الـPDF: صفحة أولى مستقلة */
+  .guide-cover { display: block !important; text-align: center; padding-top: 26vh; break-after: page; }
+  /* فتح كل إجابات الأسئلة الشائعة عند الطباعة */
+  details.guide-faq > *:not(summary) { display: block !important; }
+  details.guide-faq svg { display: none; }
 }
 
 /* Hero slide transition */
