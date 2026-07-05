@@ -208,7 +208,7 @@ export default function AssessmentResultsTable({
                       <td className="px-4 py-3.5 text-center font-semibold text-ink">{v(it, "assessment") || "—"}</td>
                       <td className="px-4 py-3.5 text-center text-ink">{v(it, "age") || "—"}</td>
                       <td className="px-4 py-3.5 text-center">
-                        <span className="inline-flex items-center gap-1.5 text-ink"><span className="h-2 w-2 rounded-full" style={{ background: lv.dot }} />{lv.label}</span>
+                        <span className="inline-flex w-24 items-center justify-start gap-1.5 text-ink"><span className="h-2 w-2 shrink-0 rounded-full" style={{ background: lv.dot }} />{lv.label}</span>
                       </td>
                       <td className="px-4 py-3.5 text-center text-ink-soft">
                         <span className="inline-flex flex-col items-start gap-0.5 text-start">
