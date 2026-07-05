@@ -615,10 +615,11 @@ function DateField({ label, help, value, onChange }: { label?: string; help?: st
   const firstDow = new Date(y, m, 1).getDay();
   const daysInMonth = new Date(y, m + 1, 0).getDate();
   const cells: (number | null)[] = [...Array(firstDow).fill(null), ...Array.from({ length: daysInMonth }, (_, i) => i + 1)];
-  const isPast = (d: number) => new Date(y, m, d) < today;
   const isToday = (d: number) => new Date(y, m, d).getTime() === today.getTime();
   const isSel = (d: number) => !!sel && sel.y === y && sel.m === m && sel.d === d;
-  const canPrev = y > today.getFullYear() || (y === today.getFullYear() && m > today.getMonth());
+  // تواريخ المحتوى (طرح الوظيفة، المباشرة، الأخبار) قد تكون في الماضي أو المستقبل
+  // ⇒ نسمح باختيار أي تاريخ ولا نقيّد بالتنقّل للأمام فقط.
+  const canPrev = y > 1970;
   const display = sel ? (en ? `${MONTHS[sel.m]} ${sel.d}, ${sel.y}` : `${sel.d} ${MONTHS[sel.m]} ${sel.y}`) : t("اختر التاريخ", "Pick a date");
   const pick = (d: number) => { onChange(isoOf(y, m, d)); setOpen(false); };
 
@@ -652,10 +653,9 @@ function DateField({ label, help, value, onChange }: { label?: string; help?: st
           </div>
           <div className="grid grid-cols-7 gap-1">
             {cells.map((d, i) => d === null ? <div key={i} /> : (
-              <button key={i} type="button" disabled={isPast(d)} onClick={() => pick(d)}
+              <button key={i} type="button" onClick={() => pick(d)}
                 className={"flex h-9 items-center justify-center rounded-lg text-sm transition-colors " + (
                   isSel(d) ? "bg-brand font-semibold text-white"
-                  : isPast(d) ? "cursor-not-allowed text-ink-soft/30"
                   : isToday(d) ? "font-semibold text-brand ring-1 ring-brand/40 hover:bg-brand/10"
                   : "text-ink hover:bg-surface")}>
                 {d}
