@@ -6,6 +6,7 @@ import CustomSelect from "@/components/ui/Select";
 import { type CmsItem, type FieldSchema } from "@/lib/cms/api";
 import { exportSheet } from "@/lib/cms/exportSheet";
 import { useCmsLang } from "@/lib/cms/i18n";
+import { branchFilterOptions } from "@/lib/branchesData";
 
 /* ===== جدول إدارة طلبات الالتحاق (شكل CRM) — ديزاين فقط، نفس البيانات والأكشنز ===== */
 
@@ -79,7 +80,7 @@ export default function SubmissionsTable({
   const [copied, setCopied] = useState<number | null>(null);
   const [viewing, setViewing] = useState<CmsItem | null>(null);
 
-  const branchOpts = useMemo(() => [{ value: "", label: t("كل الفروع", "All branches") }, ...uniq(items.map((it) => v(it, "branch"))).map((b) => ({ value: b, label: b }))], [items, en]);
+  const branchOpts = useMemo(() => [{ value: "", label: t("كل الفروع", "All branches") }, ...branchFilterOptions(items.map((it) => v(it, "branch")), en)], [items, en]);
   const condOpts = useMemo(() => [{ value: "", label: t("كل أنواع الحالات", "All case types") }, ...uniq(items.map((it) => v(it, "case_type"))).map((c) => ({ value: c, label: c }))], [items, en]);
   const rangeOpts = [
     { value: "", label: t("كل الوقت", "All time") },

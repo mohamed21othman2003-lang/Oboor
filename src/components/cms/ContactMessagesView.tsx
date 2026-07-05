@@ -1,10 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import CustomSelect from "@/components/ui/Select";
 import { type CmsItem } from "@/lib/cms/api";
 import { useCmsLang } from "@/lib/cms/i18n";
+import { branchFilterOptions } from "@/lib/branchesData";
+
+const READ_KEY = "oboor_cms_read_contact"; // تتبّع الرسائل المقروءة محليًا (لكل متصفّح)
 
 /* ===== رسائل التواصل — تصميم Inbox مقسوم (قائمة + تفاصيل) — ديزاين فقط ===== */
 
@@ -42,6 +45,7 @@ const uniq = (a: string[]) => [...new Set(a.filter(Boolean))];
 const I = {
   search: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>,
   filter: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z" /></svg>,
+  sort: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 5h10M11 9h7M11 13h4M3 17l3 3 3-3M6 20V4" /></svg>,
   reset: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8" /><path d="M3 3v5h5" /></svg>,
   mail: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="M3 7l9 6 9-6" /></svg>,
   chats: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>,
@@ -77,12 +81,32 @@ export default function ContactMessagesView({
   const [branch, setBranch] = useState("");
   const [mtype, setMtype] = useState("");
   const [range, setRange] = useState("");
-  const [showFilters, setShowFilters] = useState(true);
+  const [sort, setSort] = useState("newest");
   const [visible, setVisible] = useState(10);
   const [selId, setSelId] = useState<number | null>(items[0]?.id ?? null);
   const [copied, setCopied] = useState(false);
 
-  const branchOpts = useMemo(() => [{ value: "", label: t("كل الفروع", "All branches") }, ...uniq(items.map((it) => v(it, "branch"))).map((b) => ({ value: b, label: b }))], [items, en]);
+  // الرسائل المقروءة (محليًا) — للترتيب حسب مقروء/غير مقروء
+  const [readIds, setReadIds] = useState<Set<number>>(new Set());
+  useEffect(() => { try { setReadIds(new Set(JSON.parse(localStorage.getItem(READ_KEY) || "[]"))); } catch {} }, []);
+  useEffect(() => {
+    if (selId == null) return;
+    setReadIds((prev) => {
+      if (prev.has(selId)) return prev;
+      const n = new Set(prev); n.add(selId);
+      try { localStorage.setItem(READ_KEY, JSON.stringify([...n])); } catch {}
+      return n;
+    });
+  }, [selId]);
+
+  const branchOpts = useMemo(() => [{ value: "", label: t("كل الفروع", "All branches") }, ...branchFilterOptions(items.map((it) => v(it, "branch")), en)], [items, en]);
+  const sortOpts = [
+    { value: "newest", label: t("الأحدث أولاً", "Newest first") },
+    { value: "oldest", label: t("الأقدم أولاً", "Oldest first") },
+    { value: "unread", label: t("غير المقروء أولاً", "Unread first") },
+    { value: "read", label: t("المقروء أولاً", "Read first") },
+    { value: "alpha", label: t("أبجديًا (بالاسم)", "Alphabetical (name)") },
+  ];
   const typeOpts = useMemo(() => [{ value: "", label: t("كل الأنواع", "All types") }, ...uniq(items.map((it) => v(it, "type"))).map((ty) => ({ value: ty, label: ty }))], [items, en]);
   const rangeOpts = [
     { value: "", label: t("كل الوقت", "All time") },
@@ -123,8 +147,22 @@ export default function ContactMessagesView({
     return { total: items.length, today, week };
   }, [items]);
 
-  const selected = filtered.find((it) => it.id === selId) || filtered[0] || null;
-  const reset = () => { setQuery(""); setBranch(""); setMtype(""); setRange(""); };
+  // ترتيب النتائج حسب اختيار الأدمن
+  const sorted = useMemo(() => {
+    const arr = [...filtered];
+    const time = (it: CmsItem) => { const d = new Date(v(it, "created_at")).getTime(); return isNaN(d) ? 0 : d; };
+    switch (sort) {
+      case "oldest": arr.sort((a, b) => time(a) - time(b)); break;
+      case "alpha": arr.sort((a, b) => v(a, "name").localeCompare(v(b, "name"), en ? "en" : "ar")); break;
+      case "unread": arr.sort((a, b) => (readIds.has(a.id) ? 1 : 0) - (readIds.has(b.id) ? 1 : 0) || time(b) - time(a)); break;
+      case "read": arr.sort((a, b) => (readIds.has(b.id) ? 1 : 0) - (readIds.has(a.id) ? 1 : 0) || time(b) - time(a)); break;
+      default: arr.sort((a, b) => time(b) - time(a)); // newest
+    }
+    return arr;
+  }, [filtered, sort, readIds, en]);
+
+  const selected = sorted.find((it) => it.id === selId) || sorted[0] || null;
+  const reset = () => { setQuery(""); setBranch(""); setMtype(""); setRange(""); setSort("newest"); };
   const copyPhone = (phone: string) => navigator.clipboard?.writeText(phone).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1500); });
   const removeSelected = async () => { if (!selected || !confirm(t("حذف هذه الرسالة نهائياً؟", "Delete this message permanently?"))) return; await onDelete(selected.id); setSelId(null); };
 
@@ -137,28 +175,30 @@ export default function ContactMessagesView({
         <p className="mt-1 text-sm text-ink-soft">{t("عرض وإدارة جميع رسائل التواصل الواردة من المستخدمين", "View and manage all incoming contact messages from users")}</p>
       </div>
 
-      {/* عدّادات */}
+      {/* عدّادات — قابلة للضغط للفلترة السريعة */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <Counter icon={I.inbox} value={counts.total} label={t("إجمالي الرسائل", "Total messages")} />
-        <Counter icon={I.chats} value={counts.week} label={t("آخر ٧ أيام", "Last 7 days")} />
-        <Counter icon={I.mail} value={counts.today} label={t("رسائل اليوم", "Today's messages")} />
+        <Counter icon={I.inbox} value={counts.total} label={t("إجمالي الرسائل", "Total messages")} active={range === ""} onClick={() => setRange("")} hint={t("عرض الكل", "Show all")} />
+        <Counter icon={I.chats} value={counts.week} label={t("آخر ٧ أيام", "Last 7 days")} active={range === "7"} onClick={() => setRange("7")} hint={t("فلترة", "Filter")} />
+        <Counter icon={I.mail} value={counts.today} label={t("رسائل اليوم", "Today's messages")} active={range === "today"} onClick={() => setRange("today")} hint={t("فلترة", "Filter")} />
       </div>
 
-      {/* شريط الفلاتر */}
+      {/* شريط الفلاتر والترتيب */}
       <div className="rounded-2xl border border-line bg-white p-3 shadow-sm">
         <div className="flex flex-wrap items-center gap-2.5">
+          {/* بحث فوري + زر عدسة قابل للضغط */}
           <div className="relative min-w-[220px] flex-1">
-            <span className="pointer-events-none absolute inset-y-0 start-3 flex items-center text-ink-soft">{I.search}</span>
-            <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t("ابحث في الرسائل…", "Search messages…")} className="w-full rounded-xl border border-line bg-surface/60 py-2.5 pe-3 ps-10 text-sm text-ink outline-none transition-colors placeholder:text-ink-soft focus:border-brand focus:bg-white focus:ring-2 focus:ring-brand/20" />
+            <input id="contact-search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t("ابحث في الرسائل…", "Search messages…")} className="w-full rounded-xl border border-line bg-surface/60 py-2.5 pe-12 ps-3 text-sm text-ink outline-none transition-colors placeholder:text-ink-soft focus:border-brand focus:bg-white focus:ring-2 focus:ring-brand/20" />
+            <button type="button" onClick={() => { const el = document.getElementById("contact-search"); el?.focus(); }} aria-label={t("بحث", "Search")} title={t("بحث", "Search")} className="absolute inset-y-1 end-1 flex w-10 items-center justify-center rounded-lg bg-[#1FA6A8] text-white transition-colors hover:bg-[#0F6C73]">{I.search}</button>
           </div>
-          {showFilters && (
-            <>
-              <div className="w-[150px]"><CustomSelect value={range} onChange={setRange} options={rangeOpts} placeholder={t("كل الوقت", "All time")} /></div>
-              <div className="w-[160px]"><CustomSelect value={mtype} onChange={setMtype} options={typeOpts} placeholder={t("كل الأنواع", "All types")} /></div>
-              <div className="w-[170px]"><CustomSelect value={branch} onChange={setBranch} options={branchOpts} placeholder={t("كل الفروع", "All branches")} /></div>
-            </>
-          )}
-          <button onClick={() => setShowFilters((s) => !s)} className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-white px-3.5 py-2.5 text-xs font-bold text-ink-soft transition-colors hover:bg-surface">{I.filter} {t("فلترة", "Filter")}</button>
+          {/* الفلاتر ظاهرة دائمًا */}
+          <div className="w-[150px]"><CustomSelect value={range} onChange={setRange} options={rangeOpts} placeholder={t("كل الوقت", "All time")} /></div>
+          <div className="w-[160px]"><CustomSelect value={mtype} onChange={setMtype} options={typeOpts} placeholder={t("كل الأنواع", "All types")} /></div>
+          <div className="w-[180px]"><CustomSelect value={branch} onChange={setBranch} options={branchOpts} placeholder={t("كل الفروع", "All branches")} /></div>
+          {/* ترتيب */}
+          <div className="flex items-center gap-1.5">
+            <span className="text-ink-soft">{I.sort}</span>
+            <div className="w-[170px]"><CustomSelect value={sort} onChange={setSort} options={sortOpts} placeholder={t("ترتيب", "Sort")} /></div>
+          </div>
           <button onClick={reset} className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-white px-3.5 py-2.5 text-xs font-bold text-ink-soft transition-colors hover:bg-surface">{I.reset} {t("إعادة تعيين", "Reset")}</button>
         </div>
       </div>
@@ -167,13 +207,14 @@ export default function ContactMessagesView({
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_340px]">
         {/* قائمة الرسائل (يسار على الديسكتوب، وأول عنصر على الموبايل) */}
         <div className="rounded-2xl border border-line bg-white shadow-sm lg:order-2">
-          <div className="border-b border-line px-4 py-3 text-sm font-extrabold text-ink">{t("الرسائل", "Messages")} ({filtered.length})</div>
-          {filtered.length === 0 ? (
+          <div className="border-b border-line px-4 py-3 text-sm font-extrabold text-ink">{t("الرسائل", "Messages")} ({sorted.length})</div>
+          {sorted.length === 0 ? (
             <p className="p-8 text-center text-sm text-ink-soft">{t("لا توجد رسائل مطابقة.", "No matching messages.")}</p>
           ) : (
             <div className="max-h-[64vh] overflow-auto">
-              {filtered.slice(0, visible).map((it) => {
+              {sorted.slice(0, visible).map((it) => {
                 const active = selected?.id === it.id;
+                const unread = !readIds.has(it.id);
                 const name = v(it, "name") || `#${it.id}`;
                 return (
                   <button
@@ -181,7 +222,10 @@ export default function ContactMessagesView({
                     onClick={() => setSelId(it.id)}
                     className={`flex w-full items-start gap-3 border-b border-line px-4 py-3 text-start transition-colors ${active ? "border-s-[3px] border-s-[#1FA6A8] bg-[#1FA6A8]/8" : "border-s-[3px] border-s-transparent hover:bg-surface/60"}`}
                   >
-                    <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-extrabold ${active ? "bg-[#1FA6A8] text-white" : "bg-[#1FA6A8]/12 text-[#0F6C73]"}`}>{name.charAt(0)}</span>
+                    <span className="relative shrink-0">
+                      <span className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-extrabold ${active ? "bg-[#1FA6A8] text-white" : "bg-[#1FA6A8]/12 text-[#0F6C73]"}`}>{name.charAt(0)}</span>
+                      {unread && <span className="absolute -end-0.5 -top-0.5 h-3 w-3 rounded-full border-2 border-white bg-[#1FA6A8]" title={t("غير مقروء", "Unread")} />}
+                    </span>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-2">
                         <p className="truncate font-bold text-ink">{name}</p>
@@ -192,7 +236,7 @@ export default function ContactMessagesView({
                   </button>
                 );
               })}
-              {visible < filtered.length && (
+              {visible < sorted.length && (
                 <button onClick={() => setVisible((n) => n + 10)} className="flex w-full items-center justify-center gap-1.5 py-3 text-xs font-bold text-[#0F6C73] transition-colors hover:bg-surface">{t("عرض المزيد", "Show more")} <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" d="M6 9l6 6 6-6" /></svg></button>
               )}
             </div>
@@ -251,15 +295,20 @@ export default function ContactMessagesView({
   );
 }
 
-function Counter({ icon, value, label }: { icon: React.ReactNode; value: number; label: string }) {
+function Counter({ icon, value, label, onClick, active, hint }: { icon: React.ReactNode; value: number; label: string; onClick?: () => void; active?: boolean; hint?: string }) {
   return (
-    <div className="flex items-center gap-3 rounded-2xl border border-line bg-white px-4 py-3 shadow-sm">
-      <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#1FA6A8]/10 text-[#0F6C73]">{icon}</span>
-      <div>
+    <button
+      type="button"
+      onClick={onClick}
+      className={`group flex items-center gap-3 rounded-2xl border bg-white px-4 py-3 text-start shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md ${active ? "border-[#1FA6A8] ring-1 ring-[#1FA6A8]/40" : "border-line hover:border-[#1FA6A8]/40"}`}
+    >
+      <span className={`flex h-11 w-11 items-center justify-center rounded-xl ${active ? "bg-[#1FA6A8] text-white" : "bg-[#1FA6A8]/10 text-[#0F6C73]"}`}>{icon}</span>
+      <div className="min-w-0 flex-1">
         <p className="text-xl font-extrabold text-ink">{value}</p>
         <p className="text-xs text-ink-soft">{label}</p>
       </div>
-    </div>
+      {hint && <span className={`shrink-0 text-[10px] font-semibold ${active ? "text-[#1FA6A8]" : "text-ink-soft/60 group-hover:text-[#1FA6A8]"}`}>{hint}</span>}
+    </button>
   );
 }
 

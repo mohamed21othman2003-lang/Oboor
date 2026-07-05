@@ -241,6 +241,17 @@ export function branchSelectOptions(source: Branch[]): { value: string; label: s
   return order.flatMap((g) => byRegion[g].map((b) => ({ value: b.name, label: b.name, group: g })));
 }
 
+// خيارات فلتر الفرع في الـCMS: كل الفروع الـ43 القياسية (مجمّعة بالمنطقة)
+// + أي قيمة فرع موجودة في البيانات وغير مدرجة (لتبقى بيانات قديمة قابلة للتصفية).
+export function branchFilterOptions(existing: string[], en: boolean): { value: string; label: string; group: string }[] {
+  const canonical = branchSelectOptions(en ? ALL_BRANCHES_EN : ALL_BRANCHES);
+  const known = new Set(canonical.map((o) => o.value));
+  const extra = [...new Set(existing.filter(Boolean))]
+    .filter((v) => !known.has(v))
+    .map((v) => ({ value: v, label: v, group: en ? "Other" : "أخرى" }));
+  return [...canonical, ...extra];
+}
+
 export function mapRegionsFrom(source: Branch[]): { name: string; count: number; color: string }[] {
   const order: string[] = [];
   const counts: Record<string, number> = {};
