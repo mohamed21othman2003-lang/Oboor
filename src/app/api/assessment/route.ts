@@ -9,12 +9,14 @@ export async function POST(req: Request) {
     if (!parentName || !phone || !String(body?.branch || "").trim()) {
       return NextResponse.json({ ok: false, error: "اسم ولي الأمر ورقم الجوال والفرع مطلوبة" }, { status: 400 });
     }
-    if (await forwardJson("assessment", {
+    const outcome = await forwardJson("assessment", {
       assessment: body.assessment || "", assessment_slug: body.assessmentSlug || "",
       level: body.level || "", score: body.score || 0, answers: body.answers || [],
       parent_name: parentName, phone, email: body.email || "", child_name: body.childName || "",
       age: body.age || "", gender: body.gender || "", city: body.city || "", branch: body.branch || "",
-    })) return NextResponse.json({ ok: true });
+    });
+    if (outcome === "duplicate") return NextResponse.json({ ok: false, duplicate: true, error: "تم إرسال هذا الطلب مسبقاً بالفعل." }, { status: 409 });
+    if (outcome === "ok") return NextResponse.json({ ok: true });
     const entry = await addSubmission("assessment", body);
     return NextResponse.json({ ok: true, id: entry.id });
   } catch {

@@ -10,10 +10,12 @@ export async function POST(req: Request) {
     if (!data.name || !data.phone || !String(data.branch || "").trim()) {
       return NextResponse.json({ ok: false, error: "الاسم ورقم الجوال والفرع مطلوبة" }, { status: 400 });
     }
-    if (await forwardJson("contact", {
+    const outcome = await forwardJson("contact", {
       name: data.name, phone: data.phone, email: data.email || "",
       branch: data.branch || "", type: data.type || "", message: data.message || "",
-    })) return NextResponse.json({ ok: true });
+    });
+    if (outcome === "duplicate") return NextResponse.json({ ok: false, duplicate: true, error: "تم إرسال هذا الطلب مسبقاً بالفعل." }, { status: 409 });
+    if (outcome === "ok") return NextResponse.json({ ok: true });
     const entry = await addSubmission("contact", data);
     return NextResponse.json({ ok: true, id: entry.id });
   } catch {

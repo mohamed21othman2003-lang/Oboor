@@ -40,7 +40,9 @@ export async function POST(req: Request) {
         fd.set("cv", cv, cv.name);
       }
       // إن فشل التوجيه (باك إند بارد/معطّل) نسقط لتخزين الطلب فلا يضيع
-      if (await forwardForm("career", fd)) return NextResponse.json({ ok: true });
+      const outcome = await forwardForm("career", fd);
+      if (outcome === "duplicate") return NextResponse.json({ ok: false, duplicate: true, error: "تم إرسال هذا الطلب مسبقاً بالفعل." }, { status: 409 });
+      if (outcome === "ok") return NextResponse.json({ ok: true });
     }
 
     let cvId = "";

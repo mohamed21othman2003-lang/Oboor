@@ -41,6 +41,7 @@ export default function ContactForm({ locale, branches }: { locale: Locale; bran
     try {
       const res = await fetch("/api/contact", { method: "POST", body: fd });
       const data = await res.json();
+      if (data?.duplicate) { setError(pick(locale, "تم إرسال هذا الطلب مسبقاً بالفعل.", "This request has already been submitted.")); return; }
       if (!res.ok || !data.ok) throw new Error(data.error || "");
       setSent(true);
     } catch (err) {

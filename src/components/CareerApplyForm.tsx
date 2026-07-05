@@ -84,10 +84,12 @@ export default function CareerApplyForm({ jobTitle, locale, branchOptions }: { j
         dj.set("about", String(fd.get("about") || ""));
         dj.set("cv", cv, cv.name);
         const res = await fetch(`${base}/career/`, { method: "POST", body: dj });
+        if (res.status === 409) { setError(pick(locale, "تم إرسال هذا الطلب مسبقاً بالفعل.", "This request has already been submitted.")); return; }
         if (!res.ok) throw new Error("");
       } else {
         const res = await fetch("/api/career", { method: "POST", body: fd });
         const data = await res.json();
+        if (data?.duplicate) { setError(pick(locale, "تم إرسال هذا الطلب مسبقاً بالفعل.", "This request has already been submitted.")); return; }
         if (!res.ok || !data.ok) throw new Error(data.error || "");
       }
       setSent(true);

@@ -19,11 +19,16 @@ async function previewParam(): Promise<string> {
   }
 }
 
-// توجيه الطلب لـ Django. يرجّع true عند النجاح، و false عند أي فشل
-// (باك إند غير مفعّل، خطأ شبكة، timeout، أو رد غير 2xx) — بدون رمي استثناء،
-// حتى يسقط مسار الاستدعاء تلقائيًا لتخزين الطلب في قاعدة البيانات فلا يضيع.
-export async function forwardJson(path: string, payload: Record<string, unknown>): Promise<boolean> {
-  if (!DJANGO_API_URL) return false;
+// نتيجة توجيه الطلب لـ Django:
+//  "ok"        → نجح الحفظ (2xx)
+//  "duplicate" → طلب مكرّر رفضه الباك إند (409) — لا نُخزّن نسخة ثانية
+//  "failed"    → باك إند غير مفعّل/معطّل/بطيء أو رد غير متوقّع → يسقط لتخزين احتياطي فلا يضيع
+export type ForwardOutcome = "ok" | "duplicate" | "failed";
+
+// توجيه الطلب لـ Django بدون رمي استثناء، حتى يقرّر مسار الاستدعاء ماذا يفعل
+// حسب النتيجة (نجاح / تكرار / فشل يستوجب التخزين الاحتياطي).
+export async function forwardJson(path: string, payload: Record<string, unknown>): Promise<ForwardOutcome> {
+  if (!DJANGO_API_URL) return "failed";
   try {
     const res = await fetch(`${DJANGO_API_URL}/${path}/`, {
       method: "POST",
@@ -31,23 +36,27 @@ export async function forwardJson(path: string, payload: Record<string, unknown>
       body: JSON.stringify(payload),
       signal: AbortSignal.timeout(8000),
     });
-    return res.ok;
+    if (res.ok) return "ok";
+    if (res.status === 409) return "duplicate";
+    return "failed";
   } catch {
-    return false;
+    return "failed";
   }
 }
 
-export async function forwardForm(path: string, form: FormData): Promise<boolean> {
-  if (!DJANGO_API_URL) return false;
+export async function forwardForm(path: string, form: FormData): Promise<ForwardOutcome> {
+  if (!DJANGO_API_URL) return "failed";
   try {
     const res = await fetch(`${DJANGO_API_URL}/${path}/`, {
       method: "POST",
       body: form,
       signal: AbortSignal.timeout(15000),
     });
-    return res.ok;
+    if (res.ok) return "ok";
+    if (res.status === 409) return "duplicate";
+    return "failed";
   } catch {
-    return false;
+    return "failed";
   }
 }
 

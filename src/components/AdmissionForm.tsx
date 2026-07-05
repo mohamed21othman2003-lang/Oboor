@@ -95,6 +95,7 @@ export default function AdmissionForm({ locale, branchOptions }: { locale: Local
     try {
       const res = await fetch("/api/admission", { method: "POST", body: fd });
       const data = await res.json();
+      if (data?.duplicate) { setFormError(pick(locale, "تم إرسال هذا الطلب مسبقاً بالفعل.", "This request has already been submitted.")); return; }
       if (!res.ok || !data.ok) throw new Error(data.error || "");
       setSent(true);
     } catch {

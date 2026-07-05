@@ -12,11 +12,13 @@ export async function POST(req: Request) {
     if (missing.length) {
       return NextResponse.json({ ok: false, error: "الرجاء تعبئة جميع الحقول الإلزامية (بما فيها الفرع والمدينة)." }, { status: 400 });
     }
-    if (await forwardJson("admission", {
+    const outcome = await forwardJson("admission", {
       child_name: data.childName, child_age: data.childAge || "", gender: data.gender || "",
       city: data.city || "", branch: data.branch || "", parent_name: data.parentName,
       phone: data.phone, email: data.email || "", case_type: data.caseType || "", notes: data.notes || "",
-    })) return NextResponse.json({ ok: true });
+    });
+    if (outcome === "duplicate") return NextResponse.json({ ok: false, duplicate: true, error: "تم إرسال هذا الطلب مسبقاً بالفعل." }, { status: 409 });
+    if (outcome === "ok") return NextResponse.json({ ok: true });
     const entry = await addSubmission("admission", data);
     return NextResponse.json({ ok: true, id: entry.id });
   } catch {
