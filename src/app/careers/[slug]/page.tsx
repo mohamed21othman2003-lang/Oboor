@@ -3,6 +3,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { JOBS, getJob } from "@/lib/careersData";
 import CareerApplyForm from "@/components/CareerApplyForm";
+import { loadBranches } from "@/lib/server/branches";
+import { branchSelectOptions } from "@/lib/branchesData";
 import { getLocale } from "@/i18n/locale";
 import { pick, type Locale } from "@/i18n/config";
 import { fetchJobs } from "../page";
@@ -37,6 +39,7 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
   const locale = await getLocale();
   const job = await loadJob(slug, locale);
   if (!job) notFound();
+  const branches = await loadBranches(locale);
 
   const details = [
     { icon: <CalendarIcon />, label: pick(locale, "تاريخ طرح الوظيفة", "Posted date"), value: job.date },
@@ -150,7 +153,7 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
 
       {/* Apply form */}
       <div id="apply">
-        <CareerApplyForm jobTitle={job.title} locale={locale} />
+        <CareerApplyForm jobTitle={job.title} locale={locale} branchOptions={branchSelectOptions(branches)} />
       </div>
     </>
   );

@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { CITIES, CITIES_EN } from "@/lib/careersData";
 import { pick, type Locale } from "@/i18n/config";
 import { validateName, validatePhone, stripDigits, digitsOnly } from "@/lib/validate";
-import CustomSelect from "@/components/ui/Select";
+import CustomSelect, { type SelectOption } from "@/components/ui/Select";
 import LimitedTextarea from "@/components/ui/LimitedTextarea";
 
 const OTHER = "__other__";
@@ -13,7 +13,7 @@ const OTHER = "__other__";
 const SPECIALTIES = ["أخصائي نطق وتخاطب", "علاج وظيفي", "علاج طبيعي", "تحليل سلوك تطبيقي (ABA)", "أخصائي نفسي", "تربية خاصة", "تمريض", "إداري / منسّق", "طالب / خريّج جديد"];
 const SPECIALTIES_EN = ["Speech & Language Therapist", "Occupational Therapist", "Physical Therapist", "ABA Behavior Analyst", "Psychologist", "Special Education", "Nursing", "Administrative / Coordinator", "Student / New Graduate"];
 
-export default function CareerApplyForm({ jobTitle, locale }: { jobTitle: string; locale: Locale }) {
+export default function CareerApplyForm({ jobTitle, locale, branchOptions }: { jobTitle: string; locale: Locale; branchOptions?: (string | SelectOption)[] }) {
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -22,6 +22,7 @@ export default function CareerApplyForm({ jobTitle, locale }: { jobTitle: string
   const [roleOther, setRoleOther] = useState("");
   const [city, setCity] = useState("");
   const [cityOther, setCityOther] = useState("");
+  const [branch, setBranch] = useState("");
   const successRef = useRef<HTMLDivElement>(null);
   useEffect(() => { if (sent) successRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }); }, [sent]);
 
@@ -53,6 +54,8 @@ export default function CareerApplyForm({ jobTitle, locale }: { jobTitle: string
     const finalCity = city === OTHER ? cityOther.trim() : city;
     if (!finalCity) { setError(pick(locale, "الرجاء اختيار أو إدخال المدينة.", "Please select or enter your city.")); return; }
     fd.set("city", finalCity);
+    if (!branch.trim()) { setError(pick(locale, "الرجاء اختيار الفرع.", "Please choose a branch.")); return; }
+    fd.set("branch", branch);
     const cv = fd.get("cv");
     // السيرة الذاتية إجبارية فعلياً
     if (!(cv instanceof File) || cv.size === 0) {
@@ -75,6 +78,7 @@ export default function CareerApplyForm({ jobTitle, locale }: { jobTitle: string
         dj.set("phone", String(fd.get("phone") || ""));
         dj.set("email", String(fd.get("email") || ""));
         dj.set("city", String(fd.get("city") || ""));
+        dj.set("branch", branch);
         dj.set("current_role", finalRole);
         dj.set("experience", String(fd.get("experience") || ""));
         dj.set("about", String(fd.get("about") || ""));
@@ -96,6 +100,7 @@ export default function CareerApplyForm({ jobTitle, locale }: { jobTitle: string
 
   const cityList = locale === "en" ? CITIES_EN : CITIES;
   const cities = cityList.filter((c) => c !== "الكل" && c !== "All");
+  const branchList = branchOptions?.length ? branchOptions : [];
   const experienceOptions = locale === "en"
     ? ["Less than a year", "1 - 2 years", "3 - 5 years", "More than 5 years"]
     : ["أقل من سنة", "سنة - سنتان", "٣ - ٥ سنوات", "أكثر من ٥ سنوات"];
@@ -164,6 +169,17 @@ export default function CareerApplyForm({ jobTitle, locale }: { jobTitle: string
                     className="mt-2 w-full rounded-xl border border-line bg-white px-3 py-2.5 text-start text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-brand/30"
                   />
                 )}
+              </div>
+              <div>
+                <Label required>{pick(locale, "الفرع المطلوب", "Preferred Branch")}</Label>
+                <div className="mt-1.5">
+                  <CustomSelect
+                    value={branch}
+                    onChange={setBranch}
+                    placeholder={pick(locale, "اختر الفرع…", "Select branch…")}
+                    options={branchList}
+                  />
+                </div>
               </div>
               <div>
                 <Label required>{pick(locale, "تخصصك / مجالك الحالي", "Your current field / specialty")}</Label>

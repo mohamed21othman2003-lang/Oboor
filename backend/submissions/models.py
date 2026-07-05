@@ -55,6 +55,7 @@ class AssessmentResult(models.Model):
     age = models.CharField("العمر", max_length=40, blank=True)
     gender = models.CharField("الجنس", max_length=20, blank=True)
     city = models.CharField("المدينة", max_length=80, blank=True)
+    branch = models.CharField("الفرع", max_length=120, blank=True)
     created_at = models.DateTimeField("التاريخ", auto_now_add=True)
 
     class Meta:
@@ -72,6 +73,7 @@ class JobApplication(models.Model):
     phone = models.CharField("الجوال", max_length=40)
     email = models.EmailField("البريد", blank=True)
     city = models.CharField("المدينة", max_length=80, blank=True)
+    branch = models.CharField("الفرع", max_length=120, blank=True)
     current_role = models.CharField("المسمى الحالي", max_length=200, blank=True)
     experience = models.CharField("الخبرة", max_length=80, blank=True)
     about = models.TextField("نبذة", blank=True)

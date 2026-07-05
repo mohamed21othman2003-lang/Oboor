@@ -26,14 +26,14 @@ class AssessmentResultSerializer(serializers.ModelSerializer):
     class Meta:
         model = AssessmentResult
         fields = ["id", "assessment", "assessment_slug", "level", "score", "answers",
-                  "parent_name", "phone", "email", "child_name", "age", "gender", "city", "created_at"]
+                  "parent_name", "phone", "email", "child_name", "age", "gender", "city", "branch", "created_at"]
         read_only_fields = ["id", "created_at"]
 
 
 class JobApplicationSerializer(serializers.ModelSerializer):
     class Meta:
         model = JobApplication
-        fields = ["id", "job", "name", "phone", "email", "city", "current_role",
+        fields = ["id", "job", "name", "phone", "email", "city", "branch", "current_role",
                   "experience", "about", "cv", "created_at"]
         read_only_fields = ["id", "created_at"]
 

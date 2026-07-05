@@ -3,6 +3,7 @@
 import { Fragment, useMemo, useState } from "react";
 import Link from "next/link";
 import CustomSelect from "@/components/ui/Select";
+import { branchFilterOptions } from "@/lib/branchesData";
 import { type CmsItem } from "@/lib/cms/api";
 import { exportSheet } from "@/lib/cms/exportSheet";
 import { useCmsLang } from "@/lib/cms/i18n";
@@ -78,6 +79,7 @@ export default function AssessmentResultsTable({
   const [atype, setAtype] = useState("");
   const [sev, setSev] = useState("");
   const [range, setRange] = useState("");
+  const [branch, setBranch] = useState("");
   const [perPage, setPerPage] = useState(10);
   const [page, setPage] = useState(1);
   const [open, setOpen] = useState<number | null>(null);
@@ -86,6 +88,7 @@ export default function AssessmentResultsTable({
   const typeOpts = useMemo(() => [{ value: "", label: t("كل الأنواع", "All Types") }, ...uniq(items.map((it) => v(it, "assessment"))).map((tp) => ({ value: tp, label: tp }))], [items, en]);
   const sevOpts = useMemo(() => [{ value: "", label: t("كل المستويات", "All Levels") }, ...uniq(items.map((it) => v(it, "level"))).map((l) => ({ value: l, label: levelInfo(l, en).label }))], [items, en]);
   const rangeOpts = [{ value: "", label: t("كل الوقت", "All Time") }, { value: "today", label: t("اليوم", "Today") }, { value: "7", label: t("آخر ٧ أيام", "Last 7 Days") }, { value: "30", label: t("آخر ٣٠ يوم", "Last 30 Days") }];
+  const branchOpts = useMemo(() => [{ value: "", label: t("كل الفروع", "All Branches") }, ...branchFilterOptions(items.map((it) => v(it, "branch")), en)], [items, en]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -94,6 +97,7 @@ export default function AssessmentResultsTable({
       if (q && !`${v(it, "child_name")} ${v(it, "parent_name")}`.toLowerCase().includes(q)) return false;
       if (atype && v(it, "assessment") !== atype) return false;
       if (sev && v(it, "level") !== sev) return false;
+      if (branch && v(it, "branch") !== branch) return false;
       if (range) {
         const c = new Date(v(it, "created_at"));
         if (isNaN(c.getTime())) return false;
@@ -103,7 +107,7 @@ export default function AssessmentResultsTable({
       }
       return true;
     });
-  }, [items, query, atype, sev, range]);
+  }, [items, query, atype, sev, range, branch]);
 
   const total = filtered.length;
   const pages = Math.max(1, Math.ceil(total / perPage));
@@ -111,7 +115,7 @@ export default function AssessmentResultsTable({
   const startIdx = (cur - 1) * perPage;
   const pageItems = filtered.slice(startIdx, startIdx + perPage);
 
-  const resetFilters = () => { setQuery(""); setAtype(""); setSev(""); setRange(""); setPage(1); };
+  const resetFilters = () => { setQuery(""); setAtype(""); setSev(""); setRange(""); setBranch(""); setPage(1); };
   const onFilter = (fn: () => void) => { fn(); setPage(1); };
   const del = async (id: number) => { setMenu(null); if (!confirm(t("حذف هذه النتيجة نهائياً؟", "Delete this result permanently?"))) return; await onDelete(id); };
 
@@ -120,7 +124,7 @@ export default function AssessmentResultsTable({
     const cols: [string, (it: CmsItem) => string][] = [
       [t("الطفل", "Child"), (it) => v(it, "child_name")], [t("ولي الأمر", "Parent"), (it) => v(it, "parent_name")], [t("الجوال", "Phone"), (it) => v(it, "phone")],
       [t("نوع التقييم", "Assessment Type"), (it) => v(it, "assessment")], [t("العمر", "Age"), (it) => v(it, "age")], [t("مستوى الحالة", "Severity Level"), (it) => levelInfo(v(it, "level"), en).label],
-      [t("المدينة", "City"), (it) => v(it, "city")], [dateHeader, (it) => v(it, "created_at")],
+      [t("المدينة", "City"), (it) => v(it, "city")], [t("الفرع", "Branch"), (it) => v(it, "branch")], [dateHeader, (it) => v(it, "created_at")],
     ];
     await exportSheet({
       filename: "assessment-results",
@@ -153,6 +157,7 @@ export default function AssessmentResultsTable({
           <div className="w-[150px]"><CustomSelect value={range} onChange={(x) => onFilter(() => setRange(x))} options={rangeOpts} placeholder={t("كل الوقت", "All Time")} /></div>
           <div className="w-[160px]"><CustomSelect value={sev} onChange={(x) => onFilter(() => setSev(x))} options={sevOpts} placeholder={t("كل المستويات", "All Levels")} /></div>
           <div className="w-[170px]"><CustomSelect value={atype} onChange={(x) => onFilter(() => setAtype(x))} options={typeOpts} placeholder={t("كل الأنواع", "All Types")} /></div>
+          <div className="w-[180px]"><CustomSelect value={branch} onChange={(x) => onFilter(() => setBranch(x))} options={branchOpts} placeholder={t("كل الفروع", "All Branches")} /></div>
           <button onClick={resetFilters} className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-white px-3.5 py-2.5 text-xs font-bold text-ink-soft transition-colors hover:bg-surface">{I.reset} {t("إعادة تعيين", "Reset")}</button>
         </div>
       </div>
@@ -251,7 +256,8 @@ export default function AssessmentResultsTable({
                                 <Info icon={I.user} label={t("ولي الأمر", "Parent")} value={v(it, "parent_name") || "—"} />
                                 <Info icon={I.phone} label={t("الجوال", "Phone")} value={phone || "—"} ltr />
                                 <Info icon={I.mail} label={t("البريد الإلكتروني", "Email")} value={email || "—"} ltr />
-                                <Info icon={I.pin} label={t("المدينة", "City")} value={v(it, "city") || "—"} last />
+                                <Info icon={I.pin} label={t("المدينة", "City")} value={v(it, "city") || "—"} />
+                                <Info icon={I.pin} label={t("الفرع", "Branch")} value={v(it, "branch") || "—"} last />
                               </div>
                               {/* أسئلة التقييم */}
                               <div className="rounded-xl border border-line bg-white p-4">

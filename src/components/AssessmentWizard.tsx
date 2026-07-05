@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { validateName, validatePhone, stripDigits, digitsOnly } from "@/lib/validate";
-import CustomSelect from "@/components/ui/Select";
+import CustomSelect, { type SelectOption } from "@/components/ui/Select";
 import { getAssessments, getQuestionsFor, getAnswerOptions, type Assessment } from "@/lib/assessmentData";
 import { pick, type Locale } from "@/i18n/config";
 import { waUrl } from "@/lib/site";
@@ -19,6 +19,7 @@ export default function AssessmentWizard({
   prelimQuestions,
   answerOptions,
   whatsapp,
+  branchOptions,
 }: {
   locale: Locale;
   assessments?: Assessment[];
@@ -26,6 +27,7 @@ export default function AssessmentWizard({
   prelimQuestions?: string[];
   answerOptions?: string[];
   whatsapp?: string;
+  branchOptions?: (string | SelectOption)[];
 }) {
   const whatsappHref = whatsapp || waUrl();
   const STEPS = [
@@ -41,6 +43,7 @@ export default function AssessmentWizard({
   const [step, setStep] = useState(0);
   const [city, setCity] = useState("");
   const [cityOther, setCityOther] = useState("");
+  const [branch, setBranch] = useState("");
   const rootRef = useRef<HTMLDivElement>(null);
   // عند الانتقال بين خطوات المعالج (خصوصاً عرض النتيجة) مرّر لأعلى المعالج
   useEffect(() => { if (step > 0) rootRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }); }, [step]);
@@ -61,6 +64,7 @@ export default function AssessmentWizard({
     if (nameErr) { setError(nameErr); return; }
     const phoneErr = validatePhone(String(fd.get("phone") || ""), locale);
     if (phoneErr) { setError(phoneErr); return; }
+    if (!branch.trim()) { setError(pick(locale, "الرجاء اختيار الفرع.", "Please choose a branch.")); return; }
     setError("");
     const payload = {
       assessment: active?.title,
@@ -75,6 +79,7 @@ export default function AssessmentWizard({
       age: String(fd.get("age") || ""),
       gender: String(fd.get("gender") || ""),
       city: city === CITY_OTHER ? cityOther.trim() : city,
+      branch,
     };
     setStep(3); // النتيجة تظهر فورًا
     fetch("/api/assessment", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) }).catch(() => {});
@@ -198,6 +203,17 @@ export default function AssessmentWizard({
                   className="mt-2 w-full rounded-xl border border-line bg-white px-3 py-2.5 text-start text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-brand/30"
                 />
               )}
+            </div>
+            <div>
+              <label className="block text-start text-sm font-semibold text-ink">{pick(locale, "الفرع المطلوب", "Preferred Branch")} <span className="text-red-500">*</span></label>
+              <div className="mt-1.5">
+                <CustomSelect
+                  value={branch}
+                  onChange={setBranch}
+                  placeholder={pick(locale, "اختر الفرع…", "Select branch…")}
+                  options={branchOptions?.length ? branchOptions : []}
+                />
+              </div>
             </div>
           </div>
           {error && <p className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-center text-sm font-medium text-red-600">{error}</p>}

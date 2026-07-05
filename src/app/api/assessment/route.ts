@@ -6,14 +6,14 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     const { parentName, phone } = body ?? {};
-    if (!parentName || !phone) {
-      return NextResponse.json({ ok: false, error: "اسم ولي الأمر ورقم الجوال مطلوبان" }, { status: 400 });
+    if (!parentName || !phone || !String(body?.branch || "").trim()) {
+      return NextResponse.json({ ok: false, error: "اسم ولي الأمر ورقم الجوال والفرع مطلوبة" }, { status: 400 });
     }
     if (await forwardJson("assessment", {
       assessment: body.assessment || "", assessment_slug: body.assessmentSlug || "",
       level: body.level || "", score: body.score || 0, answers: body.answers || [],
       parent_name: parentName, phone, email: body.email || "", child_name: body.childName || "",
-      age: body.age || "", gender: body.gender || "", city: body.city || "",
+      age: body.age || "", gender: body.gender || "", city: body.city || "", branch: body.branch || "",
     })) return NextResponse.json({ ok: true });
     const entry = await addSubmission("assessment", body);
     return NextResponse.json({ ok: true, id: entry.id });
