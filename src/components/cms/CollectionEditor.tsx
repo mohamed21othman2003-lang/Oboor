@@ -1409,10 +1409,17 @@ function ImageInput({ f, value, pathFallback, type, id, isNew, onUploaded, onCha
   const [err, setErr] = useState("");
   const [localPreview, setLocalPreview] = useState("");
   const [pending, setPending] = useState<File | null>(null); // الملف المختار قبل المعاينة/الاعتماد
+  const [zoom, setZoom] = useState(false); // معاينة الصورة بحجم كامل عند الضغط عليها
+  // كاسر كاش: التخزين قد يعيد استخدام نفس اسم/مسار الملف عند التغيير، فالمتصفح
+  // يعرض الصورة القديمة المخزّنة. نضيف بصمة زمنية تتغيّر عند كل فتح وبعد كل رفع
+  // حتى تُظهر لوحة التحكّم الصورة الحالية فعلاً لا نسخة قديمة من الكاش.
+  const [bust, setBust] = useState(() => Date.now());
 
   // أولوية العرض: معاينة فورية → ملف مرفوع → الصورة الحالية على الموقع (المسار)
   const uploaded = typeof value === "string" ? value : "";
-  const current = resolveSrc(uploaded || pathFallback);
+  const resolved = resolveSrc(uploaded || pathFallback);
+  // نضيف كاسر الكاش لروابط الخادم فقط (لا نلمس blob/data الخاصة بالمعاينة الفورية)
+  const current = resolved && /^(https?:|\/)/.test(resolved) ? `${resolved}${resolved.includes("?") ? "&" : "?"}v=${bust}` : resolved;
   const src = localPreview || current;
 
   // عند اختيار ملف: نفتح المعاينة بدل الرفع المباشر
@@ -1440,6 +1447,7 @@ function ImageInput({ f, value, pathFallback, type, id, isNew, onUploaded, onCha
         const saved = await uploadField(type, id, f.name, file);
         onUploaded(saved);
       }
+      setBust(Date.now()); // اجعل رابط الخادم طازجاً بعد الرفع (لو أعاد التخزين نفس المسار)
     } catch (e) {
       setErr(e instanceof Error ? e.message : t("تعذّر الرفع.", "Could not upload."));
       setLocalPreview("");
@@ -1454,7 +1462,12 @@ function ImageInput({ f, value, pathFallback, type, id, isNew, onUploaded, onCha
       <div className="flex items-center gap-4">
         {src ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={src} alt="" className="h-24 w-24 rounded-xl object-cover ring-1 ring-line" />
+          <button type="button" onClick={() => setZoom(true)} title={t("اضغط لعرض الصورة", "Click to view")} className="group relative h-24 w-24 shrink-0 overflow-hidden rounded-xl ring-1 ring-line">
+            <img src={src} alt="" className="h-full w-full object-cover" />
+            <span className="absolute inset-0 flex items-center justify-center bg-black/0 text-white opacity-0 transition-all group-hover:bg-black/35 group-hover:opacity-100">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3M11 8v6M8 11h6" /></svg>
+            </span>
+          </button>
         ) : (
           <div className="flex h-24 w-24 items-center justify-center rounded-xl bg-surface text-ink-soft ring-1 ring-dashed ring-line">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" /></svg>
@@ -1471,6 +1484,15 @@ function ImageInput({ f, value, pathFallback, type, id, isNew, onUploaded, onCha
       {err && <p className="mt-1 text-xs text-red-600">{err}</p>}
       <Help text={f.help} />
       {pending && <ImageCropModal file={pending} onCancel={() => setPending(null)} onConfirm={doUpload} />}
+      {zoom && src && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/80 p-4 sm:p-8" onClick={() => setZoom(false)}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={src} alt="" className="max-h-[90vh] max-w-[92vw] rounded-xl object-contain shadow-2xl" onClick={(e) => e.stopPropagation()} />
+          <button type="button" onClick={() => setZoom(false)} aria-label={t("إغلاق", "Close")} className="absolute end-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur transition-colors hover:bg-white/30">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
+          </button>
+        </div>
+      )}
     </div>
   );
 }

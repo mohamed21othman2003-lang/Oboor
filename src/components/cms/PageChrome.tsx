@@ -293,6 +293,10 @@ export default function PageChrome({ page }: { page: string }) {
   const [addingBlock, setAddingBlock] = useState<string | null>(null);
   const [pendingImg, setPendingImg] = useState<{ it: CmsItem; file: File } | null>(null);
   const [err, setErr] = useState("");
+  const [zoom, setZoom] = useState(""); // رابط الصورة المعروضة بالحجم الكامل
+  // كاسر كاش: التخزين قد يعيد استخدام نفس مسار الملف عند التغيير فيعرض المتصفح
+  // النسخة القديمة. بصمة تتغيّر عند الفتح وبعد كل رفع تضمن ظهور الصورة الحالية.
+  const [bust, setBust] = useState(() => Date.now());
 
   useEffect(() => {
     listCollection("sections")
@@ -337,6 +341,7 @@ export default function PageChrome({ page }: { page: string }) {
     try {
       const saved = await uploadField("sections", it.id, "image_file", file) as CmsItem;
       setItems((prev) => prev.map((x) => (x.id === it.id ? saved : x)));
+      setBust(Date.now()); // اعرض الصورة الجديدة فوراً حتى لو أعاد التخزين نفس المسار
       setOkId(it.id);
     } catch (e) { setErr(e instanceof Error ? e.message : t("تعذّر رفع الصورة.", "Could not upload the image.")); }
     finally { setSavingId(null); }
@@ -433,7 +438,8 @@ export default function PageChrome({ page }: { page: string }) {
                   const hasImage = String(it.image ?? "").trim() !== "" || Boolean(it.image_file);
                   const hasTitle = String(it.title_ar ?? "").trim() !== "" || String(it.title_en ?? "").trim() !== "" || ("title_ar" in (edits[it.id] || {}));
                   const showTitle = hasTitle || !hasImage; // العناصر المخصّصة للصورة فقط لا تعرض حقل العنوان
-                  const imgSrc = resolveSrc(String(it.image ?? ""));
+                  const imgResolved = resolveSrc(String(it.image ?? ""));
+                  const imgSrc = imgResolved && /^(https?:|\/)/.test(imgResolved) ? `${imgResolved}${imgResolved.includes("?") ? "&" : "?"}v=${bust}` : imgResolved;
                   return (
                     <div key={it.id} className="rounded-xl border border-line bg-surface/40 p-3">
                       <p className="mb-2 text-xs font-bold text-ink">{(en ? ITEM_LABELS_EN[key] : ITEM_LABELS[key]) || ITEM_LABELS[key] || String(it.title_ar || it.key || "")}</p>
@@ -472,8 +478,13 @@ export default function PageChrome({ page }: { page: string }) {
                             <p className="mb-1 text-xs font-semibold text-ink-soft">{t("الصورة", "Image")}</p>
                             <div className="flex items-center gap-3">
                               {imgSrc && (
-                                // eslint-disable-next-line @next/next/no-img-element
-                                <img src={imgSrc} alt="" className="h-16 w-24 shrink-0 rounded-lg object-cover ring-1 ring-line" />
+                                <button type="button" onClick={() => setZoom(imgSrc)} title={t("اضغط لعرض الصورة", "Click to view")} className="group relative h-16 w-24 shrink-0 overflow-hidden rounded-lg ring-1 ring-line">
+                                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                                  <img src={imgSrc} alt="" className="h-full w-full object-cover" />
+                                  <span className="absolute inset-0 flex items-center justify-center text-white opacity-0 transition-all group-hover:bg-black/35 group-hover:opacity-100">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3M11 8v6M8 11h6" /></svg>
+                                  </span>
+                                </button>
                               )}
                               <label className="cursor-pointer rounded-lg bg-brand/10 px-3 py-2 text-xs font-semibold text-brand hover:bg-brand hover:text-white">
                                 {t("تغيير الصورة", "Change image")}
@@ -509,6 +520,15 @@ export default function PageChrome({ page }: { page: string }) {
         </div>
       )}
       {pendingImg && <ImageCropModal file={pendingImg.file} onCancel={() => setPendingImg(null)} onConfirm={(out) => onImage(pendingImg.it, out)} />}
+      {zoom && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/80 p-4 sm:p-8" onClick={() => setZoom("")}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={zoom} alt="" className="max-h-[90vh] max-w-[92vw] rounded-xl object-contain shadow-2xl" onClick={(e) => e.stopPropagation()} />
+          <button type="button" onClick={() => setZoom("")} aria-label={t("إغلاق", "Close")} className="absolute end-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur transition-colors hover:bg-white/30">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
+          </button>
+        </div>
+      )}
     </div>
   );
 }
