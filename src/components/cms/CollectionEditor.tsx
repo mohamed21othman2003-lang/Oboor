@@ -30,6 +30,7 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
   const [hasDefault, setHasDefault] = useState(false);
   const [readonly, setReadonly] = useState(false);
   const [groupField, setGroupField] = useState<string | null>(null); // حقل التجميع (القسم) — مخفي، يُحدَّد عند الإضافة
+  const [revealed, setRevealed] = useState<Set<string>>(new Set()); // حقول محتوى اختيارية فارغة أظهرها المستخدم للإضافة
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [resetting, setResetting] = useState(false);
@@ -270,6 +271,23 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
   }
 
   function renderRow(row: Row, i: number) {
+    // حقل محتوى اختياري فارغ: نعرضه كزر «+ إضافة» صغير (داخل قسمه) بدل حقل فارغ يزحم المحرّر
+    const rowBase = row.f?.base ?? row.ar?.base ?? row.en?.base ?? "";
+    if (COLLAPSIBLE_BASES.has(rowBase) && !revealed.has(rowBase)) {
+      const arName = row.ar?.name ?? row.f?.name ?? `${rowBase}_ar`;
+      const enName = row.en?.name;
+      const bothEmpty = isEmpty(values[arName]) && (!enName || isEmpty(values[enName]));
+      if (bothEmpty) {
+        const rawLabel = (en ? (fieldLabelEn(arName) || row.ar?.label || row.f?.label) : (row.ar?.label || row.f?.label)) || rowBase;
+        const clean = String(rawLabel).replace(/\s*\((عربي|إنجليزي|Arabic|English)\)\s*$/i, "").trim();
+        return (
+          <button key={i} type="button" onClick={() => setRevealed((p) => new Set(p).add(rowBase))} className="inline-flex items-center gap-1.5 rounded-xl border border-dashed border-brand/40 bg-brand/5 px-3.5 py-2 text-xs font-bold text-brand transition-colors hover:border-brand hover:bg-brand hover:text-white">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" d="M12 5v14M5 12h14" /></svg>
+            {en ? `Add ${clean}` : `إضافة ${clean}`}
+          </button>
+        );
+      }
+    }
     if (row.kind === "pair") {
       // قسم «كيف يساعد…» في التقنيات — محرّر منظّم بعرض كامل
       if (row.ar?.base === "help_section" || row.en?.base === "help_section") {
@@ -613,16 +631,14 @@ const FIELD_SECTIONS: Record<string, { title: string; title_en: string; bases: s
 // حقول تقنية/اختيارية تُخفى إن كانت فارغة (تقليل التشويش لمن لا يحتاجها)
 // تشمل حقول البرامج الشرطية (قائمة الفئة المستهدفة + المحطات التطبيقية):
 // تظهر فقط في البرامج التي تستخدمها فعلاً على الصفحة، وتختفي في غيرها.
-const HIDE_IF_EMPTY = new Set([
-  "icon", "value", "color", "href", "data_ar", "data_en",
-  "target_ar", "target_en",  // نص الفئة المستهدفة — بديل للقائمة؛ يظهر فقط للبرامج التي تستخدم النص
-  "target_tags_ar", "target_tags_en",  // وسوم الفئة المستهدفة — تظهر فقط للبرامج التي تستخدمها
-  "target_list_ar", "target_list_en",
-  "stations_intro_ar", "stations_intro_en",
-  "stations_ar", "stations_en",
-  "about_tag_ar", "about_tag_en",  // البطاقة المميّزة — تظهر فقط للخدمات التي تستخدمها
-  "help_section_ar", "help_section_en",  // قسم المساعدة في التقنيات — يظهر فقط لمن يستخدمه
-  "about_list_ar", "about_list_en",  // نقاط النبذة — تظهر فقط للخدمات التي تستخدمها
+// حقول تقنية تُخفى تماماً عند الفراغ (لا معنى لإضافتها يدوياً)
+const HIDE_IF_EMPTY = new Set(["icon", "value", "color", "href", "data_ar", "data_en"]);
+// حقول محتوى اختيارية: تُطوى إلى زر «+ إضافة» صغير داخل قسمها عند الفراغ — تبقى متاحة
+// للإضافة من مكانها الصحيح دون أن تزحم المحرّر بحقل فارغ.
+const COLLAPSIBLE_BASES = new Set([
+  "target", "target_tags", "target_list",   // بطاقة الفئة المستهدفة (نص/وسوم/نقاط)
+  "stations_intro", "stations",             // المحطات التطبيقية
+  "about_tag", "about_list", "help_section", // حقول الخدمات/التقنيات الاختيارية
 ]);
 // نص زر الإضافة لكل قائمة (حسب اسم الحقل) — ليكون واضحاً ما الذي يُضاف
 const LIST_ADD_LABELS: Record<string, string> = {
