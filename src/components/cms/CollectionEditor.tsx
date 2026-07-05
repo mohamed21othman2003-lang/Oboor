@@ -161,6 +161,10 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
       if (type === "sections") {
         if (f.name === "image") continue;
         if (f.name === "image_file" && isEmpty(baseline.image) && isEmpty(baseline.image_file)) continue;
+        // أقسام الفقرات: المحتوى يُدار من محرّر «الفقرات» (data)، فحقل «النص» المفرد
+        // غير مستخدم على الموقع ويظهر فارغاً فيربك المحرّر — نخفيه (طالما لا نص فيه).
+        if (f.base === "text" && Array.isArray(baseline.data_ar) && (baseline.data_ar as unknown[]).length > 0
+            && isEmpty(values.text_ar) && isEmpty(values.text_en)) continue;
       }
       // عناصر الروابط: «النص» غير مستخدم، ونوضّح أن «القيمة» هي الرابط/الوجهة
       if (isLinkBlock) {
