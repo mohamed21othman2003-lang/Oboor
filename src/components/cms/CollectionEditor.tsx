@@ -215,6 +215,23 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fields, baseline, type, values.section, sectionBlock, isLinkBlock, groupField, en]);
 
+  // تقسيم الحقول إلى أقسام مرئية بعناوين بارزة (حسب FIELD_SECTIONS)؛ الحقول غير المُدرَجة في «إعدادات»
+  const sectionGroups = useMemo(() => {
+    const cfg = FIELD_SECTIONS[type];
+    if (!cfg) return [{ title: null as string | null, rows }];
+    const baseOf = (r: Row) => r.f?.base ?? r.ar?.base ?? r.en?.base ?? "";
+    const used = new Set<Row>();
+    const out: { title: string | null; rows: Row[] }[] = [];
+    for (const sec of cfg) {
+      const secRows = rows.filter((r) => sec.bases.includes(baseOf(r)));
+      secRows.forEach((r) => used.add(r));
+      if (secRows.length) out.push({ title: en ? sec.title_en : sec.title, rows: secRows });
+    }
+    const leftover = rows.filter((r) => !used.has(r));
+    if (leftover.length) out.push({ title: en ? "Settings" : "إعدادات", rows: leftover });
+    return out;
+  }, [rows, type, en]);
+
   async function onSave() {
     setSaving(true);
     setError("");
@@ -406,8 +423,18 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
         ) : null;
       })()}
 
-      <div className="space-y-7 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-line sm:p-8">
-        {rows.map(renderRow)}
+      <div className="space-y-5">
+        {sectionGroups.map((g, gi) => (
+          <div key={gi} className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-line sm:p-8">
+            {g.title && (
+              <h2 className="mb-6 flex items-center gap-2.5 border-b border-line pb-3 text-lg font-extrabold text-brand-dark">
+                <span className="h-5 w-1.5 shrink-0 rounded-full bg-brand" />
+                {g.title}
+              </h2>
+            )}
+            <div className="space-y-7">{g.rows.map(renderRow)}</div>
+          </div>
+        ))}
       </div>
 
       {/* شريط الحفظ */}
@@ -558,6 +585,30 @@ const SHARED_CONTENT_NOTES: Record<string, { ar: string; en: string }> = {
     ar: "بطاقات الفروع المعروضة في هذا القسم تُدار من صفحة «مراكزنا (الفروع)». عدّل الفروع هناك وسيظهر التعديل تلقائياً هنا. (من هنا تُحرَّر العنوان والجملة التوضيحية فقط.)",
     en: "The branch cards shown in this section are managed from the “Our Centers (Branches)” page. Edit branches there and the change appears here automatically. (Only the heading and description are edited here.)",
   },
+};
+// تجميع حقول المحرّر في أقسام مرئية بعناوين بارزة تطابق أقسام الصفحة على الموقع —
+// حتى يعرف الأدمن أي مجموعة حقول تتحكّم في أي قسم. الحقول غير المُدرَجة تظهر تحت «إعدادات».
+const FIELD_SECTIONS: Record<string, { title: string; title_en: string; bases: string[] }[]> = {
+  programs: [
+    { title: "أعلى الصفحة (الهيرو)", title_en: "Top of page (Hero)", bases: ["title", "subtitle", "image", "image_file"] },
+    { title: "نبذة عن البرنامج", title_en: "About the program", bases: ["about"] },
+    { title: "فلسفة البرنامج", title_en: "Program philosophy", bases: ["philosophy_intro", "philosophy"] },
+    { title: "معلومات البرنامج (٣ بطاقات: المنهج + المدة + الفئة المستهدفة)", title_en: "Program info (3 cards: methodology + duration + target group)", bases: ["methods", "duration", "target", "target_tags", "target_list"] },
+    { title: "مجالات التدريب", title_en: "Training areas", bases: ["training_intro", "training_areas"] },
+    { title: "المحطات التطبيقية", title_en: "Practical stations", bases: ["stations_intro", "stations"] },
+  ],
+  clinical: [
+    { title: "أعلى الصفحة (الهيرو)", title_en: "Top of page (Hero)", bases: ["title", "subtitle", "image", "image_file"] },
+    { title: "نبذة عن الخدمة", title_en: "About the service", bases: ["about_heading", "about", "about_list", "about_tag"] },
+    { title: "أقسام محتوى الصفحة", title_en: "Page content sections", bases: ["blocks"] },
+  ],
+  techniques: [
+    { title: "أعلى الصفحة (الهيرو)", title_en: "Top of page (Hero)", bases: ["title", "badge", "image", "image_file"] },
+    { title: "نبذة عن التقنية", title_en: "About the technique", bases: ["about"] },
+    { title: "الفئات المستهدفة", title_en: "Target groups", bases: ["targets"] },
+    { title: "ما تقدّمه التقنية", title_en: "What the technique offers", bases: ["offers", "offer_icons"] },
+    { title: "قسم «كيف تساعد التقنية»", title_en: "\"How the technique helps\" section", bases: ["help_section"] },
+  ],
 };
 // حقول تقنية/اختيارية تُخفى إن كانت فارغة (تقليل التشويش لمن لا يحتاجها)
 // تشمل حقول البرامج الشرطية (قائمة الفئة المستهدفة + المحطات التطبيقية):
