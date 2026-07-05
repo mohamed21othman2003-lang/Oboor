@@ -65,8 +65,10 @@ export default async function AboutPage() {
     ? specRows.map((r) => ({ slug: r.slug, name: en ? r.name_en || r.name_ar : r.name_ar, specialty: en ? r.specialty_en || r.specialty_ar : r.specialty_ar, desc: en ? r.desc_en || r.desc_ar : r.desc_ar, image: r.image }))
     : getSpecialists(locale);
 
-  // نصوص الصفحة من الـCMS (أقسام صفحة about) مع fallback للنص الحالي
-  const blk = (b: string) => about?.[b]?.[0];
+  // نصوص الصفحة من الـCMS (أقسام صفحة about) مع fallback للنص الحالي.
+  // نختار عنصر العنوان الخاص بالقسم (key = about-<block>) لأن بعض الأقسام (مثل الفروع)
+  // تحوي أكثر من عنصر، فلا يصح الاكتفاء بأول عنصر.
+  const blk = (b: string) => about?.[b]?.find((r) => r.key === `about-${b}`) ?? about?.[b]?.[0];
   const aTitle = (b: string, ar: string, e: string) => { const r = blk(b); const v = r && (en ? r.title_en || r.title_ar : r.title_ar); return v || pick(locale, ar, e); };
   const aText = (b: string, ar: string, e: string) => { const r = blk(b); const v = r && (en ? r.text_en || r.text_ar : r.text_ar); return v || pick(locale, ar, e); };
   const aList = (b: string, ar: string[], e: string[]) => { const r = blk(b); const d = r && (en ? r.data_en : r.data_ar) as unknown; const arr = Array.isArray(d) ? (d as string[]) : []; return arr.length ? arr : (en ? e : ar); };
