@@ -467,7 +467,9 @@ export default function PageChrome({ page }: { page: string }) {
                             )}
                           </div>
                         )}
-                        {(String(it.value ?? "").trim() !== "" || g.block === "stats") && (
+                        {/* «الرقم» يظهر فقط لعناصر تحمل رقماً فعلاً — لا لعنصر العنوان (main)
+                            الذي هو عنوان+جملة فقط. أرقام الرئيسية تُدار من «الأرقام والإحصائيات». */}
+                        {(String(it.value ?? "").trim() !== "" || (g.block === "stats" && String(it.key ?? "") !== "main")) && (
                           <div>
                             <p className="mb-1 text-xs font-semibold text-ink-soft">{t("الرقم", "Number")}</p>
                             <input value={val(it, "value")} onChange={(e) => setVal(it.id, "value", e.target.value)} dir="ltr" className={INPUT} placeholder={t("مثال: 500", "e.g. 500")} />
