@@ -31,6 +31,12 @@ class AssessmentResultSerializer(serializers.ModelSerializer):
 
 
 class JobApplicationSerializer(serializers.ModelSerializer):
+    # سنوات الخبرة إلزامية (الموديل يسمح بالفراغ، لكن النموذج يتطلّبها)
+    experience = serializers.CharField(
+        required=True, allow_blank=False,
+        error_messages={"required": "سنوات الخبرة مطلوبة.", "blank": "سنوات الخبرة مطلوبة."},
+    )
+
     class Meta:
         model = JobApplication
         fields = ["id", "job", "name", "phone", "email", "city", "branch", "current_role",

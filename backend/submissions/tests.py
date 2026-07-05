@@ -39,6 +39,15 @@ class DuplicateGuardTests(APITestCase):
             "current_role": "معلم", "experience": "3-5", "about": "about me",
         }, JobApplication)
 
+    def test_career_requires_experience(self):
+        r = self.client.post("/api/career/", {
+            "job": "أخصائي", "name": "Applicant", "phone": "0500000009",
+            "city": "الرياض", "branch": "فرع العليا", "current_role": "معلم",
+            "experience": "", "about": "about",
+        }, format="json")
+        self.assertEqual(r.status_code, 400, r.content)
+        self.assertEqual(JobApplication.objects.count(), 0)
+
     def test_assessment_duplicate_blocked(self):
         payload = {
             "assessment": "تقييم ADHD", "assessment_slug": "adhd",

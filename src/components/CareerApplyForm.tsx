@@ -56,6 +56,7 @@ export default function CareerApplyForm({ jobTitle, locale, branchOptions }: { j
     fd.set("city", finalCity);
     if (!branch.trim()) { setError(pick(locale, "الرجاء اختيار الفرع.", "Please choose a branch.")); return; }
     fd.set("branch", branch);
+    if (!String(fd.get("experience") || "").trim()) { setError(pick(locale, "الرجاء اختيار سنوات الخبرة.", "Please select your years of experience.")); return; }
     const cv = fd.get("cv");
     // السيرة الذاتية إجبارية فعلياً
     if (!(cv instanceof File) || cv.size === 0) {

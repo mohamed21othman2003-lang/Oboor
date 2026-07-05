@@ -12,8 +12,8 @@ export async function POST(req: Request) {
     const get = (k: string) => String(form.get(k) || "");
     const name = get("name");
     const phone = get("phone");
-    if (!name || !phone || !get("branch").trim()) {
-      return NextResponse.json({ ok: false, error: "الاسم ورقم الجوال والفرع مطلوبة" }, { status: 400 });
+    if (!name || !phone || !get("branch").trim() || !get("experience").trim()) {
+      return NextResponse.json({ ok: false, error: "الاسم ورقم الجوال والفرع وسنوات الخبرة مطلوبة" }, { status: 400 });
     }
     // تحقّق مبكّر من ملف السيرة الذاتية (يسري على كل المسارات: التوجيه والتخزين الاحتياطي)
     const cvFile = form.get("cv");
