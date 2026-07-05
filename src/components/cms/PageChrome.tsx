@@ -9,7 +9,7 @@ import { useCmsLang } from "@/lib/cms/i18n";
 const ImageCropModal = dynamic(() => import("@/components/cms/ImageCropModal"), { ssr: false });
 
 // ترتيب الأقسام كما تظهر على الصفحة (لعرضها مرتّبة بدل ترتيب قاعدة البيانات)
-const BLOCK_ORDER = ["hero", "about", "smart_search", "stats", "join_cards", "why_us", "success", "gallery", "news", "certs", "features", "services", "profile_intro", "profile_stats", "journey", "accreditations", "steps", "prelim_questions", "answer_options", "categories", "list", "cities", "employment_types", "contact_prompt", "highlights"];
+const BLOCK_ORDER = ["hero", "about", "smart_search", "stats", "join", "join_cards", "why_us", "success", "gallery", "news", "certs", "features", "services", "profile_intro", "profile_stats", "journey", "accreditations", "steps", "prelim_questions", "answer_options", "categories", "list", "cities", "employment_types", "contact_prompt", "highlights"];
 const blockRank = (b: string) => { const i = BLOCK_ORDER.indexOf(b); return i === -1 ? 999 : i; };
 // أقسام محتواها منظّم معقّد ⇒ تُحرّر بالمحرّر الكامل (رابط) بدل الحقول المبسّطة
 const COMPLEX_BLOCKS = new Set(["highlights", "services"]);
@@ -58,6 +58,7 @@ const BLOCK_LABELS: Record<string, string> = {
   certs: "قسم الشهادات والاعتمادات",
   highlights: "القصة المميّزة",
   join_cards: "بطاقات الانضمام",
+  join: "قسم «انضم إلى الفريق»",
   contact_prompt: "شريط دعوة التواصل",
   features: "المميزات",
   steps: "خطوات التقييم",
@@ -85,6 +86,7 @@ const BLOCK_LABELS_EN: Record<string, string> = {
   certs: "Certificates & accreditations section",
   highlights: "Featured story",
   join_cards: "Join cards",
+  join: "“Join the Team” section",
   contact_prompt: "Contact call-to-action bar",
   features: "Features",
   steps: "Assessment steps",
@@ -101,6 +103,7 @@ const ITEM_LABELS: Record<string, string> = {
   "hero.badge": "الوسم العلوي",
   "hero.heading": "العنوان + الوصف + الصورة",
   "hero.stat": "الشارة العائمة (العدّاد)",
+  "join.visual": "صورة قسم «انضم إلى الفريق»",
   "hero.map_heading": "عنوان قسم الخريطة",
   "hero.features_heading": "عنوان قسم المميزات",
   "hero.why_heading": "عنوان قسم «لماذا هذا التقييم»",
@@ -132,6 +135,7 @@ const ITEM_LABELS: Record<string, string> = {
 const ITEM_LABELS_EN: Record<string, string> = {
   "hero.badge": "Top badge",
   "hero.heading": "Heading + description + image",
+  "join.visual": "“Join the Team” section image",
   "hero.stat": "Floating badge (counter)",
   "hero.map_heading": "Map section heading",
   "hero.features_heading": "Features section heading",

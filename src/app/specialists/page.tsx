@@ -82,6 +82,8 @@ export default async function SpecialistsPage() {
     loadBranches(locale),
     getWhatsAppUrl(),
   ]);
+  // صورة قسم «انضم إلى الفريق» من الـCMS مع fallback للصورة الثابتة
+  const joinImg = sections?.join?.[0]?.image || "/figma/specialists/team.jpg";
 
   // القائمة الكاملة لتخصصات وفروع عبور (تظهر في الفلتر حتى قبل إضافة كل الأخصائيين)
   const specialtyOptions = pick(
@@ -213,7 +215,7 @@ export default async function SpecialistsPage() {
             {/* Floating layout (xl) */}
             <div className="relative hidden h-[661px] w-[752px] xl:block">
               <div className="absolute left-[28px] top-[97px] h-[500px] w-[613px] overflow-hidden rounded-[20px] shadow-[0px_20px_60px_0px_rgba(0,0,0,0.1)]">
-                <Image src="/figma/specialists/team.jpg" alt={pick(locale, "فريق الأخصائيين", "The specialists team")} fill className="object-cover" sizes="613px" />
+                <Image src={joinImg} alt={pick(locale, "فريق الأخصائيين", "The specialists team")} fill className="object-cover" sizes="613px" />
               </div>
               <JoinCard className="left-[85px] bottom-[491px]" card={joinCards[0]} />
               <JoinCard className="left-[539px] top-[109px]" card={joinCards[1]} />
@@ -223,7 +225,7 @@ export default async function SpecialistsPage() {
             {/* Stacked (below xl) */}
             <div className="xl:hidden">
               <div className="relative h-72 w-full overflow-hidden rounded-3xl shadow-lg">
-                <Image src="/figma/specialists/team.jpg" alt={pick(locale, "فريق الأخصائيين", "The specialists team")} fill className="object-cover" sizes="100vw" />
+                <Image src={joinImg} alt={pick(locale, "فريق الأخصائيين", "The specialists team")} fill className="object-cover" sizes="100vw" />
               </div>
               <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
                 {joinCards.map((c) => <JoinCard key={c.title} card={c} />)}

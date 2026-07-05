@@ -166,7 +166,7 @@ export default async function AssessmentPage() {
             <div className="relative order-1 mx-auto h-[420px] w-full max-w-[480px] lg:order-2">
               <div className="absolute -bottom-4 -right-4 h-full w-full rounded-3xl bg-brand/10" />
               <div className="relative h-full w-full overflow-hidden rounded-3xl shadow-lg">
-                <Image src="/figma/about/intro.jpg" alt={pick(locale, "تقييم الطفل", "Child assessment")} fill className="object-cover" sizes="(max-width:1024px) 100vw, 480px" priority />
+                <Image src={hF("heading")?.image || "/figma/about/intro.jpg"} alt={pick(locale, "تقييم الطفل", "Child assessment")} fill className="object-cover" sizes="(max-width:1024px) 100vw, 480px" priority />
               </div>
             </div>
           </div>
