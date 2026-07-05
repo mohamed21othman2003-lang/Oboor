@@ -211,8 +211,10 @@ export default function AssessmentResultsTable({
                         <span className="inline-flex items-center gap-1.5 text-ink"><span className="h-2 w-2 rounded-full" style={{ background: lv.dot }} />{lv.label}</span>
                       </td>
                       <td className="px-4 py-3.5 text-center text-ink-soft">
-                        <span className="flex items-center justify-center gap-1.5"><span className="text-[#1FA6A8]">{I.cal}</span>{s.date}</span>
-                        {s.time && <span className="mt-0.5 flex items-center justify-center gap-1.5 text-xs"><span className="text-[#1FA6A8]">{I.clock}</span>{s.time}</span>}
+                        <span className="inline-flex flex-col items-start gap-0.5 text-start">
+                          <span className="flex items-center gap-1.5"><span className="text-[#1FA6A8]">{I.cal}</span>{s.date}</span>
+                          {s.time && <span className="flex items-center gap-1.5 text-xs"><span className="text-[#1FA6A8]">{I.clock}</span>{s.time}</span>}
+                        </span>
                       </td>
                       <td className="px-4 py-3.5">
                         <div className="flex items-center justify-center gap-1.5">
