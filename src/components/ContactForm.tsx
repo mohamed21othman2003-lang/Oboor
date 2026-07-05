@@ -35,6 +35,7 @@ export default function ContactForm({ locale, branches }: { locale: Locale; bran
     if (nameErr) { setError(nameErr); return; }
     const phoneErr = validatePhone(String(fd.get("phone") || ""), locale);
     if (phoneErr) { setError(phoneErr); return; }
+    if (!String(fd.get("branch") || "").trim()) { setError(pick(locale, "يرجى اختيار الفرع.", "Please choose a branch.")); return; }
     setLoading(true);
     setError("");
     try {
@@ -85,10 +86,11 @@ export default function ContactForm({ locale, branches }: { locale: Locale; bran
           <input id="phone" name="phone" required dir="ltr" inputMode="numeric" placeholder="05XXXXXXXX" onInput={(e) => { e.currentTarget.value = digitsOnly(e.currentTarget.value); }} className={`${field} text-start`} />
         </div>
         <div>
-          <label htmlFor="branch" className={labelCls}>{pick(locale, "اختر الفرع", "Choose Branch")}</label>
+          <label htmlFor="branch" className={labelCls}>{pick(locale, "اختر الفرع", "Choose Branch")} <span className="text-red-500">*</span></label>
           <CustomSelect
             id="branch"
             name="branch"
+            required
             placeholder={pick(locale, "اختر الفرع", "Choose Branch")}
             options={branchOptions}
           />

@@ -6,8 +6,9 @@ export async function POST(req: Request) {
   try {
     const form = await req.formData();
     const data = Object.fromEntries([...form.entries()].map(([k, v]) => [k, String(v)]));
-    if (!data.name || !data.phone) {
-      return NextResponse.json({ ok: false, error: "الاسم ورقم الجوال مطلوبان" }, { status: 400 });
+    // الفرع إجباري ليعرف الأدمن مصدر كل رسالة (حارس خادمي نهائي)
+    if (!data.name || !data.phone || !String(data.branch || "").trim()) {
+      return NextResponse.json({ ok: false, error: "الاسم ورقم الجوال والفرع مطلوبة" }, { status: 400 });
     }
     if (await forwardJson("contact", {
       name: data.name, phone: data.phone, email: data.email || "",
