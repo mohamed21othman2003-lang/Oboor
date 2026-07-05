@@ -70,6 +70,8 @@ export default async function AboutPage() {
   const aTitle = (b: string, ar: string, e: string) => { const r = blk(b); const v = r && (en ? r.title_en || r.title_ar : r.title_ar); return v || pick(locale, ar, e); };
   const aText = (b: string, ar: string, e: string) => { const r = blk(b); const v = r && (en ? r.text_en || r.text_ar : r.text_ar); return v || pick(locale, ar, e); };
   const aList = (b: string, ar: string[], e: string[]) => { const r = blk(b); const d = r && (en ? r.data_en : r.data_ar) as unknown; const arr = Array.isArray(d) ? (d as string[]) : []; return arr.length ? arr : (en ? e : ar); };
+  // صورة القسم من الـCMS (حقل الصورة) مع fallback للصورة الثابتة
+  const aImage = (b: string, fallback: string) => { const r = blk(b); const v = String(r?.image ?? "").trim(); return v || fallback; };
 
   // كارت الفرع الرئيسي في قسم «نبذة عن الفروع» (من الـCMS مع fallback)
   const mainCard = (about?.branches ?? []).find((r) => r.key === "main_card");
@@ -136,7 +138,7 @@ export default async function AboutPage() {
           {/* Image (left) */}
           <div className="relative order-1 h-[420px] lg:order-2">
             <div className="relative h-full w-full overflow-hidden rounded-3xl shadow-lg">
-              <Image src="/figma/about/intro.jpg" alt={pick(locale, "جلسة تأهيل", "Rehabilitation session")} fill className="object-cover" sizes="(max-width:1024px) 100vw, 50vw" quality={90} />
+              <Image src={aImage("intro", "/figma/about/intro.jpg")} alt={pick(locale, "جلسة تأهيل", "Rehabilitation session")} fill className="object-cover" sizes="(max-width:1024px) 100vw, 50vw" quality={90} />
             </div>
           </div>
         </div>
@@ -200,7 +202,7 @@ export default async function AboutPage() {
             {/* Image (left) */}
             <div className="relative order-1 h-[480px] lg:order-2">
               <div className="relative h-full w-full overflow-hidden rounded-3xl shadow-lg">
-                <Image src="/figma/about/programs.jpg" alt={pick(locale, "برامج عبور", "Oboor programs")} fill className="object-cover" sizes="(max-width:1024px) 100vw, 50vw" quality={90} />
+                <Image src={aImage("programs", "/figma/about/programs.jpg")} alt={pick(locale, "برامج عبور", "Oboor programs")} fill className="object-cover" sizes="(max-width:1024px) 100vw, 50vw" quality={90} />
               </div>
             </div>
           </div>
