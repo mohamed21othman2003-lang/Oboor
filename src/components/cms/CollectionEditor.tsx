@@ -108,7 +108,13 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
   const isEmpty = (v: unknown) => v === null || v === undefined || v === "" || (Array.isArray(v) && v.length === 0) || (typeof v === "object" && v !== null && !Array.isArray(v) && Object.keys(v as object).length === 0);
   // الصورة تُعتبر مكتملة إن وُجد ملف مرفوع أو مسار (نتحقق من كل صيغ حقل الصورة)
   const imageFilled = useMemo(() => ["image_file", "image", "image_path", "logo_path"].some((k) => !isEmpty(values[k])), [values]);
-  const counted = useMemo(() => fields.filter((f) => !HIDDEN_IN_FORM.has(f.name) && (f.required || f.type === "image")), [fields]);
+  // للأقسام: الصورة تُحتسب فقط للأقسام التي تعرض صورة على الموقع (لا لعناوين/نصوص لا صورة لها)
+  const sectionHasImage = type === "sections" && IMAGE_SECTION_KEYS.has(String(values.key ?? ""));
+  const counted = useMemo(() => fields.filter((f) => {
+    if (HIDDEN_IN_FORM.has(f.name)) return false;
+    if (f.type === "image" && type === "sections") return sectionHasImage;
+    return f.required || f.type === "image";
+  }), [fields, type, sectionHasImage]);
   const fieldFilled = (f: FieldSchema) => (f.type === "image" ? imageFilled : !isEmpty(values[f.name]));
   const completion = useMemo(() => {
     if (!counted.length) return 100;
@@ -160,7 +166,8 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
       // أقسام الصفحات: المسار النصّي يُدار عبر الرافع؛ والرافع يظهر فقط للأقسام التي بها صورة
       if (type === "sections") {
         if (f.name === "image") continue;
-        if (f.name === "image_file" && isEmpty(baseline.image) && isEmpty(baseline.image_file)) continue;
+        // رافع الصورة يظهر للأقسام التي بها صورة فعلاً، أو الأقسام التي تعرض صورة على الموقع (intro/programs)
+        if (f.name === "image_file" && isEmpty(baseline.image) && isEmpty(baseline.image_file) && !sectionHasImage) continue;
         // أقسام الفقرات: المحتوى يُدار من محرّر «الفقرات» (data)، فحقل «النص» المفرد
         // غير مستخدم على الموقع ويظهر فارغاً فيربك المحرّر — نخفيه (طالما لا نص فيه).
         if (f.base === "text" && Array.isArray(baseline.data_ar) && (baseline.data_ar as unknown[]).length > 0
@@ -518,6 +525,9 @@ function previewHref(type: string, v: Record<string, unknown>): string | null {
 // حقول مخفية من الفورم (الترتيب يُدار بأسهم القائمة)
 // «مسار الصورة» النصّي مخفي — الصورة تُدار بأداة الرفع (image_file) التي تعرض الصورة الحالية تلقائياً
 const HIDDEN_IN_FORM = new Set(["order", "page", "image"]);
+// أقسام صفحات تعرض صورة على الموقع ⇒ يظهر لها رافع الصورة (حتى قبل رفع صورة) وتُحتسب في الاكتمال.
+// بقية الأقسام (عناوين/نصوص) لا تعرض صورة، فلا نعرض لها رافعاً ولا نحسبها ناقصة.
+const IMAGE_SECTION_KEYS = new Set(["about-intro", "about-programs"]);
 // حقول تقنية/اختيارية تُخفى إن كانت فارغة (تقليل التشويش لمن لا يحتاجها)
 // تشمل حقول البرامج الشرطية (قائمة الفئة المستهدفة + المحطات التطبيقية):
 // تظهر فقط في البرامج التي تستخدمها فعلاً على الصفحة، وتختفي في غيرها.
