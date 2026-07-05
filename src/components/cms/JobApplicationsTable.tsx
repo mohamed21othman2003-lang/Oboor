@@ -6,6 +6,7 @@ import CustomSelect from "@/components/ui/Select";
 import { type CmsItem, type FieldSchema } from "@/lib/cms/api";
 import { exportSheet } from "@/lib/cms/exportSheet";
 import { useCmsLang } from "@/lib/cms/i18n";
+import StatCounter from "@/components/cms/StatCounter";
 
 /* ===== جدول طلبات التوظيف (CRM) — ديزاين فقط، نفس البيانات والأكشنز ===== */
 
@@ -26,6 +27,8 @@ const uniq = (a: string[]) => [...new Set(a.filter(Boolean))];
 const I = {
   search: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>,
   reset: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8" /><path d="M3 3v5h5" /></svg>,
+  sort: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 5h10M11 9h7M11 13h4M3 17l3 3 3-3M6 20V4" /></svg>,
+  inbox: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2" /><path d="M5.5 5.5 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.5-6.5A2 2 0 0 0 16.8 4H7.2a2 2 0 0 0-1.7 1.5z" /></svg>,
   export: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><path d="M7 10l5 5 5-5" /><path d="M12 15V3" /></svg>,
   cal: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" /></svg>,
   clock: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" strokeLinecap="round" /></svg>,
@@ -65,6 +68,7 @@ export default function JobApplicationsTable({
   const [city, setCity] = useState("");
   const [job, setJob] = useState("");
   const [range, setRange] = useState("");
+  const [sort, setSort] = useState("newest");
   const [perPage, setPerPage] = useState(10);
   const [page, setPage] = useState(1);
   const [menu, setMenu] = useState<number | null>(null);
@@ -78,6 +82,13 @@ export default function JobApplicationsTable({
     { value: "today", label: t("اليوم", "Today") },
     { value: "7", label: t("آخر ٧ أيام", "Last 7 Days") },
     { value: "30", label: t("آخر ٣٠ يوم", "Last 30 Days") },
+  ];
+  const sortOpts = [
+    { value: "newest", label: t("الأحدث أولاً", "Newest first") },
+    { value: "oldest", label: t("الأقدم أولاً", "Oldest first") },
+    { value: "alpha", label: t("أبجديًا (الاسم)", "Alphabetical (name)") },
+    { value: "job", label: t("حسب الوظيفة", "By position") },
+    { value: "city", label: t("حسب المدينة", "By city") },
   ];
 
   const filtered = useMemo(() => {
@@ -98,13 +109,40 @@ export default function JobApplicationsTable({
     });
   }, [items, query, city, job, range]);
 
-  const total = filtered.length;
+  const counts = useMemo(() => {
+    const now = new Date();
+    const sameDay = (c: Date) => c.getFullYear() === now.getFullYear() && c.getMonth() === now.getMonth() && c.getDate() === now.getDate();
+    let today = 0, week = 0;
+    for (const it of items) {
+      const c = new Date(v(it, "created_at"));
+      if (isNaN(c.getTime())) continue;
+      if (sameDay(c)) today++;
+      if ((now.getTime() - c.getTime()) / 86400000 <= 7) week++;
+    }
+    return { total: items.length, today, week };
+  }, [items]);
+
+  const sorted = useMemo(() => {
+    const arr = [...filtered];
+    const time = (it: CmsItem) => { const d = new Date(v(it, "created_at")); return isNaN(d.getTime()) ? 0 : d.getTime(); };
+    const coll = en ? "en" : "ar";
+    switch (sort) {
+      case "oldest": arr.sort((a, b) => time(a) - time(b)); break;
+      case "alpha": arr.sort((a, b) => v(a, "name").localeCompare(v(b, "name"), coll)); break;
+      case "job": arr.sort((a, b) => v(a, "job").localeCompare(v(b, "job"), coll) || time(b) - time(a)); break;
+      case "city": arr.sort((a, b) => v(a, "city").localeCompare(v(b, "city"), coll) || time(b) - time(a)); break;
+      default: arr.sort((a, b) => time(b) - time(a)); // newest
+    }
+    return arr;
+  }, [filtered, sort, en]);
+
+  const total = sorted.length;
   const pages = Math.max(1, Math.ceil(total / perPage));
   const cur = Math.min(page, pages);
   const startIdx = (cur - 1) * perPage;
-  const pageItems = filtered.slice(startIdx, startIdx + perPage);
+  const pageItems = sorted.slice(startIdx, startIdx + perPage);
 
-  const resetFilters = () => { setQuery(""); setCity(""); setJob(""); setRange(""); setPage(1); };
+  const resetFilters = () => { setQuery(""); setCity(""); setJob(""); setRange(""); setSort("newest"); setPage(1); };
   const onFilter = (fn: () => void) => { fn(); setPage(1); };
   const copyPhone = (id: number, phone: string) => navigator.clipboard?.writeText(phone).then(() => { setCopied(id); setTimeout(() => setCopied((c) => (c === id ? null : c)), 1500); });
   const del = async (id: number) => { setMenu(null); if (!confirm(t("حذف هذا الطلب نهائياً؟", "Permanently delete this application?"))) return; await onDelete(id); };
@@ -121,7 +159,7 @@ export default function JobApplicationsTable({
       filename: "job-applications",
       sheetName: t("طلبات التوظيف", "Job Applications"),
       columns: cols.map(([header, , link]) => ({ header, link, date: header === dateHeader })),
-      rows: filtered.map((it) => cols.map(([, acc]) => acc(it))),
+      rows: sorted.map((it) => cols.map(([, acc]) => acc(it))),
     });
   };
 
@@ -139,16 +177,27 @@ export default function JobApplicationsTable({
         <p className="mt-1 text-sm text-ink-soft">{t("عرض وإدارة جميع طلبات التوظيف الواردة", "View and manage all incoming job applications")}</p>
       </div>
 
-      {/* شريط الفلاتر */}
+      {/* عدّادات — قابلة للضغط للفلترة السريعة */}
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <StatCounter icon={I.inbox} value={counts.total} label={t("إجمالي الطلبات", "Total applications")} active={range === ""} onClick={() => onFilter(() => setRange(""))} hint={t("عرض الكل", "Show all")} />
+        <StatCounter icon={I.cal} value={counts.week} label={t("آخر ٧ أيام", "Last 7 days")} active={range === "7"} onClick={() => onFilter(() => setRange("7"))} hint={t("فلترة", "Filter")} />
+        <StatCounter icon={I.clock} value={counts.today} label={t("طلبات اليوم", "Today's applications")} active={range === "today"} onClick={() => onFilter(() => setRange("today"))} hint={t("فلترة", "Filter")} />
+      </div>
+
+      {/* شريط الفلاتر والترتيب */}
       <div className="rounded-2xl border border-line bg-white p-3 shadow-sm">
         <div className="flex flex-wrap items-center gap-2.5">
           <div className="relative min-w-[230px] flex-1">
-            <span className="pointer-events-none absolute inset-y-0 start-3 flex items-center text-ink-soft">{I.search}</span>
-            <input value={query} onChange={(e) => onFilter(() => setQuery(e.target.value))} placeholder={t("ابحث عن اسم أو بريد إلكتروني أو هاتف…", "Search by name, email or phone…")} className="w-full rounded-xl border border-line bg-surface/60 py-2.5 pe-3 ps-10 text-sm text-ink outline-none transition-colors placeholder:text-ink-soft focus:border-brand focus:bg-white focus:ring-2 focus:ring-brand/20" />
+            <input id="career-search" value={query} onChange={(e) => onFilter(() => setQuery(e.target.value))} placeholder={t("ابحث عن اسم أو بريد إلكتروني أو هاتف…", "Search by name, email or phone…")} className="w-full rounded-xl border border-line bg-surface/60 py-2.5 pe-12 ps-3 text-sm text-ink outline-none transition-colors placeholder:text-ink-soft focus:border-brand focus:bg-white focus:ring-2 focus:ring-brand/20" />
+            <button type="button" onClick={() => document.getElementById("career-search")?.focus()} aria-label={t("بحث", "Search")} title={t("بحث", "Search")} className="absolute inset-y-1 end-1 flex w-10 items-center justify-center rounded-lg bg-[#1FA6A8] text-white transition-colors hover:bg-[#0F6C73]">{I.search}</button>
           </div>
           <div className="w-[150px]"><CustomSelect value={range} onChange={(x) => onFilter(() => setRange(x))} options={rangeOpts} placeholder={t("كل الوقت", "All Time")} /></div>
           <div className="w-[160px]"><CustomSelect value={city} onChange={(x) => onFilter(() => setCity(x))} options={cityOpts} placeholder={t("كل المدن", "All Cities")} /></div>
           <div className="w-[180px]"><CustomSelect value={job} onChange={(x) => onFilter(() => setJob(x))} options={jobOpts} placeholder={t("كل الوظائف", "All Positions")} /></div>
+          <div className="flex items-center gap-1.5">
+            <span className="text-ink-soft">{I.sort}</span>
+            <div className="w-[170px]"><CustomSelect value={sort} onChange={setSort} options={sortOpts} placeholder={t("ترتيب", "Sort")} /></div>
+          </div>
           <button onClick={resetFilters} className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-white px-3.5 py-2.5 text-xs font-bold text-ink-soft transition-colors hover:bg-surface">{I.reset} {t("إعادة تعيين", "Reset")}</button>
         </div>
       </div>
