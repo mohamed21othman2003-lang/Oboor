@@ -815,7 +815,7 @@ function FieldInput({ f, value, onChange, badge, dir }: { f: FieldSchema; value:
         ) : OBJECT_FIELDS[f.base] ? (
           <ObjectEditor value={value} onChange={onChange} fields={OBJECT_FIELDS[f.base]} dir={dir} />
         ) : CARD_LIST_FIELDS[f.base] ? (
-          <CardListEditor value={value} onChange={onChange} fields={CARD_LIST_FIELDS[f.base]} dir={dir} addLabel={listAdd(f.base, en)} />
+          <CardListEditor value={value} onChange={onChange} fields={CARD_LIST_FIELDS[f.base]} dir={dir} addLabel={listAdd(f.base, en)} iconPicker={f.base === "training_areas" && f.lang === "ar"} />
         ) : COMPLEX_JSON.has(f.base) || isComplexJson(value) ? (
           <ReadOnlyJson f={f} value={value} />
         ) : isSimpleArray(value) || value == null ? (
@@ -1031,7 +1031,7 @@ function ObjectEditor({ value, onChange, fields, dir }: { value: unknown; onChan
 }
 
 // محرّر قائمة بطاقات — كل عنصر كائن بخانات معنونة (بدل قائمة JSON مركّبة)
-function CardListEditor({ value, onChange, fields, dir, addLabel }: { value: unknown; onChange: (v: unknown) => void; fields: { key: string; label: string; label_en?: string }[]; dir?: string; addLabel?: string }) {
+function CardListEditor({ value, onChange, fields, dir, addLabel, iconPicker }: { value: unknown; onChange: (v: unknown) => void; fields: { key: string; label: string; label_en?: string }[]; dir?: string; addLabel?: string; iconPicker?: boolean }) {
   const { lang } = useCmsLang();
   const en = lang === "en";
   const flLabel = (fl: { label: string; label_en?: string }) => (en ? (fl.label_en || fl.label) : fl.label);
@@ -1056,6 +1056,17 @@ function CardListEditor({ value, onChange, fields, dir, addLabel }: { value: unk
                 <AutoTextarea value={String(it[fl.key] ?? "")} onChange={(v) => update(i, fl.key, v)} dir={dir} className={INPUT + " bg-white"} />
               </div>
             ))}
+            {iconPicker && (
+              <div>
+                <p className="mb-1 text-xs font-semibold text-ink-soft">{en ? "Icon" : "الأيقونة"}</p>
+                <div className="grid grid-cols-6 gap-1.5 rounded-xl border border-line bg-white p-2 sm:grid-cols-9">
+                  <button type="button" onClick={() => update(i, "icon", "")} title={en ? "Automatic" : "تلقائي"} className={`flex h-9 items-center justify-center rounded-lg border text-[10px] transition-colors ${!it.icon ? "border-brand bg-brand/10 text-brand" : "border-line bg-white text-ink-soft hover:border-brand/40"}`}>{en ? "Auto" : "تلقائي"}</button>
+                  {OFFER_ICON_KEYS.map((k) => (
+                    <button type="button" key={k} onClick={() => update(i, "icon", k)} title={k} className={`flex h-9 items-center justify-center rounded-lg border transition-colors ${it.icon === k ? "border-brand bg-brand/10 text-brand" : "border-line bg-white text-ink hover:border-brand/40"}`}>{iconByKey(k)}</button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       ))}

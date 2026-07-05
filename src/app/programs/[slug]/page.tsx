@@ -3,7 +3,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { PROGRAM_DETAILS, getProgram, type ProgramDetail } from "@/lib/programsData";
-import { distinctIcons } from "@/lib/areaIcon";
+import { distinctIcons, iconByKey } from "@/lib/areaIcon";
 import { getLocale } from "@/i18n/locale";
 import { pick, type Locale } from "@/i18n/config";
 import { fetchContent } from "@/lib/server/django";
@@ -26,7 +26,7 @@ type ApiProgram = {
   target_ar: string; target_en: string;
   target_tags_ar: string[]; target_tags_en: string[];
   training_intro_ar: string; training_intro_en: string;
-  training_areas_ar: { title: string; desc: string }[]; training_areas_en: { title: string; desc: string }[];
+  training_areas_ar: { title: string; desc: string; icon?: string }[]; training_areas_en: { title: string; desc: string; icon?: string }[];
   target_list_ar: string[]; target_list_en: string[];
   stations_intro_ar: string; stations_intro_en: string;
   stations_ar: string[]; stations_en: string[];
@@ -56,6 +56,8 @@ function mapProgram(row: ApiProgram, locale: Locale): ProgramDetail {
     targetTags: b(row.target_tags_ar, row.target_tags_en),
     trainingIntro: b(row.training_intro_ar, row.training_intro_en),
     trainingAreas: b(row.training_areas_ar, row.training_areas_en),
+    // الأيقونات تُخزَّن على المصفوفة العربية (لغة-محايدة) وتُستخدم في اللغتين
+    trainingAreaIcons: (row.training_areas_ar || []).map((a) => a.icon || ""),
     targetList: b(row.target_list_ar, row.target_list_en),
     stationsIntro: b(row.stations_intro_ar, row.stations_intro_en),
     stations: b(row.stations_ar, row.stations_en),
@@ -216,7 +218,7 @@ export default async function ProgramDetailPage({ params }: { params: Promise<{ 
               {p.trainingIntro && <p className="mt-3 max-w-4xl text-sm text-ink-muted">{p.trainingIntro}</p>}
             </div>
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {(() => { const icons = distinctIcons(p.trainingAreas.map((x) => x.title)); return p.trainingAreas.map((a, i) => (
+              {(() => { const autoIcons = distinctIcons(p.trainingAreas.map((x) => x.title)); const chosen = p.trainingAreaIcons ?? []; const icons = p.trainingAreas.map((_, i) => (chosen[i] ? iconByKey(chosen[i]) : autoIcons[i])); return p.trainingAreas.map((a, i) => (
                 <div key={i} className="rounded-2xl border border-line bg-white p-6 text-start shadow-sm">
                   <div className="flex items-start gap-3">
                     <div className="flex shrink-0 flex-col items-center gap-1">

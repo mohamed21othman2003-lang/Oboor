@@ -7,6 +7,7 @@ export type ProgramDetail = {
   methods: { name: string; desc: string }[];
   duration: string; target: string; targetTags: string[];
   trainingIntro: string; trainingAreas: { title: string; desc: string }[];
+  trainingAreaIcons?: string[]; // مفاتيح أيقونات مجالات التدريب (اختياري — لكل مجال) مع سقوط لاختيار تلقائي
   targetList?: string[];
   stationsIntro?: string; stations?: string[];
 };
