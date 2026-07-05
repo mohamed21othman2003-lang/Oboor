@@ -6,8 +6,11 @@ export async function POST(req: Request) {
   try {
     const form = await req.formData();
     const data = Object.fromEntries([...form.entries()].map(([k, v]) => [k, String(v)]));
-    if (!data.childName || !data.parentName || !data.phone) {
-      return NextResponse.json({ ok: false, error: "بيانات الطفل وولي الأمر والجوال مطلوبة" }, { status: 400 });
+    // تحقّق خادمي من الحقول الإلزامية (حارس نهائي حتى لو تخطّى المستخدم تحقّق الواجهة)
+    const requiredFields = ["childName", "childAge", "gender", "city", "branch", "parentName", "phone"];
+    const missing = requiredFields.filter((k) => !String(data[k] || "").trim());
+    if (missing.length) {
+      return NextResponse.json({ ok: false, error: "الرجاء تعبئة جميع الحقول الإلزامية (بما فيها الفرع والمدينة)." }, { status: 400 });
     }
     if (await forwardJson("admission", {
       child_name: data.childName, child_age: data.childAge || "", gender: data.gender || "",
