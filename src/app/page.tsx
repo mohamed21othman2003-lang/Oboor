@@ -29,12 +29,12 @@ async function loadHero(locale: Locale): Promise<HeroSlide[] | undefined> {
   const rows = await fetchContent<ApiHero[]>("home/hero");
   if (!rows || !rows.length) return undefined;
   const en = locale === "en";
+  // الشارة العلوية ونص زر الإجراء مركزيان (chrome) ويظهران فوق كل الشرائح — لا نمرّرهما
+  // لكل شريحة حتى لا تتجاوز قيمُ الشريحة الحقلَ المركزي الذي يحرّره الأدمن.
   return rows.map((r) => ({
     img: r.image,
-    badge: t(en, r.badge_ar, r.badge_en),
     heading: t(en, r.heading_ar, r.heading_en),
     desc: t(en, r.desc_ar, r.desc_en),
-    cta: t(en, r.cta_ar, r.cta_en),
     ctaHref: r.cta_href,
   }));
 }

@@ -4,13 +4,15 @@ from django.db import models
 class HeroSlide(models.Model):
     key = models.SlugField("المعرّف (key)", max_length=140, unique=True)
 
-    badge_ar = models.CharField("الشارة العلوية (عربي)", max_length=300)
+    # الشارة العلوية ونص زر الإجراء يُداران مركزياً من «الوسم + زر الإجراء (ثابتان فوق كل الشرائح)»
+    # ضمن عناوين الصفحة الرئيسية — فهذه الحقول لكل شريحة اختيارية ومخفيّة من المحرّر.
+    badge_ar = models.CharField("الشارة العلوية (عربي)", max_length=300, blank=True)
     badge_en = models.CharField("الشارة العلوية (إنجليزي)", max_length=300, blank=True)
     heading_ar = models.CharField("العنوان الرئيسي (عربي)", max_length=300)
     heading_en = models.CharField("العنوان الرئيسي (إنجليزي)", max_length=300, blank=True)
     desc_ar = models.TextField("الوصف (عربي)")
     desc_en = models.TextField("الوصف (إنجليزي)", blank=True)
-    cta_ar = models.CharField("زر الإجراء (عربي)", max_length=300)
+    cta_ar = models.CharField("زر الإجراء (عربي)", max_length=300, blank=True)
     cta_en = models.CharField("زر الإجراء (إنجليزي)", max_length=300, blank=True)
     cta_href = models.CharField(
         "رابط زر الإجراء", max_length=300, blank=True,
