@@ -387,6 +387,16 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
 
       {error && <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">{error}</p>}
 
+      {(() => {
+        const note = type === "sections" ? SHARED_CONTENT_NOTES[String(values.key ?? "")] : undefined;
+        return note ? (
+          <div className="flex items-start gap-2.5 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mt-0.5 shrink-0"><circle cx="12" cy="12" r="9" /><path d="M12 8h.01M11 12h1v4h1" /></svg>
+            <span><span className="font-bold">{t("محتوى مشترك: ", "Shared content: ")}</span>{en ? note.en : note.ar}</span>
+          </div>
+        ) : null;
+      })()}
+
       <div className="space-y-7 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-line sm:p-8">
         {rows.map(renderRow)}
       </div>
@@ -528,6 +538,18 @@ const HIDDEN_IN_FORM = new Set(["order", "page", "image"]);
 // أقسام صفحات تعرض صورة على الموقع ⇒ يظهر لها رافع الصورة (حتى قبل رفع صورة) وتُحتسب في الاكتمال.
 // بقية الأقسام (عناوين/نصوص) لا تعرض صورة، فلا نعرض لها رافعاً ولا نحسبها ناقصة.
 const IMAGE_SECTION_KEYS = new Set(["about-intro", "about-programs"]);
+// ملاحظات «محتوى مشترك»: أقسام تعرض بطاقات/محتوى تُديره صفحة أخرى — نوضّح للأدمن أين يُحرَّر فعلاً
+// (مفتاح القسم → رسالة). يُظهرها المحرّر كتنبيه بارز فوق الحقول.
+const SHARED_CONTENT_NOTES: Record<string, { ar: string; en: string }> = {
+  "about-specialists": {
+    ar: "بطاقات الأخصائيين المعروضة في هذا القسم تُدار من صفحة «روّادنا (الأخصائيون)». عدّل الأخصائيين هناك وسيظهر التعديل تلقائياً هنا. (من هنا تُحرَّر العنوان والجملة التوضيحية فقط.)",
+    en: "The specialist cards shown in this section are managed from the “Our Pioneers (Specialists)” page. Edit specialists there and the change appears here automatically. (Only the heading and description are edited here.)",
+  },
+  "about-branches": {
+    ar: "بطاقات الفروع المعروضة في هذا القسم تُدار من صفحة «مراكزنا (الفروع)». عدّل الفروع هناك وسيظهر التعديل تلقائياً هنا. (من هنا تُحرَّر العنوان والجملة التوضيحية فقط.)",
+    en: "The branch cards shown in this section are managed from the “Our Centers (Branches)” page. Edit branches there and the change appears here automatically. (Only the heading and description are edited here.)",
+  },
+};
 // حقول تقنية/اختيارية تُخفى إن كانت فارغة (تقليل التشويش لمن لا يحتاجها)
 // تشمل حقول البرامج الشرطية (قائمة الفئة المستهدفة + المحطات التطبيقية):
 // تظهر فقط في البرامج التي تستخدمها فعلاً على الصفحة، وتختفي في غيرها.
