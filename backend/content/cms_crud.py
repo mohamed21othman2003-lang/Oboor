@@ -259,6 +259,8 @@ def item(request, type_key, pk):
         return Response(data)
     if request.method == "DELETE":
         obj.delete()
+        from .preview import clear_preview_draft
+        clear_preview_draft(type_key, pk)  # لا تُبقِ مسودّة لعنصر محذوف
         return Response(status=status.HTTP_204_NO_CONTENT)
     if is_sub:
         return Response({"detail": "غير مسموح."}, status=403)
@@ -269,6 +271,9 @@ def item(request, type_key, pk):
             ser.save()
     except IntegrityError:
         return Response({"detail": "تعذّر الحفظ — قد يكون هناك تعارض في البيانات. حاول مجدداً."}, status=400)
+    # بعد الحفظ الفعلي: احذف أي مسودّة معاينة قديمة حتى لا تُظهر المعاينة محتوى متجاوَزاً
+    from .preview import clear_preview_draft
+    clear_preview_draft(type_key, pk)
     return Response(ser.data)
 
 

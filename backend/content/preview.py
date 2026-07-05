@@ -22,6 +22,12 @@ def get_preview_draft(type_key, pid):
     return row.data if row else None
 
 
+def clear_preview_draft(type_key, pid):
+    """يحذف مسودّة المعاينة لعنصر — يُستدعى بعد الحفظ/الحذف حتى لا تبقى مسودّة قديمة
+    تُظهر محتوى محذوفاً في وضع المعاينة (المسودّة يجب ألا تتجاوز عمرها الحفظ الفعلي)."""
+    PreviewDraft.objects.filter(type_key=type_key, obj_id=str(pid)).delete()
+
+
 def apply_draft(obj, draft):
     """يطبّق قيم المسودّة على نسخة الموديل في الذاكرة (بدون حفظ).
     يتجاهل حقول الصور/الملفات (الصور تُدار بالرفع، والمعاينة تُبقي الصورة الحالية)."""
