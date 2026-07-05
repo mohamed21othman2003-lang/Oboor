@@ -29,6 +29,7 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
   const [baseline, setBaseline] = useState<Record<string, unknown>>({});
   const [hasDefault, setHasDefault] = useState(false);
   const [readonly, setReadonly] = useState(false);
+  const [groupField, setGroupField] = useState<string | null>(null); // حقل التجميع (القسم) — مخفي، يُحدَّد عند الإضافة
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [resetting, setResetting] = useState(false);
@@ -56,8 +57,9 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
 
   useEffect(() => {
     setLoading(true);
+    let gf: string | null = null;
     const tasks: Promise<unknown>[] = [
-      getSchema(type).then((s) => { setFields(s.fields); setReadonly(s.readonly); }),
+      getSchema(type).then((s) => { setFields(s.fields); setReadonly(s.readonly); gf = s.group_field ?? null; setGroupField(gf); }),
     ];
     if (!isNew) tasks.push(getItem(type, id).then((it) => {
       const v = it as Record<string, unknown>;
@@ -66,11 +68,16 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
       setHasDefault(Boolean(v._has_default));
     }));
     else {
-      // عنصر جديد: ابدأ من قيم أوّليّة (قد تتضمّن الصفحة تلقائياً مثل «عن عبور»)،
-      // واجعل baseline مطابقاً لها حتى لا تُحسَب هذه الافتراضيات كتعديل — فيبقى الحفظ معطّلاً
-      // حتى يُدخل المستخدم محتوى حقيقياً.
+      // عنصر جديد: ابدأ من قيم أوّليّة — تتضمّن الصفحة (page) وحقل التجميع (القسم)
+      // القادمين من الرابط، لأن الإضافة تتم من داخل المجموعة. baseline مطابق حتى لا
+      // تُحسَب هذه الافتراضيات كتعديل، فيبقى الحفظ معطّلاً حتى يُدخل المستخدم محتوى.
+      const init: Record<string, unknown> = {};
       const pg = sp.get("page");
-      const init: Record<string, unknown> = pg ? { page: pg } : {};
+      if (pg) init.page = pg;
+      // بعد تحميل المخطّط نعرف حقل التجميع؛ نقرأ قيمته من الرابط
+      Promise.resolve(tasks[0]).then(() => {
+        if (gf) { const gv = sp.get(gf); if (gv) { setValues((p) => ({ ...p, [gf!]: gv })); setBaseline((p) => ({ ...p, [gf!]: gv })); } }
+      });
       setValues(init);
       setBaseline(init);
     }
@@ -161,6 +168,8 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
     const done = new Set<string>();
     for (const f of fields) {
       if (done.has(f.name) || HIDDEN_IN_FORM.has(f.name)) continue;
+      // حقل التجميع (القسم) مخفي — يُحدَّد عند الإضافة من داخل مجموعته، لا يُعدَّل من هنا
+      if (groupField && f.name === groupField) continue;
       // أخفِ الحقول التقنية الاختيارية الفارغة (icon/value/color/href) لتقليل التشويش
       if (HIDE_IF_EMPTY.has(f.name) && isEmpty(baseline[f.name])) continue;
       // أقسام الصفحات: المسار النصّي يُدار عبر الرافع؛ والرافع يظهر فقط للأقسام التي بها صورة
@@ -204,7 +213,7 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
     }
     return out;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fields, baseline, type, values.section, sectionBlock, isLinkBlock, en]);
+  }, [fields, baseline, type, values.section, sectionBlock, isLinkBlock, groupField, en]);
 
   async function onSave() {
     setSaving(true);

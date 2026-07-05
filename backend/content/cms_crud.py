@@ -298,7 +298,9 @@ def schema(request, type_key):
     Model, is_sub = _resolve(type_key)
     if Model is None:
         return Response({"detail": "نوع غير معروف."}, status=404)
-    return Response({"fields": _schema(Model), "readonly": is_sub})
+    # حقل التجميع (القسم) — يُحدَّد عند الإضافة من داخل مجموعته ويُخفى من المحرّر
+    group_field = CONTENT[type_key][2] if (not is_sub and len(CONTENT[type_key]) > 2) else None
+    return Response({"fields": _schema(Model), "readonly": is_sub, "group_field": group_field})
 
 
 @api_view(["POST"])

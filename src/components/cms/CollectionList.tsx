@@ -248,7 +248,8 @@ export default function CollectionList({ type }: { type: string }) {
           <h1 className="mt-1 text-2xl font-extrabold text-ink">{pageFilter ? pageLabel : label}</h1>
           <p className="mt-1 text-sm text-ink-soft">{(pageFilter ? pageItems.length : grouped ? grouped.reduce((n, g) => n + g.items.length, 0) : items.length)} {t("عنصر", "items")}</p>
         </div>
-        {!readonly && (
+        {/* زر الإضافة العلوي يظهر فقط عندما لا يوجد تجميع (وإلا الإضافة تكون من داخل كل قسم) */}
+        {!readonly && (pageFilter || !groupBy) && (
           <Link href={pageFilter ? `/cms/content/${type}/new?page=${pageFilter}` : `/cms/content/${type}/new`} className="inline-flex items-center gap-2 rounded-xl bg-brand px-4 py-2.5 text-sm font-bold text-white shadow-sm transition-colors hover:bg-brand-dark">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" d="M12 5v14M5 12h14" /></svg>
             {addLabelFor(type, lang)}
@@ -306,6 +307,15 @@ export default function CollectionList({ type }: { type: string }) {
                           <Table list={sg.items} hideSub />
                         </div>
                       )) : <Table list={g.items} />}
+                      {/* إضافة عنصر جديد داخل هذا القسم مباشرةً (القسم يُحدَّد تلقائياً) */}
+                      {!readonly && groupBy && g.key !== "__other__" && (
+                        <div className="pt-1">
+                          <Link href={`/cms/content/${type}/new?${groupBy}=${encodeURIComponent(g.key)}`} className="inline-flex items-center gap-1.5 rounded-xl border border-dashed border-brand/40 bg-brand/5 px-3.5 py-2 text-xs font-bold text-brand transition-colors hover:border-brand hover:bg-brand hover:text-white">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" d="M12 5v14M5 12h14" /></svg>
+                            {addLabelFor(type, lang)} — {groupLabel(g.label, lang)}
+                          </Link>
+                        </div>
+                      )}
                     </div>
                   );
                 })()}

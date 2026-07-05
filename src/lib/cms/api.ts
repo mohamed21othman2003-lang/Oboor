@@ -118,7 +118,7 @@ async function bumpSiteCache() {
 }
 
 export function getSchema(type: string) {
-  return cmsFetch<{ fields: FieldSchema[]; readonly: boolean }>(`/cms/collections/${type}/schema/`);
+  return cmsFetch<{ fields: FieldSchema[]; readonly: boolean; group_field?: string | null }>(`/cms/collections/${type}/schema/`);
 }
 export function listCollection(type: string) {
   return cmsFetch<{
