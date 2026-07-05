@@ -615,6 +615,7 @@ const FIELD_SECTIONS: Record<string, { title: string; title_en: string; bases: s
 // تظهر فقط في البرامج التي تستخدمها فعلاً على الصفحة، وتختفي في غيرها.
 const HIDE_IF_EMPTY = new Set([
   "icon", "value", "color", "href", "data_ar", "data_en",
+  "target_ar", "target_en",  // نص الفئة المستهدفة — بديل للقائمة؛ يظهر فقط للبرامج التي تستخدم النص
   "target_tags_ar", "target_tags_en",  // وسوم الفئة المستهدفة — تظهر فقط للبرامج التي تستخدمها
   "target_list_ar", "target_list_en",
   "stations_intro_ar", "stations_intro_en",
