@@ -5,13 +5,12 @@ import { pick, type Locale } from "@/i18n/config";
 import { validateName, validatePhone, validateRequired, validateEmail, stripDigits, digitsOnly } from "@/lib/validate";
 import CustomSelect, { type SelectOption } from "@/components/ui/Select";
 import LimitedTextarea from "@/components/ui/LimitedTextarea";
+import { caseOptions } from "@/lib/caseTypes";
 
 const CITIES = ["الرياض", "مكة المكرمة", "المدينة المنورة", "الشرقية", "القصيم", "عسير", "جازان", "الجوف"];
 const CITIES_EN = ["Riyadh", "Makkah", "Madinah", "Eastern Province", "Qassim", "Asir", "Jazan", "Al-Jouf"];
 const BRANCHES = ["فرع النرجس", "فرع العليا", "فرع الروضة", "فرع جدة", "فرع الشرقية", "فرع مكة"];
 const BRANCHES_EN = ["Al-Narjis Branch", "Al-Olaya Branch", "Al-Rawdah Branch", "Jeddah Branch", "Eastern Branch", "Makkah Branch"];
-const CASES = ["اضطراب طيف التوحد", "نقص الانتباه وفرط الحركة (ADHD)", "تأخر النطق واللغة", "صعوبات التعلم", "إعاقة حركية", "أخرى"];
-const CASES_EN = ["Autism Spectrum Disorder", "ADHD", "Speech & Language Delay", "Learning Difficulties", "Physical Disability", "Other"];
 
 export default function AdmissionForm({ locale, branchOptions }: { locale: Locale; branchOptions?: (string | SelectOption)[] }) {
   const [sent, setSent] = useState(false);
@@ -28,7 +27,7 @@ export default function AdmissionForm({ locale, branchOptions }: { locale: Local
   const branches = locale === "en" ? BRANCHES_EN : BRANCHES;
   // الفروع من الـCMS (تُمرَّر من الصفحة) مع fallback للقائمة الثابتة
   const branchList = branchOptions?.length ? branchOptions : branches;
-  const cases = locale === "en" ? CASES_EN : CASES;
+  const cases = caseOptions(locale === "en");
   const otherCase = pick(locale, "أخرى", "Other");
   const otherCity = pick(locale, "أخرى", "Other");
   const cityOptions = [...cities, otherCity];
