@@ -615,6 +615,7 @@ const FIELD_SECTIONS: Record<string, { title: string; title_en: string; bases: s
 // تظهر فقط في البرامج التي تستخدمها فعلاً على الصفحة، وتختفي في غيرها.
 const HIDE_IF_EMPTY = new Set([
   "icon", "value", "color", "href", "data_ar", "data_en",
+  "target_tags_ar", "target_tags_en",  // وسوم الفئة المستهدفة — تظهر فقط للبرامج التي تستخدمها
   "target_list_ar", "target_list_en",
   "stations_intro_ar", "stations_intro_en",
   "stations_ar", "stations_en",
@@ -656,9 +657,9 @@ const EVENT_FIELDS = new Set([
 // حقول مقفولة (تُعرض للاطلاع فقط؛ تغييرها يكسر مكان المحتوى)
 const LOCKED_FIELDS = new Set(["block"]);
 // قوائم بطاقات — كل عنصر كائن بخانات معنونة بسيطة (بدل JSON)
-const CARD_LIST_FIELDS: Record<string, { key: string; label: string; label_en?: string }[]> = {
+const CARD_LIST_FIELDS: Record<string, { key: string; label: string; label_en?: string; optional?: boolean }[]> = {
   methods: [
-    { key: "name", label: "اسم الأسلوب/المنهج (عنوان عريض — اختياري)", label_en: "Method/approach name (bold title — optional)" },
+    { key: "name", label: "اسم الأسلوب/المنهج (عنوان عريض)", label_en: "Method/approach name (bold title)", optional: true },
     { key: "desc", label: "وصف الأسلوب", label_en: "Method description" },
   ],
   training_areas: [
@@ -1082,9 +1083,10 @@ function ObjectEditor({ value, onChange, fields, dir }: { value: unknown; onChan
 }
 
 // محرّر قائمة بطاقات — كل عنصر كائن بخانات معنونة (بدل قائمة JSON مركّبة)
-function CardListEditor({ value, onChange, fields, dir, addLabel, iconPicker }: { value: unknown; onChange: (v: unknown) => void; fields: { key: string; label: string; label_en?: string }[]; dir?: string; addLabel?: string; iconPicker?: boolean }) {
+function CardListEditor({ value, onChange, fields, dir, addLabel, iconPicker }: { value: unknown; onChange: (v: unknown) => void; fields: { key: string; label: string; label_en?: string; optional?: boolean }[]; dir?: string; addLabel?: string; iconPicker?: boolean }) {
   const { lang } = useCmsLang();
   const en = lang === "en";
+  const [reveal, setReveal] = useState<Record<string, boolean>>({}); // إظهار حقل اختياري فارغ عند الطلب
   const flLabel = (fl: { label: string; label_en?: string }) => (en ? (fl.label_en || fl.label) : fl.label);
   const addTxt = addLabel ?? (en ? "Add Item" : "إضافة عنصر");
   const items = (Array.isArray(value) ? value : []).filter((x) => x && typeof x === "object" && !Array.isArray(x)) as Record<string, unknown>[];
@@ -1101,12 +1103,24 @@ function CardListEditor({ value, onChange, fields, dir, addLabel, iconPicker }: 
             <button type="button" onClick={() => remove(i)} className="rounded-lg bg-red-50 px-2.5 py-1.5 text-xs font-semibold text-red-600 transition-colors hover:bg-red-600 hover:text-white">{en ? "Remove" : "حذف"}</button>
           </div>
           <div className="space-y-2">
-            {fields.map((fl) => (
-              <div key={fl.key}>
-                <p className="mb-1 text-xs font-semibold text-ink-soft">{flLabel(fl)}</p>
-                <AutoTextarea value={String(it[fl.key] ?? "")} onChange={(v) => update(i, fl.key, v)} dir={dir} className={INPUT + " bg-white"} />
-              </div>
-            ))}
+            {fields.map((fl) => {
+              // حقل اختياري فارغ: نخفيه ونعرض زر «+ إضافة» بدله لتقليل التشويش
+              const rk = `${i}:${fl.key}`;
+              if (fl.optional && !String(it[fl.key] ?? "").trim() && !reveal[rk]) {
+                return (
+                  <button key={fl.key} type="button" onClick={() => setReveal((p) => ({ ...p, [rk]: true }))} className="inline-flex items-center gap-1 rounded-lg border border-dashed border-line px-2.5 py-1 text-[11px] font-semibold text-ink-soft transition-colors hover:border-brand/40 hover:text-brand">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path strokeLinecap="round" d="M12 5v14M5 12h14" /></svg>
+                    {en ? `Add ${flLabel(fl)}` : `إضافة ${flLabel(fl)}`}
+                  </button>
+                );
+              }
+              return (
+                <div key={fl.key}>
+                  <p className="mb-1 text-xs font-semibold text-ink-soft">{flLabel(fl)}</p>
+                  <AutoTextarea value={String(it[fl.key] ?? "")} onChange={(v) => update(i, fl.key, v)} dir={dir} className={INPUT + " bg-white"} />
+                </div>
+              );
+            })}
             {iconPicker && (
               <div>
                 <p className="mb-1 text-xs font-semibold text-ink-soft">{en ? "Icon" : "الأيقونة"}</p>
