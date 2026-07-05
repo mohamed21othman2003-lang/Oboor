@@ -51,6 +51,16 @@ export default function CollectionList({ type }: { type: string }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState<number | null>(null);
+  const [zoom, setZoom] = useState(""); // صورة معروضة بالحجم الكامل عند الضغط على المصغّرة
+  const [bust] = useState(() => Date.now()); // كاسر كاش ليعرض أحدث صورة لا نسخة قديمة
+
+  // رابط صورة العنصر (إن وُجد) بعد تحليله وإضافة كاسر الكاش — لعرض مصغّرة في القائمة
+  function imageOf(it: CmsItem): string {
+    const raw = String(it.image ?? it.image_file ?? "");
+    if (!raw) return "";
+    const resolved = /^(https?:|data:|blob:|\/)/.test(raw) ? raw : "/" + raw.replace(/^\/+/, "");
+    return /^(https?:|\/)/.test(resolved) ? `${resolved}${resolved.includes("?") ? "&" : "?"}v=${bust}` : resolved;
+  }
 
   const label = typeLabel(type, lang);
 
@@ -179,8 +189,24 @@ export default function CollectionList({ type }: { type: string }) {
           </td>
         )}
         <td className="px-5 py-3.5">
-          <p className="font-semibold text-ink">{titleOf(it)}</p>
-          {sub && <p className="mt-0.5 text-xs text-ink-soft">{t("القسم:", "Section:")} {sub}</p>}
+          <div className="flex items-center gap-3">
+            {(() => {
+              const img = imageOf(it);
+              return img ? (
+                <button type="button" onClick={() => setZoom(img)} title={t("اضغط لعرض الصورة", "Click to view")} className="group relative h-11 w-11 shrink-0 overflow-hidden rounded-lg ring-1 ring-line">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={img} alt="" className="h-full w-full object-cover" />
+                  <span className="absolute inset-0 flex items-center justify-center text-white opacity-0 transition-all group-hover:bg-black/35 group-hover:opacity-100">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3M11 8v6M8 11h6" /></svg>
+                  </span>
+                </button>
+              ) : null;
+            })()}
+            <div className="min-w-0">
+              <p className="font-semibold text-ink">{titleOf(it)}</p>
+              {sub && <p className="mt-0.5 text-xs text-ink-soft">{t("القسم:", "Section:")} {sub}</p>}
+            </div>
+          </div>
         </td>
         <td className="px-5 py-3.5 w-28">
           {pub === null ? <span className="text-ink-soft">—</span>
@@ -289,6 +315,16 @@ export default function CollectionList({ type }: { type: string }) {
         </div>
       ) : (
         <Table list={items} />
+      )}
+
+      {zoom && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/80 p-4 sm:p-8" onClick={() => setZoom("")}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={zoom} alt="" className="max-h-[90vh] max-w-[92vw] rounded-xl object-contain shadow-2xl" onClick={(e) => e.stopPropagation()} />
+          <button type="button" onClick={() => setZoom("")} aria-label={t("إغلاق", "Close")} className="absolute end-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur transition-colors hover:bg-white/30">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
+          </button>
+        </div>
       )}
     </div>
   );
