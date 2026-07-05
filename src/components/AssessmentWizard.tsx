@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { validateName, validatePhone, stripDigits, digitsOnly } from "@/lib/validate";
+import { validateName, validatePhone, validateEmail, stripDigits, digitsOnly } from "@/lib/validate";
 import CustomSelect, { type SelectOption } from "@/components/ui/Select";
 import { getAssessments, getQuestionsFor, getAnswerOptions, type Assessment } from "@/lib/assessmentData";
 import { pick, type Locale } from "@/i18n/config";
@@ -60,10 +60,24 @@ export default function AssessmentWizard({
   function submitData(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
-    const nameErr = validateName(String(fd.get("parentName") || ""), locale);
+    const parentName = String(fd.get("parentName") || "");
+    const phone = String(fd.get("phone") || "");
+    const email = String(fd.get("email") || "");
+    const childName = String(fd.get("childName") || "");
+    const age = String(fd.get("age") || "");
+    const gender = String(fd.get("gender") || "");
+    const cityValue = city === CITY_OTHER ? cityOther.trim() : city;
+    // كل الحقول إجبارية — نتحقق منها بالترتيب ونعرض أول خطأ
+    const nameErr = validateName(parentName, locale);
     if (nameErr) { setError(nameErr); return; }
-    const phoneErr = validatePhone(String(fd.get("phone") || ""), locale);
+    const phoneErr = validatePhone(phone, locale);
     if (phoneErr) { setError(phoneErr); return; }
+    const emailErr = validateEmail(email, locale);
+    if (emailErr) { setError(emailErr); return; }
+    if (!childName.trim()) { setError(pick(locale, "الرجاء إدخال اسم الطفل.", "Please enter the child's name.")); return; }
+    if (!age.trim()) { setError(pick(locale, "الرجاء إدخال عمر الطفل.", "Please enter the child's age.")); return; }
+    if (!gender.trim()) { setError(pick(locale, "الرجاء اختيار الجنس.", "Please select the gender.")); return; }
+    if (!cityValue.trim()) { setError(pick(locale, "الرجاء اختيار المدينة.", "Please select the city.")); return; }
     if (!branch.trim()) { setError(pick(locale, "الرجاء اختيار الفرع.", "Please choose a branch.")); return; }
     setError("");
     const payload = {
@@ -72,13 +86,13 @@ export default function AssessmentWizard({
       level,
       score,
       answers: PRELIM_QUESTIONS.map((q, i) => ({ q, a: answers[i] })),
-      parentName: String(fd.get("parentName") || ""),
-      phone: String(fd.get("phone") || ""),
-      email: String(fd.get("email") || ""),
-      childName: String(fd.get("childName") || ""),
-      age: String(fd.get("age") || ""),
-      gender: String(fd.get("gender") || ""),
-      city: city === CITY_OTHER ? cityOther.trim() : city,
+      parentName,
+      phone,
+      email,
+      childName,
+      age,
+      gender,
+      city: cityValue,
       branch,
     };
     setStep(3); // النتيجة تظهر فورًا
@@ -177,13 +191,13 @@ export default function AssessmentWizard({
             <Field name="parentName" label={pick(locale, "اسم ولي الأمر", "Parent's Name")} required placeholder={pick(locale, "الاسم الكامل", "Full name")} filter="name" />
             <Field name="phone" label={pick(locale, "رقم الجوال", "Mobile Number")} required type="tel" placeholder="05XXXXXXXX" filter="phone" />
             <div className="sm:col-span-2">
-              <Field name="email" label={pick(locale, "البريد الإلكتروني", "Email")} type="email" placeholder="name@example.com" />
+              <Field name="email" label={pick(locale, "البريد الإلكتروني", "Email")} required type="email" placeholder="name@example.com" />
             </div>
             <Field name="childName" label={pick(locale, "اسم الطفل", "Child's Name")} required placeholder={pick(locale, "اسم الطفل", "Child's name")} filter="name" />
             <Field name="age" label={pick(locale, "العمر (بالسنوات)", "Age (years)")} required placeholder={pick(locale, "مثال: 6", "Example: 6")} filter="digits" />
-            <Select name="gender" label={pick(locale, "الجنس", "Gender")} placeholder={pick(locale, "اختر الجنس", "Select gender")} options={[pick(locale, "ذكر", "Male"), pick(locale, "أنثى", "Female")]} />
+            <Select name="gender" label={pick(locale, "الجنس", "Gender")} required placeholder={pick(locale, "اختر الجنس", "Select gender")} options={[pick(locale, "ذكر", "Male"), pick(locale, "أنثى", "Female")]} />
             <div>
-              <label className="block text-start text-sm font-semibold text-ink">{pick(locale, "المدينة", "City")}</label>
+              <label className="block text-start text-sm font-semibold text-ink">{pick(locale, "المدينة", "City")} <span className="text-danger">*</span></label>
               <div className="mt-1.5">
                 <CustomSelect
                   value={city}
@@ -288,10 +302,10 @@ function Field({ label, name, required, type = "text", placeholder, filter }: { 
   );
 }
 
-function Select({ label, name, placeholder, options }: { label: string; name: string; placeholder: string; options: string[] }) {
+function Select({ label, name, placeholder, options, required }: { label: string; name: string; placeholder: string; options: string[]; required?: boolean }) {
   return (
     <div>
-      <label className="block text-start text-sm font-semibold text-ink">{label}</label>
+      <label className="block text-start text-sm font-semibold text-ink">{label} {required && <span className="text-danger">*</span>}</label>
       <div className="mt-1.5">
         <CustomSelect name={name} placeholder={placeholder} options={options} />
       </div>

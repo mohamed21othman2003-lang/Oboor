@@ -6,8 +6,13 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     const { parentName, phone } = body ?? {};
-    if (!parentName || !phone || !String(body?.branch || "").trim()) {
-      return NextResponse.json({ ok: false, error: "اسم ولي الأمر ورقم الجوال والفرع مطلوبة" }, { status: 400 });
+    // كل حقول بيانات التواصل إجبارية (حارس خادمي نهائي)
+    const required: Record<string, unknown> = {
+      parentName, phone, email: body?.email, childName: body?.childName,
+      age: body?.age, gender: body?.gender, city: body?.city, branch: body?.branch,
+    };
+    if (Object.values(required).some((val) => !String(val || "").trim())) {
+      return NextResponse.json({ ok: false, error: "الرجاء تعبئة جميع الحقول الإلزامية." }, { status: 400 });
     }
     const outcome = await forwardJson("assessment", {
       assessment: body.assessment || "", assessment_slug: body.assessmentSlug || "",
