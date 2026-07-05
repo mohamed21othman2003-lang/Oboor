@@ -193,7 +193,11 @@ export default function NewsBrowser({ locale, categories, workshopFeatured, work
         <div className="flex flex-wrap items-center justify-center gap-3 border-b border-line pb-px">
           {categories.map((c, i) => (
             <button key={c.label} onClick={() => selectTab(i)} className={`-mb-px flex items-center gap-2 border-b-2 px-3 pb-3 text-sm font-bold transition-colors sm:text-base ${i === tab ? "border-brand text-brand" : "border-transparent text-ink-muted hover:text-brand"}`}>
-              {c.count !== undefined && <span className={`flex h-5 min-w-[20px] items-center justify-center rounded-full px-1 text-xs ${i === tab ? "bg-brand text-white" : "bg-surface text-ink-soft"}`}>{c.count}</span>}
+              {i === 0 && (
+                <span className={`flex h-5 w-5 items-center justify-center rounded-full ${i === tab ? "bg-brand text-white" : "bg-surface text-ink-soft"}`}>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><rect x="3" y="3" width="7" height="7" rx="1.5" /><rect x="14" y="3" width="7" height="7" rx="1.5" /><rect x="3" y="14" width="7" height="7" rx="1.5" /><rect x="14" y="14" width="7" height="7" rx="1.5" /></svg>
+                </span>
+              )}
               {c.label}
             </button>
           ))}

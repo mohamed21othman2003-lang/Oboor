@@ -100,7 +100,6 @@ export default async function NewsPage() {
   const categories = sections?.categories
     ? sections.categories.map((row) => ({
         label: en ? row.title_en || row.title_ar : row.title_ar,
-        ...(row.value ? { count: Number(row.value) } : {}),
       }))
     : en
       ? NEWS_CATEGORIES_EN
