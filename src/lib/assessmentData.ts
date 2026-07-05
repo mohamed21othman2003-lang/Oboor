@@ -128,6 +128,18 @@ export const ASSESSMENTS_EN: Assessment[] = [
   { slug: "sensory", title: "Sensory Profile", desc: "Assessment of sensory responses and sensory information processing in the child.", icon: "sensory", duration: "6 minutes", questions: "15 questions", ageRange: "3 - 10 years" },
 ];
 
+// خيارات فلتر «نوع التقييم» للـCMS: أنواع التقييمات القياسية (كما في الويبسايت)
+// + أي قيم إضافية موجودة فعلاً في البيانات (مثل عناوين قديمة أو مُعاد تسميتها).
+// القيمة = العنوان العربي كما يُخزَّن، والعرض حسب لغة اللوحة.
+export function assessmentTypeFilterOptions(existing: string[], en: boolean): { value: string; label: string }[] {
+  const canonical = ASSESSMENTS.map((a, i) => ({ value: a.title, label: en ? ASSESSMENTS_EN[i].title : a.title }));
+  const known = new Set(ASSESSMENTS.map((a) => a.title));
+  const extra = [...new Set(existing.filter(Boolean))]
+    .filter((tp) => !known.has(tp))
+    .map((tp) => ({ value: tp, label: tp }));
+  return [...canonical, ...extra];
+}
+
 export const PRELIM_QUESTIONS_EN = [
   "Does your child communicate verbally in a way appropriate for their age?",
   "Does your child respond when called by their name?",

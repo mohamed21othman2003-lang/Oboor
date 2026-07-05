@@ -4,6 +4,7 @@ import { Fragment, useMemo, useState } from "react";
 import Link from "next/link";
 import CustomSelect from "@/components/ui/Select";
 import { branchFilterOptions } from "@/lib/branchesData";
+import { assessmentTypeFilterOptions } from "@/lib/assessmentData";
 import { type CmsItem } from "@/lib/cms/api";
 import { exportSheet } from "@/lib/cms/exportSheet";
 import { useCmsLang } from "@/lib/cms/i18n";
@@ -85,7 +86,7 @@ export default function AssessmentResultsTable({
   const [open, setOpen] = useState<number | null>(null);
   const [menu, setMenu] = useState<number | null>(null);
 
-  const typeOpts = useMemo(() => [{ value: "", label: t("كل الأنواع", "All Types") }, ...uniq(items.map((it) => v(it, "assessment"))).map((tp) => ({ value: tp, label: tp }))], [items, en]);
+  const typeOpts = useMemo(() => [{ value: "", label: t("كل الأنواع", "All Types") }, ...assessmentTypeFilterOptions(items.map((it) => v(it, "assessment")), en)], [items, en]);
   const sevOpts = useMemo(() => [{ value: "", label: t("كل المستويات", "All Levels") }, ...uniq(items.map((it) => v(it, "level"))).map((l) => ({ value: l, label: levelInfo(l, en).label }))], [items, en]);
   const rangeOpts = [{ value: "", label: t("كل الوقت", "All Time") }, { value: "today", label: t("اليوم", "Today") }, { value: "7", label: t("آخر ٧ أيام", "Last 7 Days") }, { value: "30", label: t("آخر ٣٠ يوم", "Last 30 Days") }];
   const branchOpts = useMemo(() => [{ value: "", label: t("كل الفروع", "All Branches") }, ...branchFilterOptions(items.map((it) => v(it, "branch")), en)], [items, en]);
