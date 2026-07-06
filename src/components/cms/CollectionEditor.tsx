@@ -1045,6 +1045,7 @@ function GalleryEditor({ value, onChange }: { value: unknown; onChange: (v: unkn
   const urls = (Array.isArray(value) ? value : []).filter((x) => typeof x === "string") as string[];
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
+  const [zoom, setZoom] = useState(""); // الصورة المعروضة بالحجم الكامل عند الضغط
 
   async function onFiles(e: React.ChangeEvent<HTMLInputElement>) {
     const files = [...(e.target.files || [])];
@@ -1080,7 +1081,13 @@ function GalleryEditor({ value, onChange }: { value: unknown; onChange: (v: unkn
         {urls.map((u, i) => (
           <div key={u + i} className="group relative aspect-square overflow-hidden rounded-xl ring-1 ring-line">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={u} alt="" className="h-full w-full object-cover" />
+            <button type="button" onClick={() => setZoom(u)} title={t("اضغط لعرض الصورة", "Click to view")} className="block h-full w-full">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={u} alt="" className="h-full w-full object-cover" />
+              <span className="pointer-events-none absolute inset-0 flex items-center justify-center text-white opacity-0 transition-all group-hover:bg-black/25 group-hover:opacity-100">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3M11 8v6M8 11h6" /></svg>
+              </span>
+            </button>
             <div className="absolute inset-x-0 bottom-0 flex items-center justify-between bg-black/45 px-1.5 py-1 opacity-0 transition-opacity group-hover:opacity-100">
               <button type="button" onClick={() => move(i, -1)} disabled={i === 0} className="rounded p-0.5 text-white/90 hover:text-white disabled:opacity-30" title={t("لليمين", "Move earlier")}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" d="M9 6l6 6-6 6" /></svg>
@@ -1106,6 +1113,15 @@ function GalleryEditor({ value, onChange }: { value: unknown; onChange: (v: unkn
       </div>
       {urls.length === 0 && <p className="mt-2 text-xs text-ink-soft">{t("لا توجد صور بعد — اضغط «إضافة صور» لرفع صور هذا الفرع.", "No images yet — click “Add Images” to upload this branch's photos.")}</p>}
       {err && <p className="mt-1 text-xs text-red-600">{err}</p>}
+      {zoom && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/80 p-4 sm:p-8" onClick={() => setZoom("")}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={zoom} alt="" className="max-h-[90vh] max-w-[92vw] rounded-xl object-contain shadow-2xl" onClick={(e) => e.stopPropagation()} />
+          <button type="button" onClick={() => setZoom("")} aria-label={t("إغلاق", "Close")} className="absolute end-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur transition-colors hover:bg-white/30">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
+          </button>
+        </div>
+      )}
     </div>
   );
 }
