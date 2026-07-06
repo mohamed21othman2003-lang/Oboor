@@ -1216,12 +1216,6 @@ const BLOCK_KIND_LABEL_EN: Record<string, string> = {
   areas: "Areas (title + description per area)",
 };
 
-function blockSkeleton(kind: string): Rec {
-  if (kind === "prose") return { kind, heading: "", paragraphs: [] };
-  if (kind === "agePrograms") return { kind, heading: "", adult: { title: "", sub: "", label: "" }, child: { title: "", label: "", levels: [] } };
-  return { kind, heading: "", intro: "", items: [] };
-}
-
 // حقل نصّي ثنائي اللغة (عربي يمين / إنجليزي يسار)
 function BiScalar({ label, a, e, onA, onE }: { label: string; a: string; e: string; onA: (v: string) => void; onE: (v: string) => void }) {
   return (
@@ -1353,14 +1347,12 @@ function BlocksEditor({ ar, en, onChange }: { ar: unknown[]; en: unknown[]; onCh
   const { lang } = useCmsLang();
   const isEn = lang === "en";
   const tt = (arTxt: string, e: string) => (isEn ? e : arTxt);
-  const [addKind, setAddKind] = useState("cards");
   const n = Math.max(ar.length, en.length);
   const pairs = Array.from({ length: n }, (_, i) => ({ a: blkObj(ar[i]), e: blkObj(en[i] ?? ar[i]) }));
   const commit = (next: { a: Rec; e: Rec }[]) => onChange(next.map((p) => p.a), next.map((p) => p.e));
   const patch = (i: number, av: Rec, ev: Rec) => commit(pairs.map((p, j) => (j === i ? { a: av, e: ev } : p)));
   const move = (i: number, dir: -1 | 1) => { const j = i + dir; if (j < 0 || j >= n) return; const next = [...pairs]; [next[i], next[j]] = [next[j], next[i]]; commit(next); };
   const removeAt = (i: number) => commit(pairs.filter((_, j) => j !== i));
-  const add = () => commit([...pairs, { a: blockSkeleton(addKind), e: blockSkeleton(addKind) }]);
 
   return (
     <div className="space-y-4">
@@ -1443,17 +1435,6 @@ function BlocksEditor({ ar, en, onChange }: { ar: unknown[]; en: unknown[]; onCh
           </div>
         );
       })}
-      <div className="flex flex-wrap items-center gap-2 border-t border-line pt-3">
-        <span className="text-xs font-semibold text-ink-soft">{tt("إضافة قسم جديد:", "Add a new section:")}</span>
-        <div className="w-48">
-          <CustomSelect
-            value={addKind}
-            onChange={setAddKind}
-            options={Object.entries(isEn ? BLOCK_KIND_LABEL_EN : BLOCK_KIND_LABEL).map(([k, l]) => ({ value: k, label: String(l) }))}
-          />
-        </div>
-        <button type="button" onClick={add} className="inline-flex items-center gap-1 rounded-lg bg-brand px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-dark">+ {tt("إضافة القسم", "Add Section")}</button>
-      </div>
     </div>
   );
 }
