@@ -82,8 +82,11 @@ export default async function SpecialistsPage() {
     loadBranches(locale),
     getWhatsAppUrl(),
   ]);
-  // صورة قسم «انضم إلى الفريق» من الـCMS مع fallback للصورة الثابتة
-  const joinImg = sections?.join?.[0]?.image || "/figma/specialists/team.jpg";
+  // قسم «انضم إلى الفريق» من الـCMS (العنوان + الوصف + الصورة) مع fallback ثابت
+  const joinItem = sections?.join?.[0];
+  const joinImg = joinItem?.image || "/figma/specialists/team.jpg";
+  const joinHeading = (en ? joinItem?.title_en || joinItem?.title_ar : joinItem?.title_ar) || "";
+  const joinDesc = (en ? joinItem?.text_en || joinItem?.text_ar : joinItem?.text_ar) || "";
 
   // القائمة الكاملة لتخصصات وفروع عبور (تظهر في الفلتر حتى قبل إضافة كل الأخصائيين)
   const specialtyOptions = pick(
@@ -196,9 +199,9 @@ export default async function SpecialistsPage() {
               {pick(locale, "انضم إلى فريقنا", "Join Our Team")}
               <UsersIcon small />
             </span>
-            <h2 className="mt-5 text-3xl font-extrabold leading-tight text-ink sm:text-4xl">{pick(locale, "انضم إلى فريق ", "Join the ")}<span className="text-brand">{pick(locale, "الأخصائيين", "Specialists")}</span>{pick(locale, "", " Team")}</h2>
+            <h2 className="mt-5 text-3xl font-extrabold leading-tight text-ink sm:text-4xl">{joinHeading ? hl(joinHeading) : <>{pick(locale, "انضم إلى فريق ", "Join the ")}<span className="text-brand">{pick(locale, "الأخصائيين", "Specialists")}</span>{pick(locale, "", " Team")}</>}</h2>
             <p className="mt-5 text-base leading-8 text-ink-muted">
-              {pick(
+              {joinDesc || pick(
                 locale,
                 "إذا كنت أخصائيًا في مجالات التأهيل المختلفة وترغب في الانضمام إلى فريقنا، يسعدنا تواصلك معنا. نبحث دائماً عن متخصصين شغوفين يشاركوننا رؤيتنا في تقديم رعاية استثنائية للأطفال وأسرهم.",
                 "If you are a specialist in any of the various fields of rehabilitation and would like to join our team, we would be delighted to hear from you. We are always looking for passionate professionals who share our vision of providing exceptional care for children and their families.",

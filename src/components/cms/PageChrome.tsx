@@ -115,7 +115,7 @@ const ITEM_LABELS: Record<string, string> = {
   "hero.badge": "الوسم العلوي",
   "hero.heading": "العنوان + الوصف + الصورة",
   "hero.stat": "الشارة العائمة (العدّاد)",
-  "join.visual": "صورة قسم «انضم إلى الفريق»",
+  "join.visual": "قسم «انضم إلى الفريق» (العنوان + الوصف + الصورة)",
   "hero.map_heading": "عنوان قسم الخريطة",
   "hero.features_heading": "عنوان قسم المميزات",
   "hero.why_heading": "عنوان قسم «لماذا هذا التقييم»",
@@ -147,7 +147,7 @@ const ITEM_LABELS: Record<string, string> = {
 const ITEM_LABELS_EN: Record<string, string> = {
   "hero.badge": "Top badge",
   "hero.heading": "Heading + description + image",
-  "join.visual": "“Join the Team” section image",
+  "join.visual": "“Join the Team” section (heading + text + image)",
   "hero.stat": "Floating badge (counter)",
   "hero.map_heading": "Map section heading",
   "hero.features_heading": "Features section heading",
@@ -179,6 +179,7 @@ const ITEM_LABELS_EN: Record<string, string> = {
 };
 // تسميات مخصّصة لحقلَي «العنوان/النص» حسب العنصر (لتوضيح ما يمثّله كل حقل)
 const FIELD_LABELS: Record<string, { title?: string; text?: string }> = {
+  "join.visual": { title: "العنوان", text: "الوصف" },
   "hero.chrome": { title: "الوسم العلوي", text: "نص زر الإجراء" },
   "hero.heading": { title: "العنوان", text: "الجملة التوضيحية" },
   "hero.map_heading": { title: "العنوان", text: "الجملة التوضيحية" },
@@ -205,6 +206,7 @@ const FIELD_LABELS: Record<string, { title?: string; text?: string }> = {
   "certs.cert4": { title: "اسم/كود الشهادة", text: "التصنيف" },
 };
 const FIELD_LABELS_EN: Record<string, { title?: string; text?: string }> = {
+  "join.visual": { title: "Heading", text: "Description" },
   "hero.chrome": { title: "Top badge", text: "Action button text" },
   "hero.heading": { title: "Heading", text: "Descriptive line" },
   "hero.map_heading": { title: "Heading", text: "Descriptive line" },
@@ -234,10 +236,12 @@ const FIELD_LABELS_EN: Record<string, { title?: string; text?: string }> = {
 const ITEM_NOTES: Record<string, string> = {
   "hero.stat": "الرقم يُحسب تلقائياً = عدد الوظائف المنشورة (يتحدّث وحده عند الإضافة أو الحذف). أنت تتحكّم فقط في «العنوان» و«النص» حوله.",
   "list.header": "الرقم يُحسب تلقائياً = عدد الوظائف المنشورة. أنت تتحكّم فقط في النصوص حوله.",
+  "join.visual": "هذا العنوان والوصف والصورة يظهرون في قسم «انضم إلى الفريق» بصفحة الأخصائيين. البطاقات الأربعة تُدار من قسم «بطاقات الانضمام» بالأسفل. (لتمييز جزء من العنوان بلون مختلف ضعه بين نجمتين **هكذا**).",
 };
 const ITEM_NOTES_EN: Record<string, string> = {
   "hero.stat": "The number is calculated automatically = the count of published jobs (it updates on its own when you add or delete). You only control the “title” and “text” around it.",
   "list.header": "The number is calculated automatically = the count of published jobs. You only control the text around it.",
+  "join.visual": "This heading, description and image appear in the “Join the Team” section on the Specialists page. The four cards are managed in the “Join cards” section below. (Wrap part of the heading in **asterisks** to highlight it).",
 };
 
 // ملاحظة تعريفية لكل قسم (المفتاح = «الصفحة.البلوك») — توضّح أين يظهر المحتوى على الموقع
