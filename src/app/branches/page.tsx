@@ -10,6 +10,7 @@ import { pick } from "@/i18n/config";
 import { loadBranches } from "@/lib/server/branches";
 import { fetchSections } from "@/lib/server/django";
 import { hl } from "@/lib/highlight";
+import { CMS_ICONS } from "@/lib/cms/icons";
 import CtaSection from "@/components/CtaSection";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -117,7 +118,7 @@ export default async function BranchesPage() {
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {branchFeatures.map((f) => (
               <div key={f.title} className="rounded-2xl border border-line bg-white p-6 text-center shadow-sm">
-                <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-brand/10 text-brand">{FEATURE_ICONS[f.icon]}</span>
+                <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-brand/10 text-brand">{CMS_ICONS[f.icon] ?? CMS_ICONS.building}</span>
                 <h3 className="mt-4 text-base font-bold text-ink">{f.title}</h3>
                 <p className="mt-2 text-sm leading-7 text-ink-muted">{f.desc}</p>
               </div>
@@ -136,13 +137,6 @@ export default async function BranchesPage() {
     </>
   );
 }
-
-const FEATURE_ICONS: Record<string, React.ReactNode> = {
-  graduation: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5z" /><path d="M6 12v5c0 1 2.7 2.5 6 2.5s6-1.5 6-2.5v-5" /></svg>,
-  shield: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2l8 3v6c0 5-3.4 8.6-8 11-4.6-2.4-8-6-8-11V5z" /><path d="M9 12l2 2 4-4" /></svg>,
-  heart: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z" /></svg>,
-  building: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="3" width="16" height="18" rx="2" /><path d="M9 7h2M13 7h2M9 11h2M13 11h2M9 15h2M13 15h2" /></svg>,
-};
 
 function ZoomBtn({ children }: { children: React.ReactNode }) {
   return <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-ink-muted shadow">{children}</span>;

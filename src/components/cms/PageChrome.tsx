@@ -5,6 +5,7 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import { listCollection, updateItem, createItem, deleteItem, uploadField, type CmsItem } from "@/lib/cms/api";
 import { useCmsLang } from "@/lib/cms/i18n";
+import { CMS_ICONS, ICON_LABELS } from "@/lib/cms/icons";
 // تحميل مكوّن قصّ الصورة عند الحاجة فقط
 const ImageCropModal = dynamic(() => import("@/components/cms/ImageCropModal"), { ssr: false });
 
@@ -19,6 +20,10 @@ const LIST_BLOCKS = new Set([
   "accreditations", "journey", "profile_stats", "join_cards",
   "features", "stats", "steps", "services",
 ]);
+// أقسام تعرض لكل عنصر أيقونة قابلة للاختيار (المفتاح = اسم البلوك، القيمة = الأيقونات المتاحة)
+const ICON_BLOCK_NAMES: Record<string, string[]> = {
+  features: ["graduation", "shield", "heart", "building", "team", "book", "target", "star", "trophy", "bulb", "hand", "activity", "clipboard", "list"],
+};
 // نص زر الإضافة محدّد لكل قسم
 // رابط الصفحة الحقيقية لكل صفحة (لزر «عاين الصفحة»)
 const PAGE_URL: Record<string, string> = {
@@ -320,7 +325,7 @@ export default function PageChrome({ page }: { page: string }) {
     try {
       const e = edits[it.id] || {};
       const payload: Record<string, unknown> = {};
-      for (const k of ["title_ar", "title_en", "text_ar", "text_en", "value"]) if (k in e) payload[k] = e[k];
+      for (const k of ["title_ar", "title_en", "text_ar", "text_en", "value", "icon"]) if (k in e) payload[k] = e[k];
       if (Object.keys(payload).length) {
         const saved = await updateItem("sections", it.id, payload) as CmsItem;
         setItems((prev) => prev.map((x) => (x.id === it.id ? saved : x)));
@@ -357,7 +362,9 @@ export default function PageChrome({ page }: { page: string }) {
     try {
       const orders = items.filter((i) => String(i.block) === block).map((i) => Number(i.order) || 0);
       const order = (orders.length ? Math.max(...orders) : -1) + 1;
-      const created = await createItem("sections", { page, block, order, title_ar: "", title_en: "" }) as CmsItem;
+      const base: Record<string, unknown> = { page, block, order, title_ar: "", title_en: "" };
+      if (ICON_BLOCK_NAMES[block]) base.icon = ICON_BLOCK_NAMES[block][0];
+      const created = await createItem("sections", base) as CmsItem;
       setItems((prev) => [...prev, created]);
     } catch (e) { setErr(e instanceof Error ? e.message : t("تعذّر الإضافة.", "Could not add.")); }
     finally { setAddingBlock(null); }
@@ -449,6 +456,19 @@ export default function PageChrome({ page }: { page: string }) {
                       <p className="mb-2 text-xs font-bold text-ink">{(en ? ITEM_LABELS_EN[key] : ITEM_LABELS[key]) || ITEM_LABELS[key] || String(it.title_ar || it.key || "")}</p>
                       {ITEM_NOTES[key] && <p className="mb-2 rounded-lg bg-brand/5 px-3 py-2 text-[11px] leading-5 text-ink-soft">ℹ️ {(en ? ITEM_NOTES_EN[key] : ITEM_NOTES[key]) || ITEM_NOTES[key]}</p>}
                       <div className="space-y-2">
+                        {ICON_BLOCK_NAMES[g.block] && (
+                          <div>
+                            <p className="mb-1 text-xs font-semibold text-ink-soft">{t("الأيقونة", "Icon")}</p>
+                            <div className="grid grid-cols-7 gap-1.5 rounded-xl border border-line bg-white p-2 sm:grid-cols-10">
+                              {ICON_BLOCK_NAMES[g.block].map((k) => {
+                                const sel = val(it, "icon") === k;
+                                return (
+                                  <button type="button" key={k} onClick={() => setVal(it.id, "icon", k)} title={ICON_LABELS[k] || k} className={`flex h-9 items-center justify-center rounded-lg border transition-colors ${sel ? "border-brand bg-brand/10 text-brand" : "border-line bg-white text-ink hover:border-brand/40"}`}>{CMS_ICONS[k]}</button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
                         {showTitle && (
                           <div>
                             <p className="mb-1 text-xs font-semibold text-ink-soft">{(en ? FIELD_LABELS_EN[key]?.title : FIELD_LABELS[key]?.title) || t("العنوان", "Title")}</p>
