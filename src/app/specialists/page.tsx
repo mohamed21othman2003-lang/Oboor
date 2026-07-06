@@ -7,6 +7,7 @@ import { pick, type Locale } from "@/i18n/config";
 import { fetchContent, fetchSections, getWhatsAppUrl } from "@/lib/server/django";
 import { loadBranches } from "@/lib/server/branches";
 import { hl } from "@/lib/highlight";
+import { CMS_ICONS } from "@/lib/cms/icons";
 import SpecialistsExplorer from "@/components/SpecialistsExplorer";
 import CtaSection from "@/components/CtaSection";
 
@@ -249,15 +250,9 @@ export default async function SpecialistsPage() {
 }
 
 function JoinCard({ card, className = "" }: { card: { title: string; desc: string; icon: string }; className?: string }) {
-  const icons: Record<string, React.ReactNode> = {
-    growth: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 17l6-6 4 4 8-8" /><path d="M21 7v5h-5" /></svg>,
-    building: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="3" width="16" height="18" rx="2" /><path d="M9 7h2M13 7h2M9 11h2M13 11h2M9 15h2M13 15h2" /></svg>,
-    book: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" /><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" /></svg>,
-    heart: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z" /></svg>,
-  };
   return (
     <div className={`flex w-full flex-col items-center rounded-2xl bg-brand p-5 text-center text-white shadow-[3px_3px_6.5px_rgba(0,0,0,0.16)] xl:absolute xl:min-h-[193px] xl:w-[213px] ${className}`}>
-      <span className="flex h-10 w-10 items-center justify-center rounded-[14px] bg-[#e8f7f9] text-brand">{icons[card.icon]}</span>
+      <span className="flex h-10 w-10 items-center justify-center rounded-[14px] bg-[#e8f7f9] text-brand">{CMS_ICONS[card.icon] ?? CMS_ICONS.growth}</span>
       <h4 className="mt-3 text-[15px] font-bold">{card.title}</h4>
       <p className="mt-1.5 text-[13px] leading-[21px] text-white/90">{card.desc}</p>
     </div>
