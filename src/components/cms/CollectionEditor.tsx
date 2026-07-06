@@ -313,7 +313,6 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
               en={Array.isArray(values.blocks_en) ? (values.blocks_en as unknown[]) : []}
               onChange={(a, e) => { set("blocks_ar", a); set("blocks_en", e); }}
             />
-            <Help text={t("كل قسم من أقسام الصفحة (عناوين، بطاقات، قوائم، مربّعات…). عدّل النص العربي على اليمين والإنجليزي على اليسار. نوع القسم وشكله ثابتان للحفاظ على التصميم.", "Every section of the page (headings, cards, lists, tiles…). Edit the Arabic text on the right and the English on the left. The section's type and layout are fixed to preserve the design.")} />
           </div>
         );
       }
