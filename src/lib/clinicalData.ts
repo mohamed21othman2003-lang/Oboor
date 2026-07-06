@@ -17,7 +17,7 @@ export type ClinicalService = {
   image: string;
   aboutHeading: string;
   about: string[];
-  aboutTag?: { heading: string; label: string };
+  aboutTag?: { heading: string; label?: string; labels?: string[] };
   aboutList?: string[];
   blocks: ClinicalBlock[];
 };

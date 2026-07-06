@@ -21,8 +21,8 @@ type ApiService = {
   about_heading_ar: string; about_heading_en: string;
   about_ar: string[]; about_en: string[];
   about_list_ar: string[]; about_list_en: string[];
-  about_tag_ar: { heading: string; label: string } | null;
-  about_tag_en: { heading: string; label: string } | null;
+  about_tag_ar: { heading: string; label?: string; labels?: string[] } | null;
+  about_tag_en: { heading: string; label?: string; labels?: string[] } | null;
   blocks_ar: ClinicalBlock[]; blocks_en: ClinicalBlock[];
   image: string;
   order: number;
@@ -347,12 +347,19 @@ export default async function ClinicalDetailPage({ params }: { params: Promise<{
                 ))}
               </ul>
             )}
-            {s.aboutTag?.heading && (
-              <div className="mt-6">
-                <h3 className="mb-3 text-base font-bold text-ink">{s.aboutTag.heading}</h3>
-                <span className="inline-block rounded-2xl bg-gradient-to-b from-brand-dark to-brand-deep px-8 py-3.5 text-sm font-semibold text-white shadow-md ring-1 ring-white/30">{s.aboutTag.label}</span>
-              </div>
-            )}
+            {s.aboutTag?.heading && (() => {
+              const tags = (s.aboutTag.labels && s.aboutTag.labels.length ? s.aboutTag.labels : (s.aboutTag.label ? [s.aboutTag.label] : [])).filter((t) => t && t.trim());
+              return tags.length > 0 ? (
+                <div className="mt-6">
+                  <h3 className="mb-3 text-base font-bold text-ink">{s.aboutTag.heading}</h3>
+                  <div className="flex flex-wrap gap-2.5">
+                    {tags.map((t, i) => (
+                      <span key={i} className="inline-block rounded-2xl bg-gradient-to-b from-brand-dark to-brand-deep px-8 py-3.5 text-sm font-semibold text-white shadow-md ring-1 ring-white/30">{t}</span>
+                    ))}
+                  </div>
+                </div>
+              ) : null;
+            })()}
           </div>
         </div>
       </section>

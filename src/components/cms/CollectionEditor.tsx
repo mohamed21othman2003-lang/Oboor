@@ -880,6 +880,8 @@ function FieldInput({ f, value, onChange, badge, dir }: { f: FieldSchema; value:
       ) : f.type === "json" ? (
         f.base === "offer_icons" ? (
           <IconListEditor value={value} onChange={onChange} />
+        ) : f.base === "about_tag" ? (
+          <AboutTagEditor value={value} onChange={onChange} dir={dir} />
         ) : OBJECT_FIELDS[f.base] ? (
           <ObjectEditor value={value} onChange={onChange} fields={OBJECT_FIELDS[f.base]} dir={dir} />
         ) : CARD_LIST_FIELDS[f.base] ? (
@@ -1094,6 +1096,51 @@ function ObjectEditor({ value, onChange, fields, dir }: { value: unknown; onChan
         </div>
       ))}
       <p className="text-[11px] text-ink-soft">{en ? "Leave empty if the service doesn't need a featured card." : "اتركها فارغة إن لم تكن الخدمة تحتاج بطاقة مميّزة."}</p>
+    </div>
+  );
+}
+
+// محرّر «الفئات المستهدفة» — عنوان + قائمة فئات (يمكن للأدمن إضافة أكثر من فئة)
+// يتوافق مع البيانات القديمة: { heading, label } (فئة واحدة) ويحفظ { heading, labels: [...] }
+function AboutTagEditor({ value, onChange, dir }: { value: unknown; onChange: (v: unknown) => void; dir?: string }) {
+  const { lang } = useCmsLang();
+  const en = lang === "en";
+  const obj = (value && typeof value === "object" && !Array.isArray(value)) ? (value as Record<string, unknown>) : {};
+  const heading = String(obj.heading ?? "");
+  const labels: string[] = Array.isArray(obj.labels)
+    ? (obj.labels as unknown[]).map(String)
+    : (typeof obj.label === "string" && obj.label.trim() ? [obj.label] : []);
+  // يحفظ كائناً فارغاً إن كان كل شيء فارغاً (حتى لا تظهر بطاقة فاضية على الموقع)
+  const commit = (h: string, ls: string[]) => {
+    const allEmpty = !h.trim() && ls.every((s) => !s.trim());
+    onChange(allEmpty ? {} : { heading: h, labels: ls });
+  };
+  const setLabel = (i: number, v: string) => commit(heading, labels.map((s, j) => (j === i ? v : s)));
+  const removeLabel = (i: number) => commit(heading, labels.filter((_, j) => j !== i));
+  const addLabel = () => commit(heading, [...labels, ""]);
+  return (
+    <div className="space-y-3 rounded-xl border border-line bg-surface/50 p-3">
+      <div>
+        <p className="mb-1 text-xs font-semibold text-ink-soft">{en ? "Card title (e.g. Target Groups)" : "عنوان البطاقة (مثال: الفئات المستهدفة)"}</p>
+        <AutoTextarea value={heading} onChange={(v) => commit(v, labels)} dir={dir} className={INPUT + " bg-white"} />
+      </div>
+      <div>
+        <p className="mb-1 text-xs font-semibold text-ink-soft">{en ? "Categories (e.g. Individuals with disabilities)" : "الفئات (مثال: الأفراد من ذوي الإعاقة)"}</p>
+        <div className="space-y-2">
+          {labels.map((it, i) => (
+            <div key={i} className="flex items-start gap-2">
+              <span className="mt-2 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-surface text-[11px] font-bold text-ink-soft">{i + 1}</span>
+              <div className="flex-1"><AutoTextarea value={it} onChange={(v) => setLabel(i, v)} dir={dir} className={INPUT + " bg-white"} /></div>
+              <button type="button" onClick={() => removeLabel(i)} className="mt-1 shrink-0 rounded-lg bg-red-50 px-2.5 py-2 text-xs font-semibold text-red-600 transition-colors hover:bg-red-600 hover:text-white">{en ? "Remove" : "حذف"}</button>
+            </div>
+          ))}
+          <button type="button" onClick={addLabel} className="inline-flex items-center gap-1.5 rounded-lg bg-brand/10 px-3 py-1.5 text-xs font-semibold text-brand transition-colors hover:bg-brand hover:text-white">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path strokeLinecap="round" d="M12 5v14M5 12h14" /></svg>
+            {en ? "Add Category" : "إضافة فئة"}
+          </button>
+        </div>
+      </div>
+      <p className="text-[11px] text-ink-soft">{en ? "Leave empty if the service doesn't need this card." : "اتركها فارغة إن لم تكن الخدمة تحتاج هذه البطاقة."}</p>
     </div>
   );
 }
