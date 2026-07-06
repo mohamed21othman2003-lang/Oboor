@@ -1421,6 +1421,7 @@ function ServiceCardsEditor({ value, onChange }: { value: unknown; onChange: (v:
           <div>
             <p className="mb-1 text-xs font-semibold text-ink-soft">{tt("رابط صفحة الخدمة (اختياري)", "Service page link (optional)")}</p>
             <input value={blkStr(c.href)} onChange={(e) => patch(i, "href", e.target.value)} dir="ltr" placeholder="/services/physical" className={INPUT + " bg-white"} />
+            <p className="mt-1 text-[11px] leading-4 text-ink-soft">{tt("الوجهة عند الضغط على «عرض التفاصيل». صفحة داخل الموقع، فتُكتب كمسار مختصر يبدأ بـ/ (مثل /services/social) لا رابطاً كاملاً.", "Where “View Details” goes. It's a page inside this site, so write a short path starting with / (e.g. /services/social), not a full URL.")}</p>
           </div>
         </div>
       ))}
