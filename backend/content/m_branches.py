@@ -53,6 +53,15 @@ class Branch(models.Model):
     # الاعتمادات: [{title_ar, title_en}]
     accreditations = models.JSONField("الاعتمادات (ملف الفرع)", default=list, blank=True)
 
+    # «ما يميّز الفرع» — بطاقات تظهر في صفحة الفرع: [{icon, title_ar, title_en, desc_ar, desc_en}]
+    distinctions = models.JSONField("ما يميّز الفرع", default=list, blank=True)
+
+    # عنوان ووصف قسم «قصص النجاح» في صفحة الفرع (الكروت نفسها من صفحة أبطال عبور)
+    success_heading_ar = models.CharField("عنوان قصص النجاح (عربي)", max_length=300, blank=True)
+    success_heading_en = models.CharField("عنوان قصص النجاح (إنجليزي)", max_length=300, blank=True)
+    success_sub_ar = models.TextField("وصف قصص النجاح (عربي)", blank=True)
+    success_sub_en = models.TextField("وصف قصص النجاح (إنجليزي)", blank=True)
+
     gallery = models.JSONField("معرض صور الفرع", default=list, blank=True)
 
     lat = models.FloatField("خط العرض (lat)", null=True, blank=True)

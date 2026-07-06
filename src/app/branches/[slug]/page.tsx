@@ -3,13 +3,14 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ALL_BRANCHES, getBranch, BRANCH_FEATURES, BRANCH_FEATURES_EN } from "@/lib/branchesData";
 import { loadBranch } from "@/lib/server/branches";
-import { fetchSections } from "@/lib/server/django";
 import { getSuccessStories } from "@/lib/successStoriesData";
 import ProgramCard, { type Program } from "@/components/ProgramCard";
 import SuccessStoryCard from "@/components/SuccessStoryCard";
 import BranchGallery from "@/components/BranchGallery";
 import { getLocale } from "@/i18n/locale";
 import { pick, type Locale } from "@/i18n/config";
+import { hl } from "@/lib/highlight";
+import { CMS_ICONS } from "@/lib/cms/icons";
 
 export function generateStaticParams() {
   return ALL_BRANCHES.map((b) => ({ slug: b.slug }));
@@ -75,10 +76,9 @@ export default async function BranchDetailPage({ params }: { params: Promise<{ s
 
   const en = locale === "en";
   const successStories = getSuccessStories(locale);
-  // المميزات من الـCMS (نفس مصدر صفحة الفروع) مع fallback للبيانات الثابتة
-  const sections = await fetchSections("branches");
-  const branchFeatures = sections?.features
-    ? sections.features.map((r) => ({ icon: r.icon, title: en ? r.title_en || r.title_ar : r.title_ar, desc: en ? r.text_en || r.text_ar : r.text_ar }))
+  // «ما يميّز الفرع» — خاص بهذا الفرع (يتحكّم فيه من لوحة الفرع) مع fallback ثابت
+  const branchFeatures = b.distinctions?.length
+    ? b.distinctions
     : (en ? BRANCH_FEATURES_EN : BRANCH_FEATURES);
 
   // كروت خدمات الفرع — خاصة بهذا الفرع (يتحكّم فيها من لوحة الفرع) مع fallback ثابت
@@ -196,7 +196,7 @@ export default async function BranchDetailPage({ params }: { params: Promise<{ s
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {branchFeatures.map((f) => (
               <div key={f.title} className="rounded-2xl border border-line bg-white p-6 text-center shadow-sm">
-                <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-brand/10 text-brand">{FEATURE_ICONS[f.icon]}</span>
+                <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-brand/10 text-brand">{CMS_ICONS[f.icon] ?? CMS_ICONS.building}</span>
                 <h3 className="mt-4 text-base font-bold text-ink">{f.title}</h3>
                 <p className="mt-2 text-sm leading-7 text-ink-muted">{f.desc}</p>
               </div>
@@ -209,8 +209,8 @@ export default async function BranchDetailPage({ params }: { params: Promise<{ s
       <section className="bg-white py-16">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mb-10 text-start">
-            <h2 className="text-3xl font-extrabold text-ink">{pick(locale, "قصص نجاح من ", "Success Stories from ")}<span className="text-brand">{b.name}</span></h2>
-            <p className="mt-2 text-sm text-ink-muted">{pick(locale, "كل قصة نجاح تُعبّر عن رحلة حقيقية من التحدي إلى الإنجاز.", "Every success story reflects a real journey from challenge to achievement.")}</p>
+            <h2 className="text-3xl font-extrabold text-ink">{b.successHeading ? hl(b.successHeading) : <>{pick(locale, "قصص نجاح من ", "Success Stories from ")}<span className="text-brand">{b.name}</span></>}</h2>
+            <p className="mt-2 text-sm text-ink-muted">{b.successSub || pick(locale, "كل قصة نجاح تُعبّر عن رحلة حقيقية من التحدي إلى الإنجاز.", "Every success story reflects a real journey from challenge to achievement.")}</p>
           </div>
           <div className="grid gap-7 md:grid-cols-2 lg:grid-cols-3">
             {successStories.slice(0, 3).map((s) => <SuccessStoryCard key={s.slug} story={s} locale={locale} />)}
@@ -251,10 +251,3 @@ function DownloadIcon() {
 function NavIcon() {
   return <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11" /></svg>;
 }
-
-const FEATURE_ICONS: Record<string, React.ReactNode> = {
-  graduation: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5z" /><path d="M6 12v5c0 1 2.7 2.5 6 2.5s6-1.5 6-2.5v-5" /></svg>,
-  shield: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2l8 3v6c0 5-3.4 8.6-8 11-4.6-2.4-8-6-8-11V5z" /><path d="M9 12l2 2 4-4" /></svg>,
-  heart: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z" /></svg>,
-  building: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="3" width="16" height="18" rx="2" /><path d="M9 7h2M13 7h2M9 11h2M13 11h2M9 15h2M13 15h2" /></svg>,
-};

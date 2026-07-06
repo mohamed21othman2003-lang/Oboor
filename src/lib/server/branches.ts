@@ -25,6 +25,9 @@ type ApiBranch = {
   profile_stats?: { value?: string; label_ar?: string; label_en?: string }[];
   journey?: { title_ar?: string; title_en?: string; desc_ar?: string; desc_en?: string }[];
   accreditations?: { title_ar?: string; title_en?: string }[];
+  distinctions?: { icon?: string; title_ar?: string; title_en?: string; desc_ar?: string; desc_en?: string }[];
+  success_heading_ar?: string; success_heading_en?: string;
+  success_sub_ar?: string; success_sub_en?: string;
   gallery: string[];
   lat: number | null; lng: number | null;
   is_new: boolean;
@@ -71,6 +74,13 @@ function toBranch(row: ApiBranch, locale: Locale): Branch {
     accreditations: (Array.isArray(row.accreditations) ? row.accreditations : []).map((a) =>
       en ? (a.title_en || a.title_ar || "") : (a.title_ar || "")
     ).filter(Boolean),
+    distinctions: (Array.isArray(row.distinctions) ? row.distinctions : []).map((d) => ({
+      icon: d.icon || "",
+      title: en ? (d.title_en || d.title_ar || "") : (d.title_ar || ""),
+      desc: en ? (d.desc_en || d.desc_ar || "") : (d.desc_ar || ""),
+    })).filter((d) => d.title),
+    successHeading: en ? (row.success_heading_en || row.success_heading_ar || "") : (row.success_heading_ar || ""),
+    successSub: en ? (row.success_sub_en || row.success_sub_ar || "") : (row.success_sub_ar || ""),
     gallery: Array.isArray(row.gallery) ? row.gallery : [],
     lat: row.lat ?? null,
     lng: row.lng ?? null,

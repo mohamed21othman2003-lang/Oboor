@@ -24,6 +24,11 @@ export type Branch = {
   profileStats?: { value: string; label: string }[];
   journey?: { title: string; desc: string }[];
   accreditations?: string[];
+  // «ما يميّز الفرع» — بطاقات خاصة بالفرع (محلولة حسب اللغة)
+  distinctions?: { icon: string; title: string; desc: string }[];
+  // عنوان ووصف قسم قصص النجاح (يدعمان تمييز الجزء بين نجمتين **)
+  successHeading?: string;
+  successSub?: string;
   gallery?: string[];
   lat?: number | null;
   lng?: number | null;

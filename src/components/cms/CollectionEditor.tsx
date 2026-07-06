@@ -219,14 +219,14 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
   // تقسيم الحقول إلى أقسام مرئية بعناوين بارزة (حسب FIELD_SECTIONS)؛ الحقول غير المُدرَجة في «إعدادات»
   const sectionGroups = useMemo(() => {
     const cfg = FIELD_SECTIONS[type];
-    if (!cfg) return [{ title: null as string | null, rows }];
+    if (!cfg) return [{ title: null as string | null, rows, note: undefined as string | undefined, preview: undefined as string | undefined }];
     const baseOf = (r: Row) => r.f?.base ?? r.ar?.base ?? r.en?.base ?? "";
     const used = new Set<Row>();
-    const out: { title: string | null; rows: Row[] }[] = [];
+    const out: { title: string | null; rows: Row[]; note?: string; preview?: string }[] = [];
     for (const sec of cfg) {
       const secRows = rows.filter((r) => sec.bases.includes(baseOf(r)));
       secRows.forEach((r) => used.add(r));
-      if (secRows.length) out.push({ title: en ? sec.title_en : sec.title, rows: secRows });
+      if (secRows.length) out.push({ title: en ? sec.title_en : sec.title, rows: secRows, note: en ? sec.note_en : sec.note, preview: sec.preview });
     }
     const leftover = rows.filter((r) => !used.has(r));
     if (leftover.length) out.push({ title: en ? "Settings" : "إعدادات", rows: leftover });
@@ -444,10 +444,21 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
         {sectionGroups.map((g, gi) => (
           <div key={gi} className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-line sm:p-8">
             {g.title && (
-              <h2 className="mb-6 flex items-center gap-2.5 border-b border-line pb-3 text-lg font-extrabold text-brand-dark">
+              <h2 className="mb-3 flex items-center gap-2.5 border-b border-line pb-3 text-lg font-extrabold text-brand-dark">
                 <span className="h-5 w-1.5 shrink-0 rounded-full bg-brand" />
                 {g.title}
               </h2>
+            )}
+            {g.note && (
+              <div className="mb-5 rounded-lg border border-brand/20 bg-brand/5 px-3 py-2.5 text-[11px] leading-5 text-ink-soft">
+                ℹ️ {g.note}
+                {g.preview && (
+                  <a href={g.preview.replace("{slug}", String(values.slug ?? ""))} target="_blank" rel="noopener noreferrer" className="ms-1 inline-flex items-center gap-1 font-semibold text-brand hover:underline">
+                    {t("عاين على الموقع", "Preview on site")}
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3" /></svg>
+                  </a>
+                )}
+              </div>
             )}
             <div className="space-y-7">{g.rows.map(renderRow)}</div>
           </div>
@@ -605,7 +616,27 @@ const SHARED_CONTENT_NOTES: Record<string, { ar: string; en: string }> = {
 };
 // تجميع حقول المحرّر في أقسام مرئية بعناوين بارزة تطابق أقسام الصفحة على الموقع —
 // حتى يعرف الأدمن أي مجموعة حقول تتحكّم في أي قسم. الحقول غير المُدرَجة تظهر تحت «إعدادات».
-const FIELD_SECTIONS: Record<string, { title: string; title_en: string; bases: string[] }[]> = {
+const FIELD_SECTIONS: Record<string, { title: string; title_en: string; bases: string[]; note?: string; note_en?: string; preview?: string }[]> = {
+  branches: [
+    { title: "بيانات الفرع الأساسية", title_en: "Branch basic info", bases: ["name", "city", "region", "address", "hours", "phone", "phone_evening", "email", "manager", "map_url", "rating", "reviews_count", "is_new"],
+      note: "تظهر في أعلى صفحة الفرع (الاسم ومعلومات التواصل)، وعلى بطاقة الفرع في صفحة مراكزنا، وفي ملف الـPDF.",
+      note_en: "Shown at the top of the branch page (name & contact info), on the branch card in the Branches page, and in the PDF profile.", preview: "/branches/{slug}" },
+    { title: "الخدمات المقدَّمة في الفرع", title_en: "Services offered at the branch", bases: ["service_cards", "services"],
+      note: "«كروت خدمات الفرع» = الكروت الكبيرة داخل صفحة الفرع. «الخدمات» = وسوم سريعة تظهر على بطاقة الفرع وفي قائمة الخدمات بملف الـPDF.",
+      note_en: "\"Service cards\" = the big cards inside the branch page. \"Services\" = quick tags shown on the branch card and in the PDF services list.", preview: "/branches/{slug}" },
+    { title: "ما يميّز الفرع", title_en: "What sets the branch apart", bases: ["distinctions"],
+      note: "البطاقات في قسم «ما يميّز الفرع» داخل صفحة الفرع — لكل بطاقة أيقونة + عنوان + وصف.",
+      note_en: "The cards in the \"What sets the branch apart\" section on the branch page — each card has an icon + title + description.", preview: "/branches/{slug}" },
+    { title: "قصص النجاح", title_en: "Success stories", bases: ["success_heading", "success_sub"],
+      note: "عنوان ووصف قسم «قصص النجاح» في صفحة الفرع فقط. أمّا بطاقات القصص نفسها فتُدار من صفحة «أبطال عبور». (لتمييز جزء من العنوان بلون مختلف ضعه بين نجمتين **هكذا**).",
+      note_en: "The heading and subtitle of the \"Success stories\" section on the branch page only. The story cards themselves are managed from the \"Oboor Heroes\" page. (Wrap part of the heading in **asterisks** to highlight it).", preview: "/branches/{slug}" },
+    { title: "ملف الفرع (PDF)", title_en: "Branch profile (PDF)", bases: ["profile_intro", "profile_stats", "journey", "accreditations"],
+      note: "يظهر داخل ملف الـPDF الذي يُنزَّل عند الضغط على «تحميل البروفايل» في صفحة الفرع.",
+      note_en: "Appears inside the PDF downloaded when clicking \"Download profile\" on the branch page.", preview: "/branches/{slug}/profile" },
+    { title: "معرض صور الفرع", title_en: "Branch photo gallery", bases: ["gallery"],
+      note: "صور المعرض في أسفل صفحة الفرع (سلايدشو + عارض صور).",
+      note_en: "The gallery photos at the bottom of the branch page (slideshow + viewer).", preview: "/branches/{slug}" },
+  ],
   programs: [
     { title: "أعلى الصفحة (الهيرو)", title_en: "Top of page (Hero)", bases: ["title", "subtitle", "image", "image_file"] },
     { title: "نبذة عن البرنامج", title_en: "About the program", bases: ["about"] },
@@ -1369,8 +1400,17 @@ function ServiceCardsEditor({ value, onChange }: { value: unknown; onChange: (v:
 
 // محرّر عام لقوائم كائنات ثنائية اللغة على مستوى الفرع (إحصائيات/رحلة/اعتمادات).
 // kind: "scalar" = قيمة واحدة (item[key])؛ "bi-scalar" = عربي/إنجليزي (item[key_ar]/item[key_en]).
-type BranchListField = { key: string; label: string; label_en: string; kind: "scalar" | "bi-scalar" };
+type BranchListField = { key: string; label: string; label_en: string; kind: "scalar" | "bi-scalar" | "icon"; iconNames?: string[] };
+const DISTINCTION_ICONS = ["graduation", "shield", "heart", "building", "team", "book", "target", "star", "trophy", "bulb", "hand", "activity", "clipboard", "list"];
 const BRANCH_LIST_FIELDS: Record<string, { addLabel: string; addLabel_en: string; fields: BranchListField[] }> = {
+  distinctions: {
+    addLabel: "إضافة ميزة", addLabel_en: "Add feature",
+    fields: [
+      { key: "icon", label: "الأيقونة", label_en: "Icon", kind: "icon", iconNames: DISTINCTION_ICONS },
+      { key: "title", label: "العنوان", label_en: "Title", kind: "bi-scalar" },
+      { key: "desc", label: "الوصف", label_en: "Description", kind: "bi-scalar" },
+    ],
+  },
   profile_stats: {
     addLabel: "إضافة إحصائية", addLabel_en: "Add stat",
     fields: [
@@ -1405,7 +1445,7 @@ function BranchListEditor({ value, onChange, base }: { value: unknown; onChange:
   const removeAt = (i: number) => commit(items.filter((_, j) => j !== i));
   const add = () => {
     const blank: Rec = {};
-    for (const fl of cfg.fields) { if (fl.kind === "scalar") blank[fl.key] = ""; else { blank[`${fl.key}_ar`] = ""; blank[`${fl.key}_en`] = ""; } }
+    for (const fl of cfg.fields) { if (fl.kind === "bi-scalar") { blank[`${fl.key}_ar`] = ""; blank[`${fl.key}_en`] = ""; } else { blank[fl.key] = fl.kind === "icon" ? (fl.iconNames?.[0] ?? "") : ""; } }
     commit([...items, blank]);
   };
   const flLabel = (fl: BranchListField) => (isEn ? fl.label_en : fl.label);
@@ -1422,7 +1462,19 @@ function BranchListEditor({ value, onChange, base }: { value: unknown; onChange:
               <button type="button" onClick={() => removeAt(i)} className="rounded-lg bg-red-50 px-2.5 py-1 text-[11px] font-semibold text-red-600 hover:bg-red-600 hover:text-white">{tt("حذف", "Remove")}</button>
             </div>
           </div>
-          {cfg.fields.map((fl) => fl.kind === "scalar" ? (
+          {cfg.fields.map((fl) => fl.kind === "icon" ? (
+            <div key={fl.key}>
+              <p className="mb-1 text-xs font-semibold text-ink-soft">{flLabel(fl)}</p>
+              <div className="grid grid-cols-7 gap-1.5 rounded-xl border border-line bg-white p-2 sm:grid-cols-10">
+                {(fl.iconNames ?? []).map((k) => {
+                  const sel = blkStr(it[fl.key]) === k;
+                  return (
+                    <button type="button" key={k} onClick={() => patch(i, fl.key, k)} title={ICON_LABELS[k] || k} className={`flex h-9 items-center justify-center rounded-lg border transition-colors ${sel ? "border-brand bg-brand/10 text-brand" : "border-line bg-white text-ink hover:border-brand/40"}`}>{CMS_ICONS[k]}</button>
+                  );
+                })}
+              </div>
+            </div>
+          ) : fl.kind === "scalar" ? (
             <div key={fl.key}>
               <p className="mb-1 text-xs font-semibold text-ink-soft">{flLabel(fl)}</p>
               <input value={blkStr(it[fl.key])} onChange={(e) => patch(i, fl.key, e.target.value)} dir="ltr" className={INPUT + " bg-white"} />
