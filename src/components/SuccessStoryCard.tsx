@@ -79,10 +79,16 @@ function StoryModal({ story, locale, highlights, onClose }: { story: SuccessStor
     return () => { document.removeEventListener("keydown", onKey); document.body.style.overflow = ""; };
   }, [onClose]);
 
+  // محتوى النافذة الخاص بكل قصة (مع fallback للقيم العامة)
+  const badge = story.badge || h.badge;
+  const program = story.program || h.program;
+  const journey = (story.journey || h.journeyTemplate).replace(/\{name\}/g, story.name);
+  const results = story.results?.length ? story.results : h.results;
+
   const stats = [
     { label: h.durationLabel, value: story.metaDuration, icon: <ClockIcon /> },
     { label: h.ageLabel, value: story.age, icon: <UsersIcon /> },
-    { label: h.programLabel, value: h.program, icon: <BookIcon small /> },
+    { label: h.programLabel, value: program, icon: <BookIcon small /> },
   ];
 
   return (
@@ -101,7 +107,7 @@ function StoryModal({ story, locale, highlights, onClose }: { story: SuccessStor
           {/* badge */}
           <span className="absolute end-2 top-1/2 z-10 -translate-y-1/2 inline-flex items-center gap-1 rounded-full bg-brand px-2.5 py-1 text-[10px] font-bold text-white shadow-md">
             <SparkIcon />
-            {h.badge}
+            {badge}
           </span>
           {/* framed photo */}
           <div className="absolute left-1/2 top-1/2 h-[126px] w-[118px] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-2xl bg-white p-1.5 shadow-[0_12px_30px_rgba(13,61,69,0.18)]">
@@ -152,14 +158,14 @@ function StoryModal({ story, locale, highlights, onClose }: { story: SuccessStor
           {/* Journey */}
           <div>
             <SectionHeading>{h.journeyTitle}</SectionHeading>
-            <p className="mt-1.5 text-start text-[12px] leading-6 text-ink-muted">{h.journeyTemplate.replace("{name}", story.name)}</p>
+            <p className="mt-1.5 text-start text-[12px] leading-6 text-ink-muted">{journey}</p>
           </div>
 
           {/* Results */}
           <div>
             <SectionHeading>{h.resultsTitle}</SectionHeading>
             <ul className="mt-2 grid grid-cols-1 gap-x-4 gap-y-1.5 sm:grid-cols-2">
-              {h.results.map((r) => (
+              {results.map((r) => (
                 <li key={r} className="flex items-start justify-start gap-1.5 text-start text-[12px] leading-5 text-ink-muted">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="mt-0.5 shrink-0 text-brand"><circle cx="12" cy="12" r="9" /><path d="M8.5 12l2.2 2.2L15.5 9.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
                   {r}

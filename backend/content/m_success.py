@@ -26,6 +26,16 @@ class SuccessStory(models.Model):
     author_ar = models.CharField("راوي القصة (عربي)", max_length=300)
     author_en = models.CharField("راوي القصة (إنجليزي)", max_length=300, blank=True)
 
+    # تفاصيل نافذة «عرض التفاصيل» — خاصة بكل قصة (كانت مشتركة سابقاً)
+    badge_ar = models.CharField("الوسم (عربي)", max_length=300, blank=True)
+    badge_en = models.CharField("الوسم (إنجليزي)", max_length=300, blank=True)
+    program_ar = models.CharField("البرنامج (عربي)", max_length=300, blank=True)
+    program_en = models.CharField("البرنامج (إنجليزي)", max_length=300, blank=True)
+    journey_ar = models.TextField("رحلة العلاج (عربي)", blank=True)
+    journey_en = models.TextField("رحلة العلاج (إنجليزي)", blank=True)
+    results_ar = models.JSONField("أبرز النتائج (عربي)", default=list, blank=True)
+    results_en = models.JSONField("أبرز النتائج (إنجليزي)", default=list, blank=True)
+
     image = models.CharField("مسار الصورة", max_length=300, blank=True)
     image_file = models.ImageField("رفع صورة", upload_to="content/", blank=True)
     order = models.IntegerField("الترتيب", default=0)

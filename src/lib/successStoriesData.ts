@@ -15,6 +15,11 @@ export type SuccessStory = {
   metaDuration: string; // مدة العلاج (أيقونة الساعة)
   metaAge: string; // أيقونة المجموعة
   author: string; // راوي القصة (أيقونة الشخص)
+  // تفاصيل نافذة «عرض التفاصيل» — خاصة بكل قصة (اختيارية، fallback للقيم العامة)
+  badge?: string; // الوسم أعلى النافذة
+  program?: string; // اسم البرنامج
+  journey?: string; // سرد رحلة العلاج
+  results?: string[]; // أبرز النتائج
 };
 
 export const SUCCESS_STATS = [

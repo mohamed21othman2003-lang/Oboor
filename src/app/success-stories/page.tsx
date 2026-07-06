@@ -28,6 +28,10 @@ type ApiSuccess = {
   meta_duration_ar: string; meta_duration_en: string;
   meta_age_ar: string; meta_age_en: string;
   author_ar: string; author_en: string;
+  badge_ar?: string; badge_en?: string;
+  program_ar?: string; program_en?: string;
+  journey_ar?: string; journey_en?: string;
+  results_ar?: string[]; results_en?: string[];
   image: string; order: number;
 };
 
@@ -47,6 +51,10 @@ function toStory(row: ApiSuccess, locale: Locale): SuccessStory {
     metaDuration: t(row.meta_duration_ar, row.meta_duration_en),
     metaAge: t(row.meta_age_ar, row.meta_age_en),
     author: t(row.author_ar, row.author_en),
+    badge: t(row.badge_ar ?? "", row.badge_en ?? ""),
+    program: t(row.program_ar ?? "", row.program_en ?? ""),
+    journey: t(row.journey_ar ?? "", row.journey_en ?? ""),
+    results: (en ? (row.results_en?.length ? row.results_en : row.results_ar) : row.results_ar) ?? [],
   };
 }
 

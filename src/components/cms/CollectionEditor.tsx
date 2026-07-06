@@ -618,6 +618,13 @@ const SHARED_CONTENT_NOTES: Record<string, { ar: string; en: string }> = {
 // تجميع حقول المحرّر في أقسام مرئية بعناوين بارزة تطابق أقسام الصفحة على الموقع —
 // حتى يعرف الأدمن أي مجموعة حقول تتحكّم في أي قسم. الحقول غير المُدرَجة تظهر تحت «إعدادات».
 const FIELD_SECTIONS: Record<string, { title: string; title_en: string; bases: string[]; note?: string; note_en?: string; preview?: string }[]> = {
+  success: [
+    { title: "بيانات القصة (البطاقة)", title_en: "Story info (card)", bases: ["name", "age", "category", "image", "image_file", "duration_label", "before", "after"],
+      note: "تظهر على بطاقة القصة في صفحة قصص النجاح.", note_en: "Shown on the story card in the Success Stories page.", preview: "/success-stories" },
+    { title: "نافذة «عرض التفاصيل»", title_en: "\"View Details\" popup", bases: ["badge", "program", "journey", "results", "meta_duration", "meta_age", "quote", "author"],
+      note: "تظهر داخل النافذة التي تُفتح عند الضغط على «عرض التفاصيل» لهذه القصة تحديداً (الوسم + البرنامج + رحلة العلاج + أبرز النتائج + كلمة ولي الأمر).",
+      note_en: "Shown inside the popup that opens when clicking \"View Details\" for this specific story (badge + program + treatment journey + key results + parent's words).", preview: "/success-stories" },
+  ],
   branches: [
     { title: "بيانات الفرع الأساسية", title_en: "Branch basic info", bases: ["name", "city", "region", "address", "hours", "phone", "phone_evening", "email", "manager", "map_url", "rating", "reviews_count", "is_new"],
       note: "تظهر في أعلى صفحة الفرع (الاسم ومعلومات التواصل)، وعلى بطاقة الفرع في صفحة مراكزنا، وفي ملف الـPDF.",

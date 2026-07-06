@@ -26,6 +26,8 @@ const LIST_BLOCKS = new Set([
 const HIDDEN_BLOCKS = new Set([
   "branches.services", "branches.profile_intro", "branches.profile_stats",
   "branches.journey", "branches.accreditations",
+  // تفاصيل «القصة المميّزة» صارت تُدار داخل كل قصة نجاح على حدة
+  "success.highlights",
 ]);
 // أقسام تعرض لكل عنصر أيقونة قابلة للاختيار (المفتاح = اسم البلوك، القيمة = الأيقونات المتاحة)
 const ICON_BLOCK_NAMES: Record<string, string[]> = {
@@ -248,11 +250,6 @@ const ITEM_NOTES_EN: Record<string, string> = {
 // ملاحظة تعريفية لكل قسم (المفتاح = «الصفحة.البلوك») — توضّح أين يظهر المحتوى على الموقع
 // حتى لا يتوه المستخدم. previewPath = رابط الصفحة التي يظهر فيها فعلاً (لزر معاينة).
 const BLOCK_NOTES: Record<string, { ar: string; en: string; previewPath?: string; previewLabel_ar?: string; previewLabel_en?: string }> = {
-  "success.highlights": {
-    ar: "يظهر داخل النافذة التي تُفتح عند الضغط على «عرض التفاصيل» لأي قصة نجاح (الوسم + البرنامج + سرد رحلة العلاج). محتوى مشترك لكل القصص، ويُدرَج اسم البطل تلقائياً مكان {name}.",
-    en: "Shows inside the popup that opens when you click “View Details” on any success story (badge + program + treatment-journey text). Shared across all stories; the child's name auto-fills in place of {name}.",
-    previewPath: "/success-stories", previewLabel_ar: "عاين صفحة قصص النجاح (اضغط «عرض التفاصيل»)", previewLabel_en: "Preview Success Stories (click “View Details”)",
-  },
   "branches.features": {
     ar: "قسم «بيئتنا، أمان وتمكين» أسفل صفحة مراكزنا.",
     en: "The “Our Environment” section at the bottom of the Branches page.",

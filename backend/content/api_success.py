@@ -19,6 +19,10 @@ class SuccessStorySerializer(ResolvedImageMixin):
             "meta_duration_ar", "meta_duration_en",
             "meta_age_ar", "meta_age_en",
             "author_ar", "author_en",
+            "badge_ar", "badge_en",
+            "program_ar", "program_en",
+            "journey_ar", "journey_en",
+            "results_ar", "results_en",
             "image", "order",
         ]
 
