@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -1037,6 +1038,31 @@ function LocationEditor({ lat, lng, onLat, onLng }: { lat: unknown; lng: unknown
   );
 }
 
+// عارض صورة بالحجم الكامل — يُرسَل عبر Portal إلى body حتى لا يتأثّر بأي عنصر أب
+// له transform/filter (الذي يجعل fixed نسبةً إليه لا للشاشة فتظهر الصورة صغيرة).
+function Lightbox({ src, onClose }: { src: string; onClose: () => void }) {
+  const { lang } = useCmsLang();
+  const t = (ar: string, e: string) => (lang === "en" ? e : ar);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.removeEventListener("keydown", onKey); document.body.style.overflow = prev; };
+  }, [onClose]);
+  if (typeof document === "undefined") return null;
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 p-4 sm:p-10" onClick={onClose}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={src} alt="" className="max-h-[92vh] max-w-[94vw] rounded-xl object-contain shadow-2xl" onClick={(e) => e.stopPropagation()} />
+      <button type="button" onClick={onClose} aria-label={t("إغلاق", "Close")} className="absolute end-5 top-5 flex h-11 w-11 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur transition-colors hover:bg-white/30">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
+      </button>
+    </div>,
+    document.body
+  );
+}
+
 // محرّر معرض صور — رفع متعدد + معاينة مصغّرة + حذف/ترتيب (يخزّن قائمة روابط)
 function GalleryEditor({ value, onChange }: { value: unknown; onChange: (v: unknown) => void }) {
   const { lang } = useCmsLang();
@@ -1113,15 +1139,7 @@ function GalleryEditor({ value, onChange }: { value: unknown; onChange: (v: unkn
       </div>
       {urls.length === 0 && <p className="mt-2 text-xs text-ink-soft">{t("لا توجد صور بعد — اضغط «إضافة صور» لرفع صور هذا الفرع.", "No images yet — click “Add Images” to upload this branch's photos.")}</p>}
       {err && <p className="mt-1 text-xs text-red-600">{err}</p>}
-      {zoom && (
-        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/80 p-4 sm:p-8" onClick={() => setZoom("")}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={zoom} alt="" className="max-h-[90vh] max-w-[92vw] rounded-xl object-contain shadow-2xl" onClick={(e) => e.stopPropagation()} />
-          <button type="button" onClick={() => setZoom("")} aria-label={t("إغلاق", "Close")} className="absolute end-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur transition-colors hover:bg-white/30">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
-          </button>
-        </div>
-      )}
+      {zoom && <Lightbox src={zoom} onClose={() => setZoom("")} />}
     </div>
   );
 }
@@ -1853,15 +1871,7 @@ function ImageInput({ f, value, pathFallback, type, id, isNew, onUploaded, onCha
       {err && <p className="mt-1 text-xs text-red-600">{err}</p>}
       <Help text={f.help} />
       {pending && <ImageCropModal file={pending} onCancel={() => setPending(null)} onConfirm={doUpload} />}
-      {zoom && src && (
-        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/80 p-4 sm:p-8" onClick={() => setZoom(false)}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={src} alt="" className="max-h-[90vh] max-w-[92vw] rounded-xl object-contain shadow-2xl" onClick={(e) => e.stopPropagation()} />
-          <button type="button" onClick={() => setZoom(false)} aria-label={t("إغلاق", "Close")} className="absolute end-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur transition-colors hover:bg-white/30">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
-          </button>
-        </div>
-      )}
+      {zoom && src && <Lightbox src={src} onClose={() => setZoom(false)} />}
     </div>
   );
 }
