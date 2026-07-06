@@ -3,7 +3,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { CLINICAL_SERVICES, getClinicalService, type ClinicalBlock, type ClinicalService } from "@/lib/clinicalData";
-import { areaIcon, distinctIcons, iconByKey } from "@/lib/areaIcon";
+import { distinctIcons, iconByKey } from "@/lib/areaIcon";
 import { getLocale } from "@/i18n/locale";
 import { pick, type Locale } from "@/i18n/config";
 import { fetchContent } from "@/lib/server/django";
@@ -153,15 +153,15 @@ function Block({ b }: { b: ClinicalBlock }) {
             {b.intro && <p className="mx-auto mt-3 max-w-3xl text-sm leading-7 text-ink-muted">{b.intro}</p>}
           </div>
           <div className={`grid gap-5 sm:grid-cols-2 ${b.cols === 4 ? "lg:grid-cols-4" : b.cols === 3 ? "lg:grid-cols-3" : ""}`}>
-            {b.items.map((it, i) => (
+            {(() => { const autoIcons = distinctIcons(b.items.map((x) => x.title)); return b.items.map((it, i) => (
               <div key={i} className="rounded-2xl border border-line bg-white p-6 text-start shadow-sm">
                 <div className="mb-3 flex items-center justify-start gap-3">
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand/10 text-brand">{it.icon ? iconByKey(it.icon) : autoIcons[i]}</span>
                   <h3 className="text-base font-bold text-ink">{it.title}</h3>
-                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand/10 text-brand">{areaIcon(it.title)}</span>
                 </div>
                 {it.desc && <p className="text-sm leading-7 text-ink-muted">{it.desc}</p>}
               </div>
-            ))}
+            )); })()}
           </div>
         </div>
       </section>

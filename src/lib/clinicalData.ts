@@ -2,7 +2,7 @@
 import { type Locale } from "@/i18n/config";
 
 export type ClinicalBlock =
-  | { kind: "cards"; heading: string; intro?: string; dark?: boolean; cols?: number; items: { title: string; sub?: string; desc?: string; tags?: string[]; bullets?: string[] }[] }
+  | { kind: "cards"; heading: string; intro?: string; dark?: boolean; cols?: number; items: { title: string; sub?: string; desc?: string; tags?: string[]; bullets?: string[]; icon?: string }[] }
   | { kind: "prose"; heading: string; paragraphs: string[] }
   | { kind: "agePrograms"; heading: string; adult: { title: string; sub: string; label: string }; child: { title: string; label: string; levels: string[] } }
   | { kind: "pills"; heading: string; intro?: string; dark?: boolean; items: string[] }
