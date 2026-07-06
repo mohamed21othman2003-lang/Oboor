@@ -56,7 +56,9 @@ export default function CollectionList({ type }: { type: string }) {
 
   // رابط صورة العنصر (إن وُجد) بعد تحليله وإضافة كاسر الكاش — لعرض مصغّرة في القائمة
   function imageOf(it: CmsItem): string {
-    const raw = String(it.image ?? it.image_file ?? "");
+    // الفروع تخزّن صورها في «gallery» (مصفوفة) بدل حقل image — نعرض أول صورة كغلاف
+    const gallery = Array.isArray(it.gallery) ? (it.gallery as unknown[]) : [];
+    const raw = String(it.image ?? it.image_file ?? gallery[0] ?? "");
     if (!raw) return "";
     const resolved = /^(https?:|data:|blob:|\/)/.test(raw) ? raw : "/" + raw.replace(/^\/+/, "");
     return /^(https?:|\/)/.test(resolved) ? `${resolved}${resolved.includes("?") ? "&" : "?"}v=${bust}` : resolved;

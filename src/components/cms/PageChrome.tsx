@@ -233,6 +233,37 @@ const ITEM_NOTES_EN: Record<string, string> = {
   "list.header": "The number is calculated automatically = the count of published jobs. You only control the text around it.",
 };
 
+// ملاحظة تعريفية لكل قسم (المفتاح = «الصفحة.البلوك») — توضّح أين يظهر المحتوى على الموقع
+// حتى لا يتوه المستخدم. previewPath = رابط الصفحة التي يظهر فيها فعلاً (لزر معاينة).
+const BLOCK_NOTES: Record<string, { ar: string; en: string; previewPath?: string; previewLabel_ar?: string; previewLabel_en?: string }> = {
+  "branches.services": {
+    ar: "كروت الخدمات دي بتظهر داخل صفحة تفاصيل أي فرع (من صفحة مراكزنا اضغط أي فرع). المحتوى مشترك ويظهر بنفسه في كل الفروع — مش خاص بفرع واحد.",
+    en: "These service cards appear inside any branch's detail page (open any branch from the Branches page). The content is shared and shows on every branch — not tied to one branch.",
+    previewPath: "/branches", previewLabel_ar: "افتح صفحة مراكزنا ← اختر فرعاً", previewLabel_en: "Open Branches → pick a branch",
+  },
+  "branches.profile_intro": {
+    ar: "بتظهر في صفحة «ملف الفرع» (افتح أي فرع ثم صفحة ملف الفرع). المحتوى مشترك لكل الفروع.",
+    en: "Appears on the branch profile page (open any branch, then its profile page). Shared across all branches.",
+  },
+  "branches.profile_stats": {
+    ar: "أرقام تظهر في صفحة «ملف الفرع» (مشتركة لكل الفروع).",
+    en: "Numbers shown on the branch profile page (shared across all branches).",
+  },
+  "branches.journey": {
+    ar: "خطوات «رحلة التأهيل» في صفحة «ملف الفرع» (مشتركة لكل الفروع).",
+    en: "The rehabilitation journey steps on the branch profile page (shared across all branches).",
+  },
+  "branches.accreditations": {
+    ar: "الاعتمادات في صفحة «ملف الفرع» (مشتركة لكل الفروع).",
+    en: "Accreditations on the branch profile page (shared across all branches).",
+  },
+  "branches.features": {
+    ar: "قسم «بيئتنا، أمان وتمكين» أسفل صفحة مراكزنا.",
+    en: "The “Our Environment” section at the bottom of the Branches page.",
+    previewPath: "/branches", previewLabel_ar: "عاين صفحة مراكزنا", previewLabel_en: "Preview Branches page",
+  },
+};
+
 const INPUT = "w-full rounded-xl border border-line bg-surface px-4 py-2.5 text-sm text-ink outline-none transition-colors focus:border-brand focus:bg-white focus:ring-2 focus:ring-brand/20";
 
 function resolveSrc(s: string): string {
@@ -428,6 +459,20 @@ export default function PageChrome({ page }: { page: string }) {
               </button>
               {isOpen && (
               <div className="space-y-3 border-t border-line p-3">
+                {BLOCK_NOTES[`${page}.${g.block}`] && (() => {
+                  const bn = BLOCK_NOTES[`${page}.${g.block}`];
+                  return (
+                    <div className="rounded-lg border border-brand/20 bg-brand/5 px-3 py-2.5 text-[11px] leading-5 text-ink-soft">
+                      ℹ️ {en ? bn.en : bn.ar}
+                      {bn.previewPath && (
+                        <a href={bn.previewPath} target="_blank" rel="noopener noreferrer" className="ms-1 inline-flex items-center gap-1 font-semibold text-brand hover:underline">
+                          {(en ? bn.previewLabel_en : bn.previewLabel_ar) || (en ? "Preview" : "معاينة")}
+                          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3" /></svg>
+                        </a>
+                      )}
+                    </div>
+                  );
+                })()}
                 {g.items.map((it) => {
                   // أقسام بمحتوى منظّم معقّد — تُحرّر بالمحرّر الكامل
                   if (COMPLEX_BLOCKS.has(g.block)) {
