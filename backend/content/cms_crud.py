@@ -241,6 +241,11 @@ def collection(request, type_key):
             ser.save()
     except IntegrityError:
         return Response({"detail": "تعذّر الحفظ — قد يكون هناك عنصر بنفس المعرّف. حاول مجدداً."}, status=400)
+    # التقط نسخة افتراضية للعنصر الجديد فور إنشائه حتى يتوفّر زر «استرجاع النسخة الافتراضية» دائماً
+    try:
+        capture_snapshot(type_key, ser.instance)
+    except Exception:
+        pass
     return Response(ser.data, status=status.HTTP_201_CREATED)
 
 
