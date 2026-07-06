@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ALL_BRANCHES, getBranch, BRANCH_FEATURES, BRANCH_FEATURES_EN } from "@/lib/branchesData";
 import { loadBranch } from "@/lib/server/branches";
-import { fetchSections } from "@/lib/server/django";
 import { getLocale } from "@/i18n/locale";
 import { pick } from "@/i18n/config";
 import { CONTACT } from "@/lib/site";
@@ -40,14 +39,9 @@ export default async function BranchProfilePage({ params }: { params: Promise<{ 
 
   const features = locale === "en" ? BRANCH_FEATURES_EN : BRANCH_FEATURES;
 
-  // محتوى ملف الفرع من الـCMS (عام لكل الفروع) مع fallback ثابت
-  const en = locale === "en";
-  const sec = await fetchSections("branches");
-  const sT = (r: { title_ar: string; title_en: string }) => (en ? r.title_en || r.title_ar : r.title_ar);
-  const sB = (r: { text_ar: string; text_en: string }) => (en ? r.text_en || r.text_ar : r.text_ar);
-
-  const highlights = sec?.profile_stats?.length
-    ? sec.profile_stats.map((r) => ({ value: r.value, label: sT(r) }))
+  // محتوى ملف الفرع — خاص بهذا الفرع (يتحكّم فيه من لوحة الفرع) مع fallback ثابت
+  const highlights = b.profileStats?.length
+    ? b.profileStats
     : [
         { value: "+19", label: pick(locale, "عامًا في الريادة", "Years of leadership") },
         { value: "+6,300", label: pick(locale, "مستفيد احتُضن بحب", "Beneficiaries served") },
@@ -55,24 +49,25 @@ export default async function BranchProfilePage({ params }: { params: Promise<{ 
         { value: "+7", label: pick(locale, "برامج تأهيلية", "Rehabilitation programs") },
       ];
 
-  const journey = sec?.journey?.length
-    ? sec.journey.map((r, i) => ({ step: String(i + 1), title: sT(r), desc: sB(r) }))
+  const journey = (b.journey?.length
+    ? b.journey
     : [
-        { step: "1", title: pick(locale, "التقييم والتشخيص", "Assessment & Diagnosis"), desc: pick(locale, "تقييمٌ شاملٌ بأدواتٍ حديثة لتحديد احتياج الطفل بدقة.", "A comprehensive assessment with modern tools to precisely identify the child's needs.") },
-        { step: "2", title: pick(locale, "الخطة الفردية", "Individualized Plan"), desc: pick(locale, "خطةٌ تأهيليةٌ مصممةٌ خصيصًا لكل طفلٍ وأهدافه.", "A rehabilitation plan tailored specifically to each child and their goals.") },
-        { step: "3", title: pick(locale, "الجلسات التأهيلية", "Rehabilitation Sessions"), desc: pick(locale, "تنفيذ البرنامج على يد نخبةٍ من الأخصائيين المتخصصين.", "The program is delivered by a select team of specialized practitioners.") },
-        { step: "4", title: pick(locale, "المتابعة والتمكين", "Follow-up & Empowerment"), desc: pick(locale, "قياسٌ مستمرٌ للتقدّم ودمجٌ للأسرة في كل خطوة.", "Continuous progress tracking and family involvement at every step.") },
-      ];
+        { title: pick(locale, "التقييم والتشخيص", "Assessment & Diagnosis"), desc: pick(locale, "تقييمٌ شاملٌ بأدواتٍ حديثة لتحديد احتياج الطفل بدقة.", "A comprehensive assessment with modern tools to precisely identify the child's needs.") },
+        { title: pick(locale, "الخطة الفردية", "Individualized Plan"), desc: pick(locale, "خطةٌ تأهيليةٌ مصممةٌ خصيصًا لكل طفلٍ وأهدافه.", "A rehabilitation plan tailored specifically to each child and their goals.") },
+        { title: pick(locale, "الجلسات التأهيلية", "Rehabilitation Sessions"), desc: pick(locale, "تنفيذ البرنامج على يد نخبةٍ من الأخصائيين المتخصصين.", "The program is delivered by a select team of specialized practitioners.") },
+        { title: pick(locale, "المتابعة والتمكين", "Follow-up & Empowerment"), desc: pick(locale, "قياسٌ مستمرٌ للتقدّم ودمجٌ للأسرة في كل خطوة.", "Continuous progress tracking and family involvement at every step.") },
+      ]
+  ).map((j, i) => ({ step: String(i + 1), title: j.title, desc: j.desc }));
 
-  const accreditations = sec?.accreditations?.length
-    ? sec.accreditations.map((r) => sT(r))
+  const accreditations = b.accreditations?.length
+    ? b.accreditations
     : [
         pick(locale, "ISO 9001 — إدارة الجودة", "ISO 9001 — Quality Management"),
         pick(locale, "برامج تأهيلية معتمدة", "Accredited rehabilitation programs"),
         pick(locale, "كوادر مرخّصة ومؤهّلة", "Licensed & qualified staff"),
       ];
 
-  const introTpl = sec?.profile_intro?.[0] ? sB(sec.profile_intro[0]) : pick(
+  const introTpl = b.profileIntro || pick(
     locale,
     "يقدّم {name} خدمات الرعاية والتأهيل المتكاملة لذوي الاحتياجات الخاصة وأسرهم في {city}، عبر فريقٍ متخصص وبرامج معتمدة مصممة وفق احتياج كل طفل، وبيئةٍ مهيأة بأحدث أدوات التقييم والتأهيل.",
     "{name} provides integrated care and rehabilitation services for people with special needs and their families in {city}, through a specialized team, accredited programs tailored to each child's needs, and a facility equipped with the latest assessment and rehabilitation tools."

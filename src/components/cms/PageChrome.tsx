@@ -21,8 +21,11 @@ const LIST_BLOCKS = new Set([
   "features", "stats", "steps", "services",
 ]);
 // بلوكات لم تعُد تُدار من هنا (انتقل تحكّمها لمكان أنسب) — تُخفى من محرّر الصفحة
-// «branches.services» صار لكل فرع مستقلاً داخل محرّر الفرع نفسه (كروت خدمات الفرع).
-const HIDDEN_BLOCKS = new Set(["branches.services"]);
+// محتوى صفحة الفرع/ملف الفرع صار لكل فرع مستقلاً داخل محرّر الفرع نفسه.
+const HIDDEN_BLOCKS = new Set([
+  "branches.services", "branches.profile_intro", "branches.profile_stats",
+  "branches.journey", "branches.accreditations",
+]);
 // أقسام تعرض لكل عنصر أيقونة قابلة للاختيار (المفتاح = اسم البلوك، القيمة = الأيقونات المتاحة)
 const ICON_BLOCK_NAMES: Record<string, string[]> = {
   features: ["graduation", "shield", "heart", "building", "team", "book", "target", "star", "trophy", "bulb", "hand", "activity", "clipboard", "list"],
@@ -239,27 +242,6 @@ const ITEM_NOTES_EN: Record<string, string> = {
 // ملاحظة تعريفية لكل قسم (المفتاح = «الصفحة.البلوك») — توضّح أين يظهر المحتوى على الموقع
 // حتى لا يتوه المستخدم. previewPath = رابط الصفحة التي يظهر فيها فعلاً (لزر معاينة).
 const BLOCK_NOTES: Record<string, { ar: string; en: string; previewPath?: string; previewLabel_ar?: string; previewLabel_en?: string }> = {
-  "branches.services": {
-    ar: "كروت الخدمات دي بتظهر داخل صفحة تفاصيل أي فرع (من صفحة مراكزنا اضغط أي فرع). المحتوى مشترك ويظهر بنفسه في كل الفروع — مش خاص بفرع واحد.",
-    en: "These service cards appear inside any branch's detail page (open any branch from the Branches page). The content is shared and shows on every branch — not tied to one branch.",
-    previewPath: "/branches", previewLabel_ar: "افتح صفحة مراكزنا ← اختر فرعاً", previewLabel_en: "Open Branches → pick a branch",
-  },
-  "branches.profile_intro": {
-    ar: "بتظهر في صفحة «ملف الفرع» (افتح أي فرع ثم صفحة ملف الفرع). المحتوى مشترك لكل الفروع.",
-    en: "Appears on the branch profile page (open any branch, then its profile page). Shared across all branches.",
-  },
-  "branches.profile_stats": {
-    ar: "أرقام تظهر في صفحة «ملف الفرع» (مشتركة لكل الفروع).",
-    en: "Numbers shown on the branch profile page (shared across all branches).",
-  },
-  "branches.journey": {
-    ar: "خطوات «رحلة التأهيل» في صفحة «ملف الفرع» (مشتركة لكل الفروع).",
-    en: "The rehabilitation journey steps on the branch profile page (shared across all branches).",
-  },
-  "branches.accreditations": {
-    ar: "الاعتمادات في صفحة «ملف الفرع» (مشتركة لكل الفروع).",
-    en: "Accreditations on the branch profile page (shared across all branches).",
-  },
   "branches.features": {
     ar: "قسم «بيئتنا، أمان وتمكين» أسفل صفحة مراكزنا.",
     en: "The “Our Environment” section at the bottom of the Branches page.",

@@ -21,6 +21,10 @@ type ApiBranch = {
     title_ar?: string; title_en?: string; desc_ar?: string; desc_en?: string;
     features_ar?: string[]; features_en?: string[]; href?: string;
   }[];
+  profile_intro_ar?: string; profile_intro_en?: string;
+  profile_stats?: { value?: string; label_ar?: string; label_en?: string }[];
+  journey?: { title_ar?: string; title_en?: string; desc_ar?: string; desc_en?: string }[];
+  accreditations?: { title_ar?: string; title_en?: string }[];
   gallery: string[];
   lat: number | null; lng: number | null;
   is_new: boolean;
@@ -55,6 +59,18 @@ function toBranch(row: ApiBranch, locale: Locale): Branch {
       features: en ? (c.features_en?.length ? c.features_en : (c.features_ar || [])) : (c.features_ar || []),
       href: c.href || undefined,
     })).filter((c) => c.title),
+    profileIntro: en ? (row.profile_intro_en || row.profile_intro_ar || "") : (row.profile_intro_ar || ""),
+    profileStats: (Array.isArray(row.profile_stats) ? row.profile_stats : []).map((s) => ({
+      value: s.value || "",
+      label: en ? (s.label_en || s.label_ar || "") : (s.label_ar || ""),
+    })).filter((s) => s.value || s.label),
+    journey: (Array.isArray(row.journey) ? row.journey : []).map((j) => ({
+      title: en ? (j.title_en || j.title_ar || "") : (j.title_ar || ""),
+      desc: en ? (j.desc_en || j.desc_ar || "") : (j.desc_ar || ""),
+    })).filter((j) => j.title || j.desc),
+    accreditations: (Array.isArray(row.accreditations) ? row.accreditations : []).map((a) =>
+      en ? (a.title_en || a.title_ar || "") : (a.title_ar || "")
+    ).filter(Boolean),
     gallery: Array.isArray(row.gallery) ? row.gallery : [],
     lat: row.lat ?? null,
     lng: row.lng ?? null,

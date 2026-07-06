@@ -11,7 +11,9 @@ class BranchSerializer(serializers.ModelSerializer):
                   "address_ar", "address_en", "hours_ar", "hours_en",
                   "phone", "phone_evening", "email", "manager", "manager_en", "map_url",
                   "rating", "reviews_count",
-                  "services_ar", "services_en", "service_cards", "gallery", "lat", "lng", "is_new", "order"]
+                  "services_ar", "services_en", "service_cards",
+                  "profile_intro_ar", "profile_intro_en", "profile_stats", "journey", "accreditations",
+                  "gallery", "lat", "lng", "is_new", "order"]
 
 
 from .preview import PreviewListMixin

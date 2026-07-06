@@ -43,6 +43,16 @@ class Branch(models.Model):
     # كل عنصر: {title_ar, title_en, desc_ar, desc_en, features_ar[], features_en[], href}
     service_cards = models.JSONField("كروت خدمات الفرع", default=list, blank=True)
 
+    # محتوى صفحة «ملف الفرع» — خاص بهذا الفرع (كان مشتركاً لكل الفروع سابقاً).
+    profile_intro_ar = models.TextField("نبذة ملف الفرع (عربي)", blank=True)
+    profile_intro_en = models.TextField("نبذة ملف الفرع (إنجليزي)", blank=True)
+    # إحصائيات: [{value, label_ar, label_en}]
+    profile_stats = models.JSONField("إحصائيات ملف الفرع", default=list, blank=True)
+    # رحلة التأهيل: [{title_ar, title_en, desc_ar, desc_en}]
+    journey = models.JSONField("رحلة التأهيل (ملف الفرع)", default=list, blank=True)
+    # الاعتمادات: [{title_ar, title_en}]
+    accreditations = models.JSONField("الاعتمادات (ملف الفرع)", default=list, blank=True)
+
     gallery = models.JSONField("معرض صور الفرع", default=list, blank=True)
 
     lat = models.FloatField("خط العرض (lat)", null=True, blank=True)

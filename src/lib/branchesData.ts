@@ -19,6 +19,11 @@ export type Branch = {
   services: string[];
   // كروت الخدمات الغنية الخاصة بهذا الفرع (تظهر في صفحة الفرع) — محلولة حسب اللغة
   serviceCards?: { title: string; desc: string; features: string[]; href?: string }[];
+  // محتوى صفحة «ملف الفرع» الخاص بهذا الفرع — محلول حسب اللغة
+  profileIntro?: string;
+  profileStats?: { value: string; label: string }[];
+  journey?: { title: string; desc: string }[];
+  accreditations?: string[];
   gallery?: string[];
   lat?: number | null;
   lng?: number | null;

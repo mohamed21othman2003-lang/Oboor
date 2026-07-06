@@ -884,6 +884,8 @@ function FieldInput({ f, value, onChange, badge, dir }: { f: FieldSchema; value:
           <AboutTagEditor value={value} onChange={onChange} dir={dir} />
         ) : f.base === "service_cards" ? (
           <ServiceCardsEditor value={value} onChange={onChange} />
+        ) : BRANCH_LIST_FIELDS[f.base] ? (
+          <BranchListEditor value={value} onChange={onChange} base={f.base} />
         ) : OBJECT_FIELDS[f.base] ? (
           <ObjectEditor value={value} onChange={onChange} fields={OBJECT_FIELDS[f.base]} dir={dir} />
         ) : CARD_LIST_FIELDS[f.base] ? (
@@ -1360,6 +1362,80 @@ function ServiceCardsEditor({ value, onChange }: { value: unknown; onChange: (v:
       <button type="button" onClick={add} className="inline-flex items-center gap-1.5 rounded-lg bg-brand px-3.5 py-2 text-xs font-bold text-white hover:bg-brand-dark">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path strokeLinecap="round" d="M12 5v14M5 12h14" /></svg>
         {tt("إضافة خدمة", "Add Service")}
+      </button>
+    </div>
+  );
+}
+
+// محرّر عام لقوائم كائنات ثنائية اللغة على مستوى الفرع (إحصائيات/رحلة/اعتمادات).
+// kind: "scalar" = قيمة واحدة (item[key])؛ "bi-scalar" = عربي/إنجليزي (item[key_ar]/item[key_en]).
+type BranchListField = { key: string; label: string; label_en: string; kind: "scalar" | "bi-scalar" };
+const BRANCH_LIST_FIELDS: Record<string, { addLabel: string; addLabel_en: string; fields: BranchListField[] }> = {
+  profile_stats: {
+    addLabel: "إضافة إحصائية", addLabel_en: "Add stat",
+    fields: [
+      { key: "value", label: "الرقم (مثال: ‎+19)", label_en: "Number (e.g. +19)", kind: "scalar" },
+      { key: "label", label: "التسمية", label_en: "Label", kind: "bi-scalar" },
+    ],
+  },
+  journey: {
+    addLabel: "إضافة خطوة", addLabel_en: "Add step",
+    fields: [
+      { key: "title", label: "عنوان الخطوة", label_en: "Step title", kind: "bi-scalar" },
+      { key: "desc", label: "وصف الخطوة", label_en: "Step description", kind: "bi-scalar" },
+    ],
+  },
+  accreditations: {
+    addLabel: "إضافة اعتماد", addLabel_en: "Add accreditation",
+    fields: [
+      { key: "title", label: "الاعتماد", label_en: "Accreditation", kind: "bi-scalar" },
+    ],
+  },
+};
+
+function BranchListEditor({ value, onChange, base }: { value: unknown; onChange: (v: unknown) => void; base: string }) {
+  const { lang } = useCmsLang();
+  const isEn = lang === "en";
+  const tt = (arTxt: string, e: string) => (isEn ? e : arTxt);
+  const cfg = BRANCH_LIST_FIELDS[base];
+  const items = blkObjArr(value);
+  const commit = (next: Rec[]) => onChange(next);
+  const patch = (i: number, key: string, v: unknown) => commit(items.map((c, j) => (j === i ? { ...c, [key]: v } : c)));
+  const move = (i: number, dir: -1 | 1) => { const j = i + dir; if (j < 0 || j >= items.length) return; const next = [...items]; [next[i], next[j]] = [next[j], next[i]]; commit(next); };
+  const removeAt = (i: number) => commit(items.filter((_, j) => j !== i));
+  const add = () => {
+    const blank: Rec = {};
+    for (const fl of cfg.fields) { if (fl.kind === "scalar") blank[fl.key] = ""; else { blank[`${fl.key}_ar`] = ""; blank[`${fl.key}_en`] = ""; } }
+    commit([...items, blank]);
+  };
+  const flLabel = (fl: BranchListField) => (isEn ? fl.label_en : fl.label);
+  return (
+    <div className="space-y-3">
+      {items.length === 0 && <p className="rounded-xl border border-dashed border-line bg-surface px-4 py-2.5 text-xs text-ink-soft">{tt("لا توجد عناصر — اضغط الزر بالأسفل.", "No items — click the button below.")}</p>}
+      {items.map((it, i) => (
+        <div key={i} className="space-y-3 rounded-2xl border border-line bg-surface/40 p-4">
+          <div className="flex items-center justify-between">
+            <span className="flex h-6 min-w-6 items-center justify-center rounded-full bg-brand px-2 text-[11px] font-bold text-white">{i + 1}</span>
+            <div className="flex items-center gap-1">
+              <button type="button" onClick={() => move(i, -1)} disabled={i === 0} className="rounded-lg border border-line bg-white px-2 py-1 text-xs font-bold text-ink-soft hover:border-brand hover:text-brand disabled:opacity-30" title={tt("أعلى", "Up")}>↑</button>
+              <button type="button" onClick={() => move(i, 1)} disabled={i === items.length - 1} className="rounded-lg border border-line bg-white px-2 py-1 text-xs font-bold text-ink-soft hover:border-brand hover:text-brand disabled:opacity-30" title={tt("أسفل", "Down")}>↓</button>
+              <button type="button" onClick={() => removeAt(i)} className="rounded-lg bg-red-50 px-2.5 py-1 text-[11px] font-semibold text-red-600 hover:bg-red-600 hover:text-white">{tt("حذف", "Remove")}</button>
+            </div>
+          </div>
+          {cfg.fields.map((fl) => fl.kind === "scalar" ? (
+            <div key={fl.key}>
+              <p className="mb-1 text-xs font-semibold text-ink-soft">{flLabel(fl)}</p>
+              <input value={blkStr(it[fl.key])} onChange={(e) => patch(i, fl.key, e.target.value)} dir="ltr" className={INPUT + " bg-white"} />
+            </div>
+          ) : (
+            <BiScalar key={fl.key} label={flLabel(fl)} a={blkStr(it[`${fl.key}_ar`])} e={blkStr(it[`${fl.key}_en`])}
+              onA={(v) => patch(i, `${fl.key}_ar`, v)} onE={(v) => patch(i, `${fl.key}_en`, v)} />
+          ))}
+        </div>
+      ))}
+      <button type="button" onClick={add} className="inline-flex items-center gap-1.5 rounded-lg bg-brand px-3.5 py-2 text-xs font-bold text-white hover:bg-brand-dark">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path strokeLinecap="round" d="M12 5v14M5 12h14" /></svg>
+        {isEn ? cfg.addLabel_en : cfg.addLabel}
       </button>
     </div>
   );
