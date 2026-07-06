@@ -8,7 +8,7 @@ export type ClinicalBlock =
   | { kind: "pills"; heading: string; intro?: string; dark?: boolean; items: string[] }
   | { kind: "tiles"; heading: string; intro?: string; dark?: boolean; filled?: boolean; cols?: number; items: string[] }
   | { kind: "checklist"; heading?: string; intro?: string; dark?: boolean; items: string[] }
-  | { kind: "areas"; heading: string; intro?: string; items: { title: string; desc: string }[] };
+  | { kind: "areas"; heading: string; intro?: string; items: { title: string; desc: string; icon?: string }[] };
 
 export type ClinicalService = {
   slug: string;

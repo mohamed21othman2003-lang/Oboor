@@ -3,7 +3,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { CLINICAL_SERVICES, getClinicalService, type ClinicalBlock, type ClinicalService } from "@/lib/clinicalData";
-import { areaIcon, distinctIcons } from "@/lib/areaIcon";
+import { areaIcon, distinctIcons, iconByKey } from "@/lib/areaIcon";
 import { getLocale } from "@/i18n/locale";
 import { pick, type Locale } from "@/i18n/config";
 import { fetchContent } from "@/lib/server/django";
@@ -272,7 +272,7 @@ function Block({ b }: { b: ClinicalBlock }) {
           {b.intro && <p className="mt-3 max-w-4xl text-sm text-ink-muted">{b.intro}</p>}
         </div>
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {(() => { const icons = distinctIcons(b.items.map((x) => x.title)); return b.items.map((a, i) => (
+          {(() => { const autoIcons = distinctIcons(b.items.map((x) => x.title)); const icons = b.items.map((a, i) => (a.icon ? iconByKey(a.icon) : autoIcons[i])); return b.items.map((a, i) => (
             <div key={i} className="rounded-2xl border border-line bg-white p-6 text-start shadow-sm">
               <div className="flex items-start gap-3">
                 <div className="flex shrink-0 flex-col items-center gap-1">

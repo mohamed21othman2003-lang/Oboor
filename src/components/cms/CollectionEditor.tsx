@@ -1280,7 +1280,7 @@ type ItemFieldSchema = { key: string; label: string; label_en?: string; list?: b
 
 // عنصر واحد داخل قائمة البطاقات/المجالات — يُظهر الحقول الأساسية فقط،
 // والحقول الاختيارية الفارغة تُخفى خلف زر صغير لتقليل التشويش
-function ObjItem({ index, ia, ie, schema, onChange, onRemove }: { index: number; ia: Rec; ie: Rec; schema: ItemFieldSchema[]; onChange: (av: Rec, ev: Rec) => void; onRemove: () => void }) {
+function ObjItem({ index, ia, ie, schema, onChange, onRemove, iconPicker }: { index: number; ia: Rec; ie: Rec; schema: ItemFieldSchema[]; onChange: (av: Rec, ev: Rec) => void; onRemove: () => void; iconPicker?: boolean }) {
   const { lang } = useCmsLang();
   const en = lang === "en";
   const hasVal = (s: ItemFieldSchema) => s.list
@@ -1305,6 +1305,17 @@ function ObjItem({ index, ia, ie, schema, onChange, onRemove }: { index: number;
         ) : (
           <BiScalar key={s.key} label={sLabel(s)} a={blkStr(ia[s.key])} e={blkStr(ie[s.key])} onA={(v) => onChange({ ...ia, [s.key]: v }, { ...ie })} onE={(v) => onChange({ ...ia }, { ...ie, [s.key]: v })} />
         ))}
+        {iconPicker && (
+          <div>
+            <p className="mb-1 text-xs font-semibold text-ink-soft">{en ? "Icon" : "الأيقونة"}</p>
+            <div className="grid grid-cols-6 gap-1.5 rounded-xl border border-line bg-white p-2 sm:grid-cols-9">
+              <button type="button" onClick={() => onChange({ ...ia, icon: "" }, { ...ie, icon: "" })} title={en ? "Automatic" : "تلقائي"} className={`flex h-9 items-center justify-center rounded-lg border text-[10px] transition-colors ${!blkStr(ia.icon) ? "border-brand bg-brand/10 text-brand" : "border-line bg-white text-ink-soft hover:border-brand/40"}`}>{en ? "Auto" : "تلقائي"}</button>
+              {OFFER_ICON_KEYS.map((k) => (
+                <button type="button" key={k} onClick={() => onChange({ ...ia, icon: k }, { ...ie, icon: k })} title={k} className={`flex h-9 items-center justify-center rounded-lg border transition-colors ${blkStr(ia.icon) === k ? "border-brand bg-brand/10 text-brand" : "border-line bg-white text-ink hover:border-brand/40"}`}>{iconByKey(k)}</button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
       {hiddenExtras.length > 0 && (
         <button type="button" onClick={() => setShowExtra((s) => !s)} className="mt-2 text-[11px] font-semibold text-brand hover:underline">
@@ -1316,7 +1327,7 @@ function ObjItem({ index, ia, ie, schema, onChange, onRemove }: { index: number;
 }
 
 // محرّر قائمة بطاقات/مجالات ثنائي اللغة (كل عنصر كائن بخاناته)
-function ObjItemsEditor({ a, e, onChange, schema, addLabel }: { a: Rec[]; e: Rec[]; onChange: (a: Rec[], e: Rec[]) => void; schema: ItemFieldSchema[]; addLabel: string }) {
+function ObjItemsEditor({ a, e, onChange, schema, addLabel, iconPicker }: { a: Rec[]; e: Rec[]; onChange: (a: Rec[], e: Rec[]) => void; schema: ItemFieldSchema[]; addLabel: string; iconPicker?: boolean }) {
   const { lang } = useCmsLang();
   const isEn = lang === "en";
   const n = Math.max(a.length, e.length);
@@ -1330,7 +1341,7 @@ function ObjItemsEditor({ a, e, onChange, schema, addLabel }: { a: Rec[]; e: Rec
     <div className="space-y-2">
       {n === 0 && <p className="rounded-xl border border-dashed border-line bg-surface px-3 py-2 text-[11px] text-ink-soft">{isEn ? `No items — click “${addLabel}”.` : `لا توجد عناصر — اضغط «${addLabel}».`}</p>}
       {Array.from({ length: n }, (_, i) => (
-        <ObjItem key={i} index={i} ia={blkObj(a[i])} ie={blkObj(e[i] ?? a[i])} schema={schema}
+        <ObjItem key={i} index={i} ia={blkObj(a[i])} ie={blkObj(e[i] ?? a[i])} schema={schema} iconPicker={iconPicker}
           onChange={(av, ev) => patch(i, av, ev)} onRemove={() => removeAt(i)} />
       ))}
       <button type="button" onClick={add} className="inline-flex items-center gap-1 rounded-lg bg-brand/10 px-2.5 py-1 text-[11px] font-semibold text-brand hover:bg-brand hover:text-white">+ {addLabel}</button>
@@ -1371,9 +1382,9 @@ function BlocksEditor({ ar, en, onChange }: { ar: unknown[]; en: unknown[]; onCh
             a={blkStr(p.a[key])} e={blkStr(p.e[key])}
             onA={(v) => patch(i, { ...p.a, [key]: v }, { ...p.e })} onE={(v) => patch(i, { ...p.a }, { ...p.e, [key]: v })} />
         );
-        const objList = (key: string, schema: ItemFieldSchema[], addLabel: string) => (
+        const objList = (key: string, schema: ItemFieldSchema[], addLabel: string, iconPicker?: boolean) => (
           <div key={key}>
-            <ObjItemsEditor a={blkObjArr(p.a[key])} e={blkObjArr(p.e[key])} schema={schema} addLabel={addLabel}
+            <ObjItemsEditor a={blkObjArr(p.a[key])} e={blkObjArr(p.e[key])} schema={schema} addLabel={addLabel} iconPicker={iconPicker}
               onChange={(av, ev) => patch(i, { ...p.a, [key]: av }, { ...p.e, [key]: ev })} />
           </div>
         );
@@ -1388,7 +1399,7 @@ function BlocksEditor({ ar, en, onChange }: { ar: unknown[]; en: unknown[]; onCh
         else if (kind === "pills") body = <>{sc("heading", tt("العنوان", "Heading"))}{introField("intro")}{strList("items", tt("الوسوم", "Pills"))}</>;
         else if (kind === "tiles") body = <>{sc("heading", tt("العنوان", "Heading"))}{introField("intro")}{strList("items", tt("المربّعات", "Tiles"))}</>;
         else if (kind === "checklist") body = <>{sc("heading", tt("العنوان (اختياري)", "Heading (optional)"))}{introField("intro")}{strList("items", tt("عناصر القائمة", "Checklist items"))}</>;
-        else if (kind === "areas") body = <>{sc("heading", tt("العنوان", "Heading"))}{introField("intro")}{objList("items", [{ key: "title", label: "العنوان", label_en: "Title" }, { key: "desc", label: "الوصف", label_en: "Description" }], tt("إضافة مجال", "Add Area"))}</>;
+        else if (kind === "areas") body = <>{sc("heading", tt("العنوان", "Heading"))}{introField("intro")}{objList("items", [{ key: "title", label: "العنوان", label_en: "Title" }, { key: "desc", label: "الوصف", label_en: "Description" }], tt("إضافة مجال", "Add Area"), true)}</>;
         else if (kind === "cards") body = <>{sc("heading", tt("العنوان", "Heading"))}{introField("intro")}{objList("items", [{ key: "title", label: "عنوان البطاقة", label_en: "Card title" }, { key: "desc", label: "الوصف", label_en: "Description" }, { key: "sub", label: "نص جانبي صغير", label_en: "Small side text", optional: true }, { key: "bullets", label: "نقاط", label_en: "Bullets", list: true, optional: true }, { key: "tags", label: "وسوم", label_en: "Tags", list: true, optional: true }], tt("إضافة بطاقة", "Add Card"))}</>;
         else if (kind === "agePrograms") body = (
           <>
