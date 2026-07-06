@@ -39,6 +39,10 @@ class Branch(models.Model):
     services_ar = models.JSONField("الخدمات (عربي)", default=list, blank=True)
     services_en = models.JSONField("الخدمات (إنجليزي)", default=list, blank=True)
 
+    # كروت الخدمات الغنية (خاصة بهذا الفرع) — تظهر في صفحة الفرع.
+    # كل عنصر: {title_ar, title_en, desc_ar, desc_en, features_ar[], features_en[], href}
+    service_cards = models.JSONField("كروت خدمات الفرع", default=list, blank=True)
+
     gallery = models.JSONField("معرض صور الفرع", default=list, blank=True)
 
     lat = models.FloatField("خط العرض (lat)", null=True, blank=True)

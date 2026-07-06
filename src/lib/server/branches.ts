@@ -17,6 +17,10 @@ type ApiBranch = {
   phone: string; phone_evening: string; email: string; manager: string; manager_en: string; map_url: string;
   rating: string; reviews_count: string;
   services_ar: string[]; services_en: string[];
+  service_cards?: {
+    title_ar?: string; title_en?: string; desc_ar?: string; desc_en?: string;
+    features_ar?: string[]; features_en?: string[]; href?: string;
+  }[];
   gallery: string[];
   lat: number | null; lng: number | null;
   is_new: boolean;
@@ -45,6 +49,12 @@ function toBranch(row: ApiBranch, locale: Locale): Branch {
     reviewsCount: row.reviews_count || "",
     // خدمات إنجليزية إن وُجدت، وإلا نترجم القياسية، وإلا العربي كما هو
     services: en ? (row.services_en?.length ? row.services_en : (row.services_ar || []).map(serviceEn)) : row.services_ar,
+    serviceCards: (Array.isArray(row.service_cards) ? row.service_cards : []).map((c) => ({
+      title: en ? (c.title_en || c.title_ar || "") : (c.title_ar || ""),
+      desc: en ? (c.desc_en || c.desc_ar || "") : (c.desc_ar || ""),
+      features: en ? (c.features_en?.length ? c.features_en : (c.features_ar || [])) : (c.features_ar || []),
+      href: c.href || undefined,
+    })).filter((c) => c.title),
     gallery: Array.isArray(row.gallery) ? row.gallery : [],
     lat: row.lat ?? null,
     lng: row.lng ?? null,

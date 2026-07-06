@@ -882,6 +882,8 @@ function FieldInput({ f, value, onChange, badge, dir }: { f: FieldSchema; value:
           <IconListEditor value={value} onChange={onChange} />
         ) : f.base === "about_tag" ? (
           <AboutTagEditor value={value} onChange={onChange} dir={dir} />
+        ) : f.base === "service_cards" ? (
+          <ServiceCardsEditor value={value} onChange={onChange} />
         ) : OBJECT_FIELDS[f.base] ? (
           <ObjectEditor value={value} onChange={onChange} fields={OBJECT_FIELDS[f.base]} dir={dir} />
         ) : CARD_LIST_FIELDS[f.base] ? (
@@ -1312,6 +1314,53 @@ function BiStrList({ a, e, onChange, addLabel }: { a: string[]; e: string[]; onC
         </div>
       ))}
       <button type="button" onClick={add} className="inline-flex items-center gap-1 rounded-lg bg-brand/10 px-2.5 py-1 text-[11px] font-semibold text-brand hover:bg-brand hover:text-white">+ {addTxt}</button>
+    </div>
+  );
+}
+
+// محرّر «كروت خدمات الفرع» — قائمة كروت خاصة بالفرع (عنوان + وصف + مميّزات + رابط)
+// ثنائي اللغة في مكان واحد. كل عنصر: {title_ar,title_en,desc_ar,desc_en,features_ar,features_en,href}
+function ServiceCardsEditor({ value, onChange }: { value: unknown; onChange: (v: unknown) => void }) {
+  const { lang } = useCmsLang();
+  const isEn = lang === "en";
+  const tt = (arTxt: string, e: string) => (isEn ? e : arTxt);
+  const cards = blkObjArr(value);
+  const commit = (next: Rec[]) => onChange(next);
+  const patch = (i: number, key: string, v: unknown) => commit(cards.map((c, j) => (j === i ? { ...c, [key]: v } : c)));
+  const move = (i: number, dir: -1 | 1) => { const j = i + dir; if (j < 0 || j >= cards.length) return; const next = [...cards]; [next[i], next[j]] = [next[j], next[i]]; commit(next); };
+  const removeAt = (i: number) => commit(cards.filter((_, j) => j !== i));
+  const add = () => commit([...cards, { title_ar: "", title_en: "", desc_ar: "", desc_en: "", features_ar: [], features_en: [], href: "" }]);
+  return (
+    <div className="space-y-3">
+      {cards.length === 0 && <p className="rounded-xl border border-dashed border-line bg-surface px-4 py-2.5 text-xs text-ink-soft">{tt("لا توجد كروت — اضغط «إضافة خدمة».", "No cards — click “Add Service”.")}</p>}
+      {cards.map((c, i) => (
+        <div key={i} className="space-y-3 rounded-2xl border border-line bg-surface/40 p-4">
+          <div className="flex items-center justify-between">
+            <span className="flex h-6 min-w-6 items-center justify-center rounded-full bg-brand px-2 text-[11px] font-bold text-white">{tt(`خدمة ${i + 1}`, `Service ${i + 1}`)}</span>
+            <div className="flex items-center gap-1">
+              <button type="button" onClick={() => move(i, -1)} disabled={i === 0} className="rounded-lg border border-line bg-white px-2 py-1 text-xs font-bold text-ink-soft hover:border-brand hover:text-brand disabled:opacity-30" title={tt("أعلى", "Up")}>↑</button>
+              <button type="button" onClick={() => move(i, 1)} disabled={i === cards.length - 1} className="rounded-lg border border-line bg-white px-2 py-1 text-xs font-bold text-ink-soft hover:border-brand hover:text-brand disabled:opacity-30" title={tt("أسفل", "Down")}>↓</button>
+              <button type="button" onClick={() => removeAt(i)} className="rounded-lg bg-red-50 px-2.5 py-1 text-[11px] font-semibold text-red-600 hover:bg-red-600 hover:text-white">{tt("حذف", "Remove")}</button>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-2 px-1 text-[10px] font-bold text-ink-soft"><span>{tt("عربي", "Arabic")}</span><span dir="ltr">English</span></div>
+          <BiScalar label={tt("عنوان الخدمة", "Service title")} a={blkStr(c.title_ar)} e={blkStr(c.title_en)} onA={(v) => patch(i, "title_ar", v)} onE={(v) => patch(i, "title_en", v)} />
+          <BiScalar label={tt("وصف الخدمة", "Service description")} a={blkStr(c.desc_ar)} e={blkStr(c.desc_en)} onA={(v) => patch(i, "desc_ar", v)} onE={(v) => patch(i, "desc_en", v)} />
+          <div>
+            <p className="mb-1 text-xs font-semibold text-ink-soft">{tt("المميّزات (نقاط)", "Features (bullets)")}</p>
+            <BiStrList a={blkStrArr(c.features_ar)} e={blkStrArr(c.features_en)} addLabel={tt("إضافة ميزة", "Add feature")}
+              onChange={(av, ev) => commit(cards.map((cc, j) => (j === i ? { ...cc, features_ar: av, features_en: ev } : cc)))} />
+          </div>
+          <div>
+            <p className="mb-1 text-xs font-semibold text-ink-soft">{tt("رابط صفحة الخدمة (اختياري)", "Service page link (optional)")}</p>
+            <input value={blkStr(c.href)} onChange={(e) => patch(i, "href", e.target.value)} dir="ltr" placeholder="/services/physical" className={INPUT + " bg-white"} />
+          </div>
+        </div>
+      ))}
+      <button type="button" onClick={add} className="inline-flex items-center gap-1.5 rounded-lg bg-brand px-3.5 py-2 text-xs font-bold text-white hover:bg-brand-dark">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path strokeLinecap="round" d="M12 5v14M5 12h14" /></svg>
+        {tt("إضافة خدمة", "Add Service")}
+      </button>
     </div>
   );
 }

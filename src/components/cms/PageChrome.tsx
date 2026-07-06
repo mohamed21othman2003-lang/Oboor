@@ -20,6 +20,9 @@ const LIST_BLOCKS = new Set([
   "accreditations", "journey", "profile_stats", "join_cards",
   "features", "stats", "steps", "services",
 ]);
+// بلوكات لم تعُد تُدار من هنا (انتقل تحكّمها لمكان أنسب) — تُخفى من محرّر الصفحة
+// «branches.services» صار لكل فرع مستقلاً داخل محرّر الفرع نفسه (كروت خدمات الفرع).
+const HIDDEN_BLOCKS = new Set(["branches.services"]);
 // أقسام تعرض لكل عنصر أيقونة قابلة للاختيار (المفتاح = اسم البلوك، القيمة = الأيقونات المتاحة)
 const ICON_BLOCK_NAMES: Record<string, string[]> = {
   features: ["graduation", "shield", "heart", "building", "team", "book", "target", "star", "trophy", "bulb", "hand", "activity", "clipboard", "list"],
@@ -415,6 +418,7 @@ export default function PageChrome({ page }: { page: string }) {
   const blocks: { block: string; items: CmsItem[] }[] = [];
   for (const it of items) {
     const b = String(it.block ?? "");
+    if (HIDDEN_BLOCKS.has(`${page}.${b}`)) continue; // بلوك انتقل تحكّمه لمكان آخر
     let g = blocks.find((x) => x.block === b);
     if (!g) { g = { block: b, items: [] }; blocks.push(g); }
     g.items.push(it);
