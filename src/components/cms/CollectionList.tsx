@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { listCollection, deleteItem, reorderCollection, typeLabel, addLabelFor, type CmsItem } from "@/lib/cms/api";
@@ -326,17 +327,28 @@ export default function CollectionList({ type }: { type: string }) {
           })}
         </div>
       ) : (
-        <Table list={items} />
+        <>
+          <Table list={items} />
+          {!readonly && (
+            <div className="flex justify-center pt-3">
+              <Link href={`/cms/content/${type}/new`} className="inline-flex items-center gap-2 rounded-xl border border-dashed border-brand/40 bg-brand/5 px-5 py-2.5 text-sm font-bold text-brand transition-colors hover:border-brand hover:bg-brand hover:text-white">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" d="M12 5v14M5 12h14" /></svg>
+                {addLabelFor(type, lang)}
+              </Link>
+            </div>
+          )}
+        </>
       )}
 
-      {zoom && (
-        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/80 p-4 sm:p-8" onClick={() => setZoom("")}>
+      {zoom && typeof document !== "undefined" && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 p-4 sm:p-10" onClick={() => setZoom("")}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={zoom} alt="" className="max-h-[90vh] max-w-[92vw] rounded-xl object-contain shadow-2xl" onClick={(e) => e.stopPropagation()} />
-          <button type="button" onClick={() => setZoom("")} aria-label={t("إغلاق", "Close")} className="absolute end-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur transition-colors hover:bg-white/30">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
+          <img src={zoom} alt="" className="max-h-[92vh] max-w-[94vw] rounded-xl object-contain shadow-2xl" onClick={(e) => e.stopPropagation()} />
+          <button type="button" onClick={() => setZoom("")} aria-label={t("إغلاق", "Close")} className="absolute end-5 top-5 flex h-11 w-11 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur transition-colors hover:bg-white/30">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
           </button>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
