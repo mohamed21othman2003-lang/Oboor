@@ -17,12 +17,13 @@ services:
       context: .
       args:
         # الرابط العام للباك إند كما يراه متصفح الزائر (يُدمج وقت البناء).
-        # في الإنتاج غيّره لدومين/عنوان السيرفر العام.
-        NEXT_PUBLIC_DJANGO_API_URL: ${NEXT_PUBLIC_DJANGO_API_URL:-http://127.0.0.1:8000}
+        # لازم ينتهي بـ/api. في الإنتاج غيّره لدومين/عنوان السيرفر العام.
+        NEXT_PUBLIC_DJANGO_API_URL: ${NEXT_PUBLIC_DJANGO_API_URL:-http://127.0.0.1:8000/api}
     env_file: .env.local
     environment:
       # داخل شبكة Docker، سيرفر Next يكلّم الباك إند باسم الخدمة "backend".
-      DJANGO_API_URL: http://backend:8000
+      # لازم ينتهي بـ/api لأن Django يخدم كل المسارات تحت /api/.
+      DJANGO_API_URL: http://backend:8000/api
     ports:
       - "3000:3000"
     depends_on:
