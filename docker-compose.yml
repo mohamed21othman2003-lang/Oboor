@@ -31,8 +31,9 @@ services:
     volumes:
       - miniodata:/data
     ports:
-      - "9000:9000"   # واجهة S3 (روابط الصور العامة يقرأها المتصفح)
-      - "9001:9001"   # لوحة MinIO الإدارية
+      # مربوطة على loopback فقط — الوصول العام عبر nginx (/media). ليست منشورة للعامة.
+      - "127.0.0.1:9000:9000"   # واجهة S3
+      - "127.0.0.1:9001:9001"   # لوحة MinIO الإدارية
     healthcheck:
       test: ["CMD", "mc", "ready", "local"]
       interval: 5s
@@ -67,7 +68,7 @@ services:
       minio:
         condition: service_started
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"   # عبر nginx فقط (/api)
     volumes:
       # احتياطي فقط لو تعطّل S3 — التخزين الأساسي على MinIO.
       - backend_media:/app/media
@@ -88,7 +89,7 @@ services:
     depends_on:
       - backend
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"   # عبر nginx فقط (/)
     restart: unless-stopped
 
 volumes:
