@@ -112,7 +112,7 @@ function ContactCards({ locale, site, c }: { locale: Locale; site: SiteInfo | nu
 /* ---------- Form section ---------- */
 function FeatureCard({ icon, title, note }: { icon: string; title: string; note: string }) {
   return (
-    <div className="flex items-center justify-between gap-4 rounded-2xl border border-line bg-surface px-5 py-4">
+    <div className="flex items-center gap-4 rounded-2xl border border-line bg-surface px-5 py-4">
       <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#e0eef0] text-brand">
         {CMS_ICONS[icon] ?? CMS_ICONS.clock}
       </div>
