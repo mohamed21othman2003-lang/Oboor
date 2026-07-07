@@ -61,7 +61,9 @@ WSGI_APPLICATION = "config.wsgi.application"
 # Database — uses DATABASE_URL (Supabase Postgres) if set, else local SQLite for quick start.
 _db_url = os.environ.get("DATABASE_URL")
 if _db_url:
-    _db = dj_database_url.parse(_db_url, conn_max_age=0, ssl_require=True)
+    # SSL مطلوب مع Supabase؛ يُطفأ لـPostgres محلي بلا TLS عبر DATABASE_SSL=disable
+    _ssl_require = os.environ.get("DATABASE_SSL", "require") != "disable"
+    _db = dj_database_url.parse(_db_url, conn_max_age=0, ssl_require=_ssl_require)
     # pgbouncer/Supabase pooler safe: disable prepared statements (psycopg3)
     _db.setdefault("OPTIONS", {})["prepare_threshold"] = None
     DATABASES = {"default": _db}
