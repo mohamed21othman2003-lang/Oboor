@@ -4,7 +4,9 @@
 FROM node:22-alpine AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN npm ci
+# npm install (وليس ci) لأن بعض الاعتماديات الاختيارية خاصة بالمنصة
+# (@emnapi/‏* لبديل wasm على musl) وقد لا تكون في lock المُولَّد على منصة أخرى.
+RUN npm install --no-audit --no-fund
 
 # 2) البناء
 FROM node:22-alpine AS builder
