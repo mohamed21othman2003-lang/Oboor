@@ -283,6 +283,11 @@ const ITEM_NOTES_EN: Record<string, string> = {
 // ملاحظة تعريفية لكل قسم (المفتاح = «الصفحة.البلوك») — توضّح أين يظهر المحتوى على الموقع
 // حتى لا يتوه المستخدم. previewPath = رابط الصفحة التي يظهر فيها فعلاً (لزر معاينة).
 const BLOCK_NOTES: Record<string, { ar: string; en: string; previewPath?: string; previewLabel_ar?: string; previewLabel_en?: string }> = {
+  "contact.info": {
+    ar: "هذه البطاقات تتحكّم في العناوين والوصف فقط. أمّا البريد الإلكتروني وأرقام الهاتف نفسها فتُدار من «إعدادات الموقع».",
+    en: "These cards control only the titles and descriptions. The actual email and phone numbers are managed in “Site Settings”.",
+    previewPath: "/cms/settings", previewLabel_ar: "افتح إعدادات الموقع", previewLabel_en: "Open Site Settings",
+  },
   "branches.features": {
     ar: "قسم «بيئتنا، أمان وتمكين» أسفل صفحة مراكزنا.",
     en: "The “Our Environment” section at the bottom of the Branches page.",
