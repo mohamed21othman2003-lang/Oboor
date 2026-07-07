@@ -17,8 +17,10 @@ let _ready: Promise<void> | null = null;
 async function getSql(): Promise<Sql> {
   if (!_sql) {
     const postgres = (await import("postgres")).default;
+    // SSL مطلوب مع Supabase؛ يُطفأ لـPostgres محلي بلا TLS عبر DATABASE_SSL=disable
+    const ssl = process.env.DATABASE_SSL === "disable" ? false : ("require" as const);
     // prepare:false ليتوافق مع poolers (Supabase transaction pooler / pgbouncer) على الـ serverless
-    _sql = postgres(DATABASE_URL as string, { ssl: "require", max: 1, prepare: false });
+    _sql = postgres(DATABASE_URL as string, { ssl, max: 1, prepare: false });
   }
   if (!_ready) {
     _ready = (async () => {
