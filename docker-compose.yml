@@ -1,0 +1,30 @@
+# تشغيل التطبيق كاملاً (واجهة + باك إند) على السيرفر.
+# قاعدة البيانات وتخزين الصور على Supabase (خارجية) — تُضبط في ملفات .env.
+#
+# التشغيل:  docker compose up -d --build
+# الإيقاف:  docker compose down
+
+services:
+  backend:
+    build: ./backend
+    env_file: ./backend/.env          # الأسرار الحقيقية (غير مرفوعة على git)
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      args:
+        # الرابط العام للباك إند كما يراه متصفح الزائر (يُدمج وقت البناء).
+        # في الإنتاج غيّره لدومين/عنوان السيرفر العام.
+        NEXT_PUBLIC_DJANGO_API_URL: ${NEXT_PUBLIC_DJANGO_API_URL:-http://127.0.0.1:8000}
+    env_file: .env.local
+    environment:
+      # داخل شبكة Docker، سيرفر Next يكلّم الباك إند باسم الخدمة "backend".
+      DJANGO_API_URL: http://backend:8000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    restart: unless-stopped

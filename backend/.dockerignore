@@ -1,0 +1,15 @@
+# سياق بناء الباك إند (Django) — استبعد ما لا يلزم
+__pycache__
+*.pyc
+*.pyo
+.env
+.env.*
+!.env.example
+.venv
+venv
+*.sqlite3
+django-dev.log
+staticfiles
+media
+.git
+*.md

@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // إخراج مستقل (standalone) — يبني ملف server.js صغير مع الملفات المطلوبة فقط،
+  // فتصبح صورة Docker خفيفة بدون الحاجة لـ node_modules كاملة.
+  output: "standalone",
   images: {
     qualities: [75, 90],
     // السماح بالصور المحلية مع query string (نستخدم ?v=2 لكسر كاش الصور بعد تحديثها)

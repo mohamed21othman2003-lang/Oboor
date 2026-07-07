@@ -1,0 +1,19 @@
+# سياق بناء الواجهة (Next.js) — استبعد ما لا يلزم لتسريع البناء وتصغير الصورة
+node_modules
+.next
+.git
+.gitignore
+.env*
+!.env.example
+npm-debug.log*
+yarn-error.log*
+.vercel
+.playwright-mcp
+.claude
+.cursor
+_py
+backend
+data
+*.md
+Dockerfile
+docker-compose.yml
