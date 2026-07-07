@@ -93,7 +93,7 @@ export default function CmsShell({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div dir={dir} className="flex min-h-screen bg-[#F7FAFA] text-ink">
+    <div dir={dir} className="flex min-h-screen overflow-x-hidden bg-[#F7FAFA] text-ink">
       {/* Sidebar (فاتح بلمسات تركوازية — حسب تصميم الديزاينر) */}
       <aside className={`fixed inset-y-0 z-40 flex w-72 transform flex-col border-[#e6eff0] bg-white transition-transform lg:static lg:translate-x-0 ${en ? "left-0 border-e" : "right-0 border-s"} ${open ? "translate-x-0" : `${en ? "-translate-x-full" : "translate-x-full"} lg:translate-x-0`}`}>
         {/* Brand */}
@@ -147,41 +147,42 @@ export default function CmsShell({ children }: { children: React.ReactNode }) {
 
       {/* Main */}
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-20 flex items-center justify-between gap-3 border-b border-[#e6eff0] bg-white/90 px-5 py-3 backdrop-blur">
-          <div className="flex items-center gap-3">
-            <button onClick={() => setOpen((v) => !v)} className="rounded-lg p-2 text-[#0F6C73] hover:bg-[#1FA6A8]/10 lg:hidden" aria-label={t("القائمة", "Menu")}>
+        <header className="sticky top-0 z-20 flex items-center justify-between gap-2 border-b border-[#e6eff0] bg-white/90 px-3 py-3 backdrop-blur sm:gap-3 sm:px-5">
+          <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+            <button onClick={() => setOpen((v) => !v)} className="shrink-0 rounded-lg p-2 text-[#0F6C73] hover:bg-[#1FA6A8]/10 lg:hidden" aria-label={t("القائمة", "Menu")}>
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 6h18M3 12h18M3 18h18" strokeLinecap="round" /></svg>
             </button>
             {pathname !== "/cms" && (
-              <button onClick={() => router.back()} className="flex items-center gap-1.5 rounded-xl border border-[#e6eff0] px-3 py-2 text-xs font-semibold text-[#0F6C73] transition-colors hover:bg-[#1FA6A8]/10" aria-label={t("رجوع للصفحة السابقة", "Back to previous page")} title={t("رجوع للصفحة السابقة", "Back to previous page")}>
+              <button onClick={() => router.back()} className="flex shrink-0 items-center gap-1.5 rounded-xl border border-[#e6eff0] px-2.5 py-2 text-xs font-semibold text-[#0F6C73] transition-colors hover:bg-[#1FA6A8]/10 sm:px-3" aria-label={t("رجوع للصفحة السابقة", "Back to previous page")} title={t("رجوع للصفحة السابقة", "Back to previous page")}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={en ? "" : "-scale-x-100"}><path d="M9 18l6-6-6-6" /></svg>
-                {t("رجوع", "Back")}
+                <span className="hidden sm:inline">{t("رجوع", "Back")}</span>
               </button>
             )}
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex min-w-0 items-center gap-2 sm:gap-3">
             {/* تبديل لغة اللوحة */}
             <button
               onClick={() => setLang(en ? "ar" : "en")}
-              className="flex items-center gap-1.5 rounded-xl border border-[#e6eff0] px-3 py-2 text-xs font-bold text-[#0F6C73] transition-colors hover:bg-[#1FA6A8]/10"
+              className="flex shrink-0 items-center gap-1.5 rounded-xl border border-[#e6eff0] px-2.5 py-2 text-xs font-bold text-[#0F6C73] transition-colors hover:bg-[#1FA6A8]/10 sm:px-3"
               aria-label={t("تغيير لغة اللوحة", "Change panel language")}
               title={t("English", "العربية")}
             >
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18" /></svg>
               {en ? "العربية" : "EN"}
             </button>
-            <div className="text-end">
-              <p className="text-sm font-bold leading-tight">{user?.name || "—"}</p>
+            {/* اسم المستخدم يُخفى على الشاشات الصغيرة (الأفاتار يكفي) لتفادي تكدّس الهيدر */}
+            <div className="hidden min-w-0 text-end sm:block">
+              <p className="truncate text-sm font-bold leading-tight">{user?.name || "—"}</p>
               <p className="text-[11px] text-ink-soft">{t("مدير النظام", "System Administrator")}</p>
             </div>
-            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#1FA6A8]/12 text-sm font-bold text-[#0F6C73]">{(user?.name || (en ? "A" : "ع")).charAt(0)}</span>
-            <button onClick={logout} className="rounded-lg p-2 text-ink-soft transition-colors hover:bg-red-50 hover:text-red-600" aria-label={t("تسجيل الخروج", "Log out")} title={t("تسجيل الخروج", "Log out")}>
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#1FA6A8]/12 text-sm font-bold text-[#0F6C73]">{(user?.name || (en ? "A" : "ع")).charAt(0)}</span>
+            <button onClick={logout} className="shrink-0 rounded-lg p-2 text-ink-soft transition-colors hover:bg-red-50 hover:text-red-600" aria-label={t("تسجيل الخروج", "Log out")} title={t("تسجيل الخروج", "Log out")}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={en ? "" : "-scale-x-100"}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" /></svg>
             </button>
           </div>
         </header>
 
-        <main className="flex-1 p-5 lg:p-8">{children}</main>
+        <main className="flex-1 overflow-x-hidden p-4 sm:p-5 lg:p-8">{children}</main>
       </div>
     </div>
   );
