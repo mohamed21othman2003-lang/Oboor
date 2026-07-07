@@ -38,6 +38,7 @@ const NAV: NavGroup[] = [
       { label: "أبطال عبور (قصص النجاح)", label_en: "Oboor Champions (Success Stories)", href: "/cms/content/success", icon: "star" },
       { label: "التقييم", label_en: "Assessment", href: "/cms/assessment", icon: "clipboard" },
       { label: "انضم إلينا (الوظائف)", label_en: "Join Us (Careers)", href: "/cms/content/careers", icon: "megaphone" },
+      { label: "خذ الخطوة لعبور (التواصل)", label_en: "Take the Step (Contact)", href: "/cms/contact", icon: "mail" },
     ],
   },
   {

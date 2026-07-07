@@ -11,7 +11,7 @@ import { CMS_ICONS, ICON_LABELS } from "@/lib/cms/icons";
 const ImageCropModal = dynamic(() => import("@/components/cms/ImageCropModal"), { ssr: false });
 
 // ترتيب الأقسام كما تظهر على الصفحة (لعرضها مرتّبة بدل ترتيب قاعدة البيانات)
-const BLOCK_ORDER = ["hero", "about", "smart_search", "stats", "join", "join_cards", "why_us", "success", "gallery", "news", "certs", "features", "services", "profile_intro", "profile_stats", "journey", "accreditations", "steps", "prelim_questions", "answer_options", "categories", "list", "cities", "employment_types", "contact_prompt", "highlights"];
+const BLOCK_ORDER = ["hero", "about", "smart_search", "stats", "join", "join_cards", "why_us", "success", "gallery", "news", "certs", "features", "services", "profile_intro", "profile_stats", "journey", "accreditations", "steps", "prelim_questions", "answer_options", "categories", "list", "cities", "employment_types", "info", "form", "map", "social", "contact_prompt", "highlights"];
 const blockRank = (b: string) => { const i = BLOCK_ORDER.indexOf(b); return i === -1 ? 999 : i; };
 // أقسام محتواها منظّم معقّد ⇒ تُحرّر بالمحرّر الكامل (رابط) بدل الحقول المبسّطة
 const COMPLEX_BLOCKS = new Set(["highlights", "services"]);
@@ -39,6 +39,7 @@ const ICON_BLOCK_NAMES: Record<string, string[]> = {
 const PAGE_URL: Record<string, string> = {
   home: "/", careers: "/careers", success: "/success-stories", specialists: "/specialists",
   branches: "/branches", news: "/news", assessment: "/assessment", about: "/about", programs: "/programs",
+  contact: "/contact",
 };
 const BLOCK_ADD: Record<string, string> = {
   answer_options: "إضافة خيار إجابة", prelim_questions: "إضافة سؤال",
@@ -85,6 +86,10 @@ const BLOCK_LABELS: Record<string, string> = {
   accreditations: "الاعتمادات (ملف الفرع)",
   profile_intro: "نبذة ملف الفرع",
   services: "كروت خدمات الفرع",
+  info: "معلومات التواصل",
+  form: "قسم «ارسل طلبك»",
+  map: "قسم الخريطة (مراكزنا)",
+  social: "قسم «تابعنا» (السوشيال)",
 };
 const BLOCK_LABELS_EN: Record<string, string> = {
   hero: "Top intro (Hero)",
@@ -113,8 +118,24 @@ const BLOCK_LABELS_EN: Record<string, string> = {
   accreditations: "Accreditations (branch profile)",
   profile_intro: "Branch profile intro",
   services: "Branch service cards",
+  info: "Contact information",
+  form: "“Send Your Request” section",
+  map: "Map section (Our Branches)",
+  social: "“Follow Us” (social) section",
 };
 const ITEM_LABELS: Record<string, string> = {
+  "info.main": "عنوان قسم «معلومات التواصل»",
+  "info.email": "بطاقة البريد الإلكتروني (العنوان + الوصف)",
+  "info.customer": "بطاقة خدمة العملاء (العنوان + الوصف)",
+  "info.unified": "بطاقة الرقم الموحّد (العنوان + الوصف)",
+  "form.badge": "الوسم أعلى قسم النموذج",
+  "form.main": "عنوان قسم «ارسل طلبك»",
+  "form.feat1": "ميزة ١ (العنوان + الوصف)",
+  "form.feat2": "ميزة ٢ (العنوان + الوصف)",
+  "form.feat3": "ميزة ٣ (العنوان + الوصف)",
+  "form.note": "الجملة أسفل المميزات (فوق النموذج)",
+  "map.main": "عنوان + وصف قسم الخريطة",
+  "social.main": "عنوان + وصف قسم «تابعنا»",
   "hero.badge": "الوسم العلوي",
   "hero.heading": "العنوان + الوصف + الصورة",
   "hero.stat": "الشارة العائمة (العدّاد)",
@@ -148,6 +169,18 @@ const ITEM_LABELS: Record<string, string> = {
   "certs.cert4": "الشهادة الرابعة",
 };
 const ITEM_LABELS_EN: Record<string, string> = {
+  "info.main": "“Contact Information” heading",
+  "info.email": "Email card (title + note)",
+  "info.customer": "Customer service card (title + note)",
+  "info.unified": "Unified number card (title + note)",
+  "form.badge": "Badge above the form section",
+  "form.main": "“Send Your Request” heading",
+  "form.feat1": "Feature 1 (title + note)",
+  "form.feat2": "Feature 2 (title + note)",
+  "form.feat3": "Feature 3 (title + note)",
+  "form.note": "Line below the features (above the form)",
+  "map.main": "Map section heading + text",
+  "social.main": "“Follow Us” heading + text",
   "hero.badge": "Top badge",
   "hero.heading": "Heading + description + image",
   "join.visual": "“Join the Team” section (heading + text + image)",
