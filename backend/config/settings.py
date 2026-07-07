@@ -115,6 +115,8 @@ if _s3_key and _s3_endpoint:
                 "addressing_style": "path",
                 "querystring_auth": False,
                 "custom_domain": _custom_domain,
+                # بروتوكول روابط القراءة العامة: https افتراضياً، http لـMinIO محلي بدون TLS.
+                "url_protocol": os.environ.get("S3_URL_PROTOCOL", "https:"),
                 "file_overwrite": False,
                 "default_acl": None,
             },

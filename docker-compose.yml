@@ -1,17 +1,75 @@
-# تشغيل التطبيق كاملاً (واجهة + باك إند) على السيرفر.
-# قاعدة البيانات وتخزين الصور على Supabase (خارجية) — تُضبط في ملفات .env.
+# تشغيل التطبيق كاملاً ذاتيّ الاستضافة على السيرفر:
+#   frontend (Next.js) + backend (Django) + postgres (قاعدة البيانات) + minio (تخزين الصور S3)
+# كل البيانات على السيرفر في volumes دائمة — لا اعتماد على خدمات خارجية.
 #
+# القيم الحساسة (كلمات المرور) تُقرأ من ملف .env بجانب هذا الملف.
 # التشغيل:  docker compose up -d --build
-# الإيقاف:  docker compose down
+# الإيقاف:  docker compose down            (البيانات تبقى في الـvolumes)
 
 services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-oobor}
+      POSTGRES_USER: ${POSTGRES_USER:-oobor}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-oobor} -d ${POSTGRES_DB:-oobor}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:?set in .env}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?set in .env}
+    volumes:
+      - miniodata:/data
+    ports:
+      - "9000:9000"   # واجهة S3 (روابط الصور العامة يقرأها المتصفح)
+      - "9001:9001"   # لوحة MinIO الإدارية
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  # حاوية لمرة واحدة: تنشئ bucket التخزين وتضبطه للقراءة العامة، ثم تنتهي.
+  minio-init:
+    image: minio/mc
+    depends_on:
+      minio:
+        condition: service_started
+    entrypoint: >
+      /bin/sh -c "
+      until mc alias set local http://minio:9000 $${MINIO_ROOT_USER} $${MINIO_ROOT_PASSWORD}; do echo 'waiting minio...'; sleep 2; done;
+      mc mb --ignore-existing local/${SUPABASE_S3_BUCKET:-media};
+      mc anonymous set download local/${SUPABASE_S3_BUCKET:-media};
+      echo 'minio bucket ready';
+      "
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:?set in .env}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?set in .env}
+    restart: "no"
+
   backend:
     build: ./backend
     env_file: ./backend/.env          # الأسرار الحقيقية (غير مرفوعة على git)
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_started
     ports:
       - "8000:8000"
     volumes:
-      # حفظ ملفات الرفع المحلية عبر إعادة البناء (يُستخدم فقط لو مفاتيح S3 غير مضبوطة).
+      # احتياطي فقط لو تعطّل S3 — التخزين الأساسي على MinIO.
       - backend_media:/app/media
     restart: unless-stopped
 
@@ -27,11 +85,13 @@ services:
       # داخل شبكة Docker، سيرفر Next يكلّم الباك إند باسم الخدمة "backend".
       # لازم ينتهي بـ/api لأن Django يخدم كل المسارات تحت /api/.
       DJANGO_API_URL: http://backend:8000/api
-    ports:
-      - "3000:3000"
     depends_on:
       - backend
+    ports:
+      - "3000:3000"
     restart: unless-stopped
 
 volumes:
+  pgdata:
+  miniodata:
   backend_media:
