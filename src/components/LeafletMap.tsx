@@ -80,8 +80,10 @@ export default function LeafletMap({ locale, branches, regions }: { locale: Loca
       ? `https://www.google.com/maps/dir/?api=1&destination=${b.lat},${b.lng}`
       : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([b.address, b.city, "السعودية"].filter(Boolean).join("، "))}`;
 
+  // isolate على الحاوية: يحبس z-index العالي لعناصر الخريطة (الماركرز/الليجند/الشارة z-[1000])
+  // داخل سياق تكديس خاص، فلا تظهر فوق الهيدر الثابت (z-50) عند التمرير.
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-line shadow-sm">
+    <div className="relative isolate overflow-hidden rounded-3xl border border-line shadow-sm">
       <MapContainer ref={setMap} center={[24.5, 45]} zoom={5} scrollWheelZoom attributionControl={false} className="z-0 h-[520px] w-full">
         {/* حقوق الخريطة (إلزامية) — بدون شعار Leaflet وعلمه */}
         <AttributionControl prefix={false} position="bottomright" />
