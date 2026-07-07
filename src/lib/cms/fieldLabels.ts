@@ -19,6 +19,7 @@ const BASE: Record<string, string> = {
   heading: "Heading",
   tagline: "Tagline",
   cta: "Call to Action",
+  cta_href: "Action button link",
   button: "Button",
   // فروع
   area: "District",
@@ -45,6 +46,7 @@ const BASE: Record<string, string> = {
   responsibilities: "Responsibilities",
   // عام
   image: "Image",
+  image_file: "Upload image",
   images: "Images",
   gallery: "Gallery",
   icon: "Icon",

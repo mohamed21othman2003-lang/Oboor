@@ -191,7 +191,7 @@ export const GUIDE: GuidePart[] = [
         intro_ar: "بعض العناصر لها نص زر ووجهة (الرابط الذي يفتح عند الضغط).",
         intro_en: "Some items have a button label and a destination (the link that opens on click).",
         steps: [
-          p("حقل «نص الزر» أو «العنوان» يحدّد الكلمات الظاهرة على الزر — اكتبها بالعربية والإنجليزية.", "The “Button label” or “Title” field sets the words shown on the button — write them in Arabic and English."),
+          cms("detail-button", "في محرّر العنصر: حقل «نص الزر» أو «العنوان» هو الكلمات الظاهرة على الزر — اكتبها بالعربية والإنجليزية.", "In the item editor: the “Button label” or “Title” field is the words shown on the button — write them in Arabic and English."),
           p("حقل «الرابط» أو «القيمة» يحدّد الوجهة: رابط داخلي في الموقع يبدأ بـ / مثل ‎/about، أو رابط خارجي كامل يبدأ بـ https://‎.", "The “Link” or “Value” field sets the destination: an internal link starting with / like /about, or a full external link starting with https://."),
           p("لروابط التواصل الاجتماعي والقائمة العلوية والفوتر، حقل «القيمة» هو عنوان الرابط.", "For social links and the top/footer menus, the “Value” field is the link address."),
         ],
@@ -201,7 +201,7 @@ export const GUIDE: GuidePart[] = [
         title_ar: "الأرقام والإحصائيات",
         title_en: "Numbers & Statistics",
         steps: [
-          p("أرقام الإنجاز (مثل «+30 أخصائي») تُدار من قسم «أرقام الإنجاز». كل رقم عنصر له «القيمة» و«التسمية».", "Achievement numbers (like “+30 specialists”) are managed from the “Achievement Numbers” area. Each is an item with a “Value” and a “Label”."),
+          cms("detail-number", "أرقام الإنجاز (مثل «+30 أخصائي») تُدار من قسم «أرقام الإنجاز». كل رقم عنصر له «القيمة» (الرقم) و«التسمية» (وصفه).", "Achievement numbers (like “+30 specialists”) are managed from the “Achievement Numbers” area. Each is an item with a “Value” (the number) and a “Label” (its description)."),
           p("اكتب الرقم في حقل «القيمة» (يمكن أن يتضمّن + أو نصاً)، والوصف في حقل «التسمية» بالعربية والإنجليزية.", "Type the number in the “Value” field (it may include + or text), and the description in the “Label” field in Arabic and English."),
           p("لإضافة رقم جديد اضغط «إضافة رقم إنجاز»، ولإخفاء رقم اجعله «مخفي» بدل حذفه إن أردت إرجاعه لاحقاً.", "To add a new number click “Add Achievement Number”; to hide one, set it to “Hidden” instead of deleting if you may restore it later."),
         ],
