@@ -10,6 +10,7 @@ import { fetchContent, fetchSections } from "@/lib/server/django";
 import { getLocale } from "@/i18n/locale";
 import { pick, type Locale } from "@/i18n/config";
 import { hl } from "@/lib/highlight";
+import { CMS_ICONS } from "@/lib/cms/icons";
 
 // النصوص القابلة للتحرير من الـCMS (page=contact) — تُبنى في ContactPage وتُمرَّر للأقسام.
 type ContactCopy = {
@@ -17,7 +18,9 @@ type ContactCopy = {
   infoMain: string;
   emailTitle: string; emailNote: string; customerTitle: string; customerNote: string; unifiedTitle: string; unifiedNote: string;
   formBadge: string; formMain: string; formNote: string;
-  feat1Title: string; feat1Note: string; feat2Title: string; feat2Note: string; feat3Title: string; feat3Note: string;
+  feat1Title: string; feat1Note: string; feat1Icon: string;
+  feat2Title: string; feat2Note: string; feat2Icon: string;
+  feat3Title: string; feat3Note: string; feat3Icon: string;
   mapTitle: string; mapSub: string;
   socialTitle: string; socialSub: string;
 };
@@ -107,25 +110,15 @@ function ContactCards({ locale, site, c }: { locale: Locale; site: SiteInfo | nu
 }
 
 /* ---------- Form section ---------- */
-const clockIcon = (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" strokeLinecap="round" strokeLinejoin="round" /></svg>
-);
-const clipboardIcon = (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="8" y="3" width="8" height="4" rx="1" /><path d="M9 5H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-3" /></svg>
-);
-const phoneIcon = (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z" /></svg>
-);
-
-function FeatureCard({ icon, title, note }: { icon: React.ReactNode; title: string; note: string }) {
+function FeatureCard({ icon, title, note }: { icon: string; title: string; note: string }) {
   return (
     <div className="flex items-center justify-between gap-4 rounded-2xl border border-line bg-surface px-5 py-4">
+      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#e0eef0] text-brand">
+        {CMS_ICONS[icon] ?? CMS_ICONS.clock}
+      </div>
       <div className="text-start">
         <h3 className="text-[15px] font-extrabold text-brand-deep">{title}</h3>
         <p className="mt-1 text-xs text-ink-muted">{note}</p>
-      </div>
-      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#e0eef0] text-brand">
-        {icon}
       </div>
     </div>
   );
@@ -144,9 +137,9 @@ function FormSection({ locale, branches, c }: { locale: Locale; branches: Select
         </div>
 
         <div className="mb-8 grid gap-4 md:grid-cols-3">
-          <FeatureCard icon={clockIcon} title={c.feat1Title} note={c.feat1Note} />
-          <FeatureCard icon={clipboardIcon} title={c.feat2Title} note={c.feat2Note} />
-          <FeatureCard icon={phoneIcon} title={c.feat3Title} note={c.feat3Note} />
+          <FeatureCard icon={c.feat1Icon} title={c.feat1Title} note={c.feat1Note} />
+          <FeatureCard icon={c.feat2Icon} title={c.feat2Title} note={c.feat2Note} />
+          <FeatureCard icon={c.feat3Icon} title={c.feat3Title} note={c.feat3Note} />
         </div>
 
         <p className="mb-6 text-center text-sm text-ink-muted">{c.formNote}</p>
@@ -237,6 +230,7 @@ export default async function ContactPage() {
     const r = find(block, key);
     return (r ? (en ? r.text_en || r.text_ar : r.text_ar) : "") || fb;
   };
+  const I = (block: string, key: string, fb: string) => find(block, key)?.icon || fb;
   const c: ContactCopy = {
     heroBadge: T("hero", "badge", pick(locale, "معًا نُمهّد لهم الطريق، ليعبروا بأمان", "Together, We Pave the Way for Their Safe Journey")),
     heroHeading: T("hero", "heading", pick(locale, "خذ الخطوة **لعبور**", "Take the Step **to Oboor**")),
@@ -253,10 +247,13 @@ export default async function ContactPage() {
     formNote: B("form", "note", pick(locale, "يرجى تعبئة النموذج التالي بدقة. سيتم مراجعة طلبك والرد عليك في أقرب وقت ممكن", "Please fill out the form below carefully. We'll review your request and reply as soon as possible.")),
     feat1Title: T("form", "feat1", pick(locale, "رسالتك تصلنا", "Your message will reach us")),
     feat1Note: B("form", "feat1", pick(locale, "سنكون على تواصل معك خلال يوم واحد.", "We will respond within one day.")),
+    feat1Icon: I("form", "feat1", "clock"),
     feat2Title: T("form", "feat2", pick(locale, "تقييم مبدئي مجاني", "Free initial assessment")),
     feat2Note: B("form", "feat2", pick(locale, "نمنحك النظرة الأولى عن قدرات طفلك.", "Offering an early insight into your child's abilities.")),
+    feat2Icon: I("form", "feat2", "clipboard"),
     feat3Title: T("form", "feat3", pick(locale, "استشارة متخصصة", "Specialized consultation")),
     feat3Note: B("form", "feat3", pick(locale, "خبراؤنا هنا للإجابة عن كل أسئلتك.", "Our experts are here to answer all your questions.")),
+    feat3Icon: I("form", "feat3", "phone"),
     mapTitle: T("map", "main", pick(locale, "مراكزنا", "Our Branches")),
     mapSub: B("map", "main", pick(locale, "اضغط على الخريطة أو اختر الفرع من القائمة لعرض تفاصيله.", "Click the map or pick a branch from the list to view its details.")),
     socialTitle: T("social", "main", pick(locale, "تابعنا", "Follow Us")),

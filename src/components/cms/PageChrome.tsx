@@ -29,11 +29,19 @@ const HIDDEN_BLOCKS = new Set([
   // تفاصيل «القصة المميّزة» صارت تُدار داخل كل قصة نجاح على حدة
   "success.highlights",
 ]);
-// أقسام تعرض لكل عنصر أيقونة قابلة للاختيار (المفتاح = اسم البلوك، القيمة = الأيقونات المتاحة)
+// أقسام يعرض كل عنصر فيها أيقونة قابلة للاختيار (المفتاح = اسم البلوك، القيمة = الأيقونات المتاحة)
 const ICON_BLOCK_NAMES: Record<string, string[]> = {
   features: ["graduation", "shield", "heart", "building", "team", "book", "target", "star", "trophy", "bulb", "hand", "activity", "clipboard", "list"],
   join_cards: ["growth", "building", "book", "heart", "target", "star", "trophy", "bulb", "hand", "activity", "team", "graduation", "shield", "clipboard"],
 };
+// عناصر مفردة (block.key) تعرض منتقي أيقونة — لبلوكات فيها بعض العناصر أيقونات فقط
+const CONTACT_FEATURE_ICONS = ["clock", "clipboard", "phone", "heart", "chat", "shield", "star", "bulb", "hand", "user", "team", "calendar", "activity"];
+const ICON_ITEM_KEYS: Record<string, string[]> = {
+  "form.feat1": CONTACT_FEATURE_ICONS, "form.feat2": CONTACT_FEATURE_ICONS, "form.feat3": CONTACT_FEATURE_ICONS,
+};
+// قائمة الأيقونات المتاحة لعنصر ما (per-item يتقدّم على per-block)
+const iconChoicesFor = (block: string, key: string): string[] | undefined =>
+  ICON_ITEM_KEYS[`${block}.${key}`] ?? ICON_BLOCK_NAMES[block];
 // نص زر الإضافة محدّد لكل قسم
 // رابط الصفحة الحقيقية لكل صفحة (لزر «عاين الصفحة»)
 const PAGE_URL: Record<string, string> = {
@@ -533,11 +541,13 @@ export default function PageChrome({ page }: { page: string }) {
                       <p className="mb-2 text-xs font-bold text-ink">{(en ? ITEM_LABELS_EN[key] : ITEM_LABELS[key]) || ITEM_LABELS[key] || String(it.title_ar || it.key || "")}</p>
                       {ITEM_NOTES[key] && <p className="mb-2 rounded-lg bg-brand/5 px-3 py-2 text-[11px] leading-5 text-ink-soft">ℹ️ {(en ? ITEM_NOTES_EN[key] : ITEM_NOTES[key]) || ITEM_NOTES[key]}</p>}
                       <div className="space-y-2">
-                        {ICON_BLOCK_NAMES[g.block] && (
+                        {(() => {
+                          const iconOpts = iconChoicesFor(g.block, String(it.key ?? ""));
+                          return iconOpts ? (
                           <div>
                             <p className="mb-1 text-xs font-semibold text-ink-soft">{t("الأيقونة", "Icon")}</p>
                             <div className="grid grid-cols-7 gap-1.5 rounded-xl border border-line bg-white p-2 sm:grid-cols-10">
-                              {ICON_BLOCK_NAMES[g.block].map((k) => {
+                              {iconOpts.map((k) => {
                                 const sel = val(it, "icon") === k;
                                 return (
                                   <button type="button" key={k} onClick={() => setVal(it.id, "icon", k)} title={ICON_LABELS[k] || k} className={`flex h-9 items-center justify-center rounded-lg border transition-colors ${sel ? "border-brand bg-brand/10 text-brand" : "border-line bg-white text-ink hover:border-brand/40"}`}>{CMS_ICONS[k]}</button>
@@ -545,7 +555,8 @@ export default function PageChrome({ page }: { page: string }) {
                               })}
                             </div>
                           </div>
-                        )}
+                          ) : null;
+                        })()}
                         {showTitle && (
                           <div>
                             <p className="mb-1 text-xs font-semibold text-ink-soft">{(en ? FIELD_LABELS_EN[key]?.title : FIELD_LABELS[key]?.title) || t("العنوان", "Title")}</p>
