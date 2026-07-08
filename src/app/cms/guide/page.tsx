@@ -3,7 +3,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useCmsLang } from "@/lib/cms/i18n";
+import { getToken } from "@/lib/cms/api";
 import { GUIDE, type GuideShot, type GuideSection } from "@/lib/cms/guideContent";
 
 // أيقونة لكل جزء رئيسي في الفهرس
@@ -29,12 +31,21 @@ export default function GuidePage() {
   const { lang, dir, setLang } = useCmsLang();
   const en = lang === "en";
   const t = (ar: string, e: string) => (en ? e : ar);
+  const router = useRouter();
+  const [authed, setAuthed] = useState(false);
   const [active, setActive] = useState("");
   const [progress, setProgress] = useState(0);
   const [query, setQuery] = useState("");
   const [zoom, setZoom] = useState<string | null>(null);
   const [copied, setCopied] = useState("");
   const [today, setToday] = useState("");
+
+  // حماية: الدليل مخصّص للمشرفين — لو المستخدم غير مسجّل الدخول في الـCMS
+  // نحوّله لصفحة تسجيل الدخول (ونرجّعه للدليل بعد الدخول عبر next).
+  useEffect(() => {
+    if (!getToken()) { router.replace("/cms/login?next=/cms/guide"); return; }
+    setAuthed(true);
+  }, [router]);
 
   // تصفية الأقسام حسب البحث
   const filtered = useMemo(() => {
@@ -85,6 +96,11 @@ export default function GuidePage() {
     try { navigator.clipboard?.writeText(`${location.origin}${location.pathname}#${id}`); setCopied(id); setTimeout(() => setCopied(""), 1500); } catch {}
   };
   const totalSections = GUIDE.reduce((n, p) => n + p.sections.length, 0);
+
+  // لا نعرض محتوى الدليل قبل التأكّد من تسجيل الدخول (يمنع ظهوره لغير المشرفين)
+  if (!authed) {
+    return <div dir={dir} className="flex min-h-screen items-center justify-center bg-[#f4f9fa] text-[#0F6C73]">{t("جارٍ التحقّق…", "Verifying…")}</div>;
+  }
 
   return (
     <div dir={dir} className="min-h-screen bg-[#f4f9fa] text-ink">

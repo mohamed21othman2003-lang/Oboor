@@ -25,7 +25,9 @@ export default function CmsLoginPage() {
     try {
       const { user } = await cmsLogin(username.trim(), password);
       localStorage.setItem("oboor_cms_user", JSON.stringify(user));
-      router.replace("/cms");
+      // ارجع للصفحة المطلوبة بعد الدخول (مثل الدليل) إن كانت داخل الـCMS، وإلا اللوحة
+      const next = new URLSearchParams(window.location.search).get("next");
+      router.replace(next && next.startsWith("/cms") ? next : "/cms");
     } catch (err) {
       setError(err instanceof Error ? err.message : t("تعذّر تسجيل الدخول.", "Unable to sign in."));
     } finally {
