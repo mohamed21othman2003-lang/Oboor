@@ -11,6 +11,8 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       // الصور المرفوعة على Supabase Storage (روابط القراءة العامة)
       { protocol: "https", hostname: "*.supabase.co", pathname: "/storage/v1/object/public/**" },
+      // تخزين MinIO في الإنتاج (يُقدَّم عبر nginx على نفس الدومين تحت /media)
+      { protocol: "https", hostname: "oboor.ido.sa", pathname: "/media/**" },
       // التخزين المحلي لـ Django أثناء التطوير
       { protocol: "http", hostname: "127.0.0.1", port: "8000", pathname: "/media/**" },
       { protocol: "http", hostname: "localhost", port: "8000", pathname: "/media/**" },
