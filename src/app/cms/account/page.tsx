@@ -98,21 +98,21 @@ export default function AccountPage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
-      {/* ===== ترويسة الصفحة ===== */}
-      <div className="flex items-start justify-between gap-3">
+      {/* ===== ترويسة الصفحة (الأيقونة يمينًا جوار العنوان) ===== */}
+      <div className="flex items-start gap-4">
+        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#0F6C73] to-[#1FA6A8] text-white shadow-sm">
+          <I size={22}><circle cx="18" cy="15" r="3" /><circle cx="9" cy="7" r="4" /><path d="M10 15H6a4 4 0 0 0-4 4v2" /><path d="m21.7 16.4-.9-.3M15.2 13.9l-.9-.3M16.6 18.7l.3-.9M19.1 12.2l.3-.9M19.6 18.7l-.4-1M16.8 12.3l-.4-1M14.3 16.6l1-.4M20.7 13.8l1-.4" /></I>
+        </span>
         <div>
           <h1 className="text-2xl font-extrabold text-ink">{t("حسابي", "My Account")}</h1>
           <p className="mt-1 text-sm text-ink-soft">{t("إدارة بيانات تسجيل الدخول الخاصة بحسابك في لوحة التحكم.", "Manage your sign-in details for the control panel.")}</p>
         </div>
-        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#0F6C73] to-[#1FA6A8] text-white shadow-sm">
-          <I size={22}><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 12-6.9M19 16v6M22 19h-6" /></I>
-        </span>
       </div>
 
       {/* ===== كرت: معلومات الحساب ===== */}
       <section className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-[#e6eff0] sm:p-7">
         <div className="flex items-start gap-3">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#1FA6A8]/12 text-[#0F6C73]"><I><rect x="3" y="5" width="18" height="14" rx="2" /><circle cx="9" cy="11" r="2" /><path d="M13 9h5M13 13h3M5 17h10" /></I></span>
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#1FA6A8]/12 text-[#0F6C73]"><I><rect x="4" y="3" width="16" height="18" rx="2" /><path d="M9 3v1M15 3v1" /><circle cx="12" cy="10" r="2.5" /><path d="M8 16.5a4 4 0 0 1 8 0" /></I></span>
           <div>
             <h2 className="text-lg font-bold text-ink">{t("معلومات الحساب", "Account Information")}</h2>
             <p className="text-sm text-ink-soft">{t("بيانات الدخول الأساسية الخاصة بحسابك.", "Your account's core sign-in details.")}</p>
