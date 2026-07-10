@@ -98,8 +98,8 @@ export default function AccountPage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
-      {/* ===== ترويسة الصفحة (الأيقونة يمينًا جوار العنوان) ===== */}
-      <div className="flex items-start gap-4">
+      {/* ===== ترويسة الصفحة (الأيقونة يمينًا على مستوى العنوان) ===== */}
+      <div className="flex items-center gap-4">
         <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#0F6C73] to-[#1FA6A8] text-white shadow-sm">
           <I size={22}><circle cx="18" cy="15" r="3" /><circle cx="9" cy="7" r="4" /><path d="M10 15H6a4 4 0 0 0-4 4v2" /><path d="m21.7 16.4-.9-.3M15.2 13.9l-.9-.3M16.6 18.7l.3-.9M19.1 12.2l.3-.9M19.6 18.7l-.4-1M16.8 12.3l-.4-1M14.3 16.6l1-.4M20.7 13.8l1-.4" /></I>
         </span>
@@ -111,7 +111,7 @@ export default function AccountPage() {
 
       {/* ===== كرت: معلومات الحساب ===== */}
       <section className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-[#e6eff0] sm:p-7">
-        <div className="flex items-start gap-3">
+        <div className="flex items-center gap-3">
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#1FA6A8]/12 text-[#0F6C73]"><I><rect x="4" y="3" width="16" height="18" rx="2" /><path d="M9 3v1M15 3v1" /><circle cx="12" cy="10" r="2.5" /><path d="M8 16.5a4 4 0 0 1 8 0" /></I></span>
           <div>
             <h2 className="text-lg font-bold text-ink">{t("معلومات الحساب", "Account Information")}</h2>
@@ -158,8 +158,8 @@ export default function AccountPage() {
 
       {/* ===== كرت: تغيير كلمة المرور ===== */}
       <section className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-[#e6eff0] sm:p-7">
-        <div className="flex items-start gap-3">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#1FA6A8]/12 text-[#0F6C73]"><I><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 9.9-1" /><path d="M12 16v-2" /></I></span>
+        <div className="flex items-center gap-3">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#1FA6A8]/12 text-[#0F6C73]"><I><rect x="5" y="12" width="14" height="9" rx="2" /><circle cx="12" cy="16.5" r="1.2" /><path d="M8.5 12V9a3.5 3.5 0 0 1 6.4-1.9" /><path d="M15.4 4.2 15 7l-2.7-.5" /></I></span>
           <div>
             <h2 className="text-lg font-bold text-ink">{t("تغيير كلمة المرور", "Change Password")}</h2>
             <p className="text-sm text-ink-soft">{t("استخدم كلمة مرور قوية لحماية حسابك.", "Use a strong password to protect your account.")}</p>
