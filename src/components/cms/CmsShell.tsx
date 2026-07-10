@@ -46,6 +46,7 @@ const NAV: NavGroup[] = [
     items: [
       { label: "أقسام الصفحات", label_en: "Page Sections", href: "/cms/content/sections", icon: "layers" },
       { label: "إعدادات الموقع", label_en: "Site Settings", href: "/cms/settings", icon: "cog" },
+      { label: "حسابي", label_en: "My Account", href: "/cms/account", icon: "account" },
       { label: "دليل الاستخدام", label_en: "User Guide", href: "/cms/guide", icon: "book", newTab: true },
     ],
   },
@@ -170,12 +171,14 @@ export default function CmsShell({ children }: { children: React.ReactNode }) {
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18" /></svg>
               {en ? "العربية" : "EN"}
             </button>
-            {/* اسم المستخدم يُخفى على الشاشات الصغيرة (الأفاتار يكفي) لتفادي تكدّس الهيدر */}
-            <div className="hidden min-w-0 text-end sm:block">
-              <p className="truncate text-sm font-bold leading-tight">{user?.name || "—"}</p>
-              <p className="text-[11px] text-ink-soft">{t("مدير النظام", "System Administrator")}</p>
-            </div>
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#1FA6A8]/12 text-sm font-bold text-[#0F6C73]">{(user?.name || (en ? "A" : "ع")).charAt(0)}</span>
+            {/* بلوك المستخدم — رابط لصفحة «حسابي» (الاسم يُخفى على الشاشات الصغيرة) */}
+            <Link href="/cms/account" title={t("حسابي", "My Account")} className="flex items-center gap-2 rounded-xl px-1.5 py-1 transition-colors hover:bg-[#1FA6A8]/8 sm:gap-3">
+              <div className="hidden min-w-0 text-end sm:block">
+                <p className="truncate text-sm font-bold leading-tight">{user?.name || "—"}</p>
+                <p className="text-[11px] text-ink-soft">{t("مدير النظام", "System Administrator")}</p>
+              </div>
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#1FA6A8]/12 text-sm font-bold text-[#0F6C73]">{(user?.name || (en ? "A" : "ع")).charAt(0)}</span>
+            </Link>
             <button onClick={logout} className="shrink-0 rounded-lg p-2 text-ink-soft transition-colors hover:bg-red-50 hover:text-red-600" aria-label={t("تسجيل الخروج", "Log out")} title={t("تسجيل الخروج", "Log out")}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={en ? "" : "-scale-x-100"}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" /></svg>
             </button>
@@ -206,6 +209,7 @@ const ICONS: Record<string, React.ReactNode> = {
   megaphone: <Svg><path d="M3 11l16-7v16L3 13zM3 11v2M8 13v6l4-1" /></Svg>,
   layers: <Svg><path d="M12 2l9 5-9 5-9-5z" /><path d="M3 12l9 5 9-5M3 17l9 5 9-5" /></Svg>,
   book: <Svg><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" /></Svg>,
+  account: <Svg><circle cx="12" cy="12" r="9" /><circle cx="12" cy="10" r="3" /><path d="M6.2 18.3a6 6 0 0 1 11.6 0" /></Svg>,
   cog: <Svg><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 0 1-4 0v-.1A1.6 1.6 0 0 0 7 19.4a1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.6 1.6 0 0 0 3 14a2 2 0 0 1 0-4h.1A1.6 1.6 0 0 0 4.6 7a1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.6 1.6 0 0 0 10 3.6 2 2 0 0 1 14 3.6a1.6 1.6 0 0 0 2.7-1.1L17 2a2 2 0 0 1 4 0v.1A1.6 1.6 0 0 0 22 4.6" /></Svg>,
 };
 

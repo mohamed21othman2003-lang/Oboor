@@ -186,6 +186,10 @@ export default function CmsLoginPage() {
                 </div>
               </div>
 
+              <div className="flex justify-start">
+                <Link href="/cms/forgot-password" className="text-xs font-bold text-[#0F6C73] transition-colors hover:text-[#1FA6A8]">{t("نسيت كلمة المرور؟", "Forgot password?")}</Link>
+              </div>
+
               {error && <p className="rounded-2xl bg-red-50 px-4 py-3 text-center text-sm font-medium text-red-600">{error}</p>}
 
               <button

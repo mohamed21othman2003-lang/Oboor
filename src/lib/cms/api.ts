@@ -92,6 +92,41 @@ export function getStats() {
   return cmsFetch<DashboardStats>("/cms/stats/");
 }
 
+// ===== حساب الأدمن =====
+export function getMe() {
+  return cmsFetch<{ user: CmsUser }>("/cms/me/");
+}
+export function updateAccountEmail(email: string) {
+  return cmsFetch<{ email: string }>("/cms/account/email/", { method: "POST", body: JSON.stringify({ email }) });
+}
+export async function changeAccountPassword(current_password: string, new_password: string) {
+  const r = await cmsFetch<{ detail: string; token: string }>("/cms/account/password/", {
+    method: "POST",
+    body: JSON.stringify({ current_password, new_password }),
+  });
+  // الباك إند يجدّد التوكن بعد تغيير كلمة المرور — نحدّثه لتبقى الجلسة صالحة
+  if (r?.token) setToken(r.token);
+  return r;
+}
+
+// ===== إعادة تعيين كلمة المرور (عام، بدون توكن) =====
+async function publicPost<T = { detail: string }>(path: string, body: Record<string, unknown>): Promise<T> {
+  const res = await fetch(`${BASE}${path}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(apiError(data.detail || (cmsPanelLang() === "en" ? `Error (${res.status})` : `خطأ (${res.status})`)));
+  return data as T;
+}
+export function requestPasswordReset(email: string) {
+  return publicPost("/cms/password-reset/", { email });
+}
+export function confirmPasswordReset(uid: string, token: string, new_password: string) {
+  return publicPost("/cms/password-reset/confirm/", { uid, token, new_password });
+}
+
 // ===== Collections (CRUD عام) =====
 export type FieldSchema = {
   name: string;

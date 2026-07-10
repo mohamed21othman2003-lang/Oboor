@@ -152,8 +152,25 @@ REST_FRAMEWORK = {
     # (نفس الـIP) فتُحسب كمستخدم واحد. الحدّ يُطبَّق حيث ينفع (تسجيل الدخول من المتصفح مباشرةً).
     "DEFAULT_THROTTLE_RATES": {
         "login": os.environ.get("LOGIN_THROTTLE_RATE", "10/min"),
+        "password_reset": os.environ.get("RESET_THROTTLE_RATE", "5/min"),
     },
 }
+
+# ===================== البريد الإلكتروني (إعادة تعيين كلمة المرور) =====================
+# افتراضياً console (يُطبع في سجلّ الخادم)؛ يتحوّل تلقائياً إلى SMTP عند ضبط EMAIL_HOST.
+EMAIL_HOST = os.environ.get("EMAIL_HOST", "")
+if EMAIL_HOST:
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+    EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "587"))
+    EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "1") == "1"
+    EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
+    EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
+else:
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "Oboor <no-reply@oboor.ido.sa>")
+
+# الرابط العام للواجهة لبناء روابط إعادة التعيين
+FRONTEND_URL = os.environ.get("FRONTEND_URL", "https://oboor.ido.sa")
 
 # ===================== تقوية أمان الإنتاج =====================
 # تُفعَّل تلقائياً خارج وضع DEBUG. خلف بروكسي (Render/Nginx) نثق بترويسة البروتوكول.
