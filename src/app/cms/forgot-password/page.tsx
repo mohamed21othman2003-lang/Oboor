@@ -60,7 +60,7 @@ export default function ForgotPasswordPage() {
                 <label className="mb-1.5 block text-sm font-bold text-[#123C40]">{t("البريد الإلكتروني", "Email address")}</label>
                 <div className="relative">
                   <span className="pointer-events-none absolute start-3.5 top-1/2 -translate-y-1/2 text-[#9fb1b2]"><I><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 7 9 6 9-6" /></I></span>
-                  <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoFocus placeholder="name@oboor.sa" className="w-full rounded-2xl border border-[#e2ecec] bg-[#F7FAFA] px-4 py-3.5 pe-11 text-sm text-[#123C40] outline-none transition-colors placeholder:text-[#a9b8b9] focus:border-[#1FA6A8] focus:bg-white focus:ring-4 focus:ring-[#1FA6A8]/15" />
+                  <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoFocus placeholder="name@oboor.sa" className="w-full rounded-2xl border border-[#e2ecec] bg-[#F7FAFA] px-4 py-3.5 ps-11 text-sm text-[#123C40] outline-none transition-colors placeholder:text-[#a9b8b9] focus:border-[#1FA6A8] focus:bg-white focus:ring-4 focus:ring-[#1FA6A8]/15" />
                 </div>
               </div>
 

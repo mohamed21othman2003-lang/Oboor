@@ -10,7 +10,7 @@ function I({ children, size = 18 }: { children: React.ReactNode; size?: number }
 }
 
 // حقل كلمة مرور مع زر إظهار/إخفاء (العين شمال، القفل/المفتاح يمين)
-function PasswordField({ label, value, onChange, keyIcon = false }: { label: string; value: string; onChange: (v: string) => void; keyIcon?: boolean }) {
+function PasswordField({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
   const [show, setShow] = useState(false);
   const { lang } = useCmsLang();
   const en = lang === "en";
@@ -19,9 +19,7 @@ function PasswordField({ label, value, onChange, keyIcon = false }: { label: str
       <label className="mb-1.5 block text-sm font-bold text-ink">{label}</label>
       <div className="relative">
         <span className="pointer-events-none absolute start-3.5 top-1/2 -translate-y-1/2 text-[#9fb1b2]">
-          {keyIcon
-            ? <I><circle cx="7.5" cy="15.5" r="4.5" /><path d="m10.5 12.5 8-8M17 7l2-2M14 7l2 2" /></I>
-            : <I><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></I>}
+          <I><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></I>
         </span>
         <input
           type={show ? "text" : "password"}
@@ -132,7 +130,7 @@ export default function AccountPage() {
               </div>
               <div className="relative">
                 <span className="pointer-events-none absolute start-3.5 top-1/2 -translate-y-1/2 text-[#9fb1b2]"><I><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></I></span>
-                <input value={loaded ? username : "…"} readOnly disabled className="w-full cursor-not-allowed rounded-xl border border-[#e2ecec] bg-[#eef4f5] px-4 py-3 pe-11 text-sm font-semibold text-ink-soft outline-none" />
+                <input value={loaded ? username : "…"} readOnly disabled className="w-full cursor-not-allowed rounded-xl border border-[#e2ecec] bg-[#eef4f5] px-4 py-3 ps-11 text-sm font-semibold text-ink-soft outline-none" />
               </div>
               <p className="mt-1.5 flex items-center gap-1.5 text-xs text-ink-soft"><I size={13}><circle cx="12" cy="12" r="10" /><path d="M12 16v-4M12 8h.01" /></I>{t("لا يمكن تعديل اسم المستخدم.", "The username cannot be changed.")}</p>
             </div>
@@ -142,7 +140,7 @@ export default function AccountPage() {
               <label className="mb-1.5 block text-sm font-bold text-ink">{t("البريد الإلكتروني", "Email address")}</label>
               <div className="relative">
                 <span className="pointer-events-none absolute start-3.5 top-1/2 -translate-y-1/2 text-[#9fb1b2]"><I><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 7 9 6 9-6" /></I></span>
-                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@oboor.sa" className="w-full rounded-xl border border-[#e2ecec] bg-[#F7FAFA] px-4 py-3 pe-11 text-sm text-ink outline-none transition-colors focus:border-[#1FA6A8] focus:bg-white focus:ring-4 focus:ring-[#1FA6A8]/15" />
+                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@oboor.sa" className="w-full rounded-xl border border-[#e2ecec] bg-[#F7FAFA] px-4 py-3 ps-11 text-sm text-ink outline-none transition-colors focus:border-[#1FA6A8] focus:bg-white focus:ring-4 focus:ring-[#1FA6A8]/15" />
               </div>
             </div>
           </div>
@@ -172,8 +170,8 @@ export default function AccountPage() {
         <form onSubmit={savePassword}>
           <div className="grid gap-5 sm:grid-cols-2">
             <PasswordField label={t("كلمة المرور الحالية", "Current password")} value={cur} onChange={setCur} />
-            <PasswordField label={t("كلمة المرور الجديدة", "New password")} value={next} onChange={setNext} keyIcon />
-            <PasswordField label={t("تأكيد كلمة المرور الجديدة", "Confirm new password")} value={confirm} onChange={setConfirm} keyIcon />
+            <PasswordField label={t("كلمة المرور الجديدة", "New password")} value={next} onChange={setNext} />
+            <PasswordField label={t("تأكيد كلمة المرور الجديدة", "Confirm new password")} value={confirm} onChange={setConfirm} />
           </div>
 
           {pwNote && <div className="mt-4"><Note ok={pwNote.ok}>{pwNote.msg}</Note></div>}
