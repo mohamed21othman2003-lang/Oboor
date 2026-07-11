@@ -143,13 +143,20 @@ export default function ServiceSearchBar({ locale = "ar", searchLabel, cards, re
   const keyOf = (p: { slug?: string; href?: string; title: string }, i: number) => p.slug || p.href || `i${i}`;
 
   const catIconKey: Record<ServiceCategoryKey, string> = { programs: "book", clinical: "stethoscope", techniques: "chip" };
+  // تسمية حقل الاختيار الأوسط + أيقونته تتبع الفئة (برنامج / خدمة / تقنية)
+  const NOUN: Record<ServiceCategoryKey, { pickAr: string; pickEn: string; allAr: string; allEn: string; icon: string }> = {
+    programs: { pickAr: "اختر البرنامج", pickEn: "Select Program", allAr: "كل البرامج", allEn: "All Programs", icon: "book" },
+    clinical: { pickAr: "اختر الخدمة", pickEn: "Select Service", allAr: "كل الخدمات", allEn: "All Services", icon: "stethoscope" },
+    techniques: { pickAr: "اختر التقنية", pickEn: "Select Technology", allAr: "كل التقنيات", allEn: "All Technologies", icon: "chip" },
+  };
+  const noun = NOUN[catKey];
   const catOptions: Option[] = categories.map((c) => ({ value: c.key, label: c.label, icon: catIconKey[c.key] }));
   const regionOptions: Option[] = [
     { value: ALL, label: pick(locale, "كل المناطق", "All Regions"), icon: "globe" },
     ...regions.map((r) => ({ value: r, label: r, icon: "pin" })),
   ];
   const programOptions: Option[] = [
-    { value: ALL, label: pick(locale, "كل البرامج", "All Programs"), icon: "grid" },
+    { value: ALL, label: pick(locale, noun.allAr, noun.allEn), icon: "grid" },
     ...category.items.map((p, i) => ({ value: keyOf(p, i), label: p.title, icon: itemIcon(catKey, i) })),
   ];
 
@@ -177,7 +184,7 @@ export default function ServiceSearchBar({ locale = "ar", searchLabel, cards, re
     <div className="relative flex flex-col items-stretch gap-2 rounded-2xl bg-white p-3 shadow-md ring-1 ring-line lg:flex-row lg:items-center">
       <Dropdown label={pick(locale, "الفئة الرئيسية", "Main Category")} triggerIcon={ICONS.book} value={catKey} onChange={onCat} options={catOptions} />
       <span className="hidden h-9 w-px shrink-0 bg-line lg:block" />
-      <Dropdown label={pick(locale, "اختر البرنامج", "Select Program")} triggerIcon={ICONS.grid} value={itemKey} onChange={setItemKey} options={programOptions} />
+      <Dropdown label={pick(locale, noun.pickAr, noun.pickEn)} triggerIcon={ICONS[noun.icon]} value={itemKey} onChange={setItemKey} options={programOptions} />
       <span className="hidden h-9 w-px shrink-0 bg-line lg:block" />
       <Dropdown label={pick(locale, "المنطقة / الفرع", "Region / Branch")} triggerIcon={ICONS.pin} value={region} onChange={setRegion} options={regionOptions} />
       <span className="hidden h-9 w-px shrink-0 bg-line lg:block" />
