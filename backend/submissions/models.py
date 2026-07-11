@@ -43,7 +43,7 @@ class AdmissionRequest(models.Model):
 
 class AssessmentResult(models.Model):
     LEVELS = [("high", "مرتفع"), ("medium", "متوسط"), ("low", "منخفض")]
-    assessment = models.CharField("نوع التقييم", max_length=120)
+    assessment = models.CharField("نوع التقييم", max_length=120, blank=True, default="")
     assessment_slug = models.CharField("المعرّف", max_length=60, blank=True)
     level = models.CharField("مستوى الحالة", max_length=10, choices=LEVELS, blank=True)
     score = models.IntegerField("الدرجة", default=0)
