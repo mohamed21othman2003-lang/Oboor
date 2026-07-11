@@ -116,3 +116,17 @@ export async function fetchSections(page: string): Promise<Record<string, Sectio
   for (const r of rows) { if (meaningful(r)) (grouped[r.block] ??= []).push(r); }
   return grouped;
 }
+
+// قائمة المناطق الحقيقية المستمدّة من الفروع (للبحث الذكي). ترجّع مصفوفة فارغة لو الباك إند غير متاح.
+export async function getBranchRegions(locale: "ar" | "en" = "ar"): Promise<string[]> {
+  const rows = await fetchContent<{ region_ar?: string; region_en?: string }[]>("branches");
+  if (!rows || !rows.length) return [];
+  const key = locale === "en" ? "region_en" : "region_ar";
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const r of rows) {
+    const v = (r[key] || "").trim();
+    if (v && !seen.has(v)) { seen.add(v); out.push(v); }
+  }
+  return out;
+}

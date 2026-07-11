@@ -17,7 +17,7 @@ const chipIcon = <svg width="16" height="16" viewBox="0 0 24 24" fill="none" str
 
 const CHIP_ICON: Record<ServiceCategoryKey, React.ReactNode> = { programs: bookIcon, clinical: stethoscopeIcon, techniques: chipIcon };
 
-export default function SmartSearch({ locale, chrome, cards }: { locale: Locale; chrome?: HomeChrome; cards?: ServiceCards }) {
+export default function SmartSearch({ locale, chrome, cards, regions }: { locale: Locale; chrome?: HomeChrome; cards?: ServiceCards; regions?: string[] }) {
   const cats = cards
     ? serviceCategories(locale).map((c) => ({ ...c, items: cards[c.key]?.length ? cards[c.key] : c.items }))
     : serviceCategories(locale);
@@ -46,7 +46,7 @@ export default function SmartSearch({ locale, chrome, cards }: { locale: Locale;
           </p>
         </div>
 
-        <ServiceSearchBar locale={locale} />
+        <ServiceSearchBar locale={locale} cards={cards} regions={regions} />
 
         {/* Quick chips — centered; switch the results below in-place */}
         <div className="mt-5 flex flex-wrap items-center justify-center gap-2">

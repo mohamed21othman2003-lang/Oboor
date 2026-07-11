@@ -115,18 +115,32 @@ function Dropdown({
   );
 }
 
-export default function ServiceSearchBar({ locale = "ar", searchLabel }: { regionValue?: string; locale?: Locale; searchLabel?: string }) {
+type SbCards = { programs: import("@/components/ProgramCard").Program[]; clinical: import("@/components/ProgramCard").Program[]; techniques: import("@/components/ProgramCard").Program[] };
+
+export default function ServiceSearchBar({ locale = "ar", searchLabel, cards, regions: regionsProp }: {
+  regionValue?: string; locale?: Locale; searchLabel?: string;
+  cards?: SbCards; regions?: string[];
+}) {
   const router = useRouter();
-  const categories = useMemo(() => serviceCategories(locale), [locale]);
-  const regions = useMemo(() => serviceRegions(locale), [locale]);
+  // الفئات من الـCMS إن توفّرت، وإلا الثابتة. والمناطق من الفروع الحقيقية إن مُرِّرت، وإلا الثابتة.
+  const categories = useMemo(() => {
+    if (cards) return [
+      { key: "programs" as const, label: pick(locale, "برامج تأهيلية", "Rehabilitation Programs"), items: cards.programs?.length ? cards.programs : serviceCategories(locale)[0].items },
+      { key: "clinical" as const, label: pick(locale, "خدمات عيادية", "Clinical Services"), items: cards.clinical?.length ? cards.clinical : serviceCategories(locale)[1].items },
+      { key: "techniques" as const, label: pick(locale, "تقنيات تأهيلية", "Rehabilitation Technologies"), items: cards.techniques?.length ? cards.techniques : serviceCategories(locale)[2].items },
+    ];
+    return serviceCategories(locale);
+  }, [cards, locale]);
+  const regions = useMemo(() => (regionsProp && regionsProp.length ? regionsProp : serviceRegions(locale)), [regionsProp, locale]);
   const ALL = "__all__";
 
   const [catKey, setCatKey] = useState<ServiceCategoryKey>("programs");
   const [region, setRegion] = useState<string>(ALL);
-  const [programIdx, setProgramIdx] = useState<string>(ALL);
+  // اختيار العنصر بمُعرّف ثابت (slug/href) لا بالفهرس — حتى لا يضيع عند تغيّر أي فلتر آخر.
+  const [itemKey, setItemKey] = useState<string>(ALL);
 
-  const category = categories.find((c) => c.key === catKey)!;
-  const programItems = region === ALL ? category.items : category.items.filter((i) => i.regions?.includes(region));
+  const category = categories.find((c) => c.key === catKey) ?? categories[0];
+  const keyOf = (p: { slug?: string; href?: string; title: string }, i: number) => p.slug || p.href || `i${i}`;
 
   const catIconKey: Record<ServiceCategoryKey, string> = { programs: "book", clinical: "stethoscope", techniques: "chip" };
   const catOptions: Option[] = categories.map((c) => ({ value: c.key, label: c.label, icon: catIconKey[c.key] }));
@@ -136,17 +150,18 @@ export default function ServiceSearchBar({ locale = "ar", searchLabel }: { regio
   ];
   const programOptions: Option[] = [
     { value: ALL, label: pick(locale, "كل البرامج", "All Programs"), icon: "grid" },
-    ...programItems.map((p, i) => ({ value: String(i), label: p.title, icon: itemIcon(catKey, i) })),
+    ...category.items.map((p, i) => ({ value: keyOf(p, i), label: p.title, icon: itemIcon(catKey, i) })),
   ];
 
-  function onCat(v: string) { setCatKey(v as ServiceCategoryKey); setProgramIdx(ALL); }
-  function onRegion(v: string) { setRegion(v); setProgramIdx(ALL); }
+  // تغيير الفئة يعيد ضبط العنصر (مجموعة مختلفة). تغيير المنطقة لا يمسّ اختيار العنصر.
+  function onCat(v: string) { setCatKey(v as ServiceCategoryKey); setItemKey(ALL); }
 
   function search() {
-    const picked = programIdx !== ALL ? programItems[Number(programIdx)] : null;
+    const picked = itemKey !== ALL ? category.items.find((p, i) => keyOf(p, i) === itemKey) : null;
     if (picked) { router.push(picked.href ?? `/programs/${picked.slug}`); return; }
-    const query = region !== ALL ? `?region=${encodeURIComponent(region)}` : "";
-    router.push(`/programs${query}#${catKey}`);
+    // منطقة فقط → اذهب لفروع تلك المنطقة (بيانات الفروع الحقيقية)
+    if (region !== ALL) { router.push(`/branches?q=${encodeURIComponent(region)}`); return; }
+    router.push(`/programs#${catKey}`);
     if (typeof window !== "undefined" && window.location.pathname === "/programs") {
       window.location.hash = catKey;
       document.getElementById("services-tabs")?.scrollIntoView({ behavior: "smooth" });
@@ -154,7 +169,7 @@ export default function ServiceSearchBar({ locale = "ar", searchLabel }: { regio
   }
 
   function reset() {
-    setCatKey("programs"); setRegion(ALL); setProgramIdx(ALL);
+    setCatKey("programs"); setRegion(ALL); setItemKey(ALL);
     if (typeof window !== "undefined" && window.location.pathname === "/programs") router.push("/programs");
   }
 
@@ -162,9 +177,9 @@ export default function ServiceSearchBar({ locale = "ar", searchLabel }: { regio
     <div className="relative flex flex-col items-stretch gap-2 rounded-2xl bg-white p-3 shadow-md ring-1 ring-line lg:flex-row lg:items-center">
       <Dropdown label={pick(locale, "الفئة الرئيسية", "Main Category")} triggerIcon={ICONS.book} value={catKey} onChange={onCat} options={catOptions} />
       <span className="hidden h-9 w-px shrink-0 bg-line lg:block" />
-      <Dropdown label={pick(locale, "اختر البرنامج", "Select Program")} triggerIcon={ICONS.grid} value={programIdx} onChange={setProgramIdx} options={programOptions} />
+      <Dropdown label={pick(locale, "اختر البرنامج", "Select Program")} triggerIcon={ICONS.grid} value={itemKey} onChange={setItemKey} options={programOptions} />
       <span className="hidden h-9 w-px shrink-0 bg-line lg:block" />
-      <Dropdown label={pick(locale, "المنطقة / الفرع", "Region / Branch")} triggerIcon={ICONS.pin} value={region} onChange={onRegion} options={regionOptions} />
+      <Dropdown label={pick(locale, "المنطقة / الفرع", "Region / Branch")} triggerIcon={ICONS.pin} value={region} onChange={setRegion} options={regionOptions} />
       <span className="hidden h-9 w-px shrink-0 bg-line lg:block" />
 
       {/* الأزرار: في صفّ واحد على الموبايل (يمنع تيتم زر إعادة التعيين) — وعناصر مباشرة على الديسكتوب */}

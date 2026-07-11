@@ -11,7 +11,7 @@ import { getLocale } from "@/i18n/locale";
 import { pick, type Locale } from "@/i18n/config";
 
 export const metadata: Metadata = { alternates: { canonical: "/" } };
-import { fetchContent, fetchSections, getWhatsAppUrl } from "@/lib/server/django";
+import { fetchContent, fetchSections, getWhatsAppUrl, getBranchRegions } from "@/lib/server/django";
 import { loadServiceCards } from "@/lib/server/serviceCards";
 import type { HomeChrome } from "@/lib/highlight";
 
@@ -117,7 +117,7 @@ async function loadCerts(locale: Locale): Promise<{ name: string; label: string 
 
 export default async function Home() {
   const locale = await getLocale();
-  const [heroSlides, statItems, featureItems, gallery, successHome, newsHome, chrome, serviceCards, certs, whatsapp] = await Promise.all([
+  const [heroSlides, statItems, featureItems, gallery, successHome, newsHome, chrome, serviceCards, certs, whatsapp, regions] = await Promise.all([
     loadHero(locale),
     loadStats(locale),
     loadFeatures(locale),
@@ -128,12 +128,13 @@ export default async function Home() {
     loadServiceCards(locale),
     loadCerts(locale),
     getWhatsAppUrl(),
+    getBranchRegions(locale),
   ]);
   return (
     <>
       <Hero locale={locale} slides={heroSlides} chrome={chrome} />
       <About locale={locale} chrome={chrome} />
-      <SmartSearch locale={locale} chrome={chrome} cards={serviceCards} />
+      <SmartSearch locale={locale} chrome={chrome} cards={serviceCards} regions={regions} />
       <Stats locale={locale} items={statItems} chrome={chrome} />
       <WhyUs locale={locale} items={featureItems} chrome={chrome} />
       <SuccessStories locale={locale} stories={successHome} chrome={chrome} />

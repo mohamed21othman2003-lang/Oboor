@@ -7,7 +7,7 @@ import ServiceSearchBar from "@/components/ServiceSearchBar";
 import ServicesTabs from "@/components/ServicesTabs";
 import CtaSection from "@/components/CtaSection";
 import type { Program } from "@/components/ProgramCard";
-import { fetchContent, fetchSections } from "@/lib/server/django";
+import { fetchContent, fetchSections, getBranchRegions } from "@/lib/server/django";
 import { hl } from "@/lib/highlight";
 
 // صفّ بطاقة خدمة كما يرجع من Django (content/service-cards)
@@ -70,7 +70,7 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-function Hero({ locale, badge, heading, subtitle }: { locale: Locale; badge?: string; heading?: string; subtitle?: string }) {
+function Hero({ locale, badge, heading, subtitle, cards, regions }: { locale: Locale; badge?: string; heading?: string; subtitle?: string; cards?: ServiceCards; regions?: string[] }) {
   return (
     <section className="bg-gradient-to-b from-[#ebf7f9] to-white">
       <div className="mx-auto max-w-7xl px-6 pb-16 pt-10 lg:px-8">
@@ -96,7 +96,7 @@ function Hero({ locale, badge, heading, subtitle }: { locale: Locale; badge?: st
           </p>
         </div>
 
-        <ServiceSearchBar regionValue={pick(locale, "كل المناطق", "All Regions")} locale={locale} />
+        <ServiceSearchBar locale={locale} cards={cards} regions={regions} />
       </div>
     </section>
   );
@@ -115,9 +115,10 @@ function CTA({ locale }: { locale: Locale }) {
 export default async function ServicesPage() {
   const locale = await getLocale();
   const en = locale === "en";
-  const [cards, sections] = await Promise.all([
+  const [cards, sections, regions] = await Promise.all([
     getServiceCards(locale),
     fetchSections("programs"),
+    getBranchRegions(locale),
   ]);
   const h = (sections?.hero ?? []).find((r) => r.key === "heading");
   const hbadge = (sections?.hero ?? []).find((r) => r.key === "badge");
@@ -128,6 +129,8 @@ export default async function ServicesPage() {
         badge={hbadge ? (en ? hbadge.title_en || hbadge.title_ar : hbadge.title_ar) : undefined}
         heading={h ? (en ? h.title_en || h.title_ar : h.title_ar) : undefined}
         subtitle={h ? (en ? h.text_en || h.text_ar : h.text_ar) : undefined}
+        cards={cards}
+        regions={regions}
       />
       <Suspense fallback={null}>
         <ServicesTabs locale={locale} cards={cards} />
