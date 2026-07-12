@@ -393,6 +393,19 @@ export const GUIDE: GuidePart[] = [
         ],
       },
       {
+        id: "site-assessment",
+        title_ar: "صفحة التقييم (إدارة محتواها)",
+        title_en: "The Assessment Page (Managing Its Content)",
+        intro_ar: "الزائر يملأ التقييم كخطوات متتابعة، لكن محتوى الصفحة نفسه (النصوص والأرقام والأسئلة والخيارات) تتحكّم فيه أنت من اللوحة.",
+        intro_en: "Visitors fill the assessment as a step-by-step wizard, but the page's own content (texts, numbers, questions, options) is controlled by you from the panel.",
+        steps: [
+          site("assessment", "صفحة التقييم كما يراها الزائر: مقدمة وأرقام ومميزات ثم خطوات وأسئلة أولية تنتهي بإرسال النتيجة.", "The assessment page as the visitor sees it: an intro, numbers and features, then steps and preliminary questions ending with submitting the result."),
+          p("تُدار من «التقييم» في القائمة الجانبية (مجموعة صفحات الموقع): عناوين ونصوص الأقسام من لوحة «محتوى وعناوين الصفحة»، ومعها الأرقام والمميزات والخطوات والأسئلة الأولية وخياراتها.", "Managed from “Assessment” in the sidebar (Site Pages group): section headings and texts via the “Page content & headings” panel, along with the numbers, features, steps, and preliminary questions with their options."),
+          p("«بطاقات أنواع التقييم» قائمة مستقلة في أسفل نفس الصفحة — أضف أو عدّل الكروت التي تعرض أنواع التقييم المتاحة، بنفس طريقة أي قائمة.", "“Assessment-type Cards” is a separate list at the bottom of the same page — add or edit the cards that show the available assessment types, just like any list."),
+          p("أما النتائج التي يرسلها الزوّار فتصلك في «نتائج التقييم» ضمن مجموعة «الطلبات والرسائل» (وليس هنا).", "The results visitors submit arrive in “Assessment Results” under the “Requests & Messages” group (not here)."),
+        ],
+      },
+      {
         id: "site-forms",
         title_ar: "نماذج الالتحاق والتقييم",
         title_en: "Admission & Assessment Forms",
@@ -547,8 +560,8 @@ export const GUIDE: GuidePart[] = [
               "Because it's what the visitor typed in the form, so it's shown as sent, in their language."),
           faq("نسيت كلمة المرور أو أريد تغييرها؟",
               "I forgot the password or want to change it?",
-              "تواصل مع فريق الدعم التقني لتغيير كلمة المرور بأمان.",
-              "Contact the technical support team to change the password safely."),
+              "وأنت مسجّل الدخول: غيّرها بنفسك من صفحة «حسابي» في القائمة الجانبية → قسم «تغيير كلمة المرور». وإن كنت خارج اللوحة ونسيتها تمامًا: اضغط «نسيت كلمة المرور؟» في شاشة الدخول ليصلك رابط إعادة تعيين على بريدك المسجّل. (التفاصيل في قسم «حسابي: تغيير البريد وكلمة المرور».)",
+              "While signed in: change it yourself from the “My Account” page in the sidebar → the “Change Password” section. If you're locked out and forgot it entirely: click “Forgot password?” on the sign-in screen to get a reset link on your registered email. (Details in the “My Account: Email & Password” section.)"),
         ],
       },
       {
