@@ -73,6 +73,7 @@ from .m_assessment import *    # noqa: E402,F401,F403
 from .m_home import *          # noqa: E402,F401,F403
 from .m_sections import *      # noqa: E402,F401,F403
 from .m_site import *          # noqa: E402,F401,F403
+from .m_email import *         # noqa: E402,F401,F403
 
 
 class ContentSnapshot(models.Model):

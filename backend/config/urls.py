@@ -19,6 +19,8 @@ urlpatterns = [
     # حساب الأدمن + إعادة تعيين كلمة المرور
     path("api/cms/account/email/", cms_account.update_email),
     path("api/cms/account/password/", cms_account.change_password),
+    path("api/cms/account/smtp/", cms_account.email_settings),
+    path("api/cms/account/smtp/test/", cms_account.email_settings_test),
     path("api/cms/password-reset/", cms_account.password_reset_request),
     path("api/cms/password-reset/confirm/", cms_account.password_reset_confirm),
     path("api/cms/upload/", cms_crud.upload),

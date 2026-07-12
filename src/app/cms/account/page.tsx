@@ -1,12 +1,25 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getMe, updateAccountEmail, changeAccountPassword } from "@/lib/cms/api";
+import { getMe, updateAccountEmail, changeAccountPassword, getEmailSettings, saveEmailSettings, sendTestEmail, type EmailSettings } from "@/lib/cms/api";
 import { useCmsLang } from "@/lib/cms/i18n";
 
 // أيقونة عامة
 function I({ children, size = 18 }: { children: React.ReactNode; size?: number }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">{children}</svg>;
+}
+
+// نمط موحّد لحقول الإدخال
+const INP = "w-full rounded-xl border border-[#e2ecec] bg-[#F7FAFA] px-4 py-3 text-sm text-ink outline-none transition-colors focus:border-[#1FA6A8] focus:bg-white focus:ring-4 focus:ring-[#1FA6A8]/15";
+
+// غلاف حقل بعنوان
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <label className="mb-1.5 block text-sm font-bold text-ink">{label}</label>
+      {children}
+    </div>
+  );
 }
 
 // حقل كلمة مرور مع زر إظهار/إخفاء (العين شمال، القفل/المفتاح يمين)
@@ -66,9 +79,46 @@ export default function AccountPage() {
   const [pwSaving, setPwSaving] = useState(false);
   const [pwNote, setPwNote] = useState<{ ok: boolean; msg: string } | null>(null);
 
+  // إعدادات البريد (SMTP)
+  const [smtp, setSmtp] = useState<EmailSettings | null>(null);
+  const [smtpPw, setSmtpPw] = useState("");
+  const [smtpSaving, setSmtpSaving] = useState(false);
+  const [smtpNote, setSmtpNote] = useState<{ ok: boolean; msg: string } | null>(null);
+  const [testTo, setTestTo] = useState("");
+  const [testing, setTesting] = useState(false);
+  const [testNote, setTestNote] = useState<{ ok: boolean; msg: string } | null>(null);
+
   useEffect(() => {
     getMe().then(({ user }) => { setUsername(user.username); setEmail(user.email || ""); setLoaded(true); }).catch(() => setLoaded(true));
+    getEmailSettings().then(setSmtp).catch(() => {});
   }, []);
+
+  const setSmtpField = <K extends keyof EmailSettings>(k: K, v: EmailSettings[K]) =>
+    setSmtp((s) => (s ? { ...s, [k]: v } : s));
+
+  async function saveSmtp(e: React.FormEvent) {
+    e.preventDefault();
+    if (!smtp) return;
+    setSmtpSaving(true); setSmtpNote(null); setTestNote(null);
+    try {
+      const payload = { ...smtp, ...(smtpPw ? { password: smtpPw } : {}) };
+      const saved = await saveEmailSettings(payload);
+      setSmtp(saved); setSmtpPw("");
+      setSmtpNote({ ok: true, msg: t("تم حفظ إعدادات البريد.", "Email settings saved.") });
+    } catch (err) {
+      setSmtpNote({ ok: false, msg: err instanceof Error ? err.message : t("تعذّر الحفظ.", "Could not save.") });
+    } finally { setSmtpSaving(false); }
+  }
+
+  async function testSmtp() {
+    setTesting(true); setTestNote(null);
+    try {
+      const r = await sendTestEmail(testTo.trim());
+      setTestNote({ ok: true, msg: r.detail });
+    } catch (err) {
+      setTestNote({ ok: false, msg: err instanceof Error ? err.message : t("فشل الإرسال.", "Send failed.") });
+    } finally { setTesting(false); }
+  }
 
   async function saveEmail(e: React.FormEvent) {
     e.preventDefault();
@@ -183,6 +233,90 @@ export default function AccountPage() {
             </button>
           </div>
         </form>
+      </section>
+
+      {/* ===== كرت: إعدادات البريد (SMTP) ===== */}
+      <section className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-[#e6eff0] sm:p-7">
+        <div className="flex items-center gap-3">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#1FA6A8]/12 text-[#0F6C73]"><I><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 7 9 6 9-6" /></I></span>
+          <div>
+            <h2 className="text-lg font-bold text-ink">{t("إعدادات البريد (SMTP)", "Email Settings (SMTP)")}</h2>
+            <p className="text-sm text-ink-soft">{t("بيانات إيميل الشركة الرسمي لإرسال رسائل النظام (مثل رابط إعادة تعيين كلمة المرور).", "Your official email credentials for sending system messages (like the password-reset link).")}</p>
+          </div>
+        </div>
+        <div className="my-5 h-px w-full bg-[#eef4f5]" />
+
+        {!smtp ? (
+          <p className="text-sm text-ink-soft">{t("جارٍ التحميل…", "Loading…")}</p>
+        ) : (
+          <form onSubmit={saveSmtp}>
+            {/* مفتاح التفعيل */}
+            <label className="mb-5 flex cursor-pointer items-center justify-between gap-4 rounded-xl border border-[#e2ecec] bg-[#F7FAFA] px-4 py-3">
+              <span>
+                <span className="block text-sm font-bold text-ink">{t("تفعيل إرسال البريد", "Enable email sending")}</span>
+                <span className="mt-0.5 block text-xs text-ink-soft">{t("عند إيقافه لن تُرسَل رسائل، ويظهر رابط إعادة التعيين للفريق التقني فقط.", "When off, no messages are sent; the reset link is available to the technical team only.")}</span>
+              </span>
+              <span className="relative shrink-0">
+                <input type="checkbox" className="peer sr-only" checked={smtp.enabled} onChange={(e) => setSmtpField("enabled", e.target.checked)} />
+                <span className="block h-6 w-11 rounded-full bg-[#cbd8d9] transition-colors peer-checked:bg-[#1FA6A8]" />
+                <span className="absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-all start-0.5 peer-checked:start-[22px]" />
+              </span>
+            </label>
+
+            <div className="grid gap-5 sm:grid-cols-2">
+              <Field label={t("خادم SMTP (Host)", "SMTP host")}>
+                <input value={smtp.host} onChange={(e) => setSmtpField("host", e.target.value)} placeholder="smtp.gmail.com" className={INP} />
+              </Field>
+              <div className="grid grid-cols-2 gap-3">
+                <Field label={t("المنفذ (Port)", "Port")}>
+                  <input type="number" value={smtp.port} onChange={(e) => setSmtpField("port", Number(e.target.value))} placeholder="587" className={INP} />
+                </Field>
+                <Field label={t("التشفير", "Security")}>
+                  <select value={smtp.security} onChange={(e) => setSmtpField("security", e.target.value as EmailSettings["security"])} className={INP}>
+                    <option value="tls">TLS</option>
+                    <option value="ssl">SSL</option>
+                    <option value="none">{t("بدون", "None")}</option>
+                  </select>
+                </Field>
+              </div>
+              <Field label={t("اسم المستخدم (الإيميل)", "Username (email)")}>
+                <input type="email" value={smtp.username} onChange={(e) => setSmtpField("username", e.target.value)} placeholder="name@company.com" className={INP} />
+              </Field>
+              <Field label={t("كلمة مرور التطبيق (App Password)", "App Password")}>
+                <input type="password" value={smtpPw} onChange={(e) => setSmtpPw(e.target.value)} placeholder={smtp.password_set ? t("•••••• (محفوظة — اكتب للتغيير)", "•••••• (saved — type to change)") : t("أدخل كلمة مرور التطبيق", "Enter the app password")} className={INP} autoComplete="new-password" />
+              </Field>
+              <Field label={t("اسم المُرسِل الظاهر", "Sender display name")}>
+                <input value={smtp.from_name} onChange={(e) => setSmtpField("from_name", e.target.value)} placeholder={t("مركز عبور للرعاية والتأهيل", "Oboor Center")} className={INP} />
+              </Field>
+              <Field label={t("عنوان المُرسِل (From) — اختياري", "From address — optional")}>
+                <input type="email" value={smtp.from_email} onChange={(e) => setSmtpField("from_email", e.target.value)} placeholder={t("افتراضيًا نفس اسم المستخدم", "Defaults to the username")} className={INP} />
+              </Field>
+            </div>
+
+            {smtpNote && <div className="mt-4"><Note ok={smtpNote.ok}>{smtpNote.msg}</Note></div>}
+
+            <div className="mt-5">
+              <button type="submit" disabled={smtpSaving} className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-l from-[#1FA6A8] to-[#0F6C73] px-6 py-3 text-sm font-extrabold text-white shadow-md shadow-[#1FA6A8]/20 transition-all hover:shadow-lg disabled:opacity-60">
+                <I size={16}><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" /><path d="M17 21v-8H7v8M7 3v5h8" /></I>
+                {smtpSaving ? t("جارٍ الحفظ…", "Saving…") : t("حفظ إعدادات البريد", "Save email settings")}
+              </button>
+            </div>
+
+            {/* اختبار الإرسال */}
+            <div className="mt-6 rounded-xl border border-dashed border-[#cfe0e0] bg-[#F7FAFA] p-4">
+              <p className="mb-2 text-sm font-bold text-ink">{t("إرسال رسالة تجريبية", "Send a test email")}</p>
+              <p className="mb-3 text-xs text-ink-soft">{t("احفظ الإعدادات أولًا، ثم أرسل رسالة تجريبية للتأكّد من أنها تعمل.", "Save the settings first, then send a test to confirm they work.")}</p>
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <input type="email" value={testTo} onChange={(e) => setTestTo(e.target.value)} placeholder={smtp.username || t("البريد المُستقبِل للاختبار", "Recipient for the test")} className={`${INP} sm:flex-1`} />
+                <button type="button" onClick={testSmtp} disabled={testing || !smtp.is_ready} title={!smtp.is_ready ? t("أكمل الإعدادات واحفظها أولًا", "Complete and save the settings first") : ""} className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-[#1FA6A8] bg-white px-5 py-3 text-sm font-bold text-[#0F6C73] transition-colors hover:bg-[#1FA6A8]/8 disabled:opacity-50">
+                  <I size={16}><path d="m22 2-7 20-4-9-9-4Z" /><path d="M22 2 11 13" /></I>
+                  {testing ? t("جارٍ الإرسال…", "Sending…") : t("إرسال اختبار", "Send test")}
+                </button>
+              </div>
+              {testNote && <div className="mt-3"><Note ok={testNote.ok}>{testNote.msg}</Note></div>}
+            </div>
+          </form>
+        )}
       </section>
     </div>
   );

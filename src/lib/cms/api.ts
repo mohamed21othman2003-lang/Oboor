@@ -109,6 +109,28 @@ export async function changeAccountPassword(current_password: string, new_passwo
   return r;
 }
 
+// ===== إعدادات البريد (SMTP) — للأدمن =====
+export type EmailSettings = {
+  enabled: boolean;
+  host: string;
+  port: number;
+  security: "tls" | "ssl" | "none";
+  username: string;
+  from_email: string;
+  from_name: string;
+  password_set: boolean;
+  is_ready: boolean;
+};
+export function getEmailSettings() {
+  return cmsFetch<EmailSettings>("/cms/account/smtp/");
+}
+export function saveEmailSettings(data: Partial<EmailSettings> & { password?: string }) {
+  return cmsFetch<EmailSettings>("/cms/account/smtp/", { method: "POST", body: JSON.stringify(data) });
+}
+export function sendTestEmail(to: string) {
+  return cmsFetch<{ detail: string }>("/cms/account/smtp/test/", { method: "POST", body: JSON.stringify({ to }) });
+}
+
 // ===== إعادة تعيين كلمة المرور (عام، بدون توكن) =====
 async function publicPost<T = { detail: string }>(path: string, body: Record<string, unknown>): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
