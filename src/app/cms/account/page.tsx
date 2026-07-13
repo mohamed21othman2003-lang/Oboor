@@ -22,6 +22,15 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
+// مزوّدات البريد المعروفة — تحدّد الـHost/Port/التشفير تلقائيًا
+type Provider = "gmail" | "outlook" | "cpanel" | "custom";
+function deriveProvider(c: EmailSettings): Provider {
+  if (c.host === "smtp.gmail.com") return "gmail";
+  if (c.host === "smtp.office365.com") return "outlook";
+  if (c.port === 465 && c.security === "ssl") return "cpanel";
+  return "custom";
+}
+
 // حقل كلمة مرور مع زر إظهار/إخفاء (العين شمال، القفل/المفتاح يمين)
 function PasswordField({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
   const [show, setShow] = useState(false);
@@ -81,6 +90,7 @@ export default function AccountPage() {
 
   // إعدادات البريد (SMTP)
   const [smtp, setSmtp] = useState<EmailSettings | null>(null);
+  const [provider, setProvider] = useState<Provider>("custom");
   const [smtpPw, setSmtpPw] = useState("");
   const [smtpSaving, setSmtpSaving] = useState(false);
   const [smtpNote, setSmtpNote] = useState<{ ok: boolean; msg: string } | null>(null);
@@ -90,11 +100,24 @@ export default function AccountPage() {
 
   useEffect(() => {
     getMe().then(({ user }) => { setUsername(user.username); setEmail(user.email || ""); setLoaded(true); }).catch(() => setLoaded(true));
-    getEmailSettings().then(setSmtp).catch(() => {});
+    getEmailSettings().then((cfg) => { setSmtp(cfg); setProvider(deriveProvider(cfg)); }).catch(() => {});
   }, []);
 
   const setSmtpField = <K extends keyof EmailSettings>(k: K, v: EmailSettings[K]) =>
     setSmtp((s) => (s ? { ...s, [k]: v } : s));
+
+  // تغيير المزوّد يضبط الخادم/المنفذ/التشفير تلقائيًا
+  function changeProvider(p: Provider) {
+    setProvider(p);
+    setSmtp((s) => {
+      if (!s) return s;
+      const known = s.host === "smtp.gmail.com" || s.host === "smtp.office365.com";
+      if (p === "gmail") return { ...s, host: "smtp.gmail.com", port: 587, security: "tls" };
+      if (p === "outlook") return { ...s, host: "smtp.office365.com", port: 587, security: "tls" };
+      if (p === "cpanel") return { ...s, host: known ? "" : s.host, port: 465, security: "ssl" };
+      return { ...s, host: known ? "" : s.host }; // مخصّص
+    });
+  }
 
   async function saveSmtp(e: React.FormEvent) {
     e.preventDefault();
@@ -263,27 +286,55 @@ export default function AccountPage() {
               </span>
             </label>
 
+            {/* المزوّد + الخادم */}
             <div className="grid gap-5 sm:grid-cols-2">
-              <Field label={t("خادم SMTP (Host)", "SMTP host")}>
-                <input value={smtp.host} onChange={(e) => setSmtpField("host", e.target.value)} placeholder="smtp.gmail.com" className={INP} />
+              <Field label={t("مزوّد البريد", "Email provider")}>
+                <select value={provider} onChange={(e) => changeProvider(e.target.value as Provider)} className={INP}>
+                  <option value="gmail">Gmail / Google Workspace</option>
+                  <option value="outlook">Outlook / Microsoft 365</option>
+                  <option value="cpanel">{t("بريد شركة / استضافة (cPanel)", "Company / hosting (cPanel)")}</option>
+                  <option value="custom">{t("مخصّص (Custom)", "Custom")}</option>
+                </select>
               </Field>
-              <div className="grid grid-cols-2 gap-3">
-                <Field label={t("المنفذ (Port)", "Port")}>
-                  <input type="number" value={smtp.port} onChange={(e) => setSmtpField("port", Number(e.target.value))} placeholder="587" className={INP} />
+
+              {provider === "gmail" || provider === "outlook" ? (
+                <Field label={t("خادم SMTP (Host)", "SMTP host")}>
+                  <input value={smtp.host} readOnly disabled className={`${INP} cursor-not-allowed !bg-[#eef4f5] text-ink-soft`} />
+                  <p className="mt-1.5 text-xs text-ink-soft">{t(`يُضبط تلقائيًا · المنفذ ${smtp.port} · تشفير ${smtp.security.toUpperCase()}`, `Automatic · port ${smtp.port} · ${smtp.security.toUpperCase()}`)}</p>
                 </Field>
-                <Field label={t("التشفير", "Security")}>
-                  <select value={smtp.security} onChange={(e) => setSmtpField("security", e.target.value as EmailSettings["security"])} className={INP}>
-                    <option value="tls">TLS</option>
-                    <option value="ssl">SSL</option>
-                    <option value="none">{t("بدون", "None")}</option>
-                  </select>
+              ) : (
+                <Field label={t("خادم SMTP (اسم سيرفر بريدك)", "SMTP host (your mail server)")}>
+                  <input value={smtp.host} onChange={(e) => setSmtpField("host", e.target.value)} placeholder="hs38.name.tools" className={INP} />
+                  {provider === "cpanel" && <p className="mt-1.5 text-xs text-ink-soft">{t("المنفذ 465 · تشفير SSL (تلقائي)", "Port 465 · SSL (automatic)")}</p>}
                 </Field>
+              )}
+            </div>
+
+            {/* المنفذ والتشفير — فقط في الوضع المخصّص */}
+            {provider === "custom" && (
+              <div className="mt-5 grid gap-5 sm:grid-cols-2">
+                <div className="grid grid-cols-2 gap-3">
+                  <Field label={t("المنفذ (Port)", "Port")}>
+                    <input type="number" min={1} value={smtp.port} onChange={(e) => setSmtpField("port", Number(e.target.value))} placeholder="587" className={INP} />
+                  </Field>
+                  <Field label={t("التشفير", "Security")}>
+                    <select value={smtp.security} onChange={(e) => setSmtpField("security", e.target.value as EmailSettings["security"])} className={INP}>
+                      <option value="tls">TLS</option>
+                      <option value="ssl">SSL</option>
+                      <option value="none">{t("بدون", "None")}</option>
+                    </select>
+                  </Field>
+                </div>
               </div>
+            )}
+
+            {/* بيانات الدخول */}
+            <div className="mt-5 grid gap-5 sm:grid-cols-2">
               <Field label={t("اسم المستخدم (الإيميل)", "Username (email)")}>
                 <input type="email" value={smtp.username} onChange={(e) => setSmtpField("username", e.target.value)} placeholder="name@company.com" className={INP} />
               </Field>
-              <Field label={t("كلمة مرور التطبيق (App Password)", "App Password")}>
-                <input type="password" value={smtpPw} onChange={(e) => setSmtpPw(e.target.value)} placeholder={smtp.password_set ? t("•••••• (محفوظة — اكتب للتغيير)", "•••••• (saved — type to change)") : t("أدخل كلمة مرور التطبيق", "Enter the app password")} className={INP} autoComplete="new-password" />
+              <Field label={provider === "gmail" || provider === "outlook" ? t("كلمة مرور التطبيق (App Password)", "App Password") : t("كلمة مرور الإيميل", "Email password")}>
+                <input type="password" value={smtpPw} onChange={(e) => setSmtpPw(e.target.value)} placeholder={smtp.password_set ? t("•••••• (محفوظة — اكتب للتغيير)", "•••••• (saved — type to change)") : t("أدخل كلمة المرور", "Enter the password")} className={INP} autoComplete="new-password" />
               </Field>
               <Field label={t("اسم المُرسِل الظاهر", "Sender display name")}>
                 <input value={smtp.from_name} onChange={(e) => setSmtpField("from_name", e.target.value)} placeholder={t("مركز عبور للرعاية والتأهيل", "Oboor Center")} className={INP} />
