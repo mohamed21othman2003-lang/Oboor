@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { Cairo } from "next/font/google";
 import "./globals.css";
 import SiteChrome, { type SiteChromeData } from "@/components/SiteChrome";
@@ -39,33 +40,39 @@ const SITE_DESC =
   "مركز عبور للرعاية النهارية والتأهيل — برامج تأهيلية وخدمات عيادية متخصصة لذوي الإعاقة والأطفال ذوي الاحتياجات: التدخل المبكر، النطق والتخاطب، العلاج الوظيفي والطبيعي، عبر فروعنا في أنحاء المملكة.";
 const OG_IMAGE = "/figma/home/imgImageWithFallback.jpg";
 
-export const metadata: Metadata = {
-  metadataBase: new URL(SITE_URL),
-  title: { default: "عبور | Oboor للرعاية والتأهيل", template: "%s | عبور" },
-  description: SITE_DESC,
-  applicationName: "عبور",
-  keywords: [
-    "عبور", "مركز عبور", "التأهيل", "الرعاية النهارية", "التدخل المبكر",
-    "النطق والتخاطب", "العلاج الوظيفي", "العلاج الطبيعي", "ذوي الإعاقة",
-    "الأطفال ذوي الاحتياجات", "السعودية", "Oboor",
-  ],
-  robots: { index: true, follow: true },
-  openGraph: {
-    type: "website",
-    siteName: "عبور | Oboor",
-    title: "عبور | Oboor للرعاية والتأهيل",
+export async function generateMetadata(): Promise<Metadata> {
+  // مسار الصفحة الحالي (يمرّره proxy.ts) لضبط canonical و og:url ذاتيًا لكل صفحة.
+  const path = (await headers()).get("x-pathname") || "/";
+  return {
+    metadataBase: new URL(SITE_URL),
+    title: { default: "عبور | Oboor للرعاية والتأهيل", template: "%s | عبور" },
     description: SITE_DESC,
-    url: SITE_URL,
-    locale: "ar_SA",
-    images: [{ url: OG_IMAGE, alt: "مركز عبور للرعاية والتأهيل" }],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "عبور | Oboor للرعاية والتأهيل",
-    description: SITE_DESC,
-    images: [OG_IMAGE],
-  },
-};
+    applicationName: "عبور",
+    keywords: [
+      "عبور", "مركز عبور", "التأهيل", "الرعاية النهارية", "التدخل المبكر",
+      "النطق والتخاطب", "العلاج الوظيفي", "العلاج الطبيعي", "ذوي الإعاقة",
+      "الأطفال ذوي الاحتياجات", "السعودية", "Oboor",
+    ],
+    robots: { index: true, follow: true },
+    // canonical ذاتي لكل صفحة (يشير لنفسها، لا للصفحة الرئيسية)
+    alternates: { canonical: path },
+    openGraph: {
+      type: "website",
+      siteName: "عبور | Oboor",
+      title: "عبور | Oboor للرعاية والتأهيل",
+      description: SITE_DESC,
+      url: path,
+      locale: "ar_SA",
+      images: [{ url: OG_IMAGE, alt: "مركز عبور للرعاية والتأهيل" }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: "عبور | Oboor للرعاية والتأهيل",
+      description: SITE_DESC,
+      images: [OG_IMAGE],
+    },
+  };
+}
 
 export default async function RootLayout({
   children,
