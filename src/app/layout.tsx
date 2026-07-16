@@ -7,6 +7,7 @@ import { getLocale, dirOf } from "@/i18n/locale";
 import { fetchContent, fetchSections, type SectionRow } from "@/lib/server/django";
 import { NAV_LINKS, CONTACT, waUrl } from "@/lib/site";
 import { getCommon } from "@/i18n/dict/common";
+import { GoogleAnalytics } from "@next/third-parties/google";
 
 type SiteSettings = {
   logo_url?: string;
@@ -31,6 +32,9 @@ const cairo = Cairo({
 });
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://oboor.ido.sa";
+// معرّف Google Analytics (GA4). عام بطبيعته (يظهر في HTML). يُفعَّل في الإنتاج فقط.
+const GA_ID = process.env.NEXT_PUBLIC_GA_ID || "G-0LHKZ941HL";
+const GA_ENABLED = process.env.NODE_ENV === "production" && GA_ID !== "G-XXXXXXXXXX";
 const SITE_DESC =
   "مركز عبور للرعاية النهارية والتأهيل — برامج تأهيلية وخدمات عيادية متخصصة لذوي الإعاقة والأطفال ذوي الاحتياجات: التدخل المبكر، النطق والتخاطب، العلاج الوظيفي والطبيعي، عبر فروعنا في أنحاء المملكة.";
 const OG_IMAGE = "/figma/home/imgImageWithFallback.jpg";
@@ -186,6 +190,7 @@ export default async function RootLayout({
         <PreviewBanner />
         <SiteChrome locale={locale} chrome={chrome}>{children}</SiteChrome>
       </body>
+      {GA_ENABLED && <GoogleAnalytics gaId={GA_ID} />}
     </html>
   );
 }
