@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
+import { pageMeta } from "@/lib/seo";
 import { notFound } from "next/navigation";
 import { TECHNIQUES, getTechnique, type Technique } from "@/lib/techniquesData";
 import { distinctIcons, iconByKey } from "@/lib/areaIcon";
@@ -73,7 +74,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const t = await loadTechnique(slug, locale);
   const suffix = pick(locale, "مركز عبور", "Oboor Center");
   const fallback = pick(locale, "تقنية تأهيلية", "Rehabilitation Technology");
-  return { title: t ? `${t.title} | ${suffix}` : `${fallback} | ${suffix}` };
+  return pageMeta(t ? `${t.title} | ${suffix}` : `${fallback} | ${suffix}`);
 }
 
 function Chev() {

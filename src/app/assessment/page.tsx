@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
+import { pageMeta } from "@/lib/seo";
 import { getAssessStats, getAssessFeatures, getAssessSteps, getAssessments, getQuestionsFor, PRELIM_QUESTIONS, PRELIM_QUESTIONS_EN, ANSWER_OPTIONS, ANSWER_OPTIONS_EN, type Assessment } from "@/lib/assessmentData";
 import AssessmentWizard from "@/components/AssessmentWizard";
 import AnimatedNumber from "@/components/home/AnimatedNumber";
@@ -64,18 +65,18 @@ function staticData(locale: Locale): WizardData {
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
-  return {
-    title: pick(
+  return pageMeta(
+    pick(
       locale,
       "قيّم ابنك | مركز عبور للرعاية والتأهيل",
       "Assess Your Child | Oboor Center for Care & Rehabilitation"
     ),
-    description: pick(
+    pick(
       locale,
       "احصل على تقييم أولي سريع يساعدك على فهم احتياجات طفلك وتحديد الخطوات الصحيحة نحو مستقبل أفضل.",
       "Get a quick preliminary assessment that helps you understand your child's needs and identify the right steps toward a better future."
     ),
-  };
+  );
 }
 
 function Chev() {

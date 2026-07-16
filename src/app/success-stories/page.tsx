@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { pageMeta } from "@/lib/seo";
 import {
   getSuccessStories,
   getSuccessStats,
@@ -67,18 +68,18 @@ async function loadStories(locale: Locale): Promise<SuccessStory[]> {
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
-  return {
-    title: pick(
+  return pageMeta(
+    pick(
       locale,
       "قصص النجاح | مركز عبور للرعاية والتأهيل",
       "Success Stories | Oboor Center for Care & Rehabilitation",
     ),
-    description: pick(
+    pick(
       locale,
       "قصص حقيقية من عائلاتنا — أبناؤنا يُلهمونا كل يوم.",
       "Real stories from our families — our children inspire us every day.",
     ),
-  };
+  );
 }
 
 function Chev() {

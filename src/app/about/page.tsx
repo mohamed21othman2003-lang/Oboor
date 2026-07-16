@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
+import { pageMeta } from "@/lib/seo";
 import { getSpecialists } from "@/lib/specialistsData";
 import { REGION_BRANCHES, REGION_BRANCHES_EN, type Branch } from "@/lib/branchesData";
 import { loadBranches } from "@/lib/server/branches";
@@ -14,14 +15,14 @@ type ApiSpec = { slug: string; name_ar: string; name_en: string; specialty_ar: s
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
-  return {
-    title: pick(locale, "عن عبور | مركز عبور للرعاية والتأهيل", "About Us | Oboor Center for Care & Rehabilitation"),
-    description: pick(
+  return pageMeta(
+    pick(locale, "عن عبور | مركز عبور للرعاية والتأهيل", "About Us | Oboor Center for Care & Rehabilitation"),
+    pick(
       locale,
       "تأسست مراكز عبور عام ٢٠٠٧ كأكبر سلسلة مراكز متخصصة في التشخيص والتقييم والتأهيل للأشخاص ذوي الإعاقة.",
       "Founded in 2007, Oboor Centers are the largest chain specialized in the diagnosis, assessment and rehabilitation of people with disabilities."
     ),
-  };
+  );
 }
 
 function Chev() {

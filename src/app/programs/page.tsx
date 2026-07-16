@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { pageMeta } from "@/lib/seo";
 import { Suspense } from "react";
 import { getLocale } from "@/i18n/locale";
 import { pick, type Locale } from "@/i18n/config";
@@ -56,18 +57,18 @@ async function getServiceCards(locale: Locale): Promise<ServiceCards | undefined
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
-  return {
-    title: pick(
+  return pageMeta(
+    pick(
       locale,
       "خدمات مراكز عبور | البرامج والخدمات والتقنيات",
       "Oboor Centers Services | Programs, Services & Technologies"
     ),
-    description: pick(
+    pick(
       locale,
       "برامج تأهيلية وخدمات عيادية وتقنيات تأهيلية من مراكز عبور",
       "Rehabilitation programs, clinical services, and rehabilitation technologies from Oboor Centers"
     ),
-  };
+  );
 }
 
 function Hero({ locale, badge, heading, subtitle, cards, regions }: { locale: Locale; badge?: string; heading?: string; subtitle?: string; cards?: ServiceCards; regions?: string[] }) {

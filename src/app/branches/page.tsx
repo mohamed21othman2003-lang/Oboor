@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
+import { pageMeta } from "@/lib/seo";
 import { BRANCH_FEATURES, BRANCH_FEATURES_EN, mapRegionsFrom } from "@/lib/branchesData";
 import { Suspense } from "react";
 import BranchesExplorer from "@/components/BranchesExplorer";
@@ -15,14 +16,14 @@ import CtaSection from "@/components/CtaSection";
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
-  return {
-    title: pick(locale, "مراكزنا | مركز عبور للرعاية والتأهيل", "Branches | Oboor Center for Care & Rehabilitation"),
-    description: pick(
+  return pageMeta(
+    pick(locale, "مراكزنا | مركز عبور للرعاية والتأهيل", "Branches | Oboor Center for Care & Rehabilitation"),
+    pick(
       locale,
       "ابحث عن أقرب فرع إليك واستكشف خدماتنا في مختلف مناطق المملكة العربية السعودية.",
       "Find your nearest branch and explore our services across the various regions of Saudi Arabia.",
     ),
-  };
+  );
 }
 
 function Chev() {

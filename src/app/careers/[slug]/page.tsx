@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { pageMeta } from "@/lib/seo";
 import { notFound } from "next/navigation";
 import { JOBS, getJob } from "@/lib/careersData";
 import CareerApplyForm from "@/components/CareerApplyForm";
@@ -23,11 +24,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const locale = await getLocale();
   const j = getJob(slug, locale);
-  return {
-    title: j
+  return pageMeta(
+    j
       ? `${j.title} | ${pick(locale, "وظائف مركز عبور", "Oboor Center Careers")}`
       : pick(locale, "تفاصيل الوظيفة | مركز عبور", "Job Details | Oboor Center"),
-  };
+  );
 }
 
 function Chev() {

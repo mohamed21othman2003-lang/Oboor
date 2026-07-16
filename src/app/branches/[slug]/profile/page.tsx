@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageMeta } from "@/lib/seo";
 import { notFound } from "next/navigation";
 import { ALL_BRANCHES, getBranch, BRANCH_FEATURES, BRANCH_FEATURES_EN } from "@/lib/branchesData";
 import { loadBranch } from "@/lib/server/branches";
@@ -16,7 +17,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const locale = await getLocale();
   const b = getBranch(slug, locale);
   const suffix = pick(locale, "مركز عبور", "Oboor Center");
-  return { title: b ? `${pick(locale, "بروفايل", "Profile")} — ${b.name}` : suffix };
+  return pageMeta(b ? `${pick(locale, "بروفايل", "Profile")} — ${b.name}` : suffix);
 }
 
 export default async function BranchProfilePage({ params }: { params: Promise<{ slug: string }> }) {

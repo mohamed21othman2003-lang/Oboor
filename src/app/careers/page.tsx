@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
+import { pageMeta } from "@/lib/seo";
 import { JOBS, JOBS_EN, CITIES, CITIES_EN, EMPLOYMENT_TYPES, EMPLOYMENT_TYPES_EN, type Job } from "@/lib/careersData";
 import CareersExplorer from "@/components/CareersExplorer";
 import { getLocale } from "@/i18n/locale";
@@ -53,14 +54,14 @@ export async function fetchJobs(locale: Locale): Promise<Job[] | null> {
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
-  return {
-    title: pick(locale, "انضم إلينا | مركز عبور للرعاية والتأهيل", "Join Us | Oboor Center for Care & Rehabilitation"),
-    description: pick(
+  return pageMeta(
+    pick(locale, "انضم إلينا | مركز عبور للرعاية والتأهيل", "Join Us | Oboor Center for Care & Rehabilitation"),
+    pick(
       locale,
       "انضم إلى فريق عبور — وظائف تصنع فرقاً حقيقياً في حياة المستفيدين وأسرهم.",
       "Join the Oboor team — careers that make a real difference in the lives of beneficiaries and their families.",
     ),
-  };
+  );
 }
 
 function Chev() {

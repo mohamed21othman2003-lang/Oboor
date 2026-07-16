@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { pageMeta } from "@/lib/seo";
 import { getLocale } from "@/i18n/locale";
 import { pick, type Locale } from "@/i18n/config";
 import { formatDate } from "@/lib/dateFormat";
@@ -79,10 +80,10 @@ function staticGroups(locale: Locale): NewsGroups {
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
-  return {
-    title: pick(locale, "إعلامنا | مركز عبور للرعاية والتأهيل", "News | Oboor Center for Care & Rehabilitation"),
-    description: pick(locale, "أحدث أخبار وفعاليات وورش ومقالات مراكز عبور.", "Latest news, events, workshops, and articles from Oboor Centers."),
-  };
+  return pageMeta(
+    pick(locale, "إعلامنا | مركز عبور للرعاية والتأهيل", "News | Oboor Center for Care & Rehabilitation"),
+    pick(locale, "أحدث أخبار وفعاليات وورش ومقالات مراكز عبور.", "Latest news, events, workshops, and articles from Oboor Centers."),
+  );
 }
 
 function Chev() {

@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
+import { pageMeta } from "@/lib/seo";
 import GalleryViewer from "@/components/GalleryViewer";
 import { fetchContent } from "@/lib/server/django";
 import { getLocale } from "@/i18n/locale";
@@ -8,10 +9,10 @@ import { pick, type Locale } from "@/i18n/config";
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
-  return {
-    title: pick(locale, "المعرض | مركز عبور للرعاية والتأهيل", "Gallery | Oboor Center for Care & Rehabilitation"),
-    description: pick(locale, "صور المركز — لحظات حقيقية من رحلات التأهيل والتطور داخل مراكز عبور.", "Center photos — real moments from rehabilitation and growth journeys inside Oboor Centers."),
-  };
+  return pageMeta(
+    pick(locale, "المعرض | مركز عبور للرعاية والتأهيل", "Gallery | Oboor Center for Care & Rehabilitation"),
+    pick(locale, "صور المركز — لحظات حقيقية من رحلات التأهيل والتطور داخل مراكز عبور.", "Center photos — real moments from rehabilitation and growth journeys inside Oboor Centers."),
+  );
 }
 
 const G = "/figma/gallery";

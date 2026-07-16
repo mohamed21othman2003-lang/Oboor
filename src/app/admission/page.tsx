@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { pageMeta } from "@/lib/seo";
 import AdmissionForm from "@/components/AdmissionForm";
 import CtaSection from "@/components/CtaSection";
 import { getLocale } from "@/i18n/locale";
@@ -9,18 +10,18 @@ import { branchSelectOptions } from "@/lib/branchesData";
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
-  return {
-    title: pick(
+  return pageMeta(
+    pick(
       locale,
       "طلب التحاق | مركز عبور للرعاية والتأهيل",
       "Apply Now | Oboor Center for Care & Rehabilitation"
     ),
-    description: pick(
+    pick(
       locale,
       "سجّل طلب التحاق لطفلك الآن — ابدأ رحلة التأهيل بخطوة بسيطة وسريعة.",
       "Register your child now — start the rehabilitation journey with one simple, quick step."
     ),
-  };
+  );
 }
 
 function Chev() {

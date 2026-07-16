@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
+import { pageMeta } from "@/lib/seo";
 import { notFound } from "next/navigation";
 import { PROGRAM_DETAILS, getProgram, type ProgramDetail } from "@/lib/programsData";
 import { distinctIcons, iconByKey } from "@/lib/areaIcon";
@@ -79,14 +80,14 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const locale = await getLocale();
   const p = await loadProgram(slug, locale);
-  return {
-    title: p
+  return pageMeta(
+    p
       ? `${p.title} | ${pick(locale, "مركز عبور", "Oboor Center")}`
       : pick(locale, "برنامج | مركز عبور", "Program | Oboor Center"),
-    description: p
+    p
       ? p.subtitle
       : pick(locale, "تعرّف على برامج عبور التأهيلية لدعم طفلك.", "Discover Oboor's rehabilitation programs to support your child."),
-  };
+  );
 }
 
 

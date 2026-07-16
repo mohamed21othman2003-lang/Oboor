@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { pageMeta } from "@/lib/seo";
 import ContactForm from "@/components/ContactForm";
 import BranchesMapSection from "@/components/BranchesMapSection";
 import { loadBranches } from "@/lib/server/branches";
@@ -30,14 +31,14 @@ type SiteInfo = { email: string; phone_unified: string; phone_customer: string; 
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
-  return {
-    title: pick(locale, "خذ الخطوة لعبور | مركز عبور", "Take the Step to Oboor | Oboor Center"),
-    description: pick(
+  return pageMeta(
+    pick(locale, "خذ الخطوة لعبور | مركز عبور", "Take the Step to Oboor | Oboor Center"),
+    pick(
       locale,
       "تواصل مع مركز عبور للرعاية والتأهيل",
       "Get in touch with Oboor Center for Care & Rehabilitation",
     ),
-  };
+  );
 }
 
 /* ---------- Hero ---------- */

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { pageMeta } from "@/lib/seo";
 import { notFound } from "next/navigation";
 import { ALL_BRANCHES, getBranch, BRANCH_FEATURES, BRANCH_FEATURES_EN } from "@/lib/branchesData";
 import { loadBranch } from "@/lib/server/branches";
@@ -22,7 +23,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const b = getBranch(slug, locale);
   const suffix = pick(locale, "مركز عبور", "Oboor Center");
   const fallback = pick(locale, "تفاصيل الفرع", "Branch Details");
-  return { title: b ? `${b.name} | ${suffix}` : `${fallback} | ${suffix}` };
+  return pageMeta(b ? `${b.name} | ${suffix}` : `${fallback} | ${suffix}`);
 }
 
 function branchServices(locale: Locale): Program[] {

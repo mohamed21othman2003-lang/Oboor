@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
+import { pageMeta } from "@/lib/seo";
 import { notFound } from "next/navigation";
 import { CLINICAL_SERVICES, getClinicalService, type ClinicalBlock, type ClinicalService } from "@/lib/clinicalData";
 import { distinctIcons, iconByKey } from "@/lib/areaIcon";
@@ -68,10 +69,10 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const locale = await getLocale();
   const s = getClinicalService(slug, locale);
-  return {
-    title: s ? pick(locale, `${s.title} | مركز عبور`, `${s.title} | Oboor Center`) : pick(locale, "خدمة عيادية | مركز عبور", "Clinical Service | Oboor Center"),
-    description: s ? s.subtitle : pick(locale, "خدمة عيادية في مركز عبور للرعاية والتأهيل.", "A clinical service at Oboor Center for Care & Rehabilitation."),
-  };
+  return pageMeta(
+    s ? pick(locale, `${s.title} | مركز عبور`, `${s.title} | Oboor Center`) : pick(locale, "خدمة عيادية | مركز عبور", "Clinical Service | Oboor Center"),
+    s ? s.subtitle : pick(locale, "خدمة عيادية في مركز عبور للرعاية والتأهيل.", "A clinical service at Oboor Center for Care & Rehabilitation."),
+  );
 }
 
 function Chev() {

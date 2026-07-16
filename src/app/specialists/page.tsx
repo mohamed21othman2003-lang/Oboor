@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
+import { pageMeta } from "@/lib/seo";
 import { getSpecialistStats, getJoinCards, getContactPrompt, getSpecialists, type Specialist } from "@/lib/specialistsData";
 import { getLocale } from "@/i18n/locale";
 import { pick, type Locale } from "@/i18n/config";
@@ -53,18 +54,18 @@ async function loadSpecialists(locale: Locale): Promise<Specialist[]> {
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
-  return {
-    title: pick(
+  return pageMeta(
+    pick(
       locale,
       "الأخصائيون | مركز عبور للرعاية والتأهيل",
       "Specialists | Oboor Center for Care & Rehabilitation",
     ),
-    description: pick(
+    pick(
       locale,
       "تعرف على فريقنا من الأخصائيين المؤهلين في مختلف مجالات التأهيل والعلاج.",
       "Meet our team of qualified specialists across the various fields of rehabilitation and therapy.",
     ),
-  };
+  );
 }
 
 function Chev() {

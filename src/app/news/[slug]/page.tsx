@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
+import { pageMeta } from "@/lib/seo";
 import { notFound } from "next/navigation";
 import { ALL_NEWS, getNewsItem } from "@/lib/newsData";
 import { fetchContent, getWhatsAppUrl } from "@/lib/server/django";
@@ -101,7 +102,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const locale = await getLocale();
   const n = getNewsItem(slug, locale);
-  return { title: n ? `${n.title} | ${pick(locale, "مركز عبور", "Oboor Center")}` : pick(locale, "خبر | مركز عبور", "News | Oboor Center") };
+  return pageMeta(
+    n ? `${n.title} | ${pick(locale, "مركز عبور", "Oboor Center")}` : pick(locale, "خبر | مركز عبور", "News | Oboor Center"),
+    n?.desc,
+    n?.image,
+  );
 }
 
 function Chev() {
