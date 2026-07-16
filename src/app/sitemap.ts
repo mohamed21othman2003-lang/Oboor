@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { fetchContent } from "@/lib/server/django";
 
-const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://oobor.vercel.app";
+const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://oboor.ido.sa";
 
 type WithSlug = { slug?: string };
 

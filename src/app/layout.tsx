@@ -30,7 +30,7 @@ const cairo = Cairo({
   weight: ["400", "500", "600", "700", "800"],
 });
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://oobor.vercel.app";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://oboor.ido.sa";
 const SITE_DESC =
   "مركز عبور للرعاية النهارية والتأهيل — برامج تأهيلية وخدمات عيادية متخصصة لذوي الإعاقة والأطفال ذوي الاحتياجات: التدخل المبكر، النطق والتخاطب، العلاج الوظيفي والطبيعي، عبر فروعنا في أنحاء المملكة.";
 const OG_IMAGE = "/figma/home/imgImageWithFallback.jpg";
