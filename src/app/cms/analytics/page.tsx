@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { getAnalytics, getTraffic, getSeo, type Analytics, type AnalyticsBucket, type Traffic, type Seo } from "@/lib/cms/api";
 import { useCmsLang } from "@/lib/cms/i18n";
+import { BarChart, DonutChart } from "@/components/cms/Chart";
 
 function I({ children, size = 18 }: { children: React.ReactNode; size?: number }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">{children}</svg>;
@@ -31,31 +32,22 @@ function MiniStat({ label, value }: { label: string; value: string }) {
   );
 }
 
-// رسم أعمدة أفقية
-function BarChart({ title, sub, data, color }: { title: string; sub?: string; data: AnalyticsBucket[]; color: string }) {
+// كارت رسم بياني — نوع مناسب لكل مقياس: bar (أفقي) / column (رأسي) / donut
+function ChartCard({ title, sub, data, type = "bar", height }: { title: string; sub?: string; data: AnalyticsBucket[]; type?: "bar" | "column" | "donut"; height?: number }) {
   const { lang } = useCmsLang();
   const en = lang === "en";
-  const max = Math.max(1, ...data.map((d) => d.count));
   return (
     <section className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-[#e6eff0]">
-      <div className="mb-1 flex items-baseline justify-between gap-3">
+      <div className="mb-2 flex items-baseline justify-between gap-3">
         <h3 className="text-base font-bold text-ink">{title}</h3>
         {sub && <span className="text-xs text-ink-soft">{sub}</span>}
       </div>
       {data.length === 0 ? (
         <p className="py-8 text-center text-sm text-ink-soft">{en ? "No data yet" : "لا توجد بيانات بعد"}</p>
+      ) : type === "donut" ? (
+        <DonutChart data={data} />
       ) : (
-        <div className="mt-3 space-y-2.5">
-          {data.map((d) => (
-            <div key={d.label} className="flex items-center gap-3">
-              <span className="w-28 shrink-0 truncate text-[13px] text-ink-soft" title={d.label}>{d.label}</span>
-              <div className="relative h-6 flex-1 overflow-hidden rounded-md bg-[#f1f6f6]">
-                <div className="absolute inset-y-0 start-0 rounded-md transition-all" style={{ width: `${(d.count / max) * 100}%`, background: color, minWidth: d.count ? "6px" : 0 }} />
-              </div>
-              <span className="w-8 shrink-0 text-end text-[13px] font-bold text-ink">{d.count}</span>
-            </div>
-          ))}
-        </div>
+        <BarChart data={data} horizontal={type === "bar"} height={height ?? (type === "bar" ? Math.max(170, data.length * 40) : 220)} />
       )}
     </section>
   );
@@ -125,10 +117,10 @@ export default function AnalyticsPage() {
                 <MiniStat label={t("متوسط زمن التفاعل", "Avg. Engagement")} value={fmtSec(traffic.totals.avg_engagement_sec)} />
               </div>
               <div className="grid gap-4 lg:grid-cols-2">
-                <BarChart title={t("حسب الجهاز", "By Device")} data={traffic.by_device || []} color={C.teal} />
-                <BarChart title={t("حسب القناة", "By Channel")} data={traffic.by_channel || []} color={C.blue} />
-                <BarChart title={t("حسب المدينة", "By City")} data={traffic.by_city || []} color={C.deep} />
-                <BarChart title={t("أكثر الصفحات دخولاً", "Top Landing Pages")} data={traffic.top_landing || []} color={C.violet} />
+                <ChartCard title={t("حسب الجهاز", "By Device")} data={traffic.by_device || []} type="donut" />
+                <ChartCard title={t("حسب القناة", "By Channel")} data={traffic.by_channel || []} type="donut" />
+                <ChartCard title={t("حسب المدينة", "By City")} data={traffic.by_city || []} type="bar" />
+                <ChartCard title={t("أكثر الصفحات دخولاً", "Top Landing Pages")} data={traffic.top_landing || []} type="bar" />
               </div>
             </>
           ) : (
@@ -165,7 +157,7 @@ export default function AnalyticsPage() {
                     <tbody>{(seo.top_queries || []).map((q) => <tr key={q.label} className="border-t border-[#eef4f5]"><td className="py-2 text-ink">{q.label}</td><td className="py-2 text-end font-bold">{q.clicks}</td><td className="py-2 text-end text-ink-soft">{q.impressions}</td><td className="py-2 text-end text-ink-soft">{q.position}</td></tr>)}</tbody>
                   </table></div>
                 </section>
-                <BarChart title={t("أكثر الصفحات ظهورًا في البحث", "Top Pages in Search")} sub={t("حسب مرات الظهور", "by impressions")} data={(seo.top_pages || []).map((p) => ({ label: p.label.replace("https://oboor.ido.sa", "") || "/", count: p.impressions }))} color={C.blue} />
+                <ChartCard title={t("أكثر الصفحات ظهورًا في البحث", "Top Pages in Search")} sub={t("حسب مرات الظهور", "by impressions")} data={(seo.top_pages || []).map((p) => ({ label: p.label.replace("https://oboor.ido.sa", "") || "/", count: p.impressions }))} type="bar" />
               </div>
             </>
           ) : (
@@ -193,25 +185,25 @@ export default function AnalyticsPage() {
           {/* طلبات الالتحاق */}
           <h2 className="pt-2 text-lg font-bold text-ink">{t("طلبات الالتحاق", "Admission Requests")}</h2>
           <div className="grid gap-4 lg:grid-cols-2">
-            <BarChart title={t("حسب الفرع", "By Branch")} data={data.admissions_by_branch} color={C.teal} />
-            <BarChart title={t("حسب المدينة", "By City")} data={data.admissions_by_city} color={C.deep} />
-            <BarChart title={t("حسب نوع الحالة", "By Case Type")} data={data.admissions_by_case_type} color={C.violet} />
-            <BarChart title={t("حسب الفئة العمرية", "By Age Band")} data={data.admissions_by_age} color={C.amber} />
-            <BarChart title={t("حسب الجنس", "By Gender")} data={data.admissions_by_gender} color={C.rose} />
+            <ChartCard title={t("حسب الفرع", "By Branch")} data={data.admissions_by_branch} type="bar" />
+            <ChartCard title={t("حسب المدينة", "By City")} data={data.admissions_by_city} type="bar" />
+            <ChartCard title={t("حسب نوع الحالة", "By Case Type")} data={data.admissions_by_case_type} type="bar" />
+            <ChartCard title={t("حسب الفئة العمرية", "By Age Band")} data={data.admissions_by_age} type="column" />
+            <ChartCard title={t("حسب الجنس", "By Gender")} data={data.admissions_by_gender} type="donut" />
           </div>
 
           {/* التقييمات */}
           <h2 className="pt-2 text-lg font-bold text-ink">{t("التقييمات", "Assessments")}</h2>
           <div className="grid gap-4 lg:grid-cols-2">
-            <BarChart title={t("حسب نوع التقييم", "By Assessment Type")} data={data.assessments_by_type} color={C.teal} />
-            <BarChart title={t("حسب مستوى الحالة", "By Level")} data={data.assessments_by_level} color={C.blue} />
+            <ChartCard title={t("حسب نوع التقييم", "By Assessment Type")} data={data.assessments_by_type} type="bar" />
+            <ChartCard title={t("حسب مستوى الحالة", "By Level")} data={data.assessments_by_level} type="donut" />
           </div>
 
           {/* التوظيف */}
           <h2 className="pt-2 text-lg font-bold text-ink">{t("التوظيف", "Recruitment")}</h2>
           <div className="grid gap-4 lg:grid-cols-2">
-            <BarChart title={t("المتقدّمون حسب المدينة", "Applicants by City")} data={data.careers_by_city} color={C.deep} />
-            <BarChart title={t("المتقدّمون حسب الوظيفة", "Applicants by Position")} data={data.careers_by_position} color={C.violet} />
+            <ChartCard title={t("المتقدّمون حسب المدينة", "Applicants by City")} data={data.careers_by_city} type="bar" />
+            <ChartCard title={t("المتقدّمون حسب الوظيفة", "Applicants by Position")} data={data.careers_by_position} type="bar" />
           </div>
         </>
       )}
