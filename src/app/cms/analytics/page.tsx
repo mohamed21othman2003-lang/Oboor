@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { getAnalytics, getTraffic, getSeo, type Analytics, type AnalyticsBucket, type Traffic, type Seo } from "@/lib/cms/api";
 import { useCmsLang } from "@/lib/cms/i18n";
 import { BarChart, DonutChart } from "@/components/cms/Chart";
+import { labelTr } from "@/lib/cms/analyticsLabels";
 
 function I({ children, size = 18 }: { children: React.ReactNode; size?: number }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">{children}</svg>;
@@ -36,18 +37,20 @@ function MiniStat({ label, value }: { label: string; value: string }) {
 function ChartCard({ title, sub, data, type = "bar", height }: { title: string; sub?: string; data: AnalyticsBucket[]; type?: "bar" | "column" | "donut"; height?: number }) {
   const { lang } = useCmsLang();
   const en = lang === "en";
+  // ترجمة قيم التسميات لتتبع لغة اللوحة (جهاز/قناة/جنس/مستوى/حالة/منطقة)
+  const tData = data.map((d) => ({ ...d, label: labelTr(d.label, en) }));
   return (
     <section className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-[#e6eff0]">
       <div className="mb-2 flex items-baseline justify-between gap-3">
         <h3 className="text-base font-bold text-ink">{title}</h3>
         {sub && <span className="text-xs text-ink-soft">{sub}</span>}
       </div>
-      {data.length === 0 ? (
+      {tData.length === 0 ? (
         <p className="py-8 text-center text-sm text-ink-soft">{en ? "No data yet" : "لا توجد بيانات بعد"}</p>
       ) : type === "donut" ? (
-        <DonutChart data={data} />
+        <DonutChart data={tData} />
       ) : (
-        <BarChart data={data} horizontal={type === "bar"} height={height ?? (type === "bar" ? Math.max(170, data.length * 40) : 220)} />
+        <BarChart data={tData} horizontal={type === "bar"} height={height ?? (type === "bar" ? Math.max(170, data.length * 40) : 220)} />
       )}
     </section>
   );
