@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getAnalytics, type Analytics, type AnalyticsBucket } from "@/lib/cms/api";
+import { getAnalytics, getTraffic, type Analytics, type AnalyticsBucket, type Traffic } from "@/lib/cms/api";
 import { useCmsLang } from "@/lib/cms/i18n";
 
 function I({ children, size = 18 }: { children: React.ReactNode; size?: number }) {
@@ -17,6 +17,16 @@ function Stat({ value, label, icon, tint }: { value: number; label: string; icon
       </div>
       <div className="mt-3 text-3xl font-extrabold text-ink">{value.toLocaleString("en-US")}</div>
       <div className="mt-0.5 text-sm text-ink-soft">{label}</div>
+    </div>
+  );
+}
+
+// كارت نسبة/قيمة نصية
+function MiniStat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl bg-white p-4 text-center shadow-sm ring-1 ring-[#e6eff0]">
+      <div className="text-2xl font-extrabold text-ink">{value}</div>
+      <div className="mt-0.5 text-xs text-ink-soft">{label}</div>
     </div>
   );
 }
@@ -58,10 +68,17 @@ export default function AnalyticsPage() {
 
   const [data, setData] = useState<Analytics | null>(null);
   const [err, setErr] = useState("");
+  const [traffic, setTraffic] = useState<Traffic | null>(null);
 
   useEffect(() => {
     getAnalytics().then(setData).catch((e) => setErr(e instanceof Error ? e.message : "error"));
+    getTraffic().then(setTraffic).catch(() => setTraffic({ connected: false }));
   }, []);
+
+  const fmtSec = (s: number) => {
+    const m = Math.floor(s / 60), sec = Math.round(s % 60);
+    return m ? `${m}${t("د", "m")} ${sec}${t("ث", "s")}` : `${sec}${t("ث", "s")}`;
+  };
 
   const C = { teal: "#1FA6A8", deep: "#0F6C73", blue: "#3B82F6", violet: "#7C6CC4", amber: "#E0A64B", rose: "#D96A8B" };
 
@@ -84,8 +101,47 @@ export default function AnalyticsPage() {
         <span>{t("هذه الأرقام من نظامك (CMS) وتتحدّث فورًا مع كل طلب جديد. أقسام الزيارات وبحث جوجل ستُضاف قريبًا.", "These figures come from your own system (CMS) and update instantly with every new request. Traffic and Google-search sections are coming soon.")}</span>
       </div>
 
+      {/* ===== زيارات الموقع (GA4) ===== */}
+      {traffic && (
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 pt-1">
+            <h2 className="text-lg font-bold text-ink">{t("زيارات الموقع (GA4)", "Website Traffic (GA4)")}</h2>
+            {traffic.connected && <span className="rounded-md bg-[#e7f7ef] px-2 py-0.5 text-[11px] font-bold text-[#12855c]">{t("مباشر", "Live")}</span>}
+            <span className="text-xs text-ink-soft">{t("آخر 28 يومًا", "Last 28 days")}</span>
+          </div>
+          {traffic.connected && traffic.totals ? (
+            <>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <Stat value={traffic.totals.sessions} label={t("الجلسات", "Sessions")} tint={C.teal} icon={<I size={20}><path d="M3 3v18h18" /><path d="m7 14 4-4 3 3 5-6" /></I>} />
+                <Stat value={traffic.totals.users} label={t("المستخدمون", "Users")} tint={C.deep} icon={<I size={20}><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /></I>} />
+                <Stat value={traffic.totals.new_users} label={t("مستخدمون جدد", "New Users")} tint={C.blue} icon={<I size={20}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M19 8v6M22 11h-6" /></I>} />
+                <Stat value={traffic.totals.views} label={t("مشاهدات الصفحات", "Page Views")} tint={C.violet} icon={<I size={20}><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7z" /><circle cx="12" cy="12" r="3" /></I>} />
+              </div>
+              <div className="grid gap-4 sm:grid-cols-3">
+                <MiniStat label={t("معدل التفاعل", "Engagement Rate")} value={`${traffic.totals.engagement_rate}%`} />
+                <MiniStat label={t("معدل الارتداد", "Bounce Rate")} value={`${traffic.totals.bounce_rate}%`} />
+                <MiniStat label={t("متوسط زمن التفاعل", "Avg. Engagement")} value={fmtSec(traffic.totals.avg_engagement_sec)} />
+              </div>
+              <div className="grid gap-4 lg:grid-cols-2">
+                <BarChart title={t("حسب الجهاز", "By Device")} data={traffic.by_device || []} color={C.teal} />
+                <BarChart title={t("حسب القناة", "By Channel")} data={traffic.by_channel || []} color={C.blue} />
+                <BarChart title={t("حسب المدينة", "By City")} data={traffic.by_city || []} color={C.deep} />
+                <BarChart title={t("أكثر الصفحات دخولاً", "Top Landing Pages")} data={traffic.top_landing || []} color={C.violet} />
+              </div>
+            </>
+          ) : (
+            <div className="rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-700">
+              {t("لم يتم الاتصال بـGoogle Analytics بعد أو لا توجد بيانات كافية.", "Google Analytics is not connected yet, or there isn't enough data.")}
+            </div>
+          )}
+        </div>
+      )}
+
       {err && <div className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">{err}</div>}
       {!data && !err && <div className="py-10 text-center text-sm text-ink-soft">{t("جارٍ التحميل…", "Loading…")}</div>}
+
+      {/* عنوان قسم بيانات النظام */}
+      {data && <h2 className="pt-2 text-lg font-bold text-ink">{t("طلبات النظام (CMS)", "System Requests (CMS)")}</h2>}
 
       {data && (
         <>

@@ -110,6 +110,24 @@ export function getAnalytics() {
   return cmsFetch<Analytics>("/cms/analytics/");
 }
 
+// ===== زيارات الموقع (GA4 Data API) =====
+export type Traffic = {
+  connected: boolean;
+  error?: string;
+  range_days?: number;
+  totals?: {
+    sessions: number; users: number; new_users: number; views: number;
+    engagement_rate: number; bounce_rate: number; avg_engagement_sec: number;
+  };
+  by_device?: AnalyticsBucket[];
+  by_channel?: AnalyticsBucket[];
+  by_city?: AnalyticsBucket[];
+  top_landing?: AnalyticsBucket[];
+};
+export function getTraffic() {
+  return cmsFetch<Traffic>("/cms/analytics/traffic/");
+}
+
 // ===== حساب الأدمن =====
 export function getMe() {
   return cmsFetch<{ user: CmsUser }>("/cms/me/");
