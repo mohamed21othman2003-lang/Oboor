@@ -10,6 +10,7 @@ import { NAV_LINKS, CONTACT, waUrl } from "@/lib/site";
 import { getCommon } from "@/i18n/dict/common";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import Script from "next/script";
+import GaEvents from "@/components/GaEvents";
 
 type SiteSettings = {
   logo_url?: string;
@@ -203,6 +204,7 @@ export default async function RootLayout({
         />
         <PreviewBanner />
         <SiteChrome locale={locale} chrome={chrome}>{children}</SiteChrome>
+        {GA_ENABLED && <GaEvents />}
       </body>
       {GA_ENABLED && <GoogleAnalytics gaId={GA_ID} />}
       {PROD && (

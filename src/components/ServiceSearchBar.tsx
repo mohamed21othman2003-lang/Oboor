@@ -4,6 +4,7 @@ import { useMemo, useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { pick, type Locale } from "@/i18n/config";
 import { serviceCategories, serviceRegions, type ServiceCategoryKey } from "@/components/ServicesTabs";
+import { sendGAEvent } from "@next/third-parties/google";
 
 type Option = { value: string; label: string; icon: string };
 
@@ -165,6 +166,7 @@ export default function ServiceSearchBar({ locale = "ar", searchLabel, cards, re
 
   function search() {
     const picked = itemKey !== ALL ? category.items.find((p, i) => keyOf(p, i) === itemKey) : null;
+    sendGAEvent("event", "smart_search", { category: catKey, program: itemKey !== ALL ? itemKey : "", region: region !== ALL ? region : "" });
     if (picked) { router.push(picked.href ?? `/programs/${picked.slug}`); return; }
     // منطقة فقط → اذهب لفروع تلك المنطقة (بيانات الفروع الحقيقية)
     if (region !== ALL) { router.push(`/branches?q=${encodeURIComponent(region)}`); return; }

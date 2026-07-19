@@ -6,6 +6,7 @@ import CustomSelect, { type SelectOption } from "@/components/ui/Select";
 import { getAssessments, getQuestionsFor, getAnswerOptions, type Assessment } from "@/lib/assessmentData";
 import { pick, type Locale } from "@/i18n/config";
 import { waUrl } from "@/lib/site";
+import { sendGAEvent } from "@next/third-parties/google";
 
 // مدن فروع المؤسسة + خيار «أخرى» (يكتب المستخدم مدينته)
 const CITY_OTHER = "__other__";
@@ -54,7 +55,7 @@ export default function AssessmentWizard({
   // أسئلة التقييم المختار (تختلف حسب نوع التقييم)
   const PRELIM_QUESTIONS = active ? (questions?.[active.slug] ?? (prelimQuestions?.length ? prelimQuestions : getQuestionsFor(active.slug, locale))) : [];
 
-  const start = (a: Assessment) => { setActive(a); setAnswers({}); setStep(1); };
+  const start = (a: Assessment) => { setActive(a); setAnswers({}); setStep(1); sendGAEvent("event", "assessment_start", { assessment_type: a.slug }); };
   const reset = () => { setStep(0); setActive(null); setAnswers({}); };
 
   function submitData(e: React.FormEvent<HTMLFormElement>) {
@@ -95,6 +96,7 @@ export default function AssessmentWizard({
       city: cityValue,
       branch,
     };
+    sendGAEvent("event", "assessment_complete", { assessment_type: active?.slug });
     setStep(3); // النتيجة تظهر فورًا
     fetch("/api/assessment", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) }).catch(() => {});
   }

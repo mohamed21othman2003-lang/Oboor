@@ -6,6 +6,7 @@ import { pick, type Locale } from "@/i18n/config";
 import { validateName, validatePhone, stripDigits, digitsOnly } from "@/lib/validate";
 import CustomSelect, { type SelectOption } from "@/components/ui/Select";
 import LimitedTextarea from "@/components/ui/LimitedTextarea";
+import { sendGAEvent } from "@next/third-parties/google";
 
 const OTHER = "__other__";
 
@@ -93,6 +94,7 @@ export default function CareerApplyForm({ jobTitle, locale, branchOptions }: { j
         if (data?.duplicate) { setError(pick(locale, "تم إرسال هذا الطلب مسبقاً بالفعل.", "This request has already been submitted.")); return; }
         if (!res.ok || !data.ok) throw new Error(data.error || "");
       }
+      sendGAEvent("event", "form_submit", { form_type: "career" });
       setSent(true);
     } catch {
       setError(pick(locale, "حدث خطأ، حاول مرة أخرى.", "Something went wrong, please try again."));

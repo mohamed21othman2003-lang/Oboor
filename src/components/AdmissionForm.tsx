@@ -6,6 +6,7 @@ import { validateName, validatePhone, validateRequired, validateEmail, stripDigi
 import CustomSelect, { type SelectOption } from "@/components/ui/Select";
 import LimitedTextarea from "@/components/ui/LimitedTextarea";
 import { caseOptions } from "@/lib/caseTypes";
+import { sendGAEvent } from "@next/third-parties/google";
 
 const CITIES = ["الرياض", "مكة المكرمة", "المدينة المنورة", "الشرقية", "القصيم", "عسير", "جازان", "الجوف"];
 const CITIES_EN = ["Riyadh", "Makkah", "Madinah", "Eastern Province", "Qassim", "Asir", "Jazan", "Al-Jouf"];
@@ -97,6 +98,7 @@ export default function AdmissionForm({ locale, branchOptions }: { locale: Local
       const data = await res.json();
       if (data?.duplicate) { setFormError(pick(locale, "تم إرسال هذا الطلب مسبقاً بالفعل.", "This request has already been submitted.")); return; }
       if (!res.ok || !data.ok) throw new Error(data.error || "");
+      sendGAEvent("event", "generate_lead", { form_type: "admission" });
       setSent(true);
     } catch {
       setFormError(pick(locale, "حدث خطأ، حاول مرة أخرى.", "Something went wrong, please try again."));
