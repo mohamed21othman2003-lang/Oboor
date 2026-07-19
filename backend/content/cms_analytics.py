@@ -163,3 +163,60 @@ def traffic_overview(request):
     except Exception as e:
         # لا نكسر الداشبورد — نُبلّغ الواجهة أن GA غير متاح مع السبب
         return Response({"connected": False, "error": str(e)[:300]})
+
+
+# ======================= أداء البحث (Google Search Console) =======================
+_GSC_CACHE = {"ts": 0.0, "data": None}
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def seo_overview(request):
+    """كلمات البحث والنقرات والظهور من Search Console. للأدمن فقط، مع كاش."""
+    if not request.user.is_staff:
+        return Response({"detail": "غير مصرّح."}, status=status.HTTP_403_FORBIDDEN)
+
+    now = time.time()
+    if _GSC_CACHE["data"] is not None and now - _GSC_CACHE["ts"] < _GA_TTL:
+        return Response(_GSC_CACHE["data"])
+
+    import datetime
+    site = os.environ.get("GSC_SITE_URL", "https://oboor.ido.sa/")
+    try:
+        from googleapiclient.discovery import build
+        from google.oauth2 import service_account
+        path = os.environ.get("GA4_CREDENTIALS_FILE", "/app/secrets/ga-service-account.json")
+        creds = service_account.Credentials.from_service_account_file(
+            path, scopes=["https://www.googleapis.com/auth/webmasters.readonly"]
+        )
+        svc = build("searchconsole", "v1", credentials=creds, cache_discovery=False)
+
+        end = datetime.date.today()
+        start = end - datetime.timedelta(days=28)
+
+        def q(dims, limit):
+            body = {"startDate": start.isoformat(), "endDate": end.isoformat(),
+                    "dimensions": dims, "rowLimit": limit}
+            return svc.searchanalytics().query(siteUrl=site, body=body).execute().get("rows", [])
+
+        tr = (q([], 1) or [{}])[0]
+        totals = {
+            "clicks": int(tr.get("clicks", 0)),
+            "impressions": int(tr.get("impressions", 0)),
+            "ctr": round(tr.get("ctr", 0) * 100, 2),
+            "position": round(tr.get("position", 0), 1),
+        }
+        queries = [{
+            "label": r["keys"][0], "clicks": int(r["clicks"]), "impressions": int(r["impressions"]),
+            "ctr": round(r["ctr"] * 100, 1), "position": round(r["position"], 1),
+        } for r in q(["query"], 15)]
+        pages = [{
+            "label": r["keys"][0], "clicks": int(r["clicks"]), "impressions": int(r["impressions"]),
+        } for r in q(["page"], 10)]
+
+        data = {"connected": True, "range_days": 28, "totals": totals,
+                "top_queries": queries, "top_pages": pages}
+        _GSC_CACHE.update(ts=now, data=data)
+        return Response(data)
+    except Exception as e:
+        return Response({"connected": False, "error": str(e)[:300]})

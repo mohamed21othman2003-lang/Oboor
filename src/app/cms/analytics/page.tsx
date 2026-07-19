@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getAnalytics, getTraffic, type Analytics, type AnalyticsBucket, type Traffic } from "@/lib/cms/api";
+import { getAnalytics, getTraffic, getSeo, type Analytics, type AnalyticsBucket, type Traffic, type Seo } from "@/lib/cms/api";
 import { useCmsLang } from "@/lib/cms/i18n";
 
 function I({ children, size = 18 }: { children: React.ReactNode; size?: number }) {
@@ -69,10 +69,12 @@ export default function AnalyticsPage() {
   const [data, setData] = useState<Analytics | null>(null);
   const [err, setErr] = useState("");
   const [traffic, setTraffic] = useState<Traffic | null>(null);
+  const [seo, setSeo] = useState<Seo | null>(null);
 
   useEffect(() => {
     getAnalytics().then(setData).catch((e) => setErr(e instanceof Error ? e.message : "error"));
     getTraffic().then(setTraffic).catch(() => setTraffic({ connected: false }));
+    getSeo().then(setSeo).catch(() => setSeo({ connected: false }));
   }, []);
 
   const fmtSec = (s: number) => {
@@ -133,6 +135,41 @@ export default function AnalyticsPage() {
             <div className="rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-700">
               {t("لم يتم الاتصال بـGoogle Analytics بعد أو لا توجد بيانات كافية.", "Google Analytics is not connected yet, or there isn't enough data.")}
             </div>
+          )}
+        </div>
+      )}
+
+      {/* ===== أداء البحث (SEO) ===== */}
+      {seo && (
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 pt-1">
+            <h2 className="text-lg font-bold text-ink">{t("أداء البحث في جوجل (SEO)", "Google Search Performance (SEO)")}</h2>
+            {seo.connected && <span className="rounded-md bg-[#e7f7ef] px-2 py-0.5 text-[11px] font-bold text-[#12855c]">{t("مباشر", "Live")}</span>}
+            <span className="text-xs text-ink-soft">{t("آخر 28 يومًا", "Last 28 days")}</span>
+          </div>
+          {!seo.connected ? (
+            <div className="rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-700">{t("لم يتم الربط بـSearch Console بعد.", "Search Console is not connected yet.")}</div>
+          ) : seo.totals && (seo.totals.impressions > 0 || (seo.top_queries?.length ?? 0) > 0) ? (
+            <>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <MiniStat label={t("النقرات", "Clicks")} value={seo.totals.clicks.toLocaleString("en-US")} />
+                <MiniStat label={t("مرات الظهور", "Impressions")} value={seo.totals.impressions.toLocaleString("en-US")} />
+                <MiniStat label={t("نسبة النقر (CTR)", "CTR")} value={`${seo.totals.ctr}%`} />
+                <MiniStat label={t("متوسط الترتيب", "Avg. Position")} value={String(seo.totals.position)} />
+              </div>
+              <div className="grid gap-4 lg:grid-cols-2">
+                <section className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-[#e6eff0]">
+                  <h3 className="mb-3 text-base font-bold text-ink">{t("أكثر كلمات البحث", "Top Search Queries")}</h3>
+                  <div className="overflow-x-auto"><table className="w-full text-sm">
+                    <thead><tr className="text-ink-soft"><th className="pb-2 text-start font-semibold">{t("الكلمة", "Query")}</th><th className="pb-2 text-end font-semibold">{t("نقرات", "Clicks")}</th><th className="pb-2 text-end font-semibold">{t("ظهور", "Impr.")}</th><th className="pb-2 text-end font-semibold">{t("ترتيب", "Pos.")}</th></tr></thead>
+                    <tbody>{(seo.top_queries || []).map((q) => <tr key={q.label} className="border-t border-[#eef4f5]"><td className="py-2 text-ink">{q.label}</td><td className="py-2 text-end font-bold">{q.clicks}</td><td className="py-2 text-end text-ink-soft">{q.impressions}</td><td className="py-2 text-end text-ink-soft">{q.position}</td></tr>)}</tbody>
+                  </table></div>
+                </section>
+                <BarChart title={t("أكثر الصفحات ظهورًا في البحث", "Top Pages in Search")} sub={t("حسب مرات الظهور", "by impressions")} data={(seo.top_pages || []).map((p) => ({ label: p.label.replace("https://oboor.ido.sa", "") || "/", count: p.impressions }))} color={C.blue} />
+              </div>
+            </>
+          ) : (
+            <div className="rounded-xl bg-[#eef6f6] px-4 py-3 text-sm text-[#0d5b60]">{t("تم الربط بنجاح ✓ — Search Console بدأ يجمع البيانات، وستظهر الأرقام خلال يوم إلى يومين.", "Connected ✓ — Search Console has started collecting; figures appear within 1–2 days.")}</div>
           )}
         </div>
       )}

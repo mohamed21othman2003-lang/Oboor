@@ -128,6 +128,19 @@ export function getTraffic() {
   return cmsFetch<Traffic>("/cms/analytics/traffic/");
 }
 
+// ===== أداء البحث (Search Console) =====
+export type SeoQuery = { label: string; clicks: number; impressions: number; ctr: number; position: number };
+export type Seo = {
+  connected: boolean;
+  error?: string;
+  totals?: { clicks: number; impressions: number; ctr: number; position: number };
+  top_queries?: SeoQuery[];
+  top_pages?: { label: string; clicks: number; impressions: number }[];
+};
+export function getSeo() {
+  return cmsFetch<Seo>("/cms/analytics/seo/");
+}
+
 // ===== حساب الأدمن =====
 export function getMe() {
   return cmsFetch<{ user: CmsUser }>("/cms/me/");
