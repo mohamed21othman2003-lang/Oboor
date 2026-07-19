@@ -115,14 +115,8 @@ export function DonutChart({ data, height = 220 }: { data: Datum[]; height?: num
           },
           tooltip: {
             backgroundColor: "#0F6C73", padding: 9, cornerRadius: 6,
-            callbacks: {
-              label: (ctx) => {
-                const ds = (ctx.dataset.data as number[]) || [];
-                const sum = ds.reduce((a, b) => a + (b || 0), 0) || 1;
-                const v = ctx.parsed as number;
-                return ` ${Math.round((v / sum) * 100)}% (${v})`;
-              },
-            },
+            // النِسب المئوية تظهر على الشرائح والليجند؛ عند الوقوف نعرض العدد الحقيقي
+            callbacks: { label: (ctx) => `  ${ctx.parsed}` },
           },
         },
       },
