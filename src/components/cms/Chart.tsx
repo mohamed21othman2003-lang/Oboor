@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import Chart, { type ChartConfiguration, type ChartTypeRegistry } from "chart.js/auto";
+import Chart, { type ChartConfiguration, type ChartTypeRegistry, type Plugin } from "chart.js/auto";
 
 // إعدادات عامة موحّدة
 Chart.defaults.font.family = "'Segoe UI', Tahoma, sans-serif";
@@ -59,8 +59,31 @@ export function BarChart({ data, horizontal = true, height = 200 }: { data: Datu
   return <div style={{ position: "relative", height }}><canvas ref={ref} /></div>;
 }
 
-/** دونات لنِسب قليلة العناصر (جهاز/قناة/جنس/مستوى). */
-export function DonutChart({ data, height = 210 }: { data: Datum[]; height?: number }) {
+// إضافة تكتب النسبة المئوية فوق كل شريحة في الدونات
+const arcPercent: Plugin<"doughnut"> = {
+  id: "arcPercent",
+  afterDatasetsDraw(chart) {
+    const ds = (chart.data.datasets[0]?.data as number[]) || [];
+    const sum = ds.reduce((a, b) => a + (b || 0), 0) || 1;
+    const meta = chart.getDatasetMeta(0);
+    const ctx = chart.ctx;
+    ctx.save();
+    ctx.font = "700 12px 'Segoe UI', sans-serif";
+    ctx.fillStyle = "#fff";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    meta.data.forEach((arc, i) => {
+      const pct = ((ds[i] || 0) / sum) * 100;
+      if (pct < 7) return; // نتجاهل الشرائح الصغيرة جدًا (تظهر نِسبتها في الليجند)
+      const p = (arc as unknown as { tooltipPosition: () => { x: number; y: number } }).tooltipPosition();
+      ctx.fillText(`${Math.round(pct)}%`, p.x, p.y);
+    });
+    ctx.restore();
+  },
+};
+
+/** دونات لنِسب قليلة العناصر (جهاز/قناة/جنس/مستوى) — تعرض النِسب المئوية. */
+export function DonutChart({ data, height = 220 }: { data: Datum[]; height?: number }) {
   const ref = useChart(
     {
       type: "doughnut",
@@ -71,12 +94,39 @@ export function DonutChart({ data, height = 210 }: { data: Datum[]; height?: num
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        cutout: "62%",
+        cutout: "60%",
         plugins: {
-          legend: { position: "bottom", labels: { boxWidth: 10, boxHeight: 10, padding: 10, color: "#33465e", font: { size: 11.5 } } },
-          tooltip: { backgroundColor: "#0F6C73", padding: 9, cornerRadius: 6 },
+          legend: {
+            position: "bottom",
+            labels: {
+              boxWidth: 10, boxHeight: 10, padding: 10, color: "#33465e", font: { size: 11.5 },
+              generateLabels: (chart) => {
+                const ds = (chart.data.datasets[0]?.data as number[]) || [];
+                const sum = ds.reduce((a, b) => a + (b || 0), 0) || 1;
+                return (chart.data.labels as string[]).map((label, i) => ({
+                  text: `${label} · ${Math.round(((ds[i] || 0) / sum) * 100)}%`,
+                  fillStyle: PALETTE[i % PALETTE.length],
+                  strokeStyle: PALETTE[i % PALETTE.length],
+                  lineWidth: 0,
+                  index: i,
+                }));
+              },
+            },
+          },
+          tooltip: {
+            backgroundColor: "#0F6C73", padding: 9, cornerRadius: 6,
+            callbacks: {
+              label: (ctx) => {
+                const ds = (ctx.dataset.data as number[]) || [];
+                const sum = ds.reduce((a, b) => a + (b || 0), 0) || 1;
+                const v = ctx.parsed as number;
+                return ` ${Math.round((v / sum) * 100)}% (${v})`;
+              },
+            },
+          },
         },
       },
+      plugins: [arcPercent],
     },
     JSON.stringify(data),
   );
