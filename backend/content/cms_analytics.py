@@ -3,7 +3,9 @@
 يجمّع طلبات الالتحاق والتقييمات والتوظيف والرسائل في أرقام جاهزة للعرض
 في صفحة /cms/analytics. للأدمن فقط. GA4 لا يستطيع إنتاج هذه الأرقام.
 """
+import os
 import re
+import time
 from django.db.models import Count
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
@@ -77,3 +79,87 @@ def analytics_overview(request):
         "careers_by_position": _group(job, "job"),
     }
     return Response(data)
+
+
+# ======================= زيارات الموقع (GA4 Data API) =======================
+_GA_CACHE = {"ts": 0.0, "data": None}
+_GA_TTL = 900  # ثوانٍ — كاش 15 دقيقة لتجنّب استهلاك حصّة GA
+
+
+def _ga_client():
+    from google.analytics.data_v1beta import BetaAnalyticsDataClient
+    from google.oauth2 import service_account
+    path = os.environ.get("GA4_CREDENTIALS_FILE", "/app/secrets/ga-service-account.json")
+    creds = service_account.Credentials.from_service_account_file(
+        path, scopes=["https://www.googleapis.com/auth/analytics.readonly"]
+    )
+    return BetaAnalyticsDataClient(credentials=creds)
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def traffic_overview(request):
+    """زيارات الموقع من GA4 (Sessions/Users/Devices/Cities/…). للأدمن فقط، مع كاش."""
+    if not request.user.is_staff:
+        return Response({"detail": "غير مصرّح."}, status=status.HTTP_403_FORBIDDEN)
+
+    now = time.time()
+    if _GA_CACHE["data"] is not None and now - _GA_CACHE["ts"] < _GA_TTL:
+        return Response(_GA_CACHE["data"])
+
+    prop = os.environ.get("GA4_PROPERTY_ID", "545831946")
+    try:
+        from google.analytics.data_v1beta.types import (
+            RunReportRequest, DateRange, Dimension, Metric, OrderBy,
+        )
+        client = _ga_client()
+        pid = f"properties/{prop}"
+        dr = [DateRange(start_date="28daysAgo", end_date="today")]
+
+        totals_metrics = ["sessions", "totalUsers", "newUsers", "screenPageViews",
+                          "engagementRate", "bounceRate", "averageSessionDuration"]
+        tresp = client.run_report(RunReportRequest(
+            property=pid, date_ranges=dr,
+            metrics=[Metric(name=m) for m in totals_metrics],
+        ))
+        tv = tresp.rows[0].metric_values if tresp.rows else None
+
+        def mv(i, cast=float):
+            try:
+                return cast(tv[i].value) if tv else 0
+            except (ValueError, TypeError, IndexError):
+                return 0
+
+        totals = {
+            "sessions": int(mv(0, int)), "users": int(mv(1, int)), "new_users": int(mv(2, int)),
+            "views": int(mv(3, int)), "engagement_rate": round(mv(4) * 100, 1),
+            "bounce_rate": round(mv(5) * 100, 1), "avg_engagement_sec": round(mv(6), 1),
+        }
+
+        def by_dim(dim, limit=8, metric="sessions"):
+            resp = client.run_report(RunReportRequest(
+                property=pid, date_ranges=dr,
+                dimensions=[Dimension(name=dim)], metrics=[Metric(name=metric)],
+                order_bys=[OrderBy(metric=OrderBy.MetricOrderBy(metric_name=metric), desc=True)],
+                limit=limit,
+            ))
+            out = []
+            for r in resp.rows:
+                label = (r.dimension_values[0].value or "").strip() or "غير محدّد"
+                out.append({"label": label, "count": int(r.metric_values[0].value or 0)})
+            return out
+
+        data = {
+            "connected": True,
+            "range_days": 28,
+            "totals": totals,
+            "by_device": by_dim("deviceCategory", 5),
+            "by_channel": by_dim("sessionDefaultChannelGroup", 6),
+            "by_city": by_dim("city", 8),
+            "top_landing": by_dim("landingPage", 8),
+        }
+        _GA_CACHE.update(ts=now, data=data)
+        return Response(data)
+    except Exception as e:
+        # لا نكسر الداشبورد — نُبلّغ الواجهة أن GA غير متاح مع السبب
+        return Response({"connected": False, "error": str(e)[:300]})

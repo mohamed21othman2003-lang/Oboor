@@ -17,6 +17,7 @@ urlpatterns = [
     path("api/cms/me/", cms_api.me),
     path("api/cms/stats/", cms_api.stats),
     path("api/cms/analytics/", cms_analytics.analytics_overview),
+    path("api/cms/analytics/traffic/", cms_analytics.traffic_overview),
     # حساب الأدمن + إعادة تعيين كلمة المرور
     path("api/cms/account/email/", cms_account.update_email),
     path("api/cms/account/password/", cms_account.change_password),

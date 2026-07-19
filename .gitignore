@@ -69,3 +69,6 @@ __pycache__/
 backend/media/
 backend/staticfiles/
 *.sqlite3
+
+# GA4 service-account key (secret — never commit)
+backend/secrets/
