@@ -92,6 +92,24 @@ export function getStats() {
   return cmsFetch<DashboardStats>("/cms/stats/");
 }
 
+// ===== التحليلات (مصدرها قاعدة البيانات) =====
+export type AnalyticsBucket = { label: string; count: number };
+export type Analytics = {
+  totals: { admissions: number; assessments: number; contacts: number; careers: number };
+  admissions_by_branch: AnalyticsBucket[];
+  admissions_by_city: AnalyticsBucket[];
+  admissions_by_gender: AnalyticsBucket[];
+  admissions_by_age: AnalyticsBucket[];
+  admissions_by_case_type: AnalyticsBucket[];
+  assessments_by_type: AnalyticsBucket[];
+  assessments_by_level: AnalyticsBucket[];
+  careers_by_city: AnalyticsBucket[];
+  careers_by_position: AnalyticsBucket[];
+};
+export function getAnalytics() {
+  return cmsFetch<Analytics>("/cms/analytics/");
+}
+
 // ===== حساب الأدمن =====
 export function getMe() {
   return cmsFetch<{ user: CmsUser }>("/cms/me/");

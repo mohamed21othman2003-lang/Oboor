@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import path, include
-from content import cms_api, cms_crud, cms_account, preview as cms_preview
+from content import cms_api, cms_crud, cms_account, cms_analytics, preview as cms_preview
 
 admin.site.site_header = "لوحة تحكّم مركز عبور"
 admin.site.site_title = "إدارة عبور"
@@ -16,6 +16,7 @@ urlpatterns = [
     path("api/cms/login/", cms_api.login),
     path("api/cms/me/", cms_api.me),
     path("api/cms/stats/", cms_api.stats),
+    path("api/cms/analytics/", cms_analytics.analytics_overview),
     # حساب الأدمن + إعادة تعيين كلمة المرور
     path("api/cms/account/email/", cms_account.update_email),
     path("api/cms/account/password/", cms_account.change_password),
