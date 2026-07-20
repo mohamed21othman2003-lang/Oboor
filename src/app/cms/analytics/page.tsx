@@ -187,28 +187,26 @@ export default function AnalyticsPage() {
                   {(seo.top_queries?.length ?? 0) === 0 ? (
                     <p className="py-8 text-center text-sm text-ink-soft">{t("لا توجد بيانات بعد", "No data yet")}</p>
                   ) : (
-                    <div className="overflow-x-auto">
-                      <table className="w-full border-collapse text-sm">
-                        <thead>
-                          <tr className="text-[11px] uppercase tracking-wide text-ink-soft">
-                            <th className="pb-2.5 text-start font-bold">{t("الكلمة", "Query")}</th>
-                            <th className="px-2 pb-2.5 text-center font-bold">{t("نقرات", "Clicks")}</th>
-                            <th className="px-2 pb-2.5 text-center font-bold">{t("ظهور", "Impr.")}</th>
-                            <th className="pb-2.5 text-center font-bold">{t("الترتيب", "Pos.")}</th>
+                    <table className="w-full table-fixed border-collapse text-sm">
+                      <thead>
+                        <tr className="text-[11px] uppercase tracking-wide text-ink-soft">
+                          <th className="w-[46%] pb-2.5 text-start font-bold">{t("الكلمة", "Query")}</th>
+                          <th className="pb-2.5 text-center font-bold">{t("نقرات", "Clicks")}</th>
+                          <th className="pb-2.5 text-center font-bold">{t("ظهور", "Impr.")}</th>
+                          <th className="pb-2.5 text-center font-bold">{t("الترتيب", "Pos.")}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(seo.top_queries || []).map((q) => (
+                          <tr key={q.label} className="border-t border-[#eef4f5] transition-colors hover:bg-[#f7fbfb]">
+                            <td className="truncate py-2.5 pe-3 font-medium text-ink" title={q.label}>{q.label}</td>
+                            <td className="py-2.5 text-center font-bold tabular-nums text-[#0F6C73]">{q.clicks}</td>
+                            <td className="py-2.5 text-center tabular-nums text-ink-soft">{q.impressions}</td>
+                            <td className="py-2.5 text-center"><span className="inline-block min-w-[32px] rounded-md bg-[#eef4f5] px-1.5 py-0.5 text-xs font-bold tabular-nums text-[#0F6C73]">{q.position}</span></td>
                           </tr>
-                        </thead>
-                        <tbody>
-                          {(seo.top_queries || []).map((q) => (
-                            <tr key={q.label} className="border-t border-[#eef4f5] transition-colors hover:bg-[#f7fbfb]">
-                              <td className="max-w-[230px] truncate py-2.5 pe-3 font-medium text-ink" title={q.label}>{q.label}</td>
-                              <td className="px-2 py-2.5 text-center font-bold tabular-nums text-[#0F6C73]">{q.clicks}</td>
-                              <td className="px-2 py-2.5 text-center tabular-nums text-ink-soft">{q.impressions}</td>
-                              <td className="py-2.5 text-center"><span className="inline-block min-w-[34px] rounded-md bg-[#eef4f5] px-2 py-0.5 text-xs font-bold tabular-nums text-[#0F6C73]">{q.position}</span></td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
+                        ))}
+                      </tbody>
+                    </table>
                   )}
                 </section>
                 <ChartCard title={t("أكثر الصفحات ظهورًا في البحث", "Top Pages in Search")} sub={t("حسب مرات الظهور", "by impressions")} data={(seo.top_pages || []).map((p) => ({ label: pageLabel(p.label.replace("https://oboor.ido.sa", ""), en), count: p.impressions }))} type="bar" />
