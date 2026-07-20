@@ -221,16 +221,22 @@ def traffic_overview(request):
     prop = os.environ.get("GA4_PROPERTY_ID", "545831946")
     try:
         from google.analytics.data_v1beta.types import (
-            RunReportRequest, DateRange, Dimension, Metric, OrderBy,
+            RunReportRequest, DateRange, Dimension, Metric, OrderBy, FilterExpression, Filter,
         )
         client = _ga_client()
         pid = f"properties/{prop}"
         dr = [DateRange(start_date="28daysAgo", end_date="today")]
 
+        # فلتر السوق الواحد (السعودية) — يستبعد الزيارات الأجنبية (ومنها ضوضاء الاختبار).
+        # قابل للتعطيل بضبط GA4_COUNTRY="" في البيئة.
+        _country = os.environ.get("GA4_COUNTRY", "Saudi Arabia")
+        GEO = FilterExpression(filter=Filter(
+            field_name="country", string_filter=Filter.StringFilter(value=_country))) if _country else None
+
         totals_metrics = ["sessions", "totalUsers", "newUsers", "screenPageViews",
                           "engagementRate", "bounceRate", "averageSessionDuration"]
         tresp = client.run_report(RunReportRequest(
-            property=pid, date_ranges=dr,
+            property=pid, date_ranges=dr, dimension_filter=GEO,
             metrics=[Metric(name=m) for m in totals_metrics],
         ))
         tv = tresp.rows[0].metric_values if tresp.rows else None
@@ -249,7 +255,7 @@ def traffic_overview(request):
 
         def by_dim(dim, limit=8, metric="sessions"):
             resp = client.run_report(RunReportRequest(
-                property=pid, date_ranges=dr,
+                property=pid, date_ranges=dr, dimension_filter=GEO,
                 dimensions=[Dimension(name=dim)], metrics=[Metric(name=metric)],
                 order_bys=[OrderBy(metric=OrderBy.MetricOrderBy(metric_name=metric), desc=True)],
                 limit=limit,
@@ -265,7 +271,7 @@ def traffic_overview(request):
                       "form_submit", "assessment_start", "assessment_complete", "smart_search", "download_pdf"]
         events = {e: 0 for e in OUR_EVENTS}
         ev_resp = client.run_report(RunReportRequest(
-            property=pid, date_ranges=dr,
+            property=pid, date_ranges=dr, dimension_filter=GEO,
             dimensions=[Dimension(name="eventName")], metrics=[Metric(name="eventCount")], limit=200,
         ))
         for r in ev_resp.rows:
@@ -275,7 +281,7 @@ def traffic_overview(request):
 
         # خط الجلسات عبر الأيام
         tr_resp = client.run_report(RunReportRequest(
-            property=pid, date_ranges=dr,
+            property=pid, date_ranges=dr, dimension_filter=GEO,
             dimensions=[Dimension(name="date")], metrics=[Metric(name="sessions")],
             order_bys=[OrderBy(dimension=OrderBy.DimensionOrderBy(dimension_name="date"))],
         ))
