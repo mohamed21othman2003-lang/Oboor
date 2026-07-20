@@ -21,9 +21,9 @@ export type GuidePart = { id: string; title_ar: string; title_en: string; sectio
 const faq = (q_ar: string, q_en: string, a_ar: string, a_en: string): FaqItem => ({ q_ar, q_en, a_ar, a_en });
 const term = (term_ar: string, term_en: string, def_ar: string, def_en: string): GlossaryItem => ({ term_ar, term_en, def_ar, def_en });
 
-// اختصار لإنشاء خطوة بلقطة CMS
-const cms = (name: string, ar: string, en: string, cap_ar?: string, cap_en?: string): GuideStep =>
-  ({ ar, en, shot: { area: "cms", name, caption_ar: cap_ar, caption_en: cap_en } });
+// اختصار لإنشاء خطوة بلقطة CMS (مع نقاط فرعية اختيارية)
+const cms = (name: string, ar: string, en: string, cap_ar?: string, cap_en?: string, points?: [string, string][]): GuideStep =>
+  ({ ar, en, shot: { area: "cms", name, caption_ar: cap_ar, caption_en: cap_en }, ...(points ? { points: points.map(([a, e]) => ({ ar: a, en: e })) } : {}) });
 const site = (name: string, ar: string, en: string): GuideStep =>
   ({ ar, en, shot: { area: "site", name } });
 const p = (ar: string, en: string): GuideStep => ({ ar, en });
@@ -47,7 +47,7 @@ export const GUIDE: GuidePart[] = [
         steps: [
           cms("login", "افتح [صفحة لوحة التحكّم](/cms) (الرابط المنتهي بـ /cms). إن لم تكن مسجّلاً ستظهر شاشة الدخول.", "Open the [control-panel page](/cms) (the link ending with /cms). If you're not signed in, the sign-in screen appears."),
           p("اكتب اسم المستخدم وكلمة المرور ثم اضغط «تسجيل الدخول».", "Enter your username and password, then click “Sign in”."),
-          p("لو نسيت كلمة المرور، اضغط «نسيت كلمة المرور؟» أسفل الحقول ليصلك رابط إعادة تعيين على بريدك المسجّل (تفاصيل أكثر في قسم «حسابي»).", "If you forget your password, click “Forgot password?” below the fields to receive a reset link on your registered email (more in the “My Account” section)."),
+          p("لو نسيت كلمة المرور، اضغط «نسيت كلمة المرور؟» أسفل الحقول ليصلك رابط إعادة تعيين على بريدك المسجّل. (يتطلب هذا ضبط «إعدادات البريد (SMTP)» أولًا؛ لو لم تصلك الرسالة فتواصل مع الفريق التقني. تفاصيل أكثر في قسمَي «حسابي» و«إعدادات البريد».)", "If you forget your password, click “Forgot password?” below the fields to receive a reset link on your registered email. (This requires the “Email Settings (SMTP)” to be configured first; if it doesn't arrive, contact the technical team. More in the “My Account” and “Email Settings” sections.)"),
           p("زر الكرة الأرضية أعلى الشاشة يبدّل لغة اللوحة نفسها بين العربية والإنجليزية في أي وقت.", "The globe button at the top switches the panel's own language between Arabic and English at any time."),
           p("عند الانتهاء اضغط زر الخروج (السهم) أعلى الشريط لتسجيل الخروج بأمان — خاصة على جهاز مشترك.", "When done, click the log-out (arrow) button in the top bar to sign out safely — especially on a shared device."),
         ],
@@ -59,7 +59,7 @@ export const GUIDE: GuidePart[] = [
         intro_ar: "أول شاشة بعد الدخول؛ تعطيك نظرة سريعة وتوصلك لكل شيء.",
         intro_en: "The first screen after signing in; it gives a quick overview and links to everything.",
         steps: [
-          cms("dashboard", "في الأعلى ترحيب وملخّص: إجمالي عناصر المحتوى، إجمالي الطلبات، وحالة إعدادات الموقع.", "At the top: a welcome and summary — total content items, total requests, and site-settings status."),
+          cms("dashboard", "في الأعلى ترحيب وملخّص: إجمالي عناصر المحتوى، إجمالي الطلبات، و«حالة إعدادات الموقع» — وهي مؤشّر يخبرك إن كانت البيانات الأساسية (الواتساب/الهاتف/البريد) مكتملة، حتى تنتبه لو ينقص شيء مهم.", "At the top: a welcome and summary — total content items, total requests, and “site-settings status” — an indicator telling you whether the essential data (WhatsApp/phone/email) is complete, so you notice if something core is missing."),
           p("بطاقات «الطلبات» تعرض أعداد الرسائل والالتحاق والتوظيف والتقييم — اضغط أيّها للانتقال إليه.", "The “Requests” cards show counts of messages, admission, jobs, and assessments — click any to open it."),
           p("«إجراءات سريعة» اختصارات لإضافة خبر أو أخصائي أو برنامج أو صورة بضغطة.", "“Quick Actions” are one-click shortcuts to add a news item, specialist, program, or image."),
           p("أسفل الصفحة كل أقسام المحتوى مجمّعة — اضغط أي قسم لإدارته.", "Lower down, all content areas are grouped — click any to manage it."),
@@ -85,7 +85,12 @@ export const GUIDE: GuidePart[] = [
         steps: [
           cms("account", "افتح [صفحة «حسابي»](/cms/account) من أسفل القائمة الجانبية، أو اضغط على اسمك/صورتك أعلى الشريط.", "Open [the “My Account” page](/cms/account) from the bottom of the sidebar, or click your name/avatar in the top bar."),
           p("اسم المستخدم للعرض فقط ولا يمكن تعديله (لأسباب أمنية). أمّا البريد الإلكتروني فقابل للتعديل — بعد تغييره اضغط «حفظ البريد الإلكتروني».", "The username is read-only (for security). The email, however, is editable — after changing it, click “Save email”."),
-          p("لتغيير كلمة المرور: اكتب كلمة المرور الحالية، ثم الجديدة، ثم أكّدها (٨ أحرف على الأقل)، واضغط «تحديث كلمة المرور».", "To change your password: enter your current password, then the new one, then confirm it (at least 8 characters), and click “Update password”."),
+          pl("لتغيير كلمة المرور، بالترتيب:", "To change your password, in order:", [
+            ["اكتب كلمة المرور الحالية.", "Enter your current password."],
+            ["اكتب كلمة المرور الجديدة (٨ أحرف على الأقل).", "Enter the new password (at least 8 characters)."],
+            ["أكّد كلمة المرور الجديدة بكتابتها مرّة ثانية.", "Confirm the new password by typing it again."],
+            ["اضغط «تحديث كلمة المرور».", "Click “Update password”."],
+          ]),
           p("زر العين بجانب كل حقل يُظهر/يُخفي كلمة المرور للتأكّد منها قبل الحفظ.", "The eye button next to each field shows/hides the password so you can verify it before saving."),
           p("أسفل نفس الصفحة يوجد قسم «إعدادات البريد (SMTP)» — وهو مهم جدًا وله شرح كامل مفصّل في القسم التالي مباشرةً.", "At the bottom of the same page is the “Email Settings (SMTP)” section — it's very important and has its own full, detailed walkthrough in the next section."),
         ],
@@ -187,7 +192,11 @@ export const GUIDE: GuidePart[] = [
         intro_en: "Repeating areas (branches, news, specialists, programs…) are managed as lists of items.",
         steps: [
           cms("list-branches", "افتح القسم من القائمة. تظهر كل العناصر مع حالتها (منشور/مخفي). القوائم الكبيرة مقسّمة لمجموعات قابلة للطيّ.", "Open the area from the sidebar. All items show with their status (Published/Hidden). Large lists are split into collapsible groups."),
-          cms("detail-list-rows", "اضغط رأس مجموعة لفتحها. بجانب كل عنصر: سهمَا ترتيب (لأعلى/أسفل)، زر «تعديل»، وزر «حذف».", "Click a group header to open it. Next to each item: up/down reorder arrows, an “Edit” button, and a “Delete” button."),
+          cms("detail-list-rows", "اضغط رأس مجموعة لفتحها. بجانب كل عنصر تجد ثلاث أدوات:", "Click a group header to open it. Next to each item are three controls:", undefined, undefined, [
+            ["سهمَا الترتيب (لأعلى/أسفل) — لتغيير موضع العنصر في القائمة (وهو نفسه ترتيب ظهوره على الموقع).", "The reorder arrows (up/down) — to change the item's position in the list (which is also its order on the site)."],
+            ["زر «تعديل» — يفتح المحرّر لتغيير محتوى العنصر.", "The “Edit” button — opens the editor to change the item's content."],
+            ["زر «حذف» — يزيل العنصر نهائيًا (بعد تأكيد).", "The “Delete” button — removes the item permanently (after confirmation)."],
+          ]),
           p("للإضافة في قائمة عادية: اضغط زر الإضافة (مثل «إضافة خبر») أسفل القائمة مباشرة، فتفتح شاشة المحرّر بحقول فارغة.", "To add in a normal list: click the add button (e.g. “Add News”) directly below the list, and the editor opens with empty fields."),
           p("مهم — للإضافة في قائمة مقسّمة لمجموعات (مثل الفروع المقسّمة حسب المنطقة): لا يوجد زر إضافة واحد أعلى القائمة. افتح أولًا مجموعة المنطقة التي تريد الإضافة إليها، ثم اضغط زرها الخاص «إضافة فرع — <اسم المنطقة>»، والعنصر الجديد يرث تلك المنطقة تلقائيًا.", "Important — to add in a list split into groups (like branches grouped by region): there is no single Add button at the top. First open the region group you want to add to, then click its own “Add Branch — <region>” button, and the new item inherits that region automatically."),
           p("للحذف: اضغط «حذف» ثم أكّد. الحذف نهائي، فتأكّد قبل التأكيد.", "To delete: click “Delete” then confirm. Deletion is permanent, so be sure before confirming."),
@@ -205,7 +214,11 @@ export const GUIDE: GuidePart[] = [
           p("الحقول مجمّعة في أقسام واضحة بعناوين بارزة (مثل «بيانات الفرع الأساسية»، «نافذة عرض التفاصيل») حتى تعرف كل مجموعة تتحكّم في أي جزء من الصفحة.", "Fields are grouped into clearly labelled sections with bold headers (e.g. “Branch basic info”, “View Details popup”) so you know which group controls which part of the page."),
           p("تحت بعض الأقسام ملاحظة زرقاء صغيرة (ℹ️) تشرح أين يظهر محتواها على الموقع، وبجانبها زر «عاين على الموقع» يفتح تلك الصفحة مباشرة.", "Under some sections is a small blue note (ℹ️) explaining where its content appears on the site, with a “Preview on site” link that opens that page directly."),
           p("الحقول الاختيارية الفارغة تُطوى إلى زر صغير «+ إضافة …» لتقليل الزحام — اضغطه فقط عند الحاجة لإظهار الحقل وملئه.", "Empty optional fields collapse into a small “+ Add …” button to reduce clutter — click it only when you need to reveal and fill the field."),
-          p("أسفل الشاشة دائماً أزرار: «حفظ التعديلات» و«تجاهل التعديلات» و«معاينة التعديلات». كل تعديل يحتاج ضغط «حفظ» ليُطبّق.", "At the bottom are always: “Save Changes”, “Discard changes”, and “Preview changes”. Every edit needs a “Save” click to apply."),
+          pl("أسفل الشاشة دائمًا ثلاثة أزرار — وكل تعديل يحتاج ضغط «حفظ» ليُطبّق:", "The bottom of the screen always has three buttons — and every edit needs a “Save” click to apply:", [
+            ["«حفظ التعديلات» — يطبّق تغييراتك ويظهرها على الموقع.", "“Save Changes” — applies your changes and shows them on the site."],
+            ["«تجاهل التعديلات» — يرجّع الحقول لآخر نسخة محفوظة.", "“Discard changes” — reverts the fields to the last saved version."],
+            ["«معاينة التعديلات» — يفتح الصفحة الحقيقية بتغييراتك قبل الحفظ.", "“Preview changes” — opens the real page with your changes before saving."],
+          ]),
           p("ملاحظة: زر «معاينة التعديلات» يظهر فقط للعناصر المحفوظة سابقًا (لا يظهر أثناء إنشاء عنصر جديد قبل حفظه). وزر «استرجاع النسخة الافتراضية» يظهر فقط للعناصر الأصلية الجاهزة مع الموقع، لا للعناصر التي أضفتها أنت — فلا تقلق إن لم تجد أحد الزرّين في بعض الحالات.", "Note: the “Preview changes” button appears only for already-saved items (not while creating a brand-new item before saving). And “Restore default” appears only for the original items that shipped with the site, not for ones you added yourself — so don't worry if a button is missing in some cases."),
           p("تنبيه مهم: هذه الشاشة (بشريط الاكتمال وأزرار الأسفل) تخصّ عناصر القوائم. أمّا نصوص وعناوين الصفحات الثابتة فتُحرَّر من لوحة «محتوى وعناوين الصفحة» بأسلوب مختلف قليلًا: لكل عنصر فيها زر «حفظ» خاص به، ولا يوجد شريط اكتمال (مشروح في قسم «تعديل نصوص وعناوين الصفحات»).", "Important heads-up: this screen (with the completion bar and bottom buttons) is for list items. Fixed page texts and headings are edited from the “Page content & headings” panel in a slightly different way: each item there has its own “Save” button, with no completion bar (explained in “Editing page texts & headings”)."),
         ],
@@ -257,7 +270,7 @@ export const GUIDE: GuidePart[] = [
         intro_en: "Images (a branch, specialist, news, hero slide, gallery photos) are uploaded straight from your device.",
         steps: [
           cms("detail-image", "في المحرّر اضغط منطقة الصورة أو زر «رفع صورة»، ثم اختر الملف من جهازك.", "In the editor click the image area or the “Upload image” button, then choose the file from your device."),
-          p("بعد اختيار الملف تظهر عادةً نافذة «قصّ الصورة» لتحديد الجزء الظاهر منها بالأبعاد المناسبة للمكان — حرّك الإطار وكبّره/صغّره ثم اضغط «تأكيد». هذا يضمن ظهور الصورة متناسقة دون تشويه.", "After you pick a file, a “Crop image” window usually appears to choose the visible part at the right proportions for its place — move and resize the frame, then click “Confirm”. This keeps the image looking consistent without distortion."),
+          p("بعد اختيار الملف تظهر نافذة «قصّ الصورة» لتحديد الجزء الظاهر منها بالأبعاد المناسبة للمكان — حرّك الإطار وكبّره/صغّره ثم اضغط «تأكيد». هذا يضمن ظهور الصورة متناسقة دون تشويه. (تظهر النافذة للصور ذات الشكل/النسبة الثابتة؛ أما الأماكن الحرّة الحجم فقد تُرفَع مباشرةً دون قصّ.)", "After you pick a file, a “Crop image” window appears to choose the visible part at the right proportions for its place — move and resize the frame, then click “Confirm”. This keeps the image consistent without distortion. (The window appears for images with a fixed shape/ratio; free-size spots may upload directly without cropping.)"),
           p("ملاحظة على اسم الزر: داخل محرّر عنصر القائمة يكون الزر «رفع صورة»، أمّا في لوحة «محتوى وعناوين الصفحة» فيكون «تغيير الصورة» — وكلاهما يفعل الشيء نفسه.", "A note on the button label: inside a list item's editor the button reads “Upload image”, while in the “Page content & headings” panel it reads “Change image” — both do the same thing."),
           p("تظهر معاينة فور الرفع. لتغيير الصورة ارفع صورة جديدة فوق القديمة. لو تجاوز الملف الحد المسموح تظهر رسالة خطأ توضّح ذلك.", "A preview appears right after upload. To change it, upload a new image over the old one. If the file exceeds the allowed size, an error message says so."),
           p("اضغط على أي صورة (في المحرّر أو في القائمة أو في المعرض) لعرضها بالحجم الكامل في نافذة، ثم أغلقها بزر الإغلاق أو مفتاح Esc.", "Click any image (in the editor, the list, or a gallery) to view it full-screen in an overlay, then close it with the close button or the Esc key."),
@@ -297,7 +310,7 @@ export const GUIDE: GuidePart[] = [
         steps: [
           cms("detail-number", "أرقام الإنجاز (مثل «+30 أخصائي») تُدار من قسم «أرقام الإنجاز». كل رقم عنصر له «القيمة» (الرقم) و«التسمية» (وصفه).", "Achievement numbers (like “+30 specialists”) are managed from the “Achievement Numbers” area. Each is an item with a “Value” (the number) and a “Label” (its description)."),
           p("اكتب الرقم في حقل «القيمة» (يمكن أن يتضمّن + أو نصاً)، والوصف في حقل «التسمية» بالعربية والإنجليزية.", "Type the number in the “Value” field (it may include + or text), and the description in the “Label” field in Arabic and English."),
-          p("لإضافة رقم جديد اضغط «إضافة رقم إنجاز»، ولإخفاء رقم اجعله «مخفي» بدل حذفه إن أردت إرجاعه لاحقاً.", "To add a new number click “Add Achievement Number”; to hide one, set it to “Hidden” instead of deleting if you may restore it later."),
+          p("لإضافة رقم جديد اضغط «إضافة رقم إنجاز». ولإخفاء رقم بدل حذفه (إن أردت إرجاعه لاحقًا) اجعله «مخفي» — والحالة تُضبط من داخل المحرّر في مجموعة «الإعدادات»، كما هو مشروح في قسم «الترتيب والنشر والإخفاء».", "To add a new number click “Add Achievement Number”. To hide one instead of deleting it (if you may restore it later) set it to “Hidden” — the status is set inside the editor in the “Settings” group, as explained in “Ordering, Publishing & Hiding”."),
         ],
       },
       {
@@ -328,7 +341,7 @@ export const GUIDE: GuidePart[] = [
         title_ar: "الاكتمال والحفظ والمعاينة والاسترجاع",
         title_en: "Completion, Saving, Preview & Restore",
         steps: [
-          p("شريط «نسبة الاكتمال» أعلى المحرّر يوضّح كم حقلاً أساسياً تبقّى، ويكتب أسماء «الحقول الناقصة». استهدف 100%.", "The “Completion” bar at the top shows how many essential fields remain and lists the “Missing” fields. Aim for 100%."),
+          p("شريط «نسبة الاكتمال» أعلى المحرّر يوضّح كم حقلاً أساسياً تبقّى، ويكتب أسماء «الحقول الناقصة». حاول ملء الحقول الأساسية المذكورة — ولا يلزم الوصول إلى 100% لكي يعمل العنصر.", "The “Completion” bar at the top shows how many essential fields remain and lists the “Missing” fields. Try to fill the listed essential fields — you don't have to reach 100% for the item to work."),
           p("«حفظ التعديلات» يعمل فقط عند وجود تغيير فعلي. بعد الحفظ تظهر رسالة «تم الحفظ بنجاح ✓» ويظهر التعديل على الموقع خلال لحظات.", "“Save Changes” is active only when there's a real change. After saving, a “Saved successfully ✓” message appears and the change shows on the site within moments."),
           p("زر «معاينة التعديلات» يفتح الصفحة الحقيقية بتعديلاتك الحالية قبل الحفظ — لتتأكّد من الشكل النهائي. (يظهر فقط للعناصر المحفوظة مسبقًا، لا أثناء إنشاء عنصر جديد.)", "The “Preview changes” button opens the real page with your current unsaved changes — to check the final look before saving. (It appears only for already-saved items, not while creating a new one.)"),
           p("«تجاهل التعديلات» يرجّع الحقول لآخر نسخة محفوظة. «استرجاع النسخة الافتراضية» يعيد العنصر لمحتواه الأصلي بالكامل، ويظهر فقط للعناصر الأصلية الجاهزة مع الموقع لا لما أضفته أنت (استخدمه بحذر).", "“Discard changes” reverts to the last saved version. “Restore Default” resets the item to its original content entirely, and appears only for the original items shipped with the site, not ones you added (use with care)."),
@@ -354,9 +367,18 @@ export const GUIDE: GuidePart[] = [
         title_ar: "إعدادات الموقع",
         title_en: "Site Settings",
         steps: [
-          cms("settings", "[صفحة «إعدادات الموقع»](/cms/settings) تجمع البيانات العامة في مكان واحد. تحتوي عادةً على: رقم الواتساب الموحّد، رقم الهاتف، البريد الإلكتروني، العنوان، ورابط الخريطة — أي البيانات التي تتكرّر في أكثر من صفحة.", "[The “Site Settings” page](/cms/settings) gathers global data in one place. It typically holds: the unified WhatsApp number, phone, email, address, and the map link — the data that repeats across more than one page."),
+          cms("settings", "[صفحة «إعدادات الموقع»](/cms/settings) تجمع البيانات العامة في مكان واحد — أي البيانات التي تتكرّر في أكثر من صفحة. تحتوي على:", "[The “Site Settings” page](/cms/settings) gathers global data in one place — the data that repeats across more than one page. It holds:", undefined, undefined, [
+            ["رقم الواتساب الموحّد.", "The unified WhatsApp number."],
+            ["رقم الهاتف.", "The phone number."],
+            ["البريد الإلكتروني.", "The email address."],
+            ["العنوان.", "The address."],
+            ["رابط الخريطة.", "The map link."],
+          ]),
           p("مثال مهم: حقل رقم الواتساب يتحكّم في كل أزرار الواتساب على مستوى الموقع كله — غيّره من هنا مرة واحدة فيتغيّر في كل مكان.", "Key example: the WhatsApp field controls every WhatsApp button across the whole site — change it here once and it changes everywhere."),
-          p("ما الذي لا يُدار من هنا؟ روابط التواصل الاجتماعي (إنستغرام، تيك توك، X) تُحرَّر من أقسام تذييل الصفحة (Footer)، وعناوين بطاقات التواصل الثلاث تُحرَّر من صفحة «التواصل» نفسها. فلو لم تجد ما تبحث عنه في «إعدادات الموقع»، فهو غالبًا في صفحته الخاصة.", "What isn't managed here? Social links (Instagram, TikTok, X) are edited from the footer sections, and the three contact-card titles are edited from the “Contact” page itself. So if you don't find something in “Site Settings”, it's likely on its own page."),
+          pl("ما الذي لا يُدار من هنا؟ لو لم تجد ما تبحث عنه في «إعدادات الموقع» فهو غالبًا في صفحته الخاصة:", "What isn't managed here? If you don't find something in “Site Settings”, it's likely on its own page:", [
+            ["روابط التواصل الاجتماعي (إنستغرام، تيك توك، X) ← تُحرَّر من أقسام تذييل الصفحة (Footer).", "Social links (Instagram, TikTok, X) ← edited from the footer sections."],
+            ["عناوين بطاقات التواصل الثلاث ← تُحرَّر من [صفحة «التواصل»](/cms/contact) نفسها.", "The three contact-card titles ← edited from [the “Contact” page](/cms/contact) itself."],
+          ]),
           p("اضغط «حفظ» بعد التعديل ليسري التغيير على كل الصفحات فوراً.", "Click “Save” after editing so the change applies to all pages immediately."),
         ],
       },
@@ -376,7 +398,11 @@ export const GUIDE: GuidePart[] = [
         intro_ar: "صفحة «التحليلات» هي لوحة القيادة التي تريك ماذا يحدث في موقعك بالأرقام: كم زائرًا جاء، من أين، وكم طلبًا وتقييمًا وتوظيفًا وصلك. افتحها مباشرةً من هنا: [صفحة التحليلات](/cms/analytics). فكّر فيها كطبلون السيارة — يجمع كل المؤشّرات في مكان واحد لتعرف حالة موقعك بنظرة.",
         intro_en: "The “Analytics” page is the dashboard that shows what's happening on your site in numbers: how many visitors came, from where, and how many requests, assessments, and job applications you received. Open it directly here: [the Analytics page](/cms/analytics). Think of it like a car dashboard — it gathers all the gauges in one place so you know your site's health at a glance.",
         steps: [
-          p("الأرقام تأتي من ثلاثة مصادر مختلفة، وكل قسم مكتوب فوقه مصدره: (١) «نظامك (CMS)» — أرقام الطلبات والتقييمات من قاعدة بياناتك مباشرة، وتتحدّث فورًا مع كل طلب جديد. (٢) «زيارات الموقع (GA4)» — من Google Analytics، تُظهر الزوّار وسلوكهم. (٣) «أداء البحث (SEO)» — من Google Search Console، تُظهر ظهورك في نتائج بحث جوجل.", "The numbers come from three different sources, and each section is labelled with its source: (1) “Your system (CMS)” — request and assessment figures straight from your database, updating instantly with each new request. (2) “Website Traffic (GA4)” — from Google Analytics, showing visitors and their behaviour. (3) “Search Performance (SEO)” — from Google Search Console, showing your presence in Google search results."),
+          pl("الأرقام تأتي من ثلاثة مصادر مختلفة، وكل قسم مكتوب فوقه مصدره:", "The numbers come from three different sources, and each section is labelled with its source:", [
+            ["«نظامك (CMS)» — أرقام الطلبات والتقييمات من قاعدة بياناتك مباشرةً، وتتحدّث فورًا مع كل طلب جديد.", "“Your system (CMS)” — request and assessment figures straight from your database, updating instantly with each new request."],
+            ["«زيارات الموقع (GA4)» — من Google Analytics، تُظهر الزوّار وسلوكهم.", "“Website Traffic (GA4)” — from Google Analytics, showing visitors and their behaviour."],
+            ["«أداء البحث (SEO)» — من Google Search Console، تُظهر ظهورك في نتائج بحث جوجل.", "“Search Performance (SEO)” — from Google Search Console, showing your presence in Google search results."],
+          ]),
           p("لا تحتاج لعمل أي شيء لتظهر الأرقام — كلها تُجمَع تلقائيًا. دورك فقط أن تقرأها وتفهمها، وهذا ما تشرحه الأقسام التالية.", "You don't need to do anything for the numbers to appear — they're all collected automatically. Your only job is to read and understand them, which the next sections explain."),
           p("شارة «مباشر» الخضراء بجانب عنوان أي قسم تعني أن مصدره متّصل ويجلب بيانات حيّة. لو ظهرت رسالة «لم يتم الربط بعد» فهذا يعني أن ذلك المصدر لم يُفعّل، والفريق التقني يتولّى ربطه.", "The green “Live” badge beside a section's title means its source is connected and pulling live data. If you see “not connected yet”, that source hasn't been enabled — the technical team handles connecting it."),
         ],
@@ -388,10 +414,24 @@ export const GUIDE: GuidePart[] = [
         intro_ar: "هذا القسم يجيب على السؤال: من يزور موقعي، وكيف يتصرّفون؟ الأرقام لآخر ٢٨ يومًا.",
         intro_en: "This section answers: who visits my site, and how do they behave? Figures cover the last 28 days.",
         steps: [
-          p("البطاقات الأربعة الكبيرة في الأعلى: «الجلسات» = عدد مرّات دخول الموقع، «المستخدمون» = عدد الأشخاص (الشخص الواحد قد يزور أكثر من مرّة)، «مستخدمون جدد» = من زاروا لأول مرّة، «مشاهدات الصفحات» = إجمالي الصفحات التي فُتحت.", "The four big cards at top: “Sessions” = number of visits, “Users” = number of people (one person may visit more than once), “New Users” = first-time visitors, “Page Views” = total pages opened."),
-          p("المؤشّرات الثلاثة الصغيرة: «معدل التفاعل» = نسبة الزيارات التي تفاعل فيها الزائر فعلًا (كلما زاد كان أفضل)، «معدل الارتداد» = نسبة من غادروا بسرعة دون تفاعل (كلما قلّ كان أفضل)، «متوسط زمن التفاعل» = الوقت الذي يقضيه الزائر متفاعلًا في المتوسّط.", "The three small metrics: “Engagement Rate” = share of visits where the visitor actually engaged (higher is better), “Bounce Rate” = share who left quickly without engaging (lower is better), “Avg. Engagement” = the average time a visitor spends engaged."),
+          pl("البطاقات الأربعة الكبيرة في الأعلى:", "The four big cards at top:", [
+            ["«الجلسات» = عدد مرّات دخول الموقع.", "“Sessions” = number of visits."],
+            ["«المستخدمون» = عدد الأشخاص (الشخص الواحد قد يزور أكثر من مرّة).", "“Users” = number of people (one person may visit more than once)."],
+            ["«مستخدمون جدد» = من زاروا لأول مرّة.", "“New Users” = first-time visitors."],
+            ["«مشاهدات الصفحات» = إجمالي الصفحات التي فُتحت.", "“Page Views” = total pages opened."],
+          ]),
+          pl("المؤشّرات الثلاثة الصغيرة تحتها:", "The three small metrics below them:", [
+            ["«معدل التفاعل» = نسبة الزيارات التي تفاعل فيها الزائر فعلًا (كلّما زاد كان أفضل).", "“Engagement Rate” = share of visits where the visitor actually engaged (higher is better)."],
+            ["«معدل الارتداد» = نسبة من غادروا بسرعة دون تفاعل (كلّما قلّ كان أفضل).", "“Bounce Rate” = share who left quickly without engaging (lower is better)."],
+            ["«متوسط زمن التفاعل» = الوقت الذي يقضيه الزائر متفاعلًا في المتوسّط.", "“Avg. Engagement” = the average time a visitor spends engaged."],
+          ]),
           p("«اتجاه الجلسات»: رسم بياني خطّي يريك عدد الزيارات يومًا بيوم — يساعدك تلاحظ أثر حملة إعلانية أو منشور على أيّام معيّنة.", "“Sessions Trend”: a line chart showing visits day by day — helps you spot the effect of a campaign or a post on particular days."),
-          p("الرسوم الدائرية والأعمدة: «حسب الجهاز» (جوال/كمبيوتر)، «حسب القناة» (من أين جاء الزائر: بحث جوجل، مباشرة، سوشيال…)، «حسب المدينة»، و«أكثر الصفحات دخولًا» (أول صفحة يفتحها الزوّار). كل شريحة تُظهر نسبتها المئوية، وعند وقوفك عليها يظهر العدد الحقيقي.", "The pie and bar charts: “By Device” (mobile/desktop), “By Channel” (where the visitor came from: Google search, direct, social…), “By City”, and “Top Landing Pages” (the first page visitors open). Each slice shows its percentage, and hovering reveals the actual count."),
+          pl("تحتها رسوم دائرية وأعمدة، كل شريحة تُظهر نسبتها المئوية، وعند وقوفك عليها يظهر العدد الحقيقي:", "Below are pie and bar charts; each slice shows its percentage, and hovering reveals the actual count:", [
+            ["«حسب الجهاز» — جوال أم كمبيوتر.", "“By Device” — mobile or desktop."],
+            ["«حسب القناة» — من أين جاء الزائر (بحث جوجل، مباشرة، سوشيال…).", "“By Channel” — where the visitor came from (Google search, direct, social…)."],
+            ["«حسب المدينة» — مدن الزوّار.", "“By City” — the visitors' cities."],
+            ["«أكثر الصفحات دخولًا» — أول صفحة يفتحها الزوّار.", "“Top Landing Pages” — the first page visitors open."],
+          ]),
         ],
       },
       {
@@ -414,7 +454,12 @@ export const GUIDE: GuidePart[] = [
         intro_ar: "هذا القسم يريك كيف يظهر موقعك في نتائج بحث جوجل — قبل حتى أن يدخل الزائر الموقع.",
         intro_en: "This section shows how your site appears in Google search results — even before a visitor reaches the site.",
         steps: [
-          p("المؤشّرات الأربعة: «النقرات» = كم مرّة نقر الناس على موقعك في نتائج جوجل، «مرات الظهور» = كم مرّة ظهر موقعك في النتائج (حتى لو لم يُنقر)، «نسبة النقر (CTR)» = النقرات ÷ الظهور، «متوسط الترتيب» = موضعك المتوسّط في صفحة النتائج (الرقم الأقل أفضل — 1 يعني الأول).", "The four metrics: “Clicks” = how many times people clicked your site in Google results, “Impressions” = how many times your site appeared in results (even if not clicked), “CTR” = clicks ÷ impressions, “Avg. Position” = your average spot on the results page (lower is better — 1 means first)."),
+          pl("المؤشّرات الأربعة:", "The four metrics:", [
+            ["«النقرات» = كم مرّة نقر الناس على موقعك في نتائج جوجل.", "“Clicks” = how many times people clicked your site in Google results."],
+            ["«مرات الظهور» = كم مرّة ظهر موقعك في النتائج (حتى لو لم يُنقر).", "“Impressions” = how many times your site appeared in results (even if not clicked)."],
+            ["«نسبة النقر (CTR)» = النقرات ÷ الظهور.", "“CTR” = clicks ÷ impressions."],
+            ["«متوسط الترتيب» = موضعك المتوسّط في صفحة النتائج (الرقم الأقل أفضل — 1 يعني الأول).", "“Avg. Position” = your average spot on the results page (lower is better — 1 means first)."],
+          ]),
           p("جدول «أكثر كلمات البحث»: الكلمات التي كتبها الناس في جوجل ووجدوا موقعك من خلالها، مع نقراتها وظهورها وترتيبها. يخبرك بأي الكلمات يجدك بها جمهورك.", "“Top Search Queries” table: the words people typed into Google and found your site through, with their clicks, impressions, and position. It tells you which words your audience finds you by."),
           p("رسم «أكثر الصفحات ظهورًا في البحث»: أي صفحات موقعك تظهر أكثر في نتائج جوجل. ملاحظة: بيانات البحث تتأخّر يومًا إلى يومين، فلا تتوقّع أرقامًا فورية هنا.", "“Top Pages in Search” chart: which of your pages show up most in Google results. Note: search data lags by 1–2 days, so don't expect instant figures here."),
         ],
@@ -427,7 +472,13 @@ export const GUIDE: GuidePart[] = [
         intro_en: "These are the most practical figures for you: everything received through the site's forms, taken straight from your database and updating instantly.",
         steps: [
           cms("analytics", "البطاقات الأربعة: «طلبات الالتحاق»، «نتائج التقييم»، «رسائل التواصل»، «طلبات التوظيف» — إجمالي كلٍّ منها. هذه نفس الطلبات التي تديرها من أقسام الطلبات: [الالتحاق](/cms/submissions/admission) · [التقييم](/cms/submissions/assessment) · [التواصل](/cms/submissions/contact) · [التوظيف](/cms/submissions/career). وتحتها مباشرةً تبدأ الرسوم البيانية كما في الصورة.", "The four cards: “Admission Requests”, “Assessments”, “Contact Messages”, “Job Applications” — the total of each. These are the same requests you manage from: [Admission](/cms/submissions/admission) · [Assessment](/cms/submissions/assessment) · [Contact](/cms/submissions/contact) · [Careers](/cms/submissions/career). Directly below them the charts begin, as shown in the image."),
-          p("«طلبات الالتحاق» بالتفصيل: رسوم توزّع الطلبات «حسب الفرع» و«حسب المدينة» و«حسب نوع الحالة» و«حسب الفئة العمرية» و«حسب الجنس» — تساعدك تعرف أي فرع وأي فئة عليها إقبال أكبر.", "“Admission Requests” in detail: charts breaking requests down “By Branch”, “By City”, “By Case Type”, “By Age Band”, and “By Gender” — helping you see which branch and which segment has the most demand."),
+          pl("«طلبات الالتحاق» بالتفصيل: رسوم تُوزّع الطلبات على عدّة أوجه، تساعدك تعرف أي فرع وأي فئة عليها إقبال أكبر:", "“Admission Requests” in detail: charts breaking requests down several ways, helping you see which branch and segment has the most demand:", [
+            ["«حسب الفرع» — أي الفروع يأتيها أكثر الطلبات.", "“By Branch” — which branches get the most requests."],
+            ["«حسب المدينة» — من أي المدن يأتي الطلب.", "“By City” — which cities requests come from."],
+            ["«حسب نوع الحالة» — طبيعة الحالات الأكثر تكرارًا.", "“By Case Type” — the most common case natures."],
+            ["«حسب الفئة العمرية» — أعمار الأطفال.", "“By Age Band” — the children's ages."],
+            ["«حسب الجنس» — توزيع ذكور/إناث.", "“By Gender” — the male/female split."],
+          ]),
           p("«التقييمات»: توزيع نتائج التقييم «حسب النوع» و«حسب مستوى الحالة» (مرتفع/متوسط/منخفض).", "“Assessments”: assessment results broken down “By Type” and “By Level” (high/medium/low)."),
           p("«التوظيف»: المتقدّمون «حسب المدينة» و«حسب الوظيفة»، ورسم «اتجاه طلبات التوظيف» أسبوعيًا لترى فترات الإقبال على الوظائف.", "“Recruitment”: applicants “By City” and “By Position”, plus an “Applications Trend” chart by week so you can see peak hiring interest periods."),
           p("«إشارات الطلب»: قسم ذكي يبرز ملاحظات مفيدة من البيانات — مثل مدينة يأتي منها طلبات كثيرة دون أن يكون لها فرع قريب، وهي فرصة توسّع محتملة.", "“Demand Signals”: a smart section highlighting useful notes from the data — like a city sending many requests without a nearby branch, a potential expansion opportunity."),
@@ -464,9 +515,14 @@ export const GUIDE: GuidePart[] = [
         title_en: "Home Page",
         steps: [
           site("home", "واجهة الموقع وأكثر صفحاته أقساماً.", "The site's front page and its most section-rich page."),
-          p("الشرائح المتحركة (الهيرو) ← «الصفحة الرئيسية» ثم قسم «شرائح الهيرو» (صورة + عنوان + زر لكل شريحة).", "The rotating hero ← “Home Page” → “Hero Slides” (image + title + button per slide)."),
-          p("أرقام الإنجاز ← «أرقام الإنجاز» · مميزات «لماذا عبور» ← «المميزات» (أيقونة + عنوان + وصف لكل ميزة).", "Achievement numbers ← “Achievement Numbers” · “Why Oboor” features ← “Features” (icon + title + description each)."),
-          p("بطاقات البحث الذكي ← «بطاقات الخدمات» · المعرض ← «صور المعرض» · قصص النجاح ← «أبطال عبور» · الأخبار ← «إعلامنا».", "Smart-search cards ← “Service Cards” · gallery ← “Gallery Images” · success stories ← “Oboor Champions” · news ← “Our Media”."),
+          pl("كلها تُدار من [صفحة «الصفحة الرئيسية»](/cms/home). كل جزء ظاهر على الموقع له قسمه في اللوحة:", "All managed from [the “Home Page”](/cms/home). Each part shown on the site has its own area in the panel:", [
+            ["الشرائح المتحركة (الهيرو) ← قسم «شرائح الهيرو» (صورة + عنوان + زر لكل شريحة).", "The rotating hero ← “Hero Slides” (image + title + button per slide)."],
+            ["أرقام الإنجاز ← قسم «أرقام الإنجاز».", "Achievement numbers ← “Achievement Numbers”."],
+            ["مميزات «لماذا عبور» ← قسم «المميزات» (أيقونة + عنوان + وصف لكل ميزة).", "“Why Oboor” features ← “Features” (icon + title + description each)."],
+            ["بطاقات البحث الذكي ← قسم «بطاقات الخدمات».", "Smart-search cards ← “Service Cards”."],
+            ["المعرض ← قسم «صور المعرض».", "Gallery ← “Gallery Images”."],
+            ["قصص النجاح ← قسم «أبطال عبور» · الأخبار ← قسم «إعلامنا».", "Success stories ← “Oboor Champions” · news ← “Our Media”."],
+          ]),
         ],
       },
       {
@@ -475,7 +531,7 @@ export const GUIDE: GuidePart[] = [
         title_en: "About Oboor",
         steps: [
           site("about", "صفحة التعريف بالمركز: النبذة، الرؤية والرسالة، والمناطق.", "The center's about page: intro, vision & mission, and regions."),
-          p("تُدار من «عن عبور (من نحن)» — عناوين ونصوص وصور الأقسام من لوحة «محتوى وعناوين الصفحة».", "Controlled from “About Oboor” — section headings, texts and images via the “Page content & headings” panel."),
+          p("تُدار من [صفحة «عن عبور (من نحن)»](/cms/content/sections?page=about) — عناوين ونصوص وصور الأقسام من لوحة «محتوى وعناوين الصفحة».", "Controlled from [the “About Oboor” page](/cms/content/sections?page=about) — section headings, texts and images via the “Page content & headings” panel."),
         ],
       },
       {
@@ -484,7 +540,11 @@ export const GUIDE: GuidePart[] = [
         title_en: "Our Programs",
         steps: [
           site("programs", "تعرض البرامج والخدمات العيادية والتقنيات في تبويبات.", "Shows programs, clinical services, and techniques in tabs."),
-          p("تُدار من ثلاثة أقسام: «البرامج»، «الخدمات العيادية»، و«التقنيات». لكل عنصر عنوان ووصف وأيقونة/صورة.", "Controlled from three areas: “Programs”, “Clinical Services”, and “Techniques”. Each item has a title, description, and icon/image."),
+          pl("تُدار من ثلاثة أقسام مستقلة، لكل عنصر عنوان ووصف وأيقونة/صورة:", "Controlled from three separate areas; each item has a title, description, and icon/image:", [
+            ["[البرامج](/cms/content/programs).", "[Programs](/cms/content/programs)."],
+            ["[الخدمات العيادية](/cms/content/services).", "[Clinical Services](/cms/content/services)."],
+            ["[التقنيات](/cms/content/techniques).", "[Techniques](/cms/content/techniques)."],
+          ]),
         ],
       },
       {
@@ -494,8 +554,14 @@ export const GUIDE: GuidePart[] = [
         steps: [
           site("branches", "قائمة الفروع مع خريطة تفاعلية وبحث وتصفية بالمنطقة.", "The branch list with an interactive map, search, and filtering by region."),
           site("branch-detail", "صفحة الفرع تعرض العنوان والمواعيد والمدير وأرقام التواصل والخدمات وزر الاتجاهات.", "A branch page shows address, hours, manager, contact numbers, services, and a Directions button."),
-          cms("list-branches", "تُدار من «مراكزنا (الفروع)». محرّر كل فرع مقسّم لأقسام واضحة، وكل قسم يتحكّم في جزء مستقل من صفحة الفرع (لكل فرع محتواه الخاص، لا شيء مشترك بين الفروع).", "Managed from “Our Centers (Branches)”. Each branch's editor is split into clear sections, each controlling a separate part of that branch's page (every branch has its own content — nothing is shared between branches)."),
-          p("الأقسام: «بيانات الفرع الأساسية» (الاسم/المدينة/المنطقة/العنوان/الهاتف/المدير/رابط الخريطة)، «الخدمات المقدَّمة» (كروت الخدمات الكبيرة + وسوم الخدمات السريعة)، «ما يميّز الفرع» (بطاقات بأيقونات)، «قصص النجاح» (العنوان والوصف)، «ملف الفرع (PDF)»، و«معرض صور الفرع».", "Sections: “Branch basic info” (name/city/region/address/phone/manager/map link), “Services offered” (the big service cards + quick service tags), “What sets the branch apart” (cards with icons), “Success stories” (heading & text), “Branch profile (PDF)”, and “Branch photo gallery”."),
+          cms("list-branches", "تُدار من [صفحة «مراكزنا (الفروع)»](/cms/content/branches). محرّر كل فرع مقسّم لأقسام واضحة، وكل قسم يتحكّم في جزء مستقل من صفحة الفرع (لكل فرع محتواه الخاص، لا شيء مشترك بين الفروع). والأقسام هي:", "Managed from [the “Our Centers (Branches)” page](/cms/content/branches). Each branch's editor is split into clear sections, each controlling a separate part of that branch's page (every branch has its own content — nothing is shared between branches). The sections are:", undefined, undefined, [
+            ["«بيانات الفرع الأساسية» — الاسم/المدينة/المنطقة/العنوان/الهاتف/المدير/رابط الخريطة.", "“Branch basic info” — name/city/region/address/phone/manager/map link."],
+            ["«الخدمات المقدَّمة» — كروت الخدمات الكبيرة + وسوم الخدمات السريعة.", "“Services offered” — the big service cards + quick service tags."],
+            ["«ما يميّز الفرع» — بطاقات بأيقونات.", "“What sets the branch apart” — cards with icons."],
+            ["«قصص النجاح» — العنوان والوصف.", "“Success stories” — heading & text."],
+            ["«ملف الفرع (PDF)» — محتوى الملف القابل للتنزيل.", "“Branch profile (PDF)” — the downloadable file's content."],
+            ["«معرض صور الفرع» — صور الفرع.", "“Branch photo gallery” — the branch's photos."],
+          ]),
           p("«ملف الفرع (PDF)» يتحكّم في محتوى الملف الذي يُنزَّل عند الضغط على «تحميل البروفايل» في صفحة الفرع (النبذة، الإحصائيات، رحلة التأهيل، الاعتمادات).", "“Branch profile (PDF)” controls the file downloaded via “Download profile” on the branch page (intro, statistics, rehabilitation journey, accreditations)."),
         ],
       },
@@ -505,7 +571,7 @@ export const GUIDE: GuidePart[] = [
         title_en: "Our Pioneers (Specialists)",
         steps: [
           site("specialists", "فريق الأخصائيين مع فلترة بالتخصص والفرع، ولكل أخصائي بطاقة تفاصيل.", "The specialists team with filtering by specialty and branch, and a details card per specialist."),
-          p("تُدار من «روّادنا (الأخصائيون)» — لكل أخصائي صورة واسم وتخصص ونبذة.", "Controlled from “Our Pioneers (Specialists)” — each has an image, name, specialty, and bio."),
+          p("تُدار من [صفحة «روّادنا (الأخصائيون)»](/cms/content/specialists) — لكل أخصائي صورة واسم وتخصص ونبذة.", "Controlled from [the “Our Pioneers (Specialists)” page](/cms/content/specialists) — each has an image, name, specialty, and bio."),
         ],
       },
       {
@@ -514,7 +580,7 @@ export const GUIDE: GuidePart[] = [
         title_en: "Oboor Champions (Success Stories)",
         steps: [
           site("success-stories", "قصص نجاح المستفيدين، ولكل قصة نافذة «عرض التفاصيل».", "Beneficiaries' success stories, each with a “View Details” popup."),
-          p("تُدار من «أبطال عبور (قصص النجاح)». محرّر كل قصة مقسّم إلى: «بيانات القصة (البطاقة)» و«نافذة عرض التفاصيل».", "Managed from “Oboor Champions (Success Stories)”. Each story's editor is split into “Story info (card)” and “View Details popup”."),
+          p("تُدار من [صفحة «أبطال عبور (قصص النجاح)»](/cms/content/success). محرّر كل قصة مقسّم إلى: «بيانات القصة (البطاقة)» و«نافذة عرض التفاصيل».", "Managed from [the “Oboor Champions (Success Stories)” page](/cms/content/success). Each story's editor is split into “Story info (card)” and “View Details popup”."),
           p("قسم «نافذة عرض التفاصيل» يتحكّم في محتوى النافذة التي تُفتح عند الضغط على «عرض التفاصيل» لتلك القصة (الوسم، البرنامج، رحلة العلاج، أبرز النتائج) — لكل قصة تفاصيلها الخاصة.", "The “View Details popup” section controls the popup opened via “View Details” for that story (badge, program, treatment journey, key results) — each story has its own details."),
         ],
       },
@@ -525,7 +591,7 @@ export const GUIDE: GuidePart[] = [
         steps: [
           site("news", "قائمة الأخبار والمقالات والفعاليات، ولكل خبر صفحة مقال كاملة.", "The list of news, articles, and events, each with a full article page."),
           site("news-article", "صفحة المقال تعرض الصورة والعنوان والمحتوى، وللفعاليات مكاناً ووقتاً.", "An article page shows the image, title, and content; events also show location and time."),
-          p("تُدار من «إعلامنا (الأخبار والمقالات)». حقول الفعالية (المكان/الوقت) تظهر عند اختيار القسم «فعاليات» أو «ورش».", "Controlled from “Our Media”. Event fields (place/time) appear when the section is set to “Events” or “Workshops”."),
+          p("تُدار من [صفحة «إعلامنا (الأخبار والمقالات)»](/cms/content/news). حقول الفعالية (المكان/الوقت) تظهر عند اختيار القسم «فعاليات» أو «ورش».", "Controlled from [the “Our Media” page](/cms/content/news). Event fields (place/time) appear when the section is set to “Events” or “Workshops”."),
         ],
       },
       {
@@ -534,7 +600,7 @@ export const GUIDE: GuidePart[] = [
         title_en: "Join Us (Careers)",
         steps: [
           site("careers", "قائمة الوظائف المتاحة، ولكل وظيفة صفحة تفاصيل ونموذج تقديم.", "The list of open jobs, each with a details page and an application form."),
-          p("الوظائف تُدار من «انضم إلينا (الوظائف)». وطلبات المتقدّمين تصل إلى «طلبات التوظيف».", "Jobs are managed from “Join Us (Careers)”. Applicants' submissions arrive in “Job Applications”."),
+          p("الوظائف تُدار من [صفحة «انضم إلينا (الوظائف)»](/cms/content/careers). وطلبات المتقدّمين تصل إلى [«طلبات التوظيف»](/cms/submissions/career).", "Jobs are managed from [the “Join Us (Careers)” page](/cms/content/careers). Applicants' submissions arrive in [“Job Applications”](/cms/submissions/career)."),
         ],
       },
       {
@@ -543,8 +609,8 @@ export const GUIDE: GuidePart[] = [
         title_en: "Take the Step (Contact Page)",
         steps: [
           site("contact", "صفحة التواصل: مقدمة، بطاقات التواصل، قسم «ارسل طلبك» بنموذج، خريطة الفروع، وقسم «تابعنا».", "The contact page: an intro, contact cards, a “Send Your Request” section with a form, the branches map, and a “Follow Us” section."),
-          p("تُدار كل نصوصها من «خذ الخطوة لعبور (التواصل)» في القائمة الجانبية — مقسّمة إلى أقسام (المقدمة، معلومات التواصل، ارسل طلبك، الخريطة، تابعنا).", "All its texts are managed from “Take the Step (Contact)” in the sidebar — split into sections (intro, contact info, send request, map, follow us)."),
-          p("مهم: البطاقات في «معلومات التواصل» تتحكّم في العناوين والوصف فقط. أما البريد الإلكتروني وأرقام الهاتف نفسها فتُدار من «إعدادات الموقع».", "Important: the “Contact Information” cards control only the titles and descriptions. The actual email and phone numbers are managed in “Site Settings”."),
+          p("تُدار كل نصوصها من [صفحة «خذ الخطوة لعبور (التواصل)»](/cms/contact) في القائمة الجانبية — مقسّمة إلى أقسام (المقدمة، معلومات التواصل، ارسل طلبك، الخريطة، تابعنا).", "All its texts are managed from [the “Take the Step (Contact)” page](/cms/contact) in the sidebar — split into sections (intro, contact info, send request, map, follow us)."),
+          p("مهم: البطاقات في «معلومات التواصل» تتحكّم في العناوين والوصف فقط. أما البريد الإلكتروني وأرقام الهاتف نفسها فتُدار من [«إعدادات الموقع»](/cms/settings).", "Important: the “Contact Information” cards control only the titles and descriptions. The actual email and phone numbers are managed in [“Site Settings”](/cms/settings)."),
         ],
       },
       {
@@ -555,9 +621,9 @@ export const GUIDE: GuidePart[] = [
         intro_en: "Visitors fill the assessment as a step-by-step wizard, but the page's own content (texts, numbers, questions, options) is controlled by you from the panel.",
         steps: [
           site("assessment", "صفحة التقييم كما يراها الزائر: مقدمة وأرقام ومميزات ثم خطوات وأسئلة أولية تنتهي بإرسال النتيجة.", "The assessment page as the visitor sees it: an intro, numbers and features, then steps and preliminary questions ending with submitting the result."),
-          p("تُدار من «التقييم» في القائمة الجانبية (مجموعة صفحات الموقع): عناوين ونصوص الأقسام من لوحة «محتوى وعناوين الصفحة»، ومعها الأرقام والمميزات والخطوات والأسئلة الأولية وخياراتها.", "Managed from “Assessment” in the sidebar (Site Pages group): section headings and texts via the “Page content & headings” panel, along with the numbers, features, steps, and preliminary questions with their options."),
+          p("تُدار من [صفحة «التقييم»](/cms/assessment) في القائمة الجانبية (مجموعة صفحات الموقع): عناوين ونصوص الأقسام من لوحة «محتوى وعناوين الصفحة»، ومعها الأرقام والمميزات والخطوات والأسئلة الأولية وخياراتها.", "Managed from [the “Assessment” page](/cms/assessment) in the sidebar (Site Pages group): section headings and texts via the “Page content & headings” panel, along with the numbers, features, steps, and preliminary questions with their options."),
           p("«بطاقات أنواع التقييم» قائمة مستقلة في أسفل نفس الصفحة — أضف أو عدّل الكروت التي تعرض أنواع التقييم المتاحة، بنفس طريقة أي قائمة.", "“Assessment-type Cards” is a separate list at the bottom of the same page — add or edit the cards that show the available assessment types, just like any list."),
-          p("أما النتائج التي يرسلها الزوّار فتصلك في «نتائج التقييم» ضمن مجموعة «الطلبات والرسائل» (وليس هنا).", "The results visitors submit arrive in “Assessment Results” under the “Requests & Messages” group (not here)."),
+          p("أما النتائج التي يرسلها الزوّار فتصلك في [«نتائج التقييم»](/cms/submissions/assessment) ضمن مجموعة «الطلبات والرسائل» (وليس هنا).", "The results visitors submit arrive in [“Assessment Results”](/cms/submissions/assessment) under the “Requests & Messages” group (not here)."),
         ],
       },
       {
@@ -656,8 +722,8 @@ export const GUIDE: GuidePart[] = [
         faq: [
           faq("عدّلت وضغطت «حفظ»، لكن التعديل لم يظهر على الموقع؟",
               "I edited and clicked “Save”, but the change isn't showing on the site?",
-              "المحتوى يتحدّث خلال دقائق قليلة (يوجد تخزين مؤقت). حدّث الصفحة بعد قليل، وتأكّد أنك ضغطت «حفظ» وظهرت لك رسالة «تم الحفظ ✓».",
-              "Content updates within a few minutes (there's a short cache). Refresh the page shortly, and confirm you clicked “Save” and saw the “Saved ✓” message."),
+              "المحتوى يتحدّث خلال دقائق قليلة (يوجد تخزين مؤقت). حدّث الصفحة بعد قليل، وتأكّد أنك ضغطت «حفظ» وظهرت لك رسالة «تم الحفظ بنجاح ✓».",
+              "Content updates within a few minutes (there's a short cache). Refresh the page shortly, and confirm you clicked “Save” and saw the “Saved successfully ✓” message."),
           faq("زر «حفظ» باهت ولا يُضغط؟",
               "The “Save” button is greyed out and won't click?",
               "لأنه يعمل فقط عند وجود تعديل فعلي. اكتب أي تغيير في أحد الحقول وسيتفعّل.",
@@ -680,12 +746,12 @@ export const GUIDE: GuidePart[] = [
               "Not at all — the panel language is completely separate from the site language and only changes the panel's interface."),
           faq("كيف أغيّر رقم الواتساب على الموقع كله؟",
               "How do I change the WhatsApp number across the whole site?",
-              "من «إعدادات الموقع» → حقل رقم الواتساب. مكان واحد يتحكّم في كل أزرار الواتساب في الموقع.",
-              "From “Site Settings” → the WhatsApp number field. One place controls every WhatsApp button on the site."),
+              "من [«إعدادات الموقع»](/cms/settings) → حقل رقم الواتساب. مكان واحد يتحكّم في كل أزرار الواتساب في الموقع.",
+              "From [“Site Settings”](/cms/settings) → the WhatsApp number field. One place controls every WhatsApp button on the site."),
           faq("أين أعدّل نصوص صفحة «خذ الخطوة لعبور» (التواصل)؟",
               "Where do I edit the “Take the Step” (contact) page texts?",
-              "من «خذ الخطوة لعبور (التواصل)» في القائمة الجانبية — كل عناوين ونصوص الصفحة. أما الإيميل والأرقام فمن «إعدادات الموقع».",
-              "From “Take the Step (Contact)” in the sidebar — all the page's headings and texts. The email and numbers, though, are in “Site Settings”."),
+              "من [«خذ الخطوة لعبور (التواصل)»](/cms/contact) في القائمة الجانبية — كل عناوين ونصوص الصفحة. أما الإيميل والأرقام فمن [«إعدادات الموقع»](/cms/settings).",
+              "From [“Take the Step (Contact)”](/cms/contact) in the sidebar — all the page's headings and texts. The email and numbers, though, are in [“Site Settings”](/cms/settings)."),
           faq("أين أتحكّم في محتوى نافذة «عرض التفاصيل» لقصة نجاح؟",
               "Where do I control a success story's “View Details” popup?",
               "من داخل محرّر القصة نفسها في «أبطال عبور» → قسم «نافذة عرض التفاصيل». لكل قصة تفاصيلها المستقلة.",
@@ -716,7 +782,7 @@ export const GUIDE: GuidePart[] = [
               "Because it's what the visitor typed in the form, so it's shown as sent, in their language."),
           faq("نسيت كلمة المرور أو أريد تغييرها؟",
               "I forgot the password or want to change it?",
-              "وأنت مسجّل الدخول: غيّرها بنفسك من صفحة «حسابي» في القائمة الجانبية → قسم «تغيير كلمة المرور». وإن كنت خارج اللوحة ونسيتها تمامًا: اضغط «نسيت كلمة المرور؟» في شاشة الدخول ليصلك رابط إعادة تعيين على بريدك المسجّل. (التفاصيل في قسم «حسابي: تغيير البريد وكلمة المرور».)",
+              "وأنت مسجّل الدخول: غيّرها بنفسك من [صفحة «حسابي»](/cms/account) في القائمة الجانبية → قسم «تغيير كلمة المرور». وإن كنت خارج اللوحة ونسيتها تمامًا: اضغط «نسيت كلمة المرور؟» في شاشة الدخول ليصلك رابط إعادة تعيين على بريدك المسجّل. (التفاصيل في قسم «حسابي: تغيير البريد وكلمة المرور».)",
               "While signed in: change it yourself from the “My Account” page in the sidebar → the “Change Password” section. If you're locked out and forgot it entirely: click “Forgot password?” on the sign-in screen to get a reset link on your registered email. (Details in the “My Account: Email & Password” section.)"),
         ],
       },
