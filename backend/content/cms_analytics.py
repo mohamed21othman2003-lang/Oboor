@@ -20,8 +20,81 @@ from rest_framework import status
 from submissions.models import (
     AdmissionRequest, AssessmentResult, ContactMessage, JobApplication,
 )
+from .m_programs import ProgramDetail
+from .m_clinical import ClinicalService
+from .m_techniques import Technique
+from .models import NewsArticle
 
 LEVEL_AR = {"high": "مرتفع", "medium": "متوسط", "low": "منخفض"}
+
+# ===== تحويل مسارات الصفحات إلى أسماء حقيقية (للتقارير) =====
+_ROUTE_NAMES = {
+    "": ("الصفحة الرئيسية", "Home"), "admission": ("طلب الالتحاق", "Admission"),
+    "about": ("عن عبور", "About"), "branches": ("المراكز", "Branches"),
+    "programs": ("البرامج", "Programs"), "assessment": ("التقييم", "Assessment"),
+    "contact": ("التواصل", "Contact"), "news": ("إعلامنا", "News"),
+    "specialists": ("الأخصائيون", "Specialists"), "success-stories": ("قصص النجاح", "Success Stories"),
+    "careers": ("الوظائف", "Careers"), "gallery": ("المعرض", "Gallery"),
+}
+_SECTION_NAMES = {"branches": ("مركز", "Branch"), "programs": ("برنامج", "Program"),
+                  "services": ("خدمة", "Service"), "techniques": ("تقنية", "Technique"), "news": ("خبر", "News")}
+
+
+def _slug_maps():
+    """{ section: {slug: (name_ar, name_en)} } من قاعدة البيانات."""
+    out = {}
+    for sec, (M, af, ef) in {
+        "branches": (Branch, "name_ar", "name_en"),
+        "programs": (ProgramDetail, "title_ar", "title_en"),
+        "services": (ClinicalService, "title_ar", "title_en"),
+        "techniques": (Technique, "title_ar", "title_en"),
+        "news": (NewsArticle, "title_ar", "title_en"),
+    }.items():
+        d = {}
+        try:
+            for o in M.objects.all():
+                ar = getattr(o, af, "") or o.slug
+                d[o.slug] = (ar, getattr(o, ef, "") or ar)
+        except Exception:
+            pass
+        out[sec] = d
+    return out
+
+
+def _page_label(path, maps):
+    """يرجّع {ar, en} لاسم الصفحة، أو None لصفحات النظام الداخلية (cms/admin)."""
+    clean = (path or "/").split("?")[0].strip("/")
+    parts = clean.split("/") if clean else []
+    if not parts:
+        return {"ar": _ROUTE_NAMES[""][0], "en": _ROUTE_NAMES[""][1]}
+    if parts[0] in ("cms", "admin", "_next", "api"):
+        return None
+    if len(parts) == 1 and parts[0] in _ROUTE_NAMES:
+        n = _ROUTE_NAMES[parts[0]]
+        return {"ar": n[0], "en": n[1]}
+    if len(parts) >= 2 and parts[0] in maps:
+        hit = maps[parts[0]].get(parts[1])
+        if hit:
+            return {"ar": hit[0], "en": hit[1]}
+        s = _SECTION_NAMES.get(parts[0])
+        if s:
+            return {"ar": f"{s[0]}: {parts[1]}", "en": f"{s[1]}: {parts[1]}"}
+    return {"ar": clean, "en": clean}
+
+
+def _resolve_page_rows(rows, maps):
+    """يحوّل صفوف الصفحات إلى label_ar/label_en، ويستبعد صفحات النظام الداخلية."""
+    out = []
+    for r in rows:
+        lbl = _page_label(r.get("label", ""), maps)
+        if lbl is None:
+            continue
+        item = {"label_ar": lbl["ar"], "label_en": lbl["en"]}
+        for k, v in r.items():
+            if k != "label":
+                item[k] = v
+        out.append(item)
+    return out
 
 
 def _group(qs, field, limit=12, label_map=None):
@@ -218,7 +291,7 @@ def traffic_overview(request):
             "by_device": by_dim("deviceCategory", 5),
             "by_channel": by_dim("sessionDefaultChannelGroup", 6),
             "by_city": by_dim("city", 8),
-            "top_landing": by_dim("landingPage", 8),
+            "top_landing": _resolve_page_rows(by_dim("landingPage", 20), _slug_maps())[:8],
             "events": events,
             "trend": trend,
         }
@@ -274,9 +347,11 @@ def seo_overview(request):
             "label": r["keys"][0], "clicks": int(r["clicks"]), "impressions": int(r["impressions"]),
             "ctr": round(r["ctr"] * 100, 1), "position": round(r["position"], 1),
         } for r in q(["query"], 15)]
-        pages = [{
-            "label": r["keys"][0], "clicks": int(r["clicks"]), "impressions": int(r["impressions"]),
-        } for r in q(["page"], 10)]
+        pages_raw = [{
+            "label": r["keys"][0].replace("https://oboor.ido.sa", ""),
+            "clicks": int(r["clicks"]), "impressions": int(r["impressions"]),
+        } for r in q(["page"], 20)]
+        pages = _resolve_page_rows(pages_raw, _slug_maps())[:10]
 
         data = {"connected": True, "range_days": 28, "totals": totals,
                 "top_queries": queries, "top_pages": pages}

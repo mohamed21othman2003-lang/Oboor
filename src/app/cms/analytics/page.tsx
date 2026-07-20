@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { getAnalytics, getTraffic, getSeo, type Analytics, type AnalyticsBucket, type Traffic, type Seo } from "@/lib/cms/api";
 import { useCmsLang } from "@/lib/cms/i18n";
 import { BarChart, DonutChart, LineChart } from "@/components/cms/Chart";
-import { labelTr, pageLabel } from "@/lib/cms/analyticsLabels";
+import { labelTr } from "@/lib/cms/analyticsLabels";
 
 function I({ children, size = 18 }: { children: React.ReactNode; size?: number }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">{children}</svg>;
@@ -128,7 +128,7 @@ export default function AnalyticsPage() {
                 <ChartCard title={t("حسب الجهاز", "By Device")} data={traffic.by_device || []} type="donut" />
                 <ChartCard title={t("حسب القناة", "By Channel")} data={traffic.by_channel || []} type="donut" />
                 <ChartCard title={t("حسب المدينة", "By City")} data={traffic.by_city || []} type="bar" />
-                <ChartCard title={t("أكثر الصفحات دخولاً", "Top Landing Pages")} data={(traffic.top_landing || []).map((p) => ({ ...p, label: pageLabel(p.label, en) }))} type="bar" />
+                <ChartCard title={t("أكثر الصفحات دخولاً", "Top Landing Pages")} data={(traffic.top_landing || []).map((p) => ({ label: en ? p.label_en : p.label_ar, count: p.count }))} type="bar" />
               </div>
 
               {traffic.events && (
@@ -209,7 +209,7 @@ export default function AnalyticsPage() {
                     </table>
                   )}
                 </section>
-                <ChartCard title={t("أكثر الصفحات ظهورًا في البحث", "Top Pages in Search")} sub={t("حسب مرات الظهور", "by impressions")} data={(seo.top_pages || []).map((p) => ({ label: pageLabel(p.label.replace("https://oboor.ido.sa", ""), en), count: p.impressions }))} type="bar" />
+                <ChartCard title={t("أكثر الصفحات ظهورًا في البحث", "Top Pages in Search")} sub={t("حسب مرات الظهور", "by impressions")} data={(seo.top_pages || []).map((p) => ({ label: en ? p.label_en : p.label_ar, count: p.impressions }))} type="bar" />
               </div>
             </>
           ) : (

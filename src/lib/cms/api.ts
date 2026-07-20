@@ -124,7 +124,7 @@ export type Traffic = {
   by_device?: AnalyticsBucket[];
   by_channel?: AnalyticsBucket[];
   by_city?: AnalyticsBucket[];
-  top_landing?: AnalyticsBucket[];
+  top_landing?: { label_ar: string; label_en: string; count: number }[];
   events?: Record<string, number>;
   trend?: AnalyticsBucket[];
 };
@@ -139,7 +139,7 @@ export type Seo = {
   error?: string;
   totals?: { clicks: number; impressions: number; ctr: number; position: number };
   top_queries?: SeoQuery[];
-  top_pages?: { label: string; clicks: number; impressions: number }[];
+  top_pages?: { label_ar: string; label_en: string; clicks: number; impressions: number }[];
 };
 export function getSeo() {
   return cmsFetch<Seo>("/cms/analytics/seo/");

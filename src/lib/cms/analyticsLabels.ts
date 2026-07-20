@@ -17,6 +17,9 @@ const PAIRS: [string, string][] = [
   // مدن إضافية غير موجودة في قوائم المشروع
   ["Al Kharj", "الخرج"], ["Dammam", "الدمام"], ["Khobar", "الخبر"], ["Taif", "الطائف"],
   ["Tabuk", "تبوك"], ["Hail", "حائل"], ["Najran", "نجران"], ["Yanbu", "ينبع"], ["Buraydah", "بريدة"],
+  ["Jeddah", "جدة"], ["Mecca", "مكة المكرمة"], ["Medina", "المدينة المنورة"], ["Abha", "أبها"],
+  ["Cairo", "القاهرة"], ["Alexandria", "الإسكندرية"], ["Giza", "الجيزة"], ["New Cairo City", "القاهرة الجديدة"],
+  ["Minya", "المنيا"], ["Mansoura", "المنصورة"], ["Tanta", "طنطا"],
 ];
 
 const EN2AR = new Map<string, string>();
