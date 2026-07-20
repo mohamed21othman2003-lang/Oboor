@@ -25,6 +25,15 @@ async function previewParam(): Promise<string> {
 //  "failed"    → باك إند غير مفعّل/معطّل/بطيء أو رد غير متوقّع → يسقط لتخزين احتياطي فلا يضيع
 export type ForwardOutcome = "ok" | "duplicate" | "failed";
 
+// أي فشل توجيه يعني أن الطلب لن يظهر في الـCMS (مصدر الحقيقة)، فلا يصحّ أن يمرّ بصمت:
+// نسجّله في لوج الخادم مع سبب الرفض حتى يُكتشف فورًا بدل أن يُبتلع.
+// جسم الخطأ من Django يحتوي أسماء الحقول ورسائل التحقق فقط — لا بيانات شخصية.
+async function logForwardFailure(path: string, res: Response) {
+  let detail = "";
+  try { detail = (await res.text()).slice(0, 300); } catch { /* تجاهل */ }
+  console.error(`[forward:${path}] رفض الباك إند الطلب — HTTP ${res.status} ${detail}`);
+}
+
 // توجيه الطلب لـ Django بدون رمي استثناء، حتى يقرّر مسار الاستدعاء ماذا يفعل
 // حسب النتيجة (نجاح / تكرار / فشل يستوجب التخزين الاحتياطي).
 export async function forwardJson(path: string, payload: Record<string, unknown>): Promise<ForwardOutcome> {
@@ -38,8 +47,10 @@ export async function forwardJson(path: string, payload: Record<string, unknown>
     });
     if (res.ok) return "ok";
     if (res.status === 409) return "duplicate";
+    await logForwardFailure(path, res);
     return "failed";
-  } catch {
+  } catch (e) {
+    console.error(`[forward:${path}] تعذّر الوصول للباك إند —`, e);
     return "failed";
   }
 }
@@ -54,8 +65,10 @@ export async function forwardForm(path: string, form: FormData): Promise<Forward
     });
     if (res.ok) return "ok";
     if (res.status === 409) return "duplicate";
+    await logForwardFailure(path, res);
     return "failed";
-  } catch {
+  } catch (e) {
+    console.error(`[forward:${path}] تعذّر الوصول للباك إند —`, e);
     return "failed";
   }
 }
