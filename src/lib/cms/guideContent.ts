@@ -81,7 +81,7 @@ export const GUIDE: GuidePart[] = [
           p("اسم المستخدم للعرض فقط ولا يمكن تعديله (لأسباب أمنية). أمّا البريد الإلكتروني فقابل للتعديل — بعد تغييره اضغط «حفظ البريد الإلكتروني».", "The username is read-only (for security). The email, however, is editable — after changing it, click “Save email”."),
           p("لتغيير كلمة المرور: اكتب كلمة المرور الحالية، ثم الجديدة، ثم أكّدها (٨ أحرف على الأقل)، واضغط «تحديث كلمة المرور».", "To change your password: enter your current password, then the new one, then confirm it (at least 8 characters), and click “Update password”."),
           p("زر العين بجانب كل حقل يُظهر/يُخفي كلمة المرور للتأكّد منها قبل الحفظ.", "The eye button next to each field shows/hides the password so you can verify it before saving."),
-          p("أسفل الصفحة قسم «إعدادات البريد (SMTP)»: تُدخل فيه بيانات إيميل الشركة الرسمي (الخادم، المنفذ، اسم المستخدم، وكلمة مرور التطبيق) حتى يقدر النظام يرسل رسائله — أهمّها رابط إعادة تعيين كلمة المرور. فعّل المفتاح، اضغط «حفظ إعدادات البريد»، ثم أرسل «رسالة تجريبية» للتأكّد. كلمة مرور التطبيق لا تظهر مرة أخرى بعد حفظها (تُكتب فقط لأمانها).", "At the bottom is the “Email Settings (SMTP)” section: enter your official company email details (host, port, username, and app password) so the system can send its messages — chiefly the password-reset link. Turn on the toggle, click “Save email settings”, then send a “test email” to confirm. The app password is never shown again after saving (write-only for security)."),
+          p("أسفل نفس الصفحة يوجد قسم «إعدادات البريد (SMTP)» — وهو مهم جدًا وله شرح كامل مفصّل في القسم التالي مباشرةً.", "At the bottom of the same page is the “Email Settings (SMTP)” section — it's very important and has its own full, detailed walkthrough in the next section."),
         ],
         faq: [
           faq("نسيت كلمة المرور تمامًا وأُقفلت خارج اللوحة؟", "Forgot your password entirely and locked out?",
@@ -93,6 +93,47 @@ export const GUIDE: GuidePart[] = [
           faq("هل تغيير كلمة المرور يسجّل خروجي؟", "Does changing my password sign me out?",
               "لا، تبقى جلستك الحالية مفتوحة. لكن أي جهاز آخر مسجّل بنفس الحساب سيحتاج تسجيل دخول جديد بكلمة المرور الجديدة.",
               "No, your current session stays open. But any other device signed in with the same account will need to sign in again with the new password."),
+        ],
+      },
+
+      // ---------------------- إعدادات البريد (SMTP) — قسم مفصّل ----------------------
+      {
+        id: "smtp",
+        title_ar: "إعدادات البريد (SMTP): شرح كل حقل بالتفصيل",
+        title_en: "Email Settings (SMTP): every field explained",
+        intro_ar: "هذا القسم يشرح — بالتفصيل ومن غير أي خلفية تقنية — كيف تربط بريد شركتك بالنظام حتى يستطيع إرسال رسائله تلقائيًا (أهمّها رابط إعادة تعيين كلمة المرور). تجد هذه الإعدادات أسفل صفحة «حسابي». اضبطها مرة واحدة فقط.",
+        intro_en: "This section explains — in plain, non-technical language — how to connect your company email to the system so it can send its messages automatically (chiefly the password-reset link). You'll find these settings at the bottom of the “My Account” page. You set them up just once.",
+        steps: [
+          p("ما معنى SMTP أصلًا؟ ببساطة هو «مكتب البريد» الذي يرسل رسائل النظام نيابةً عنك. الموقع لا يملك بريدًا خاصًا به، فنعطيه بيانات صندوق بريد شركتكم الرسمي ليرسل منه — تمامًا كأنك تعطي موظفًا مفتاح صندوق البريد ليضع رسائلك فيه.", "What is SMTP anyway? Simply, it's the “post office” that sends the system's emails on your behalf. The website has no mailbox of its own, so we give it your company's official mailbox details to send from — just like handing an employee the key to your mailbox so they can post your letters."),
+          p("لماذا نحتاجه؟ لأن النظام يرسل رسائل مهمة تلقائيًا: أهمّها رابط «نسيت كلمة المرور» الذي يصلك على بريدك لتستعيد الدخول. بدون هذه الإعدادات، لن تصلك تلك الرسائل — لذا يُفضَّل ضبطها من اليوم الأول.", "Why do we need it? Because the system sends important emails automatically — chiefly the “Forgot password” reset link that lands in your inbox to get you back in. Without these settings, those emails won't be sent — so it's best to set it up from day one."),
+          cms("smtp", "١) مفتاح التفعيل (Enable): أعلى القسم مفتاح تشغيل/إيقاف. شغّله ليعمل الإرسال. لو أطفأته، يتوقّف النظام عن إرسال أي بريد (مفيد مؤقتًا لو أردت تعطيله). في الصورة تجد القسم كاملًا كما سنشرحه حقلًا حقلًا.", "1) Enable toggle: at the top of the section is an on/off switch. Turn it on to allow sending. If you turn it off, the system stops sending any email (handy if you want to pause it temporarily). The image shows the whole section, which we'll explain field by field."),
+          p("٢) مزوّد البريد (Provider): قائمة تختار منها نوع بريدك — Gmail، أو Outlook/Office365، أو cPanel/بريد الاستضافة، أو «مخصّص». بمجرد اختيارك، يضبط النظام الخادم والمنفذ والتشفير تلقائيًا نيابةً عنك، فلا تقلق بشأن الأرقام التقنية.", "2) Provider: a dropdown where you pick your email type — Gmail, Outlook/Office365, cPanel/hosting mail, or “Custom”. Once you choose, the system sets the host, port, and encryption automatically for you, so you don't need to worry about the technical numbers."),
+          p("٣) خادم SMTP (Host): هو عنوان «مكتب البريد» الذي يرسل منه بريدك. عند اختيار Gmail أو Outlook يُملأ تلقائيًا ويظهر مقفلًا (لا تعدّله). في وضع cPanel أو «مخصّص» تكتب أنت اسم خادم بريدك (يوفّره لك مزوّد الاستضافة، مثل: hs38.name.tools).", "3) SMTP host: the address of the “post office” your email sends from. For Gmail or Outlook it's filled in automatically and shown locked (don't edit it). In cPanel or “Custom” mode you type your mail server's name (your hosting provider gives it to you, e.g. hs38.name.tools)."),
+          p("٤) المنفذ (Port) والتشفير (Security): المنفذ رقم يشبه «رقم الباب» الذي تدخل منه الرسالة لمكتب البريد، والتشفير هو ما يحمي الرسالة أثناء إرسالها. في وضع Gmail/Outlook/cPanel يُضبطان تلقائيًا (تراهما مكتوبين تحت الحقل، مثل: المنفذ 587 · تشفير TLS). لا تظهر خانتا المنفذ والتشفير للتعديل إلا في الوضع «المخصّص» فقط، وحينها يعطيك مزوّد بريدك القيم الصحيحة.", "4) Port and Security: the port is like the “door number” the message enters the post office through, and security is what protects the message in transit. In Gmail/Outlook/cPanel mode they're set automatically (shown under the field, e.g. port 587 · TLS). The port and security boxes only appear for editing in “Custom” mode — and there your mail provider gives you the correct values."),
+          p("لماذا يظهر المنفذ أحيانًا كرقم مختلف (587 أو 465)؟ كل نوع تشفير له «باب» مختلف: 587 يُستخدم مع تشفير TLS، و465 مع تشفير SSL. النظام يختار الصحيح تلقائيًا حسب المزوّد، فلا داعي لحفظ هذه الأرقام.", "Why does the port sometimes show a different number (587 or 465)? Each encryption type uses a different “door”: 587 goes with TLS, and 465 with SSL. The system picks the right one automatically per provider, so there's no need to memorize these numbers."),
+          p("٥) اسم المستخدم (الإيميل): هو عنوان بريد شركتكم الكامل الذي ستُرسَل منه الرسائل، مثل: info@company.com. اكتبه كاملًا وبشكل صحيح.", "5) Username (email): your company's full email address that messages will be sent from, e.g. info@company.com. Type it in full and correctly."),
+          p("٦) كلمة مرور التطبيق (App Password): وهنا أهم نقطة — في Gmail و Outlook لا تضع كلمة مرور بريدك العادية، بل «كلمة مرور تطبيق» خاصة تُنشئها لهذا الغرض. الخطوات التالية تشرح كيف تحصل عليها. (في cPanel/بريد الاستضافة تضع كلمة مرور البريد العادية.)", "6) App Password: this is the most important point — for Gmail and Outlook you do NOT use your normal email password, but a special “app password” you generate for this purpose. The next steps explain how to get it. (For cPanel/hosting mail you use the normal mailbox password.)"),
+          p("لماذا كلمة مرور تطبيق وليست كلمتك العادية؟ لأن Google و Microsoft يمنعان البرامج الخارجية من استخدام كلمة مرورك الأساسية (لحمايتها). فتُنشئ كلمة بديلة مخصّصة لهذا النظام فقط — ولو ألغيتها يومًا لا تتأثر كلمة مرور بريدك الأصلية.", "Why an app password and not your normal one? Because Google and Microsoft block outside programs from using your main password (to protect it). So you generate a substitute dedicated to this system only — and if you ever revoke it, your real email password is unaffected."),
+          p("كيف أحصل على App Password من Gmail؟ فعّل «التحقّق بخطوتين» على حساب Google أولًا (إجباري)، ثم افتح myaccount.google.com/apppasswords ← اكتب اسمًا (مثل: موقع عبور) ← اضغط «إنشاء» ← ستظهر ٤ مجموعات من ٤ أحرف. انسخها والصقها في خانة كلمة مرور التطبيق (تجاهل المسافات).", "How to get an App Password from Gmail? First turn on “2-Step Verification” on your Google account (required), then open myaccount.google.com/apppasswords → type a name (e.g. Oboor site) → click “Create” → 4 groups of 4 characters appear. Copy and paste them into the app-password box (ignore the spaces)."),
+          p("كيف أحصل عليها من Outlook/Office365؟ من account.microsoft.com/security ← «خيارات الأمان المتقدّمة» ← فعّل «التحقّق بخطوتين» ← ثم «كلمات مرور التطبيقات» ← «إنشاء كلمة مرور تطبيق جديدة» ← انسخ الكلمة الظاهرة والصقها في الخانة. (بعض حسابات Office365 المؤسسية تديرها إدارة تقنية شركتكم — لو لم تجد الخيار، اطلب منهم تفعيله.)", "How to get it from Outlook/Office365? Go to account.microsoft.com/security → “Advanced security options” → turn on “Two-step verification” → then “App passwords” → “Create a new app password” → copy the shown password and paste it into the box. (Some corporate Office365 accounts are managed by your company's IT — if you don't see the option, ask them to enable it.)"),
+          p("ملاحظة أمان مهمة: كلمة مرور التطبيق تُحفظ ولا تظهر مرة أخرى بعد الحفظ (تراها كنقاط ••••••). هذا مقصود لحمايتها. لو احتجت تغييرها لاحقًا، اكتب الجديدة فوقها واحفظ.", "Important security note: the app password is stored and never shown again after saving (you'll see it as dots ••••••). That's intentional, to protect it. If you need to change it later, type the new one over it and save."),
+          p("٧) اسم المُرسِل الظاهر (Sender name): الاسم الذي يظهر للمستقبِل كمُرسِل للرسالة، مثل: «مركز عبور للرعاية والتأهيل». اختياري لكنه يعطي انطباعًا احترافيًا.", "7) Sender display name: the name recipients see as the sender, e.g. “Oboor Center”. Optional, but it looks professional."),
+          p("٨) عنوان المُرسِل (From) — اختياري: لو أردت أن تظهر الرسائل كأنها من عنوان مختلف عن اسم المستخدم، اكتبه هنا. لو تركته فارغًا، يستخدم النظام نفس اسم المستخدم تلقائيًا — وهذا هو الأنسب في معظم الحالات.", "8) From address — optional: if you want messages to appear from a different address than the username, type it here. Left blank, the system uses the username automatically — which is best in most cases."),
+          p("٩) احفظ ثم اختبر: بعد تعبئة الحقول اضغط «حفظ إعدادات البريد». ثم في مربّع «إرسال رسالة تجريبية» اكتب بريدك واضغط «إرسال اختبار». إن وصلتك الرسالة خلال دقيقة، فكل شيء يعمل. إن ظهر خطأ، فهو يوضّح السبب (غالبًا كلمة مرور تطبيق غير صحيحة).", "9) Save then test: after filling the fields, click “Save email settings”. Then in the “Send a test email” box, type your email and click “Send test”. If it arrives within a minute, everything works. If an error shows, it explains the reason (usually an incorrect app password)."),
+        ],
+        faq: [
+          faq("جرّبت الإرسال وظهر خطأ «بيانات المصادقة غير صحيحة»، ماذا أفعل؟", "I tried sending and got an “authentication data is incorrect” error — what now?",
+              "غالبًا كلمة مرور التطبيق غير صحيحة أو انتهت. أنشئ كلمة مرور تطبيق جديدة (كما في الخطوات أعلاه)، الصقها في الخانة، احفظ، ثم جرّب الاختبار مرة أخرى. تأكّد أيضًا أن اسم المستخدم مكتوب كاملًا وصحيحًا.",
+              "Usually the app password is wrong or expired. Generate a fresh app password (as in the steps above), paste it in, save, then run the test again. Also make sure the username is typed in full and correctly."),
+          faq("هل أستخدم بريدي الشخصي أم بريد الشركة؟", "Should I use my personal email or the company's?",
+              "استخدم بريد الشركة الرسمي دائمًا (مثل info@company.com). فرسائل النظام — كإعادة تعيين كلمة المرور — يجب أن تصل من جهة الشركة لا من شخص، وهذا أكثر احترافية وأمانًا وثباتًا على المدى الطويل.",
+              "Always use the company's official email (e.g. info@company.com). System emails — like password reset — should come from the organization, not an individual; it's more professional, secure, and stable long-term."),
+          faq("اخترت المزوّد لكن لا أرى خانتي المنفذ والتشفير؟", "I picked a provider but I don't see the port and security boxes?",
+              "هذا طبيعي ومقصود. في أوضاع Gmail و Outlook و cPanel يضبط النظام المنفذ والتشفير تلقائيًا (تراهما مكتوبين كنصّ تحت خانة الخادم). تظهر الخانتان للتعديل في الوضع «المخصّص» فقط.",
+              "That's normal and intended. In Gmail, Outlook, and cPanel modes the system sets port and security automatically (shown as text under the host box). The editable boxes only appear in “Custom” mode."),
+          faq("هل يجب أن أضبط هذا الإعداد أكثر من مرة؟", "Do I have to set this up more than once?",
+              "لا. تضبطه مرة واحدة ويبقى محفوظًا. تحتاج العودة إليه فقط لو غيّرت بريد الشركة أو ألغيت كلمة مرور التطبيق القديمة.",
+              "No. You set it up once and it stays saved. You only return to it if you change the company email or revoke the old app password."),
         ],
       },
     ],
@@ -111,9 +152,10 @@ export const GUIDE: GuidePart[] = [
         intro_ar: "لكل صفحة نصوص وعناوين ثابتة (عنوان الصفحة، الفقرات، نصوص الأزرار). تُعدَّل من لوحة «محتوى وعناوين الصفحة» أعلى صفحة القسم.",
         intro_en: "Each page has fixed texts and headings (page title, paragraphs, button labels). Edit them from the “Page content & headings” panel at the top of the section page.",
         steps: [
-          cms("page-content-home", "افتح الصفحة من القائمة (مثل «الصفحة الرئيسية»). في الأعلى تجد لوحة «محتوى وعناوين الصفحة» مقسّمة إلى أقسام الصفحة.", "Open the page from the sidebar (e.g. “Home Page”). At the top is the “Page content & headings” panel, split into the page's sections."),
-          p("كل قسم قابل للطيّ — اضغط رأسه لفتحه وتظهر حقوله. عدّل النص الذي تريده واضغط «حفظ».", "Each section is collapsible — click its header to open it and reveal its fields. Edit the text you want, then click “Save”."),
-          p("العناصر ذات الصور أو الأرقام تُعدَّل من نفس المكان مباشرة.", "Items with images or numbers are edited right there in the same place."),
+          cms("page-content-home", "افتح الصفحة من القائمة (مثل «الصفحة الرئيسية»). في الأعلى تجد لوحة «محتوى وعناوين الصفحة» مقسّمة إلى أقسام الصفحة مرقّمة.", "Open the page from the sidebar (e.g. “Home Page”). At the top is the “Page content & headings” panel, split into the page's numbered sections."),
+          p("الفتح على مستويين: أولًا افتح اللوحة نفسها، ثم اضغط رأس القسم المرقّم الذي تريده (مثل «١ — القسم الرئيسي») ليُفتح وتظهر حقوله. هذا الترتيب يمنع الزحام ويريك جزءًا واحدًا في كل مرّة.", "Two-level opening: first open the panel itself, then click the numbered section header you want (e.g. “1 — Hero”) to expand it and reveal its fields. This keeps things uncluttered and shows one part at a time."),
+          p("انتبه لفارق مهم عن محرّر القوائم: هنا لكل عنصر زرّ «حفظ» خاص به بجانبه مباشرة — لا يوجد زر حفظ واحد أسفل الصفحة ولا شريط اكتمال. عدّلت نصًا؟ اضغط زر «حفظ» الخاص به قبل الانتقال لغيره.", "Note an important difference from the list editor: here each item has its own “Save” button right beside it — there's no single bottom Save bar and no completion bar. Edited a text? Click that item's own “Save” before moving to another."),
+          p("العناصر ذات الصور تُعدَّل من نفس المكان بزر «تغيير الصورة»، والأرقام والإحصاءات تُكتب مباشرة في خانتها.", "Items with images are edited right there via a “Change image” button, and numbers/stats are typed straight into their box."),
         ],
       },
       {
@@ -125,7 +167,8 @@ export const GUIDE: GuidePart[] = [
         steps: [
           cms("list-branches", "افتح القسم من القائمة. تظهر كل العناصر مع حالتها (منشور/مخفي). القوائم الكبيرة مقسّمة لمجموعات قابلة للطيّ.", "Open the area from the sidebar. All items show with their status (Published/Hidden). Large lists are split into collapsible groups."),
           cms("detail-list-rows", "اضغط رأس مجموعة لفتحها. بجانب كل عنصر: سهمَا ترتيب (لأعلى/أسفل)، زر «تعديل»، وزر «حذف».", "Click a group header to open it. Next to each item: up/down reorder arrows, an “Edit” button, and a “Delete” button."),
-          p("للإضافة: اضغط زر الإضافة (مثل «إضافة فرع») أسفل القائمة مباشرة. ستفتح شاشة المحرّر بحقول فارغة. (في الأقسام المقسّمة لمجموعات يظهر زر إضافة داخل كل مجموعة).", "To add: click the add button (e.g. “Add Branch”) directly below the list. The editor opens with empty fields. (In areas split into groups, an add button appears inside each group)."),
+          p("للإضافة في قائمة عادية: اضغط زر الإضافة (مثل «إضافة خبر») أسفل القائمة مباشرة، فتفتح شاشة المحرّر بحقول فارغة.", "To add in a normal list: click the add button (e.g. “Add News”) directly below the list, and the editor opens with empty fields."),
+          p("مهم — للإضافة في قائمة مقسّمة لمجموعات (مثل الفروع المقسّمة حسب المنطقة): لا يوجد زر إضافة واحد أعلى القائمة. افتح أولًا مجموعة المنطقة التي تريد الإضافة إليها، ثم اضغط زرها الخاص «إضافة فرع — <اسم المنطقة>»، والعنصر الجديد يرث تلك المنطقة تلقائيًا.", "Important — to add in a list split into groups (like branches grouped by region): there is no single Add button at the top. First open the region group you want to add to, then click its own “Add Branch — <region>” button, and the new item inherits that region automatically."),
           p("للحذف: اضغط «حذف» ثم أكّد. الحذف نهائي، فتأكّد قبل التأكيد.", "To delete: click “Delete” then confirm. Deletion is permanent, so be sure before confirming."),
           p("ملاحظة: الأخبار والوظائف تُرتَّب تلقائياً بالأحدث أولاً، لذلك لا تظهر لها أسهم ترتيب.", "Note: news and jobs are auto-ordered (newest first), so they don't show reorder arrows."),
         ],
@@ -141,7 +184,9 @@ export const GUIDE: GuidePart[] = [
           p("الحقول مجمّعة في أقسام واضحة بعناوين بارزة (مثل «بيانات الفرع الأساسية»، «نافذة عرض التفاصيل») حتى تعرف كل مجموعة تتحكّم في أي جزء من الصفحة.", "Fields are grouped into clearly labelled sections with bold headers (e.g. “Branch basic info”, “View Details popup”) so you know which group controls which part of the page."),
           p("تحت بعض الأقسام ملاحظة زرقاء صغيرة (ℹ️) تشرح أين يظهر محتواها على الموقع، وبجانبها زر «عاين على الموقع» يفتح تلك الصفحة مباشرة.", "Under some sections is a small blue note (ℹ️) explaining where its content appears on the site, with a “Preview on site” link that opens that page directly."),
           p("الحقول الاختيارية الفارغة تُطوى إلى زر صغير «+ إضافة …» لتقليل الزحام — اضغطه فقط عند الحاجة لإظهار الحقل وملئه.", "Empty optional fields collapse into a small “+ Add …” button to reduce clutter — click it only when you need to reveal and fill the field."),
-          p("أسفل الشاشة دائماً أزرار: «حفظ التعديلات» و«تجاهل التغييرات» و«معاينة». كل تعديل يحتاج ضغط «حفظ» ليُطبّق.", "At the bottom are always: “Save Changes”, “Discard changes”, and “Preview”. Every edit needs a “Save” click to apply."),
+          p("أسفل الشاشة دائماً أزرار: «حفظ التعديلات» و«تجاهل التعديلات» و«معاينة التعديلات». كل تعديل يحتاج ضغط «حفظ» ليُطبّق.", "At the bottom are always: “Save Changes”, “Discard changes”, and “Preview changes”. Every edit needs a “Save” click to apply."),
+          p("ملاحظة: زر «معاينة التعديلات» يظهر فقط للعناصر المحفوظة سابقًا (لا يظهر أثناء إنشاء عنصر جديد قبل حفظه). وزر «استرجاع النسخة الافتراضية» يظهر فقط للعناصر الأصلية الجاهزة مع الموقع، لا للعناصر التي أضفتها أنت — فلا تقلق إن لم تجد أحد الزرّين في بعض الحالات.", "Note: the “Preview changes” button appears only for already-saved items (not while creating a brand-new item before saving). And “Restore default” appears only for the original items that shipped with the site, not for ones you added yourself — so don't worry if a button is missing in some cases."),
+          p("تنبيه مهم: هذه الشاشة (بشريط الاكتمال وأزرار الأسفل) تخصّ عناصر القوائم. أمّا نصوص وعناوين الصفحات الثابتة فتُحرَّر من لوحة «محتوى وعناوين الصفحة» بأسلوب مختلف قليلًا: لكل عنصر فيها زر «حفظ» خاص به، ولا يوجد شريط اكتمال (مشروح في قسم «تعديل نصوص وعناوين الصفحات»).", "Important heads-up: this screen (with the completion bar and bottom buttons) is for list items. Fixed page texts and headings are edited from the “Page content & headings” panel in a slightly different way: each item there has its own “Save” button, with no completion bar (explained in “Editing page texts & headings”)."),
         ],
       },
       {
@@ -155,6 +200,7 @@ export const GUIDE: GuidePart[] = [
           p("اكتب العنوان في الخانة العربية (يمين) والإنجليزية (يسار) معاً — كلٌّ يظهر في نسخة الموقع بلغته.", "Type the title in both the Arabic box (right) and the English box (left) — each shows in the matching site version."),
           p("العناوين الفرعية أو الشارات (Badge/Pill) لها حقول منفصلة مثل «العنوان الفرعي» أو «الوسم» — عدّلها بنفس الطريقة.", "Subtitles or badges/pills have separate fields like “Subtitle” or “Tag” — edit them the same way."),
           p("اجعل العناوين قصيرة وواضحة؛ العنوان الطويل جداً قد يبدو غير متناسق في التصميم.", "Keep titles short and clear; a very long title may look inconsistent in the design."),
+          p("تلوين جزء من العنوان: في بعض العناوين البارزة (مثل عنوان الهيرو) يمكنك إبراز كلمة أو أكثر بلون التصميم التركوازي بوضعها بين نجمتين مزدوجتين، هكذا: **الكلمة**. يظهر تحت الحقل تلميح صغير يذكّرك بذلك. اكتب باقي العنوان عاديًا، وضع النجمتين حول الجزء الذي تريد تمييزه فقط.", "Highlighting part of a title: in some prominent headings (like the hero title) you can emphasize one or more words in the brand teal by wrapping them in double asterisks, like this: **the word**. A small tip under the field reminds you of this. Write the rest normally, and put the asterisks only around the part you want to stand out."),
         ],
       },
       {
@@ -190,8 +236,9 @@ export const GUIDE: GuidePart[] = [
         intro_en: "Images (a branch, specialist, news, hero slide, gallery photos) are uploaded straight from your device.",
         steps: [
           cms("detail-image", "في المحرّر اضغط منطقة الصورة أو زر «رفع صورة»، ثم اختر الملف من جهازك.", "In the editor click the image area or the “Upload image” button, then choose the file from your device."),
-          p("بعض الأنواع تسمح بقصّ الصورة (تحديد الجزء الظاهر) قبل الحفظ — اضبط الإطار ثم أكّد.", "Some types let you crop the image (choose the visible part) before saving — adjust the frame then confirm."),
-          p("تظهر معاينة فور الرفع. لتغيير الصورة ارفع صورة جديدة فوق القديمة.", "A preview appears right after upload. To change it, upload a new image over the old one."),
+          p("بعد اختيار الملف تظهر عادةً نافذة «قصّ الصورة» لتحديد الجزء الظاهر منها بالأبعاد المناسبة للمكان — حرّك الإطار وكبّره/صغّره ثم اضغط «تأكيد». هذا يضمن ظهور الصورة متناسقة دون تشويه.", "After you pick a file, a “Crop image” window usually appears to choose the visible part at the right proportions for its place — move and resize the frame, then click “Confirm”. This keeps the image looking consistent without distortion."),
+          p("ملاحظة على اسم الزر: داخل محرّر عنصر القائمة يكون الزر «رفع صورة»، أمّا في لوحة «محتوى وعناوين الصفحة» فيكون «تغيير الصورة» — وكلاهما يفعل الشيء نفسه.", "A note on the button label: inside a list item's editor the button reads “Upload image”, while in the “Page content & headings” panel it reads “Change image” — both do the same thing."),
+          p("تظهر معاينة فور الرفع. لتغيير الصورة ارفع صورة جديدة فوق القديمة. لو تجاوز الملف الحد المسموح تظهر رسالة خطأ توضّح ذلك.", "A preview appears right after upload. To change it, upload a new image over the old one. If the file exceeds the allowed size, an error message says so."),
           p("اضغط على أي صورة (في المحرّر أو في القائمة أو في المعرض) لعرضها بالحجم الكامل في نافذة، ثم أغلقها بزر الإغلاق أو مفتاح Esc.", "Click any image (in the editor, the list, or a gallery) to view it full-screen in an overlay, then close it with the close button or the Esc key."),
           p("الحد الأقصى لحجم الصورة 5 ميجابايت. استخدم صوراً واضحة وبأبعاد مناسبة لأفضل ظهور.", "Maximum image size is 5 MB. Use clear, well-proportioned images for the best look."),
           p("المعرض (Gallery) يقبل عدة صور لنفس العنصر — أضف أو احذف أو رتّب صوره بنفس الطريقة (مثل معرض صور كل فرع).", "A gallery accepts multiple images for one item — add, remove, or reorder its photos the same way (like each branch's photo gallery)."),
@@ -238,7 +285,8 @@ export const GUIDE: GuidePart[] = [
         title_en: "Ordering, Publishing & Hiding",
         steps: [
           cms("detail-list-rows", "الترتيب: استخدم سهمَي الأعلى/الأسفل بجانب العنصر في القائمة. الترتيب هنا هو نفسه ترتيب الظهور على الموقع.", "Order: use the up/down arrows next to an item in the list. The order here is the same order shown on the site."),
-          p("النشر/الإخفاء: كل عنصر له حالة «منشور» (يظهر للزوّار) أو «مخفي» (لا يظهر). غيّرها من داخل المحرّر.", "Publish/Hide: each item has a “Published” status (visible to visitors) or “Hidden” (not shown). Change it inside the editor."),
+          p("النشر/الإخفاء: كل عنصر له حالة «منشور» (يظهر للزوّار) أو «مخفي» (لا يظهر). لتغييرها: افتح العنصر بزر «تعديل»، وفي المحرّر انزل إلى مجموعة «الإعدادات» بالأسفل، وستجد خانة/مفتاح «منشور» — فعّله أو أطفئه ثم احفظ.", "Publish/Hide: each item has a “Published” status (visible to visitors) or “Hidden” (not shown). To change it: open the item with “Edit”, and in the editor scroll to the “Settings” group at the bottom — you'll find a “Published” checkbox/toggle; turn it on or off, then save."),
+          p("مهم: الشارة الملوّنة بجانب العنصر في القائمة (خضراء «منشور» / برتقالية «مخفي») هي للعرض فقط لتعرف حالته بنظرة — لا يمكنك الضغط عليها لتغيير الحالة، بل تُغيَّر من داخل المحرّر كما في الخطوة السابقة.", "Important: the coloured badge beside an item in the list (green “Published” / amber “Hidden”) is display-only so you can see its state at a glance — you can't click it to change the state; you change it inside the editor as in the previous step."),
           p("الإخفاء أفضل من الحذف عندما تريد إيقاف عنصر مؤقتاً مع إمكانية إرجاعه لاحقاً.", "Hiding is better than deleting when you want to pause an item temporarily but keep the option to restore it."),
         ],
       },
@@ -260,9 +308,9 @@ export const GUIDE: GuidePart[] = [
         title_en: "Completion, Saving, Preview & Restore",
         steps: [
           p("شريط «نسبة الاكتمال» أعلى المحرّر يوضّح كم حقلاً أساسياً تبقّى، ويكتب أسماء «الحقول الناقصة». استهدف 100%.", "The “Completion” bar at the top shows how many essential fields remain and lists the “Missing” fields. Aim for 100%."),
-          p("«حفظ التعديلات» يعمل فقط عند وجود تغيير فعلي. بعد الحفظ يظهر «تم الحفظ ✓» ويظهر التعديل على الموقع خلال لحظات.", "“Save Changes” is active only when there's a real change. After saving, “Saved ✓” appears and the change shows on the site within moments."),
-          p("زر «معاينة» يفتح الصفحة الحقيقية بتعديلاتك الحالية قبل الحفظ — لتتأكّد من الشكل النهائي.", "The “Preview” button opens the real page with your current unsaved changes — to check the final look before saving."),
-          p("«تجاهل التغييرات» يرجّع الحقول لآخر نسخة محفوظة. «استرجاع النسخة الافتراضية» يعيد العنصر لمحتواه الأصلي بالكامل (استخدمه بحذر).", "“Discard changes” reverts to the last saved version. “Restore Default” resets the item to its original content entirely (use with care)."),
+          p("«حفظ التعديلات» يعمل فقط عند وجود تغيير فعلي. بعد الحفظ تظهر رسالة «تم الحفظ بنجاح ✓» ويظهر التعديل على الموقع خلال لحظات.", "“Save Changes” is active only when there's a real change. After saving, a “Saved successfully ✓” message appears and the change shows on the site within moments."),
+          p("زر «معاينة التعديلات» يفتح الصفحة الحقيقية بتعديلاتك الحالية قبل الحفظ — لتتأكّد من الشكل النهائي. (يظهر فقط للعناصر المحفوظة مسبقًا، لا أثناء إنشاء عنصر جديد.)", "The “Preview changes” button opens the real page with your current unsaved changes — to check the final look before saving. (It appears only for already-saved items, not while creating a new one.)"),
+          p("«تجاهل التعديلات» يرجّع الحقول لآخر نسخة محفوظة. «استرجاع النسخة الافتراضية» يعيد العنصر لمحتواه الأصلي بالكامل، ويظهر فقط للعناصر الأصلية الجاهزة مع الموقع لا لما أضفته أنت (استخدمه بحذر).", "“Discard changes” reverts to the last saved version. “Restore Default” resets the item to its original content entirely, and appears only for the original items shipped with the site, not ones you added (use with care)."),
           p("الحقول التقنية النادرة (مثل المعرّف الداخلي) تُملأ تلقائياً وتبقى مخفيّة ما دامت فارغة — لا تحتاج للتعامل معها عادةً.", "Rare technical fields (like the internal identifier) are filled automatically and stay hidden while empty — you normally don't deal with them."),
         ],
       },
@@ -285,15 +333,97 @@ export const GUIDE: GuidePart[] = [
         title_ar: "إعدادات الموقع",
         title_en: "Site Settings",
         steps: [
-          cms("settings", "«إعدادات الموقع» تجمع الإعدادات العامة في مكان واحد، مثل رقم الواتساب الموحّد وبيانات التواصل.", "“Site Settings” gathers global settings in one place, like the unified WhatsApp number and contact details."),
-          p("مثال مهم: حقل رقم الواتساب يتحكّم في كل أزرار الواتساب على مستوى الموقع كله — غيّره من هنا مرة واحدة.", "Key example: the WhatsApp field controls every WhatsApp button across the whole site — change it here once."),
+          cms("settings", "«إعدادات الموقع» تجمع البيانات العامة في مكان واحد. تحتوي عادةً على: رقم الواتساب الموحّد، رقم الهاتف، البريد الإلكتروني، العنوان، ورابط الخريطة — أي البيانات التي تتكرّر في أكثر من صفحة.", "“Site Settings” gathers global data in one place. It typically holds: the unified WhatsApp number, phone, email, address, and the map link — the data that repeats across more than one page."),
+          p("مثال مهم: حقل رقم الواتساب يتحكّم في كل أزرار الواتساب على مستوى الموقع كله — غيّره من هنا مرة واحدة فيتغيّر في كل مكان.", "Key example: the WhatsApp field controls every WhatsApp button across the whole site — change it here once and it changes everywhere."),
+          p("ما الذي لا يُدار من هنا؟ روابط التواصل الاجتماعي (إنستغرام، تيك توك، X) تُحرَّر من أقسام تذييل الصفحة (Footer)، وعناوين بطاقات التواصل الثلاث تُحرَّر من صفحة «التواصل» نفسها. فلو لم تجد ما تبحث عنه في «إعدادات الموقع»، فهو غالبًا في صفحته الخاصة.", "What isn't managed here? Social links (Instagram, TikTok, X) are edited from the footer sections, and the three contact-card titles are edited from the “Contact” page itself. So if you don't find something in “Site Settings”, it's likely on its own page."),
           p("اضغط «حفظ» بعد التعديل ليسري التغيير على كل الصفحات فوراً.", "Click “Save” after editing so the change applies to all pages immediately."),
         ],
       },
     ],
   },
 
-  // ======================== الجزء 3: صفحات الموقع ========================
+  // ======================== الجزء 3: التحليلات والإحصاءات ========================
+  {
+    id: "analytics",
+    title_ar: "التحليلات: قراءة أرقام موقعك",
+    title_en: "Analytics: reading your site's numbers",
+    sections: [
+      {
+        id: "analytics-overview",
+        title_ar: "ما هي صفحة التحليلات؟",
+        title_en: "What is the Analytics page?",
+        intro_ar: "صفحة «التحليلات» هي لوحة القيادة التي تريك ماذا يحدث في موقعك بالأرقام: كم زائرًا جاء، من أين، وكم طلبًا وتقييمًا وتوظيفًا وصلك. افتحها من «التحليلات» في القائمة الجانبية. فكّر فيها كطبلون السيارة — يجمع كل المؤشّرات في مكان واحد لتعرف حالة موقعك بنظرة.",
+        intro_en: "The “Analytics” page is the dashboard that shows what's happening on your site in numbers: how many visitors came, from where, and how many requests, assessments, and job applications you received. Open it from “Analytics” in the sidebar. Think of it like a car dashboard — it gathers all the gauges in one place so you know your site's health at a glance.",
+        steps: [
+          p("الأرقام تأتي من ثلاثة مصادر مختلفة، وكل قسم مكتوب فوقه مصدره: (١) «نظامك (CMS)» — أرقام الطلبات والتقييمات من قاعدة بياناتك مباشرة، وتتحدّث فورًا مع كل طلب جديد. (٢) «زيارات الموقع (GA4)» — من Google Analytics، تُظهر الزوّار وسلوكهم. (٣) «أداء البحث (SEO)» — من Google Search Console، تُظهر ظهورك في نتائج بحث جوجل.", "The numbers come from three different sources, and each section is labelled with its source: (1) “Your system (CMS)” — request and assessment figures straight from your database, updating instantly with each new request. (2) “Website Traffic (GA4)” — from Google Analytics, showing visitors and their behaviour. (3) “Search Performance (SEO)” — from Google Search Console, showing your presence in Google search results."),
+          p("لا تحتاج لعمل أي شيء لتظهر الأرقام — كلها تُجمَع تلقائيًا. دورك فقط أن تقرأها وتفهمها، وهذا ما تشرحه الأقسام التالية.", "You don't need to do anything for the numbers to appear — they're all collected automatically. Your only job is to read and understand them, which the next sections explain."),
+          p("شارة «مباشر» الخضراء بجانب عنوان أي قسم تعني أن مصدره متّصل ويجلب بيانات حيّة. لو ظهرت رسالة «لم يتم الربط بعد» فهذا يعني أن ذلك المصدر لم يُفعّل، والفريق التقني يتولّى ربطه.", "The green “Live” badge beside a section's title means its source is connected and pulling live data. If you see “not connected yet”, that source hasn't been enabled — the technical team handles connecting it."),
+        ],
+      },
+      {
+        id: "analytics-traffic",
+        title_ar: "زيارات الموقع (GA4)",
+        title_en: "Website Traffic (GA4)",
+        intro_ar: "هذا القسم يجيب على السؤال: من يزور موقعي، وكيف يتصرّفون؟ الأرقام لآخر ٢٨ يومًا.",
+        intro_en: "This section answers: who visits my site, and how do they behave? Figures cover the last 28 days.",
+        steps: [
+          p("البطاقات الأربعة الكبيرة في الأعلى: «الجلسات» = عدد مرّات دخول الموقع، «المستخدمون» = عدد الأشخاص (الشخص الواحد قد يزور أكثر من مرّة)، «مستخدمون جدد» = من زاروا لأول مرّة، «مشاهدات الصفحات» = إجمالي الصفحات التي فُتحت.", "The four big cards at top: “Sessions” = number of visits, “Users” = number of people (one person may visit more than once), “New Users” = first-time visitors, “Page Views” = total pages opened."),
+          p("المؤشّرات الثلاثة الصغيرة: «معدل التفاعل» = نسبة الزيارات التي تفاعل فيها الزائر فعلًا (كلما زاد كان أفضل)، «معدل الارتداد» = نسبة من غادروا بسرعة دون تفاعل (كلما قلّ كان أفضل)، «متوسط زمن التفاعل» = الوقت الذي يقضيه الزائر متفاعلًا في المتوسّط.", "The three small metrics: “Engagement Rate” = share of visits where the visitor actually engaged (higher is better), “Bounce Rate” = share who left quickly without engaging (lower is better), “Avg. Engagement” = the average time a visitor spends engaged."),
+          p("«اتجاه الجلسات»: رسم بياني خطّي يريك عدد الزيارات يومًا بيوم — يساعدك تلاحظ أثر حملة إعلانية أو منشور على أيّام معيّنة.", "“Sessions Trend”: a line chart showing visits day by day — helps you spot the effect of a campaign or a post on particular days."),
+          p("الرسوم الدائرية والأعمدة: «حسب الجهاز» (جوال/كمبيوتر)، «حسب القناة» (من أين جاء الزائر: بحث جوجل، مباشرة، سوشيال…)، «حسب المدينة»، و«أكثر الصفحات دخولًا» (أول صفحة يفتحها الزوّار). كل شريحة تُظهر نسبتها المئوية، وعند وقوفك عليها يظهر العدد الحقيقي.", "The pie and bar charts: “By Device” (mobile/desktop), “By Channel” (where the visitor came from: Google search, direct, social…), “By City”, and “Top Landing Pages” (the first page visitors open). Each slice shows its percentage, and hovering reveals the actual count."),
+        ],
+      },
+      {
+        id: "analytics-events",
+        title_ar: "تفاعلات الزوّار (الأحداث)",
+        title_en: "Visitor Actions (events)",
+        intro_ar: "هذا الجزء يقيس الأفعال المهمّة التي يقوم بها الزوّار — لا مجرّد التصفّح، بل الضغطات التي تدلّ على اهتمام حقيقي.",
+        intro_en: "This part measures the important actions visitors take — not just browsing, but the clicks that signal real interest.",
+        steps: [
+          p("«ضغطات واتساب / الهاتف / الإيميل»: كم مرّة ضغط الزوّار على زر التواصل المقابل. أرقام مرتفعة هنا تعني أن الموقع يحوّل الزوّار إلى تواصل فعلي.", "“WhatsApp / Phone / Email clicks”: how many times visitors clicked the matching contact button. High numbers here mean the site is turning visitors into real contact."),
+          p("«عمليات البحث الذكي»: كم مرّة استخدم الزوّار خانة البحث عن الخدمات في الموقع — يدلّك على ما يبحث عنه الناس.", "“Smart Searches”: how many times visitors used the site's service-search box — tells you what people are looking for."),
+          p("رسم «أزرار التواصل»: يقارن بين وسائل التواصل المختلفة (طلب التحاق، واتساب، اتصال، إيميل) لترى أيّها يستخدمه الناس أكثر.", "“Contact Actions” chart: compares the different contact methods (admission request, WhatsApp, phone, email) so you see which people use most."),
+          p("رسم «التقييم: بدء مقابل إكمال»: يريك كم شخصًا بدأ اختبار التقييم مقابل كم أكمله — الفرق بينهما يكشف إن كان الاختبار طويلًا أو يحتاج تبسيطًا.", "“Assessment: Starts vs Completions” chart: shows how many people started the assessment vs how many finished it — the gap reveals whether the test is too long or needs simplifying."),
+        ],
+      },
+      {
+        id: "analytics-seo",
+        title_ar: "أداء البحث في جوجل (SEO)",
+        title_en: "Google Search Performance (SEO)",
+        intro_ar: "هذا القسم يريك كيف يظهر موقعك في نتائج بحث جوجل — قبل حتى أن يدخل الزائر الموقع.",
+        intro_en: "This section shows how your site appears in Google search results — even before a visitor reaches the site.",
+        steps: [
+          p("المؤشّرات الأربعة: «النقرات» = كم مرّة نقر الناس على موقعك في نتائج جوجل، «مرات الظهور» = كم مرّة ظهر موقعك في النتائج (حتى لو لم يُنقر)، «نسبة النقر (CTR)» = النقرات ÷ الظهور، «متوسط الترتيب» = موضعك المتوسّط في صفحة النتائج (الرقم الأقل أفضل — 1 يعني الأول).", "The four metrics: “Clicks” = how many times people clicked your site in Google results, “Impressions” = how many times your site appeared in results (even if not clicked), “CTR” = clicks ÷ impressions, “Avg. Position” = your average spot on the results page (lower is better — 1 means first)."),
+          p("جدول «أكثر كلمات البحث»: الكلمات التي كتبها الناس في جوجل ووجدوا موقعك من خلالها، مع نقراتها وظهورها وترتيبها. يخبرك بأي الكلمات يجدك بها جمهورك.", "“Top Search Queries” table: the words people typed into Google and found your site through, with their clicks, impressions, and position. It tells you which words your audience finds you by."),
+          p("رسم «أكثر الصفحات ظهورًا في البحث»: أي صفحات موقعك تظهر أكثر في نتائج جوجل. ملاحظة: بيانات البحث تتأخّر يومًا إلى يومين، فلا تتوقّع أرقامًا فورية هنا.", "“Top Pages in Search” chart: which of your pages show up most in Google results. Note: search data lags by 1–2 days, so don't expect instant figures here."),
+        ],
+      },
+      {
+        id: "analytics-cms",
+        title_ar: "أرقام الطلبات (من نظامك)",
+        title_en: "Request Figures (from your system)",
+        intro_ar: "هذه أهم الأرقام العملية لك: كل ما وصلك عبر نماذج الموقع، مأخوذ من قاعدة بياناتك مباشرةً ويتحدّث فورًا.",
+        intro_en: "These are the most practical figures for you: everything received through the site's forms, taken straight from your database and updating instantly.",
+        steps: [
+          cms("analytics", "البطاقات الأربعة: «طلبات الالتحاق»، «نتائج التقييم»، «رسائل التواصل»، «طلبات التوظيف» — إجمالي كلٍّ منها. هذه نفس الطلبات التي تديرها من أقسام «الطلبات والرسائل». وتحتها مباشرةً تبدأ الرسوم البيانية كما في الصورة.", "The four cards: “Admission Requests”, “Assessments”, “Contact Messages”, “Job Applications” — the total of each. These are the same requests you manage from the “Requests & Messages” sections. Directly below them the charts begin, as shown in the image."),
+          p("«طلبات الالتحاق» بالتفصيل: رسوم توزّع الطلبات «حسب الفرع» و«حسب المدينة» و«حسب نوع الحالة» و«حسب الفئة العمرية» و«حسب الجنس» — تساعدك تعرف أي فرع وأي فئة عليها إقبال أكبر.", "“Admission Requests” in detail: charts breaking requests down “By Branch”, “By City”, “By Case Type”, “By Age Band”, and “By Gender” — helping you see which branch and which segment has the most demand."),
+          p("«التقييمات»: توزيع نتائج التقييم «حسب النوع» و«حسب مستوى الحالة» (مرتفع/متوسط/منخفض).", "“Assessments”: assessment results broken down “By Type” and “By Level” (high/medium/low)."),
+          p("«التوظيف»: المتقدّمون «حسب المدينة» و«حسب الوظيفة»، ورسم «اتجاه طلبات التوظيف» أسبوعيًا لترى فترات الإقبال على الوظائف.", "“Recruitment”: applicants “By City” and “By Position”, plus an “Applications Trend” chart by week so you can see peak hiring interest periods."),
+          p("«إشارات الطلب»: قسم ذكي يبرز ملاحظات مفيدة من البيانات — مثل مدينة يأتي منها طلبات كثيرة دون أن يكون لها فرع قريب، وهي فرصة توسّع محتملة.", "“Demand Signals”: a smart section highlighting useful notes from the data — like a city sending many requests without a nearby branch, a potential expansion opportunity."),
+        ],
+        faq: [
+          faq("لماذا قسم الزيارات (GA4) يقول «لا توجد بيانات كافية»؟", "Why does the Traffic (GA4) section say “not enough data”?",
+              "إمّا أن الربط بـGoogle Analytics لم يُفعّل بعد (يتولّاه الفريق التقني)، أو أن الموقع جديد ولم يتجمّع لديه زيارات كافية بعد. أرقام «نظامك (CMS)» تظهر دائمًا لأنها من قاعدة بياناتك مباشرة.",
+              "Either the Google Analytics connection isn't enabled yet (the technical team handles it), or the site is new and hasn't gathered enough visits. The “Your system (CMS)” figures always show because they come straight from your database."),
+          faq("الأرقام هنا تختلف قليلًا عن عدّاد آخر رأيته، لماذا؟", "The numbers here differ slightly from another counter I saw — why?",
+              "كل مصدر يقيس بطريقة مختلفة قليلًا (جوجل يستبعد الزيارات المكرّرة أو الآلية مثلًا). المهم هو الاتجاه العام والمقارنة عبر الوقت، لا الرقم المطلق تمامًا.",
+              "Each source measures a bit differently (Google excludes repeated or automated visits, for instance). What matters is the overall trend and comparison over time, not the exact absolute number."),
+        ],
+      },
+    ],
+  },
+
+  // ======================== الجزء 4: صفحات الموقع ========================
   {
     id: "site",
     title_ar: "صفحات الموقع ومن أين تُدار",
@@ -422,7 +552,7 @@ export const GUIDE: GuidePart[] = [
     ],
   },
 
-  // ======================== الجزء 4: مهام شائعة (وصفات جاهزة) ========================
+  // ======================== الجزء 5: مهام شائعة (وصفات جاهزة) ========================
   {
     id: "recipes",
     title_ar: "مهام شائعة (خطوة بخطوة)",
@@ -435,11 +565,12 @@ export const GUIDE: GuidePart[] = [
         intro_ar: "وصفة كاملة لإضافة فرع من الصفر حتى يظهر على الموقع.",
         intro_en: "A complete recipe to add a branch from scratch until it appears on the site.",
         steps: [
-          cms("list-branches", "من القائمة الجانبية افتح «مراكزنا (الفروع)» واضغط «إضافة فرع».", "From the sidebar open “Our Centers (Branches)” and click “Add Branch”."),
-          cms("editor", "املأ الاسم والمدينة والمنطقة والعنوان — بالعربية والإنجليزية معاً. راقب شريط الاكتمال حتى يصل 100%.", "Fill the name, city, region, and address — in both Arabic and English. Watch the completion bar reach 100%."),
+          cms("list-branches", "من القائمة الجانبية افتح «مراكزنا (الفروع)». الفروع مقسّمة إلى مجموعات حسب المنطقة، فلا يوجد زر «إضافة» واحد أعلى القائمة. افتح أولًا مجموعة المنطقة التي سيتبعها الفرع (مثل «الرياض»).", "From the sidebar open “Our Centers (Branches)”. Branches are grouped by region, so there's no single “Add” button at the top. First open the region group the branch will belong to (e.g. “Riyadh”)."),
+          p("اضغط زر تلك المجموعة «إضافة فرع — <اسم المنطقة>». يفتح المحرّر بحقول فارغة، والفرع الجديد يرث تلك المنطقة تلقائيًا.", "Click that group's “Add Branch — <region>” button. The editor opens with empty fields, and the new branch inherits that region automatically."),
+          cms("editor", "املأ الاسم والمدينة والعنوان — بالعربية والإنجليزية معاً. راقب شريط الاكتمال حتى يصل 100%.", "Fill the name, city, and address — in both Arabic and English. Watch the completion bar reach 100%."),
           p("أضف رقم التواصل، المدير، ورابط الخريطة في قسم «بيانات الفرع الأساسية».", "Add the phone number, manager, and map link in the “Branch basic info” section."),
           p("انزل لباقي الأقسام لتخصيص هذا الفرع: كروت الخدمات، «ما يميّز الفرع» (بأيقونات)، قصص النجاح، ملف الـPDF، ورفع صور المعرض. اترك أي قسم كما هو إن لم ترد تغييره.", "Scroll to the other sections to tailor this branch: service cards, “What sets the branch apart” (with icons), success stories, the PDF profile, and uploading gallery photos. Leave any section as-is if you don't want to change it."),
-          p("تأكّد أن الحالة «منشور»، ثم اضغط «حفظ». سيظهر الفرع في صفحة «مراكزنا» على الموقع خلال لحظات.", "Make sure the status is “Published”, then click “Save”. The branch appears on the site's Centers page within moments."),
+          p("تأكّد أن الحالة «منشور» (من مجموعة «الإعدادات» أسفل المحرّر)، ثم اضغط «حفظ». سيظهر الفرع في صفحة «مراكزنا» على الموقع خلال لحظات.", "Make sure the status is “Published” (in the “Settings” group at the bottom of the editor), then click “Save”. The branch appears on the site's Centers page within moments."),
         ],
       },
       {
@@ -476,7 +607,7 @@ export const GUIDE: GuidePart[] = [
     ],
   },
 
-  // ======================== الجزء 5: نصائح وأسئلة شائعة ومسرد ========================
+  // ======================== الجزء 6: نصائح وأسئلة شائعة ومسرد ========================
   {
     id: "help",
     title_ar: "نصائح وأسئلة شائعة",

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { getMe, updateAccountEmail, changeAccountPassword, getEmailSettings, saveEmailSettings, sendTestEmail, type EmailSettings } from "@/lib/cms/api";
 import { useCmsLang } from "@/lib/cms/i18n";
 
@@ -335,6 +336,14 @@ export default function AccountPage() {
               </Field>
               <Field label={provider === "gmail" || provider === "outlook" ? t("كلمة مرور التطبيق (App Password)", "App Password") : t("كلمة مرور الإيميل", "Email password")}>
                 <input type="password" value={smtpPw} onChange={(e) => setSmtpPw(e.target.value)} placeholder={smtp.password_set ? t("•••••• (محفوظة — اكتب للتغيير)", "•••••• (saved — type to change)") : t("أدخل كلمة المرور", "Enter the password")} className={INP} autoComplete="new-password" />
+                <p className="mt-1.5 text-xs text-ink-soft">
+                  {provider === "gmail" || provider === "outlook"
+                    ? t("لا تعرف كيف تحصل على كلمة مرور التطبيق؟ ", "Not sure how to get an App Password? ")
+                    : t("لا تعرف من أين تجلب بيانات بريدك؟ ", "Not sure where to find your mail details? ")}
+                  <Link href="/cms/guide#smtp" target="_blank" rel="noopener" className="font-bold text-[#0F6C73] underline decoration-[#1FA6A8]/40 underline-offset-2 transition-colors hover:text-[#1FA6A8]">
+                    {t("اضغط هنا لعرض الشرح خطوة بخطوة", "Click here for a step-by-step guide")}
+                  </Link>
+                </p>
               </Field>
               <Field label={t("اسم المُرسِل الظاهر", "Sender display name")}>
                 <input value={smtp.from_name} onChange={(e) => setSmtpField("from_name", e.target.value)} placeholder={t("مركز عبور للرعاية والتأهيل", "Oboor Center")} className={INP} />
