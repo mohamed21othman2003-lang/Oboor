@@ -72,6 +72,9 @@ services:
     volumes:
       # احتياطي فقط لو تعطّل S3 — التخزين الأساسي على MinIO.
       - backend_media:/app/media
+      # مفتاح خدمة GA4 (للتحليلات). يُركَّب من القرص ولا يُبنى داخل الصورة،
+      # حتى لا يعتمد بقاؤه على أن الملف كان موجودًا وقت البناء.
+      - ./backend/secrets:/app/secrets:ro
     restart: unless-stopped
 
   frontend:

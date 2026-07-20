@@ -18,8 +18,14 @@ docker compose exec -T -e PGPASSWORD="$POSTGRES_PASSWORD" postgres \
 docker run --rm -v oobor_miniodata:/data -v "$BK":/backup alpine \
   tar czf "/backup/minio-$STAMP.tar.gz" -C /data . 2>/dev/null
 
-# 3) تدوير: احتفظ بآخر 14 نسخة فقط
+# 3) الأسرار والإعدادات (مفتاح GA4 + ملفات .env) — بدونها لا تكتمل استعادة الخادم،
+#    وهي غير موجودة على git فلا مصدر آخر لها.
+tar czf "$BK/secrets-$STAMP.tar.gz" \
+  backend/secrets backend/.env .env.local 2>/dev/null || true
+
+# 4) تدوير: احتفظ بآخر 14 نسخة فقط
 ls -1t "$BK"/db-*.sql.gz    2>/dev/null | tail -n +15 | xargs -r rm -f
 ls -1t "$BK"/minio-*.tar.gz 2>/dev/null | tail -n +15 | xargs -r rm -f
+ls -1t "$BK"/secrets-*.tar.gz 2>/dev/null | tail -n +15 | xargs -r rm -f
 
 echo "[$(date)] backup ok: db-$STAMP.sql.gz + minio-$STAMP.tar.gz"
