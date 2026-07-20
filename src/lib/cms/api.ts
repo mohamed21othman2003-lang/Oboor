@@ -105,6 +105,8 @@ export type Analytics = {
   assessments_by_level: AnalyticsBucket[];
   careers_by_city: AnalyticsBucket[];
   careers_by_position: AnalyticsBucket[];
+  careers_trend: AnalyticsBucket[];
+  branch_city_mismatch: { pct: number; unserved: number; total: number; top: AnalyticsBucket[] };
 };
 export function getAnalytics() {
   return cmsFetch<Analytics>("/cms/analytics/");
@@ -123,6 +125,8 @@ export type Traffic = {
   by_channel?: AnalyticsBucket[];
   by_city?: AnalyticsBucket[];
   top_landing?: AnalyticsBucket[];
+  events?: Record<string, number>;
+  trend?: AnalyticsBucket[];
 };
 export function getTraffic() {
   return cmsFetch<Traffic>("/cms/analytics/traffic/");

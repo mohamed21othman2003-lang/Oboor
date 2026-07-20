@@ -82,6 +82,33 @@ const arcPercent: Plugin<"doughnut"> = {
   },
 };
 
+/** خط زمني (اتجاه عبر الأيام/الأسابيع). */
+export function LineChart({ data, height = 200, color = TEAL }: { data: Datum[]; height?: number; color?: string }) {
+  const ref = useChart(
+    {
+      type: "line",
+      data: {
+        labels: data.map((d) => d.label),
+        datasets: [{
+          data: data.map((d) => d.count),
+          borderColor: color, backgroundColor: "rgba(31,166,168,0.10)",
+          fill: true, tension: 0.35, pointRadius: 2, pointBackgroundColor: color, borderWidth: 2,
+        }],
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip },
+        scales: {
+          x: { grid: { display: false }, border: { display: false }, ticks: { color: INK, maxRotation: 0, autoSkip: true, maxTicksLimit: 8 } },
+          y: { beginAtZero: true, grid: { color: GRID }, border: { display: false }, ticks: { color: INK, precision: 0 } },
+        },
+      },
+    },
+    JSON.stringify(data) + color,
+  );
+  return <div style={{ position: "relative", height }}><canvas ref={ref} /></div>;
+}
+
 /** دونات لنِسب قليلة العناصر (جهاز/قناة/جنس/مستوى) — تعرض النِسب المئوية. */
 export function DonutChart({ data, height = 220 }: { data: Datum[]; height?: number }) {
   const ref = useChart(

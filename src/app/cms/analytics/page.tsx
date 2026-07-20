@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { getAnalytics, getTraffic, getSeo, type Analytics, type AnalyticsBucket, type Traffic, type Seo } from "@/lib/cms/api";
 import { useCmsLang } from "@/lib/cms/i18n";
-import { BarChart, DonutChart } from "@/components/cms/Chart";
+import { BarChart, DonutChart, LineChart } from "@/components/cms/Chart";
 import { labelTr } from "@/lib/cms/analyticsLabels";
 
 function I({ children, size = 18 }: { children: React.ReactNode; size?: number }) {
@@ -34,7 +34,7 @@ function MiniStat({ label, value }: { label: string; value: string }) {
 }
 
 // كارت رسم بياني — نوع مناسب لكل مقياس: bar (أفقي) / column (رأسي) / donut
-function ChartCard({ title, sub, data, type = "bar", height }: { title: string; sub?: string; data: AnalyticsBucket[]; type?: "bar" | "column" | "donut"; height?: number }) {
+function ChartCard({ title, sub, data, type = "bar", height }: { title: string; sub?: string; data: AnalyticsBucket[]; type?: "bar" | "column" | "donut" | "line"; height?: number }) {
   const { lang } = useCmsLang();
   const en = lang === "en";
   // ترجمة قيم التسميات لتتبع لغة اللوحة (جهاز/قناة/جنس/مستوى/حالة/منطقة)
@@ -49,6 +49,8 @@ function ChartCard({ title, sub, data, type = "bar", height }: { title: string; 
         <p className="py-8 text-center text-sm text-ink-soft">{en ? "No data yet" : "لا توجد بيانات بعد"}</p>
       ) : type === "donut" ? (
         <DonutChart data={tData} />
+      ) : type === "line" ? (
+        <LineChart data={tData} />
       ) : (
         <BarChart data={tData} horizontal={type === "bar"} height={height ?? (type === "bar" ? Math.max(170, data.length * 40) : 220)} />
       )}
@@ -119,12 +121,39 @@ export default function AnalyticsPage() {
                 <MiniStat label={t("معدل الارتداد", "Bounce Rate")} value={`${traffic.totals.bounce_rate}%`} />
                 <MiniStat label={t("متوسط زمن التفاعل", "Avg. Engagement")} value={fmtSec(traffic.totals.avg_engagement_sec)} />
               </div>
+              {traffic.trend && traffic.trend.length > 1 && (
+                <ChartCard title={t("اتجاه الجلسات", "Sessions Trend")} sub={t("الجلسات يوميًا", "sessions per day")} data={traffic.trend} type="line" />
+              )}
               <div className="grid gap-4 lg:grid-cols-2">
                 <ChartCard title={t("حسب الجهاز", "By Device")} data={traffic.by_device || []} type="donut" />
                 <ChartCard title={t("حسب القناة", "By Channel")} data={traffic.by_channel || []} type="donut" />
                 <ChartCard title={t("حسب المدينة", "By City")} data={traffic.by_city || []} type="bar" />
                 <ChartCard title={t("أكثر الصفحات دخولاً", "Top Landing Pages")} data={traffic.top_landing || []} type="bar" />
               </div>
+
+              {traffic.events && (
+                <>
+                  <h3 className="pt-1 text-base font-bold text-ink">{t("تفاعلات الزوّار (أحداث)", "Visitor Actions (events)")}</h3>
+                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    <Stat value={traffic.events.whatsapp_click || 0} label={t("ضغطات واتساب", "WhatsApp Clicks")} tint={C.teal} icon={<I size={20}><path d="M3 21l1.9-5.6A9 9 0 1 1 12 21a9 9 0 0 1-4.5-1.2L3 21z" /></I>} />
+                    <Stat value={traffic.events.phone_click || 0} label={t("ضغطات الهاتف", "Phone Clicks")} tint={C.deep} icon={<I size={20}><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2 4.2 2 2 0 0 1 4 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.6a2 2 0 0 1-.5 2.1L8 9.6a16 16 0 0 0 6 6l1.2-1.2a2 2 0 0 1 2.1-.5c.8.3 1.7.6 2.6.7a2 2 0 0 1 1.7 2z" /></I>} />
+                    <Stat value={traffic.events.email_click || 0} label={t("ضغطات الإيميل", "Email Clicks")} tint={C.blue} icon={<I size={20}><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 7 9 6 9-6" /></I>} />
+                    <Stat value={traffic.events.smart_search || 0} label={t("عمليات البحث الذكي", "Smart Searches")} tint={C.violet} icon={<I size={20}><circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3" /></I>} />
+                  </div>
+                  <div className="grid gap-4 lg:grid-cols-2">
+                    <ChartCard title={t("أزرار التواصل", "Contact Actions")} data={[
+                      { label: t("طلب التحاق", "Lead"), count: traffic.events.generate_lead || 0 },
+                      { label: t("واتساب", "WhatsApp"), count: traffic.events.whatsapp_click || 0 },
+                      { label: t("اتصال", "Phone"), count: traffic.events.phone_click || 0 },
+                      { label: t("إيميل", "Email"), count: traffic.events.email_click || 0 },
+                    ]} type="bar" />
+                    <ChartCard title={t("التقييم: بدء مقابل إكمال", "Assessment: Starts vs Completions")} data={[
+                      { label: t("بدء التقييم", "Starts"), count: traffic.events.assessment_start || 0 },
+                      { label: t("إكمال التقييم", "Completions"), count: traffic.events.assessment_complete || 0 },
+                    ]} type="column" />
+                  </div>
+                </>
+              )}
             </>
           ) : (
             <div className="rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-700">
@@ -207,6 +236,30 @@ export default function AnalyticsPage() {
           <div className="grid gap-4 lg:grid-cols-2">
             <ChartCard title={t("المتقدّمون حسب المدينة", "Applicants by City")} data={data.careers_by_city} type="bar" />
             <ChartCard title={t("المتقدّمون حسب الوظيفة", "Applicants by Position")} data={data.careers_by_position} type="bar" />
+          </div>
+          {data.careers_trend.length > 1 && (
+            <ChartCard title={t("اتجاه طلبات التوظيف", "Applications Trend")} sub={t("أسبوعيًا", "by week")} data={data.careers_trend} type="line" />
+          )}
+
+          {/* إشارات الطلب / فرص التوسّع */}
+          <h2 className="pt-2 text-lg font-bold text-ink">{t("إشارات الطلب", "Demand Signals")}</h2>
+          <div className="grid gap-4 lg:grid-cols-2">
+            <section className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-[#e6eff0]">
+              <h3 className="text-base font-bold text-ink">{t("طلبات من مدن بلا فرع", "Requests from Unserved Cities")}</h3>
+              <p className="mt-1 text-xs text-ink-soft">{t("فرص توسّع محتملة", "Potential expansion opportunities")}</p>
+              <div className="mt-3 flex items-baseline gap-2">
+                <span className="text-3xl font-extrabold text-ink">{data.branch_city_mismatch.pct}<span className="text-lg">%</span></span>
+                <span className="text-sm text-ink-soft">{t(`من الطلبات (${data.branch_city_mismatch.unserved} من ${data.branch_city_mismatch.total})`, `of requests (${data.branch_city_mismatch.unserved} of ${data.branch_city_mismatch.total})`)}</span>
+              </div>
+              {data.branch_city_mismatch.top.length > 0 ? (
+                <div className="mt-3 overflow-x-auto"><table className="w-full text-sm">
+                  <thead><tr className="text-ink-soft"><th className="pb-2 text-start font-semibold">{t("المدينة (بلا فرع)", "City (no branch)")}</th><th className="pb-2 text-end font-semibold">{t("الطلبات", "Requests")}</th></tr></thead>
+                  <tbody>{data.branch_city_mismatch.top.map((c) => <tr key={c.label} className="border-t border-[#eef4f5]"><td className="py-2 text-ink">{labelTr(c.label, en)}</td><td className="py-2 text-end font-bold">{c.count}</td></tr>)}</tbody>
+                </table></div>
+              ) : (
+                <p className="py-6 text-center text-sm text-ink-soft">{t("كل الطلبات من مدن بها فروع ✓", "All requests are from served cities ✓")}</p>
+              )}
+            </section>
           </div>
         </>
       )}

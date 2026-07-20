@@ -3,10 +3,15 @@
 يجمّع طلبات الالتحاق والتقييمات والتوظيف والرسائل في أرقام جاهزة للعرض
 في صفحة /cms/analytics. للأدمن فقط. GA4 لا يستطيع إنتاج هذه الأرقام.
 """
+import datetime
 import os
 import re
 import time
 from django.db.models import Count
+from django.db.models.functions import TruncWeek
+from django.utils import timezone
+
+from .m_branches import Branch
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -77,8 +82,41 @@ def analytics_overview(request):
         "assessments_by_level": _group(ass, "level", label_map=LEVEL_AR),
         "careers_by_city": _group(job, "city"),
         "careers_by_position": _group(job, "job"),
+        "careers_trend": _careers_trend(job),
+        "branch_city_mismatch": _branch_city_mismatch(adm),
     }
     return Response(data)
+
+
+def _careers_trend(job):
+    """طلبات التوظيف أسبوعيًا لآخر 8 أسابيع."""
+    since = timezone.now() - datetime.timedelta(weeks=8)
+    rows = (job.filter(created_at__gte=since)
+            .annotate(w=TruncWeek("created_at")).values("w").annotate(n=Count("id")).order_by("w"))
+    return [{"label": r["w"].strftime("%m/%d"), "count": r["n"]} for r in rows if r["w"]]
+
+
+def _branch_city_mismatch(adm):
+    """طلبات الالتحاق من مدن ليس بها فرع (فرصة توسّع)."""
+    served = set()
+    for city_ar, region_ar in Branch.objects.values_list("city_ar", "region_ar"):
+        for v in (city_ar, region_ar):
+            if v and v.strip():
+                served.add(v.strip())
+    cities = [(c or "").strip() for c in adm.values_list("city", flat=True) if (c or "").strip()]
+    total = len(cities)
+    unserved = {}
+    for c in cities:
+        if c not in served:
+            unserved[c] = unserved.get(c, 0) + 1
+    n_unserved = sum(unserved.values())
+    top = sorted(({"label": k, "count": v} for k, v in unserved.items()), key=lambda x: x["count"], reverse=True)[:8]
+    return {
+        "pct": round(n_unserved / total * 100) if total else 0,
+        "unserved": n_unserved,
+        "total": total,
+        "top": top,
+    }
 
 
 # ======================= زيارات الموقع (GA4 Data API) =======================
@@ -149,6 +187,30 @@ def traffic_overview(request):
                 out.append({"label": label, "count": int(r.metric_values[0].value or 0)})
             return out
 
+        # عدّادات الأحداث المخصّصة (ضغطات/فورمات/تقييم/بحث)
+        OUR_EVENTS = ["whatsapp_click", "phone_click", "email_click", "generate_lead",
+                      "form_submit", "assessment_start", "assessment_complete", "smart_search", "download_pdf"]
+        events = {e: 0 for e in OUR_EVENTS}
+        ev_resp = client.run_report(RunReportRequest(
+            property=pid, date_ranges=dr,
+            dimensions=[Dimension(name="eventName")], metrics=[Metric(name="eventCount")], limit=200,
+        ))
+        for r in ev_resp.rows:
+            name = r.dimension_values[0].value
+            if name in events:
+                events[name] = int(r.metric_values[0].value or 0)
+
+        # خط الجلسات عبر الأيام
+        tr_resp = client.run_report(RunReportRequest(
+            property=pid, date_ranges=dr,
+            dimensions=[Dimension(name="date")], metrics=[Metric(name="sessions")],
+            order_bys=[OrderBy(dimension=OrderBy.DimensionOrderBy(dimension_name="date"))],
+        ))
+
+        def _fmt(d):
+            return f"{d[6:8]}/{d[4:6]}" if len(d) == 8 else d
+        trend = [{"label": _fmt(r.dimension_values[0].value), "count": int(r.metric_values[0].value or 0)} for r in tr_resp.rows]
+
         data = {
             "connected": True,
             "range_days": 28,
@@ -157,6 +219,8 @@ def traffic_overview(request):
             "by_channel": by_dim("sessionDefaultChannelGroup", 6),
             "by_city": by_dim("city", 8),
             "top_landing": by_dim("landingPage", 8),
+            "events": events,
+            "trend": trend,
         }
         _GA_CACHE.update(ts=now, data=data)
         return Response(data)
