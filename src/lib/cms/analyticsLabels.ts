@@ -43,3 +43,38 @@ export function labelTr(raw: string, en: boolean): string {
   if (!raw) return raw;
   return en ? (AR2EN.get(raw) ?? raw) : (EN2AR.get(raw.toLowerCase()) ?? raw);
 }
+
+// أسماء الصفحات الودّية (بدل مسارات الروابط)
+const PAGE_NAMES: Record<string, [string, string]> = {
+  "/": ["الصفحة الرئيسية", "Home"],
+  "/admission": ["طلب الالتحاق", "Admission"],
+  "/about": ["عن عبور", "About"],
+  "/branches": ["المراكز", "Branches"],
+  "/programs": ["البرامج", "Programs"],
+  "/assessment": ["التقييم", "Assessment"],
+  "/contact": ["التواصل", "Contact"],
+  "/news": ["إعلامنا", "News"],
+  "/specialists": ["الأخصائيون", "Specialists"],
+  "/success-stories": ["قصص النجاح", "Success Stories"],
+  "/careers": ["الوظائف", "Careers"],
+  "/gallery": ["المعرض", "Gallery"],
+};
+const SECTION_NAMES: Record<string, [string, string]> = {
+  branches: ["مركز", "Branch"],
+  programs: ["برنامج", "Program"],
+  services: ["خدمة", "Service"],
+  techniques: ["تقنية", "Technique"],
+  news: ["خبر", "News"],
+  careers: ["وظيفة", "Job"],
+};
+
+/** يحوّل مسار الصفحة إلى اسم مفهوم حسب لغة اللوحة. */
+export function pageLabel(path: string, en: boolean): string {
+  const clean = (path || "/").split("?")[0].replace(/\/+$/, "") || "/";
+  const exact = PAGE_NAMES[clean];
+  if (exact) return en ? exact[1] : exact[0];
+  const parts = clean.split("/").filter(Boolean);
+  const sec = SECTION_NAMES[parts[0]];
+  if (parts.length >= 2 && sec) return `${en ? sec[1] : sec[0]}: ${decodeURIComponent(parts.slice(1).join("/"))}`;
+  return clean;
+}

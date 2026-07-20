@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { getAnalytics, getTraffic, getSeo, type Analytics, type AnalyticsBucket, type Traffic, type Seo } from "@/lib/cms/api";
 import { useCmsLang } from "@/lib/cms/i18n";
 import { BarChart, DonutChart, LineChart } from "@/components/cms/Chart";
-import { labelTr } from "@/lib/cms/analyticsLabels";
+import { labelTr, pageLabel } from "@/lib/cms/analyticsLabels";
 
 function I({ children, size = 18 }: { children: React.ReactNode; size?: number }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">{children}</svg>;
@@ -128,7 +128,7 @@ export default function AnalyticsPage() {
                 <ChartCard title={t("حسب الجهاز", "By Device")} data={traffic.by_device || []} type="donut" />
                 <ChartCard title={t("حسب القناة", "By Channel")} data={traffic.by_channel || []} type="donut" />
                 <ChartCard title={t("حسب المدينة", "By City")} data={traffic.by_city || []} type="bar" />
-                <ChartCard title={t("أكثر الصفحات دخولاً", "Top Landing Pages")} data={traffic.top_landing || []} type="bar" />
+                <ChartCard title={t("أكثر الصفحات دخولاً", "Top Landing Pages")} data={(traffic.top_landing || []).map((p) => ({ ...p, label: pageLabel(p.label, en) }))} type="bar" />
               </div>
 
               {traffic.events && (
@@ -184,12 +184,34 @@ export default function AnalyticsPage() {
               <div className="grid gap-4 lg:grid-cols-2">
                 <section className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-[#e6eff0]">
                   <h3 className="mb-3 text-base font-bold text-ink">{t("أكثر كلمات البحث", "Top Search Queries")}</h3>
-                  <div className="overflow-x-auto"><table className="w-full text-sm">
-                    <thead><tr className="text-ink-soft"><th className="pb-2 text-start font-semibold">{t("الكلمة", "Query")}</th><th className="pb-2 text-end font-semibold">{t("نقرات", "Clicks")}</th><th className="pb-2 text-end font-semibold">{t("ظهور", "Impr.")}</th><th className="pb-2 text-end font-semibold">{t("ترتيب", "Pos.")}</th></tr></thead>
-                    <tbody>{(seo.top_queries || []).map((q) => <tr key={q.label} className="border-t border-[#eef4f5]"><td className="py-2 text-ink">{q.label}</td><td className="py-2 text-end font-bold">{q.clicks}</td><td className="py-2 text-end text-ink-soft">{q.impressions}</td><td className="py-2 text-end text-ink-soft">{q.position}</td></tr>)}</tbody>
-                  </table></div>
+                  {(seo.top_queries?.length ?? 0) === 0 ? (
+                    <p className="py-8 text-center text-sm text-ink-soft">{t("لا توجد بيانات بعد", "No data yet")}</p>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full border-collapse text-sm">
+                        <thead>
+                          <tr className="text-[11px] uppercase tracking-wide text-ink-soft">
+                            <th className="pb-2.5 text-start font-bold">{t("الكلمة", "Query")}</th>
+                            <th className="px-2 pb-2.5 text-center font-bold">{t("نقرات", "Clicks")}</th>
+                            <th className="px-2 pb-2.5 text-center font-bold">{t("ظهور", "Impr.")}</th>
+                            <th className="pb-2.5 text-center font-bold">{t("الترتيب", "Pos.")}</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {(seo.top_queries || []).map((q) => (
+                            <tr key={q.label} className="border-t border-[#eef4f5] transition-colors hover:bg-[#f7fbfb]">
+                              <td className="max-w-[230px] truncate py-2.5 pe-3 font-medium text-ink" title={q.label}>{q.label}</td>
+                              <td className="px-2 py-2.5 text-center font-bold tabular-nums text-[#0F6C73]">{q.clicks}</td>
+                              <td className="px-2 py-2.5 text-center tabular-nums text-ink-soft">{q.impressions}</td>
+                              <td className="py-2.5 text-center"><span className="inline-block min-w-[34px] rounded-md bg-[#eef4f5] px-2 py-0.5 text-xs font-bold tabular-nums text-[#0F6C73]">{q.position}</span></td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
                 </section>
-                <ChartCard title={t("أكثر الصفحات ظهورًا في البحث", "Top Pages in Search")} sub={t("حسب مرات الظهور", "by impressions")} data={(seo.top_pages || []).map((p) => ({ label: p.label.replace("https://oboor.ido.sa", "") || "/", count: p.impressions }))} type="bar" />
+                <ChartCard title={t("أكثر الصفحات ظهورًا في البحث", "Top Pages in Search")} sub={t("حسب مرات الظهور", "by impressions")} data={(seo.top_pages || []).map((p) => ({ label: pageLabel(p.label.replace("https://oboor.ido.sa", ""), en), count: p.impressions }))} type="bar" />
               </div>
             </>
           ) : (
