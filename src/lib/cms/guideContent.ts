@@ -2,7 +2,10 @@
 // كل خطوة قد تحمل لقطة شاشة تُحلّ حسب اللغة إلى /guide/<lang>/<area>/<name>.png
 
 export type GuideShot = { area: "cms" | "site"; name: string; caption_ar?: string; caption_en?: string };
-export type GuideStep = { ar: string; en: string; shot?: GuideShot };
+// النصّ يدعم روابط بصيغة ماركداون: [النص الظاهر](الرابط) — تُحوّل إلى روابط قابلة للنقر.
+// points: نقاط فرعية (bullets) تظهر أسفل نصّ الخطوة لتفكيك الشرح الطويل.
+export type GuidePoint = { ar: string; en: string };
+export type GuideStep = { ar: string; en: string; shot?: GuideShot; points?: GuidePoint[] };
 export type FaqItem = { q_ar: string; q_en: string; a_ar: string; a_en: string };
 export type GlossaryItem = { term_ar: string; term_en: string; def_ar: string; def_en: string };
 export type GuideSection = {
@@ -24,6 +27,9 @@ const cms = (name: string, ar: string, en: string, cap_ar?: string, cap_en?: str
 const site = (name: string, ar: string, en: string): GuideStep =>
   ({ ar, en, shot: { area: "site", name } });
 const p = (ar: string, en: string): GuideStep => ({ ar, en });
+// خطوة بنقاط فرعية (bullets). كل نقطة زوج [عربي، إنجليزي]، ويمكن أن تحوي روابط [نص](رابط).
+const pl = (ar: string, en: string, points: [string, string][]): GuideStep =>
+  ({ ar, en, points: points.map(([a, e]) => ({ ar: a, en: e })) });
 
 export const GUIDE: GuidePart[] = [
   // ============================ الجزء 1: الأساسيات ============================
@@ -39,7 +45,7 @@ export const GUIDE: GuidePart[] = [
         intro_ar: "لوحة التحكّم محميّة باسم مستخدم وكلمة مرور، فلا يستطيع أحد تعديل الموقع دون تسجيل دخول.",
         intro_en: "The control panel is protected by a username and password, so no one can change the site without signing in.",
         steps: [
-          cms("login", "افتح رابط لوحة التحكّم المنتهي بـ /cms. إن لم تكن مسجّلاً ستظهر شاشة الدخول.", "Open the control-panel link ending with /cms. If you're not signed in, the sign-in screen appears."),
+          cms("login", "افتح [صفحة لوحة التحكّم](/cms) (الرابط المنتهي بـ /cms). إن لم تكن مسجّلاً ستظهر شاشة الدخول.", "Open the [control-panel page](/cms) (the link ending with /cms). If you're not signed in, the sign-in screen appears."),
           p("اكتب اسم المستخدم وكلمة المرور ثم اضغط «تسجيل الدخول».", "Enter your username and password, then click “Sign in”."),
           p("لو نسيت كلمة المرور، اضغط «نسيت كلمة المرور؟» أسفل الحقول ليصلك رابط إعادة تعيين على بريدك المسجّل (تفاصيل أكثر في قسم «حسابي»).", "If you forget your password, click “Forgot password?” below the fields to receive a reset link on your registered email (more in the “My Account” section)."),
           p("زر الكرة الأرضية أعلى الشاشة يبدّل لغة اللوحة نفسها بين العربية والإنجليزية في أي وقت.", "The globe button at the top switches the panel's own language between Arabic and English at any time."),
@@ -77,7 +83,7 @@ export const GUIDE: GuidePart[] = [
         intro_ar: "من صفحة «حسابي» تدير بيانات دخولك بنفسك — تغيّر بريدك الإلكتروني أو كلمة مرورك في أي وقت وأنت مسجّل الدخول.",
         intro_en: "From the “My Account” page you manage your own sign-in details — change your email or password anytime while signed in.",
         steps: [
-          cms("account", "افتح «حسابي» من أسفل القائمة الجانبية، أو اضغط على اسمك/صورتك أعلى الشريط.", "Open “My Account” from the bottom of the sidebar, or click your name/avatar in the top bar."),
+          cms("account", "افتح [صفحة «حسابي»](/cms/account) من أسفل القائمة الجانبية، أو اضغط على اسمك/صورتك أعلى الشريط.", "Open [the “My Account” page](/cms/account) from the bottom of the sidebar, or click your name/avatar in the top bar."),
           p("اسم المستخدم للعرض فقط ولا يمكن تعديله (لأسباب أمنية). أمّا البريد الإلكتروني فقابل للتعديل — بعد تغييره اضغط «حفظ البريد الإلكتروني».", "The username is read-only (for security). The email, however, is editable — after changing it, click “Save email”."),
           p("لتغيير كلمة المرور: اكتب كلمة المرور الحالية، ثم الجديدة، ثم أكّدها (٨ أحرف على الأقل)، واضغط «تحديث كلمة المرور».", "To change your password: enter your current password, then the new one, then confirm it (at least 8 characters), and click “Update password”."),
           p("زر العين بجانب كل حقل يُظهر/يُخفي كلمة المرور للتأكّد منها قبل الحفظ.", "The eye button next to each field shows/hides the password so you can verify it before saving."),
@@ -114,12 +120,27 @@ export const GUIDE: GuidePart[] = [
           p("٥) اسم المستخدم (الإيميل): هو عنوان بريد شركتكم الكامل الذي ستُرسَل منه الرسائل، مثل: info@company.com. اكتبه كاملًا وبشكل صحيح.", "5) Username (email): your company's full email address that messages will be sent from, e.g. info@company.com. Type it in full and correctly."),
           p("٦) كلمة مرور التطبيق (App Password): وهنا أهم نقطة — في Gmail و Outlook لا تضع كلمة مرور بريدك العادية، بل «كلمة مرور تطبيق» خاصة تُنشئها لهذا الغرض. الخطوات التالية تشرح كيف تحصل عليها. (في cPanel/بريد الاستضافة تضع كلمة مرور البريد العادية.)", "6) App Password: this is the most important point — for Gmail and Outlook you do NOT use your normal email password, but a special “app password” you generate for this purpose. The next steps explain how to get it. (For cPanel/hosting mail you use the normal mailbox password.)"),
           p("لماذا كلمة مرور تطبيق وليست كلمتك العادية؟ لأن Google و Microsoft يمنعان البرامج الخارجية من استخدام كلمة مرورك الأساسية (لحمايتها). فتُنشئ كلمة بديلة مخصّصة لهذا النظام فقط — ولو ألغيتها يومًا لا تتأثر كلمة مرور بريدك الأصلية.", "Why an app password and not your normal one? Because Google and Microsoft block outside programs from using your main password (to protect it). So you generate a substitute dedicated to this system only — and if you ever revoke it, your real email password is unaffected."),
-          p("كيف أحصل على App Password من Gmail؟ فعّل «التحقّق بخطوتين» على حساب Google أولًا (إجباري)، ثم افتح myaccount.google.com/apppasswords ← اكتب اسمًا (مثل: موقع عبور) ← اضغط «إنشاء» ← ستظهر ٤ مجموعات من ٤ أحرف. انسخها والصقها في خانة كلمة مرور التطبيق (تجاهل المسافات).", "How to get an App Password from Gmail? First turn on “2-Step Verification” on your Google account (required), then open myaccount.google.com/apppasswords → type a name (e.g. Oboor site) → click “Create” → 4 groups of 4 characters appear. Copy and paste them into the app-password box (ignore the spaces)."),
-          p("كيف أحصل عليها من Outlook/Office365؟ من account.microsoft.com/security ← «خيارات الأمان المتقدّمة» ← فعّل «التحقّق بخطوتين» ← ثم «كلمات مرور التطبيقات» ← «إنشاء كلمة مرور تطبيق جديدة» ← انسخ الكلمة الظاهرة والصقها في الخانة. (بعض حسابات Office365 المؤسسية تديرها إدارة تقنية شركتكم — لو لم تجد الخيار، اطلب منهم تفعيله.)", "How to get it from Outlook/Office365? Go to account.microsoft.com/security → “Advanced security options” → turn on “Two-step verification” → then “App passwords” → “Create a new app password” → copy the shown password and paste it into the box. (Some corporate Office365 accounts are managed by your company's IT — if you don't see the option, ask them to enable it.)"),
+          pl("كيف تحصل على كلمة مرور التطبيق من Gmail؟ اتبع هذه الخطوات بالترتيب:", "How to get an App Password from Gmail? Follow these steps in order:", [
+            ["فعّل «التحقّق بخطوتين» على حسابك في Google أولًا — وهو إجباري. تجده في [إعدادات أمان Google](https://myaccount.google.com/security).", "First turn on “2-Step Verification” on your Google account — it's required. You'll find it in [Google security settings](https://myaccount.google.com/security)."],
+            ["افتح صفحة [كلمات مرور التطبيقات في Google](https://myaccount.google.com/apppasswords).", "Open the [Google App Passwords page](https://myaccount.google.com/apppasswords)."],
+            ["اكتب اسمًا يميّز هذا الاستخدام (مثل: موقع عبور) ثم اضغط «إنشاء».", "Type a name to identify this use (e.g. Oboor site), then click “Create”."],
+            ["ستظهر كلمة من ٤ مجموعات × ٤ أحرف. انسخها والصقها في خانة «كلمة مرور التطبيق» في اللوحة (تجاهل المسافات).", "A password of 4 groups × 4 characters appears. Copy it and paste it into the “App Password” box in the panel (ignore the spaces)."],
+          ]),
+          pl("كيف تحصل عليها من Outlook / Office365؟ اتبع هذه الخطوات:", "How to get it from Outlook / Office365? Follow these steps:", [
+            ["افتح صفحة [أمان حساب Microsoft](https://account.microsoft.com/security).", "Open the [Microsoft account security page](https://account.microsoft.com/security)."],
+            ["ادخل إلى «خيارات الأمان المتقدّمة» وفعّل «التحقّق بخطوتين».", "Go into “Advanced security options” and turn on “Two-step verification”."],
+            ["افتح «كلمات مرور التطبيقات» ثم اضغط «إنشاء كلمة مرور تطبيق جديدة».", "Open “App passwords”, then click “Create a new app password”."],
+            ["انسخ الكلمة الظاهرة والصقها في خانة «كلمة مرور التطبيق» في اللوحة.", "Copy the shown password and paste it into the “App Password” box in the panel."],
+            ["ملاحظة: بعض حسابات Office365 المؤسسية تديرها إدارة تقنية شركتكم — لو لم تجد الخيار فاطلب منهم تفعيله.", "Note: some corporate Office365 accounts are managed by your company's IT — if you don't see the option, ask them to enable it."],
+          ]),
           p("ملاحظة أمان مهمة: كلمة مرور التطبيق تُحفظ ولا تظهر مرة أخرى بعد الحفظ (تراها كنقاط ••••••). هذا مقصود لحمايتها. لو احتجت تغييرها لاحقًا، اكتب الجديدة فوقها واحفظ.", "Important security note: the app password is stored and never shown again after saving (you'll see it as dots ••••••). That's intentional, to protect it. If you need to change it later, type the new one over it and save."),
           p("٧) اسم المُرسِل الظاهر (Sender name): الاسم الذي يظهر للمستقبِل كمُرسِل للرسالة، مثل: «مركز عبور للرعاية والتأهيل». اختياري لكنه يعطي انطباعًا احترافيًا.", "7) Sender display name: the name recipients see as the sender, e.g. “Oboor Center”. Optional, but it looks professional."),
           p("٨) عنوان المُرسِل (From) — اختياري: لو أردت أن تظهر الرسائل كأنها من عنوان مختلف عن اسم المستخدم، اكتبه هنا. لو تركته فارغًا، يستخدم النظام نفس اسم المستخدم تلقائيًا — وهذا هو الأنسب في معظم الحالات.", "8) From address — optional: if you want messages to appear from a different address than the username, type it here. Left blank, the system uses the username automatically — which is best in most cases."),
-          p("٩) احفظ ثم اختبر: بعد تعبئة الحقول اضغط «حفظ إعدادات البريد». ثم في مربّع «إرسال رسالة تجريبية» اكتب بريدك واضغط «إرسال اختبار». إن وصلتك الرسالة خلال دقيقة، فكل شيء يعمل. إن ظهر خطأ، فهو يوضّح السبب (غالبًا كلمة مرور تطبيق غير صحيحة).", "9) Save then test: after filling the fields, click “Save email settings”. Then in the “Send a test email” box, type your email and click “Send test”. If it arrives within a minute, everything works. If an error shows, it explains the reason (usually an incorrect app password)."),
+          pl("٩) احفظ ثم اختبر: خطوتان أخيرتان للتأكّد أن كل شيء يعمل. يمكنك فتح الإعدادات مباشرةً من هنا: [صفحة «حسابي»](/cms/account).", "9) Save then test: two final steps to confirm everything works. You can open the settings directly here: [the “My Account” page](/cms/account).", [
+            ["بعد تعبئة الحقول اضغط «حفظ إعدادات البريد».", "After filling the fields, click “Save email settings”."],
+            ["في مربّع «إرسال رسالة تجريبية» اكتب بريدك واضغط «إرسال اختبار».", "In the “Send a test email” box, type your email and click “Send test”."],
+            ["إن وصلتك الرسالة خلال دقيقة فكل شيء يعمل. وإن ظهر خطأ فهو يوضّح السبب (غالبًا كلمة مرور تطبيق غير صحيحة).", "If it arrives within a minute, everything works. If an error shows, it explains the reason (usually an incorrect app password)."],
+          ]),
         ],
         faq: [
           faq("جرّبت الإرسال وظهر خطأ «بيانات المصادقة غير صحيحة»، ماذا أفعل؟", "I tried sending and got an “authentication data is incorrect” error — what now?",
@@ -321,7 +342,7 @@ export const GUIDE: GuidePart[] = [
         intro_ar: "كل ما يرسله الزوّار (رسائل، طلبات التحاق وتوظيف، نتائج تقييم) يصلك هنا في جداول للقراءة والإدارة.",
         intro_en: "Everything visitors send (messages, admission and job requests, assessment results) arrives here in tables for viewing and managing.",
         steps: [
-          cms("submissions-admission", "افتح النوع من مجموعة «الطلبات والرسائل». يظهر جدول بكل الطلبات، الأحدث أولاً، مع بحث وفلاتر (الفرع، النوع، الفترة).", "Open the type from the “Requests & Messages” group. A table shows all requests newest-first, with search and filters (branch, type, period)."),
+          cms("submissions-admission", "افتح النوع الذي تريده من مجموعة «الطلبات والرسائل»: [رسائل التواصل](/cms/submissions/contact) · [طلبات الالتحاق](/cms/submissions/admission) · [طلبات التوظيف](/cms/submissions/career) · [نتائج التقييم](/cms/submissions/assessment). يظهر جدول بكل الطلبات، الأحدث أولاً، مع بحث وفلاتر (الفرع، النوع، الفترة).", "Open the type you want from the “Requests & Messages” group: [Contact Messages](/cms/submissions/contact) · [Admission Requests](/cms/submissions/admission) · [Job Applications](/cms/submissions/career) · [Assessment Results](/cms/submissions/assessment). A table shows all requests newest-first, with search and filters (branch, type, period)."),
           cms("detail-submission", "اضغط زر «عرض التفاصيل» (العين) لأي طلب لفتح كل بياناته. وتجد أزرار مراسلة سريعة: إيميل وواتساب.", "Click the “View details” (eye) button on any request to open all its data. There are also quick contact buttons: email and WhatsApp."),
           p("في طلبات التوظيف يظهر زر لفتح ملف السيرة الذاتية المرفق.", "Job applications also show a button to open the attached CV file."),
           p("زر «تصدير» ينزّل كل الطلبات كملف Excel منسّق (مع روابط السير الذاتية) — مناسب للأرشفة أو المشاركة.", "The “Export” button downloads all requests as a formatted Excel file (with CV links) — handy for archiving or sharing."),
@@ -333,7 +354,7 @@ export const GUIDE: GuidePart[] = [
         title_ar: "إعدادات الموقع",
         title_en: "Site Settings",
         steps: [
-          cms("settings", "«إعدادات الموقع» تجمع البيانات العامة في مكان واحد. تحتوي عادةً على: رقم الواتساب الموحّد، رقم الهاتف، البريد الإلكتروني، العنوان، ورابط الخريطة — أي البيانات التي تتكرّر في أكثر من صفحة.", "“Site Settings” gathers global data in one place. It typically holds: the unified WhatsApp number, phone, email, address, and the map link — the data that repeats across more than one page."),
+          cms("settings", "[صفحة «إعدادات الموقع»](/cms/settings) تجمع البيانات العامة في مكان واحد. تحتوي عادةً على: رقم الواتساب الموحّد، رقم الهاتف، البريد الإلكتروني، العنوان، ورابط الخريطة — أي البيانات التي تتكرّر في أكثر من صفحة.", "[The “Site Settings” page](/cms/settings) gathers global data in one place. It typically holds: the unified WhatsApp number, phone, email, address, and the map link — the data that repeats across more than one page."),
           p("مثال مهم: حقل رقم الواتساب يتحكّم في كل أزرار الواتساب على مستوى الموقع كله — غيّره من هنا مرة واحدة فيتغيّر في كل مكان.", "Key example: the WhatsApp field controls every WhatsApp button across the whole site — change it here once and it changes everywhere."),
           p("ما الذي لا يُدار من هنا؟ روابط التواصل الاجتماعي (إنستغرام، تيك توك، X) تُحرَّر من أقسام تذييل الصفحة (Footer)، وعناوين بطاقات التواصل الثلاث تُحرَّر من صفحة «التواصل» نفسها. فلو لم تجد ما تبحث عنه في «إعدادات الموقع»، فهو غالبًا في صفحته الخاصة.", "What isn't managed here? Social links (Instagram, TikTok, X) are edited from the footer sections, and the three contact-card titles are edited from the “Contact” page itself. So if you don't find something in “Site Settings”, it's likely on its own page."),
           p("اضغط «حفظ» بعد التعديل ليسري التغيير على كل الصفحات فوراً.", "Click “Save” after editing so the change applies to all pages immediately."),
@@ -352,8 +373,8 @@ export const GUIDE: GuidePart[] = [
         id: "analytics-overview",
         title_ar: "ما هي صفحة التحليلات؟",
         title_en: "What is the Analytics page?",
-        intro_ar: "صفحة «التحليلات» هي لوحة القيادة التي تريك ماذا يحدث في موقعك بالأرقام: كم زائرًا جاء، من أين، وكم طلبًا وتقييمًا وتوظيفًا وصلك. افتحها من «التحليلات» في القائمة الجانبية. فكّر فيها كطبلون السيارة — يجمع كل المؤشّرات في مكان واحد لتعرف حالة موقعك بنظرة.",
-        intro_en: "The “Analytics” page is the dashboard that shows what's happening on your site in numbers: how many visitors came, from where, and how many requests, assessments, and job applications you received. Open it from “Analytics” in the sidebar. Think of it like a car dashboard — it gathers all the gauges in one place so you know your site's health at a glance.",
+        intro_ar: "صفحة «التحليلات» هي لوحة القيادة التي تريك ماذا يحدث في موقعك بالأرقام: كم زائرًا جاء، من أين، وكم طلبًا وتقييمًا وتوظيفًا وصلك. افتحها مباشرةً من هنا: [صفحة التحليلات](/cms/analytics). فكّر فيها كطبلون السيارة — يجمع كل المؤشّرات في مكان واحد لتعرف حالة موقعك بنظرة.",
+        intro_en: "The “Analytics” page is the dashboard that shows what's happening on your site in numbers: how many visitors came, from where, and how many requests, assessments, and job applications you received. Open it directly here: [the Analytics page](/cms/analytics). Think of it like a car dashboard — it gathers all the gauges in one place so you know your site's health at a glance.",
         steps: [
           p("الأرقام تأتي من ثلاثة مصادر مختلفة، وكل قسم مكتوب فوقه مصدره: (١) «نظامك (CMS)» — أرقام الطلبات والتقييمات من قاعدة بياناتك مباشرة، وتتحدّث فورًا مع كل طلب جديد. (٢) «زيارات الموقع (GA4)» — من Google Analytics، تُظهر الزوّار وسلوكهم. (٣) «أداء البحث (SEO)» — من Google Search Console، تُظهر ظهورك في نتائج بحث جوجل.", "The numbers come from three different sources, and each section is labelled with its source: (1) “Your system (CMS)” — request and assessment figures straight from your database, updating instantly with each new request. (2) “Website Traffic (GA4)” — from Google Analytics, showing visitors and their behaviour. (3) “Search Performance (SEO)” — from Google Search Console, showing your presence in Google search results."),
           p("لا تحتاج لعمل أي شيء لتظهر الأرقام — كلها تُجمَع تلقائيًا. دورك فقط أن تقرأها وتفهمها، وهذا ما تشرحه الأقسام التالية.", "You don't need to do anything for the numbers to appear — they're all collected automatically. Your only job is to read and understand them, which the next sections explain."),
@@ -405,7 +426,7 @@ export const GUIDE: GuidePart[] = [
         intro_ar: "هذه أهم الأرقام العملية لك: كل ما وصلك عبر نماذج الموقع، مأخوذ من قاعدة بياناتك مباشرةً ويتحدّث فورًا.",
         intro_en: "These are the most practical figures for you: everything received through the site's forms, taken straight from your database and updating instantly.",
         steps: [
-          cms("analytics", "البطاقات الأربعة: «طلبات الالتحاق»، «نتائج التقييم»، «رسائل التواصل»، «طلبات التوظيف» — إجمالي كلٍّ منها. هذه نفس الطلبات التي تديرها من أقسام «الطلبات والرسائل». وتحتها مباشرةً تبدأ الرسوم البيانية كما في الصورة.", "The four cards: “Admission Requests”, “Assessments”, “Contact Messages”, “Job Applications” — the total of each. These are the same requests you manage from the “Requests & Messages” sections. Directly below them the charts begin, as shown in the image."),
+          cms("analytics", "البطاقات الأربعة: «طلبات الالتحاق»، «نتائج التقييم»، «رسائل التواصل»، «طلبات التوظيف» — إجمالي كلٍّ منها. هذه نفس الطلبات التي تديرها من أقسام الطلبات: [الالتحاق](/cms/submissions/admission) · [التقييم](/cms/submissions/assessment) · [التواصل](/cms/submissions/contact) · [التوظيف](/cms/submissions/career). وتحتها مباشرةً تبدأ الرسوم البيانية كما في الصورة.", "The four cards: “Admission Requests”, “Assessments”, “Contact Messages”, “Job Applications” — the total of each. These are the same requests you manage from: [Admission](/cms/submissions/admission) · [Assessment](/cms/submissions/assessment) · [Contact](/cms/submissions/contact) · [Careers](/cms/submissions/career). Directly below them the charts begin, as shown in the image."),
           p("«طلبات الالتحاق» بالتفصيل: رسوم توزّع الطلبات «حسب الفرع» و«حسب المدينة» و«حسب نوع الحالة» و«حسب الفئة العمرية» و«حسب الجنس» — تساعدك تعرف أي فرع وأي فئة عليها إقبال أكبر.", "“Admission Requests” in detail: charts breaking requests down “By Branch”, “By City”, “By Case Type”, “By Age Band”, and “By Gender” — helping you see which branch and which segment has the most demand."),
           p("«التقييمات»: توزيع نتائج التقييم «حسب النوع» و«حسب مستوى الحالة» (مرتفع/متوسط/منخفض).", "“Assessments”: assessment results broken down “By Type” and “By Level” (high/medium/low)."),
           p("«التوظيف»: المتقدّمون «حسب المدينة» و«حسب الوظيفة»، ورسم «اتجاه طلبات التوظيف» أسبوعيًا لترى فترات الإقبال على الوظائف.", "“Recruitment”: applicants “By City” and “By Position”, plus an “Applications Trend” chart by week so you can see peak hiring interest periods."),
@@ -565,7 +586,7 @@ export const GUIDE: GuidePart[] = [
         intro_ar: "وصفة كاملة لإضافة فرع من الصفر حتى يظهر على الموقع.",
         intro_en: "A complete recipe to add a branch from scratch until it appears on the site.",
         steps: [
-          cms("list-branches", "من القائمة الجانبية افتح «مراكزنا (الفروع)». الفروع مقسّمة إلى مجموعات حسب المنطقة، فلا يوجد زر «إضافة» واحد أعلى القائمة. افتح أولًا مجموعة المنطقة التي سيتبعها الفرع (مثل «الرياض»).", "From the sidebar open “Our Centers (Branches)”. Branches are grouped by region, so there's no single “Add” button at the top. First open the region group the branch will belong to (e.g. “Riyadh”)."),
+          cms("list-branches", "افتح [صفحة «مراكزنا (الفروع)»](/cms/content/branches). الفروع مقسّمة إلى مجموعات حسب المنطقة، فلا يوجد زر «إضافة» واحد أعلى القائمة. افتح أولًا مجموعة المنطقة التي سيتبعها الفرع (مثل «الرياض»).", "Open [the “Our Centers (Branches)” page](/cms/content/branches). Branches are grouped by region, so there's no single “Add” button at the top. First open the region group the branch will belong to (e.g. “Riyadh”)."),
           p("اضغط زر تلك المجموعة «إضافة فرع — <اسم المنطقة>». يفتح المحرّر بحقول فارغة، والفرع الجديد يرث تلك المنطقة تلقائيًا.", "Click that group's “Add Branch — <region>” button. The editor opens with empty fields, and the new branch inherits that region automatically."),
           cms("editor", "املأ الاسم والمدينة والعنوان — بالعربية والإنجليزية معاً. راقب شريط الاكتمال حتى يصل 100%.", "Fill the name, city, and address — in both Arabic and English. Watch the completion bar reach 100%."),
           p("أضف رقم التواصل، المدير، ورابط الخريطة في قسم «بيانات الفرع الأساسية».", "Add the phone number, manager, and map link in the “Branch basic info” section."),
@@ -578,7 +599,7 @@ export const GUIDE: GuidePart[] = [
         title_ar: "نشر خبر أو فعالية",
         title_en: "Publish a News Item or Event",
         steps: [
-          cms("list-news", "افتح «إعلامنا (الأخبار والمقالات)» واضغط «إضافة خبر».", "Open “Our Media (News & Articles)” and click “Add News”."),
+          cms("list-news", "افتح [صفحة «إعلامنا (الأخبار والمقالات)»](/cms/content/news) واضغط «إضافة خبر».", "Open [the “Our Media (News & Articles)” page](/cms/content/news) and click “Add News”."),
           p("اكتب العنوان والمحتوى بالعربية والإنجليزية، وارفع صورة الخبر.", "Write the title and content in Arabic and English, and upload the article image."),
           p("لفعالية أو ورشة: اختر القسم «فعاليات» أو «ورش» فتظهر حقول المكان والوقت — املأها.", "For an event or workshop: set the section to “Events” or “Workshops” to reveal place/time fields — fill them."),
           p("اضغط «حفظ». الأخبار تظهر بالأحدث أولاً في صفحة «إعلامنا» وفي الصفحة الرئيسية.", "Click “Save”. News shows newest-first on the “Our Media” page and on the home page."),
@@ -589,7 +610,7 @@ export const GUIDE: GuidePart[] = [
         title_ar: "تغيير صورة أو محتوى الصفحة الرئيسية",
         title_en: "Change a Home-Page Image or Text",
         steps: [
-          cms("page-content-home", "افتح «الصفحة الرئيسية». عدّل العناوين والنصوص من لوحة «محتوى وعناوين الصفحة» أعلى الصفحة.", "Open “Home Page”. Edit headings and texts from the “Page content & headings” panel at the top."),
+          cms("page-content-home", "افتح [صفحة «الصفحة الرئيسية»](/cms/home). عدّل العناوين والنصوص من لوحة «محتوى وعناوين الصفحة» أعلى الصفحة.", "Open [the “Home Page”](/cms/home). Edit headings and texts from the “Page content & headings” panel at the top."),
           cms("detail-image", "لتغيير صورة (مثل شريحة الهيرو): افتح القسم المطلوب من قوائم الصفحة، اضغط منطقة الصورة وارفع صورة جديدة.", "To change an image (e.g. a hero slide): open the relevant list, click the image area, and upload a new image."),
           p("اضغط «حفظ» بعد كل تعديل. استخدم «معاينة» لرؤية الشكل قبل النشر.", "Click “Save” after each change. Use “Preview” to see the look before publishing."),
         ],
@@ -599,7 +620,7 @@ export const GUIDE: GuidePart[] = [
         title_ar: "الرد على طلب وارد",
         title_en: "Respond to an Incoming Request",
         steps: [
-          cms("submissions-admission", "افتح النوع المطلوب من «الطلبات والرسائل» (مثل «طلبات الالتحاق»).", "Open the type from “Requests & Messages” (e.g. “Admission Requests”)."),
+          cms("submissions-admission", "افتح النوع المطلوب من «الطلبات والرسائل» — مثل [طلبات الالتحاق](/cms/submissions/admission) أو [رسائل التواصل](/cms/submissions/contact).", "Open the type from “Requests & Messages” — e.g. [Admission Requests](/cms/submissions/admission) or [Contact Messages](/cms/submissions/contact)."),
           cms("detail-submission", "اضغط «عرض التفاصيل» (العين) لقراءة كل بيانات الطلب، ثم راسل مقدّم الطلب عبر زر الواتساب أو الإيميل مباشرةً.", "Click “View details” (eye) to read all the request data, then contact the applicant via the WhatsApp or email button directly."),
           p("لأرشفة أو مشاركة الطلبات، استخدم زر «تصدير» لتنزيلها كملف Excel منسّق.", "To archive or share requests, use the “Export” button to download them as a formatted Excel file."),
         ],

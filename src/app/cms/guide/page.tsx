@@ -19,10 +19,37 @@ const PART_ICON: Record<string, React.ReactNode> = {
   help: I(<><circle cx="12" cy="12" r="9" /><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01" /></>),
 };
 
+// يحوّل نصًّا فيه روابط ماركداون [النص](الرابط) إلى عُقد React مع روابط قابلة للنقر.
+// الروابط الخارجية والداخلية تُفتح في تبويب جديد حتى لا يفقد المستخدم مكانه في الدليل.
+function renderRich(text: string): React.ReactNode {
+  const re = /\[([^\]]+)\]\(([^)]+)\)/g;
+  const nodes: React.ReactNode[] = [];
+  let last = 0;
+  let m: RegExpExecArray | null;
+  let i = 0;
+  while ((m = re.exec(text))) {
+    if (m.index > last) nodes.push(text.slice(last, m.index));
+    const [, label, url] = m;
+    nodes.push(
+      <a key={i++} href={url} target="_blank" rel="noopener noreferrer"
+         className="font-bold text-[#0F6C73] underline decoration-[#1FA6A8]/40 underline-offset-2 transition-colors hover:text-[#1FA6A8] hover:decoration-[#1FA6A8]">
+        {label}
+        <svg className="inline-block ms-0.5 mb-0.5 h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><path d="M15 3h6v6M10 14 21 3" /></svg>
+      </a>
+    );
+    last = re.lastIndex;
+  }
+  if (last < text.length) nodes.push(text.slice(last));
+  return nodes;
+}
+
 // نصّ قابل للبحث داخل قسم (باللغة الحالية)
 function sectionText(s: GuideSection, en: boolean): string {
   const parts: string[] = [en ? s.title_en : s.title_ar, (en ? s.intro_en : s.intro_ar) || ""];
-  (s.steps || []).forEach((st) => parts.push(en ? st.en : st.ar));
+  (s.steps || []).forEach((st) => {
+    parts.push(en ? st.en : st.ar);
+    (st.points || []).forEach((pt) => parts.push(en ? pt.en : pt.ar));
+  });
   (s.faq || []).forEach((f) => parts.push(en ? `${f.q_en} ${f.a_en}` : `${f.q_ar} ${f.a_ar}`));
   (s.glossary || []).forEach((g) => parts.push(en ? `${g.term_en} ${g.def_en}` : `${g.term_ar} ${g.def_ar}`));
   return parts.join(" ").toLowerCase();
@@ -251,7 +278,19 @@ export default function GuidePage() {
                             <li key={i} className="group rounded-2xl bg-white p-4 shadow-sm ring-1 ring-[#e6eff0] transition-all hover:shadow-md hover:ring-[#1FA6A8]/30 sm:p-5">
                               <div className="flex gap-3">
                                 <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#1FA6A8]/12 text-xs font-bold text-[#0F6C73]">{i + 1}</span>
-                                <p className="text-sm leading-7 text-ink">{en ? step.en : step.ar}</p>
+                                <div className="min-w-0 flex-1">
+                                  <p className="text-sm leading-7 text-ink">{renderRich(en ? step.en : step.ar)}</p>
+                                  {step.points && step.points.length > 0 && (
+                                    <ul className="mt-2.5 space-y-2">
+                                      {step.points.map((pt, pi) => (
+                                        <li key={pi} className="flex gap-2.5 text-sm leading-7 text-ink-muted">
+                                          <span className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#1FA6A8]" />
+                                          <span className="min-w-0">{renderRich(en ? pt.en : pt.ar)}</span>
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  )}
+                                </div>
                               </div>
                               {step.shot && (
                                 <figure className="mt-4 overflow-hidden rounded-xl bg-white shadow-lg ring-1 ring-[#e6eff0]">
