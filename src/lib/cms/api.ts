@@ -96,7 +96,7 @@ export function getStats() {
 export type AnalyticsBucket = { label: string; count: number };
 export type Analytics = {
   totals: { admissions: number; assessments: number; contacts: number; careers: number };
-  admissions_by_branch: AnalyticsBucket[];
+  admissions_by_branch: { label_ar: string; label_en: string; count: number }[];
   admissions_by_city: AnalyticsBucket[];
   admissions_by_gender: AnalyticsBucket[];
   admissions_by_age: AnalyticsBucket[];

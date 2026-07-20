@@ -109,6 +109,21 @@ def _group(qs, field, limit=12, label_map=None):
     return rows[:limit]
 
 
+def _group_branch(adm):
+    """تجميع الطلبات حسب الفرع مع اسمي الفرع (عربي/إنجليزي) من قاعدة البيانات."""
+    name_map = {}
+    for na, ne in Branch.objects.values_list("name_ar", "name_en"):
+        if na and na.strip():
+            name_map[na.strip()] = (ne or na).strip()
+    counts = {}
+    for b in adm.values_list("branch", flat=True):
+        key = (b or "").strip() or "غير محدّد"
+        counts[key] = counts.get(key, 0) + 1
+    rows = [{"label_ar": k, "label_en": name_map.get(k, k), "count": v} for k, v in counts.items()]
+    rows.sort(key=lambda x: x["count"], reverse=True)
+    return rows[:12]
+
+
 def _age_bands(qs):
     bands = {"0–3": 0, "4–7": 0, "8–14": 0, "15+": 0, "غير محدّد": 0}
     for v in qs.values_list("child_age", flat=True):
@@ -146,7 +161,7 @@ def analytics_overview(request):
             "contacts": con.count(),
             "careers": job.count(),
         },
-        "admissions_by_branch": _group(adm, "branch"),
+        "admissions_by_branch": _group_branch(adm),
         "admissions_by_city": _group(adm, "city"),
         "admissions_by_gender": _group(adm, "gender"),
         "admissions_by_age": _age_bands(adm),

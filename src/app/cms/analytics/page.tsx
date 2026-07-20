@@ -237,7 +237,7 @@ export default function AnalyticsPage() {
           {/* طلبات الالتحاق */}
           <h2 className="pt-2 text-lg font-bold text-ink">{t("طلبات الالتحاق", "Admission Requests")}</h2>
           <div className="grid gap-4 lg:grid-cols-2">
-            <ChartCard title={t("حسب الفرع", "By Branch")} data={data.admissions_by_branch} type="bar" />
+            <ChartCard title={t("حسب الفرع", "By Branch")} data={data.admissions_by_branch.map((p) => ({ label: en ? p.label_en : p.label_ar, count: p.count }))} type="bar" />
             <ChartCard title={t("حسب المدينة", "By City")} data={data.admissions_by_city} type="bar" />
             <ChartCard title={t("حسب نوع الحالة", "By Case Type")} data={data.admissions_by_case_type} type="bar" />
             <ChartCard title={t("حسب الفئة العمرية", "By Age Band")} data={data.admissions_by_age} type="column" />
