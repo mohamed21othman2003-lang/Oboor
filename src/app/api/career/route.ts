@@ -12,6 +12,9 @@ export async function POST(req: Request) {
     const get = (k: string) => String(form.get(k) || "");
     const name = get("name");
     const phone = get("phone");
+    // النموذج يرسل أسماء حقول Django مباشرةً (current_role) لأن NEXT_PUBLIC_DJANGO_API_URL نسبيّ،
+    // بينما nginx يوجّه /api/career إلى Next لا إلى Django — لذا نقبل الاسمين.
+    const currentRole = get("currentRole") || get("current_role");
     if (!name || !phone || !get("branch").trim() || !get("experience").trim()) {
       return NextResponse.json({ ok: false, error: "الاسم ورقم الجوال والفرع وسنوات الخبرة مطلوبة" }, { status: 400 });
     }
@@ -32,7 +35,7 @@ export async function POST(req: Request) {
       const fd = new FormData();
       fd.set("job", get("job")); fd.set("name", name); fd.set("phone", phone);
       fd.set("email", get("email")); fd.set("city", get("city")); fd.set("branch", get("branch"));
-      fd.set("current_role", get("currentRole")); fd.set("experience", get("experience"));
+      fd.set("current_role", currentRole); fd.set("experience", get("experience"));
       fd.set("about", get("about"));
       const cv = form.get("cv");
       if (cv && cv instanceof File && cv.size > 0) {
@@ -63,7 +66,7 @@ export async function POST(req: Request) {
       phone,
       email: get("email"),
       city: get("city"),
-      currentRole: get("currentRole"),
+      currentRole,
       experience: get("experience"),
       about: get("about"),
       cvId,
