@@ -3,6 +3,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import path, include
 from content import cms_api, cms_crud, cms_account, cms_analytics, preview as cms_preview
+from submissions import cv_access
 
 admin.site.site_header = "لوحة تحكّم مركز عبور"
 admin.site.site_title = "إدارة عبور"
@@ -27,6 +28,7 @@ urlpatterns = [
     path("api/cms/password-reset/", cms_account.password_reset_request),
     path("api/cms/password-reset/confirm/", cms_account.password_reset_confirm),
     path("api/cms/upload/", cms_crud.upload),
+    path("api/cms/cv/<str:token>/", cv_access.serve_cv),
     path("api/cms/preview/", cms_preview.save_preview),
     path("api/cms/collections/<str:type_key>/schema/", cms_crud.schema),
     path("api/cms/collections/<str:type_key>/reorder/", cms_crud.reorder),

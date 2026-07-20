@@ -29,6 +29,7 @@ class AdmissionRequest(models.Model):
     phone = models.CharField("الجوال", max_length=40)
     email = models.EmailField("البريد", blank=True)
     case_type = models.CharField("نوع الحالة", max_length=120, blank=True)
+    prev_sessions = models.CharField("جلسات تأهيل سابقة", max_length=20, blank=True)
     notes = models.TextField("ملاحظات", blank=True)
     created_at = models.DateTimeField("التاريخ", auto_now_add=True)
 

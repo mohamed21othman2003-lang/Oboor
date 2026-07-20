@@ -16,6 +16,7 @@ export async function POST(req: Request) {
       child_name: data.childName, child_age: data.childAge || "", gender: data.gender || "",
       city: data.city || "", branch: data.branch || "", parent_name: data.parentName,
       phone: data.phone, email: data.email || "", case_type: data.caseType || "", notes: data.notes || "",
+      prev_sessions: data["prev-sessions"] || "",
     });
     if (outcome === "duplicate") return NextResponse.json({ ok: false, duplicate: true, error: "تم إرسال هذا الطلب مسبقاً بالفعل." }, { status: 409 });
     if (outcome === "ok") return NextResponse.json({ ok: true });

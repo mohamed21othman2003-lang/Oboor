@@ -3,6 +3,10 @@ import { fetchContent } from "@/lib/server/django";
 
 const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://oboor.ido.sa";
 
+// يُحسب عند الطلب لا عند البناء: داخل Docker لا يكون الباك إند متاحًا أثناء بناء
+// الواجهة، فكانت الخريطة تُخبز فارغة من الروابط الديناميكية وتبقى كذلك.
+export const dynamic = "force-dynamic";
+
 type WithSlug = { slug?: string };
 
 // يجلب معرّفات (slugs) نوع محتوى معيّن للروابط الديناميكية؛ يتجاهل أي فشل بهدوء.

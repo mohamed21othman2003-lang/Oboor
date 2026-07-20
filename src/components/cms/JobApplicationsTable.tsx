@@ -370,7 +370,8 @@ export default function JobApplicationsTable({
               <div className="grid gap-2.5 p-5 sm:grid-cols-2">
                 {rows.map((f) => {
                   const val0 = v(it, f.name);
-                  const isLink = (f.type === "image" || f.name === "cv") && val0.startsWith("http");
+                  // رابط السيرة الذاتية صار مسارًا موقّعًا نسبيًا (/api/cms/cv/…) وليس رابطًا عامًا
+                  const isLink = (f.type === "image" || f.name === "cv") && (val0.startsWith("http") || val0.startsWith("/api/"));
                   const isEmail = f.name.includes("email") && val0.includes("@");
                   const isPhone = (f.name.includes("phone") || f.name.includes("whatsapp")) && val0.trim() !== "";
                   return (

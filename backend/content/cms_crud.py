@@ -6,6 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from submissions.models import ContactMessage, AdmissionRequest, JobApplication, AssessmentResult
+from submissions.cv_access import cv_signed_url
 from content.models import (
     NewsArticle, ProgramDetail, ClinicalService, Technique, Branch,
     Specialist, JobOpening, SuccessStory, AssessmentCard,
@@ -96,7 +97,13 @@ HELP = {
 
 def _serializer_for(Model):
     Meta = type("Meta", (), {"model": Model, "fields": "__all__"})
-    return type(f"{Model.__name__}CMS", (serializers.ModelSerializer,), {"Meta": Meta})
+    attrs = {"Meta": Meta}
+    if Model is JobApplication:
+        # لا نُخرج الرابط العام للسيرة الذاتية أبدًا (التخزين مغلق أمام العامة)،
+        # بل رابط تنزيل موقّع ينتهي بعد ساعة ويُصدر فقط داخل لوحة الطلبات.
+        attrs["cv"] = serializers.SerializerMethodField()
+        attrs["get_cv"] = lambda self, obj: cv_signed_url(obj)
+    return type(f"{Model.__name__}CMS", (serializers.ModelSerializer,), attrs)
 
 
 def _field_type(f):
@@ -309,7 +316,32 @@ def upload(request):
     except Exception:
         return Response({"detail": "الملف ليس صورة صالحة."}, status=400)
     path = default_storage.save(f"content/{f.name}", f)
+    _fix_content_type(path)
     return Response({"url": default_storage.url(path)})
+
+
+def _fix_content_type(path: str) -> None:
+    """يضبط نوع المحتوى للكائن المرفوع.
+
+    MinIO يضع «binary/octet-stream» حين لا يصله نوع صريح، ما يجعل المتصفّح
+    ينزّل الصورة بدل عرضها. نضبطه من امتداد الملف بعد الرفع.
+    """
+    import mimetypes
+
+    from django.core.files.storage import default_storage
+
+    ctype = mimetypes.guess_type(path)[0]
+    if not ctype:
+        return
+    try:
+        client = default_storage.connection.meta.client
+        bucket = default_storage.bucket_name
+        client.copy_object(
+            Bucket=bucket, Key=path, CopySource={"Bucket": bucket, "Key": path},
+            ContentType=ctype, MetadataDirective="REPLACE",
+        )
+    except Exception:
+        pass  # تخزين محلي أو صلاحية ناقصة — لا نُفشل الرفع بسبب ذلك
 
 
 @api_view(["GET"])

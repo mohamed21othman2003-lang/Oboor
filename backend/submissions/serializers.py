@@ -18,7 +18,8 @@ class AdmissionRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = AdmissionRequest
         fields = ["id", "child_name", "child_age", "gender", "city", "branch",
-                  "parent_name", "phone", "email", "case_type", "notes", "created_at"]
+                  "parent_name", "phone", "email", "case_type", "prev_sessions",
+                  "notes", "created_at"]
         read_only_fields = ["id", "created_at"]
 
 
