@@ -2,6 +2,14 @@
   "name": "oobor",
   "version": "0.1.0",
   "private": true,
+  "comment_browserslist": "متصفّحات حديثة فقط (يطابق متطلب دعم آخر نسختين) — يمنع Next من إضافة JS قديم/polyfills لا يحتاجها جمهورنا، فيقلّل حجم الحزمة.",
+  "browserslist": [
+    "last 2 Chrome versions",
+    "last 2 Firefox versions",
+    "last 2 Safari versions",
+    "last 2 Edge versions",
+    "not dead"
+  ],
   "scripts": {
     "dev": "next dev",
     "build": "next build",

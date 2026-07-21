@@ -9,7 +9,6 @@ import { fetchContent, fetchSections, type SectionRow } from "@/lib/server/djang
 import { NAV_LINKS, CONTACT, waUrl } from "@/lib/site";
 import { getCommon } from "@/i18n/dict/common";
 import { GoogleAnalytics } from "@next/third-parties/google";
-import Script from "next/script";
 import GaEvents from "@/components/GaEvents";
 
 type SiteSettings = {
@@ -39,8 +38,6 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://oboor.ido.sa";
 const GA_ID = process.env.NEXT_PUBLIC_GA_ID || "G-0LHKZ941HL";
 const PROD = process.env.NODE_ENV === "production";
 const GA_ENABLED = PROD && GA_ID !== "G-XXXXXXXXXX";
-// Microsoft Clarity (تسجيل الجلسات + الخرائط الحرارية) — يُفعَّل في الإنتاج فقط
-const CLARITY_ID = "xosaswrrhj";
 // تحقّق ملكية Google Search Console (وسم HTML)
 const GSC_VERIFICATION = "EP77NK3NDftWgN2odPPx6hERffJmRdCuoRtdx2wwfR0";
 const SITE_DESC =
@@ -207,11 +204,6 @@ export default async function RootLayout({
         {GA_ENABLED && <GaEvents />}
       </body>
       {GA_ENABLED && <GoogleAnalytics gaId={GA_ID} />}
-      {PROD && (
-        <Script id="ms-clarity" strategy="afterInteractive">
-          {`(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window,document,"clarity","script","${CLARITY_ID}");`}
-        </Script>
-      )}
     </html>
   );
 }
