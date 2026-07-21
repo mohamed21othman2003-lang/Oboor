@@ -6,6 +6,9 @@ const nextConfig: NextConfig = {
   output: "standalone",
   // لا نُفشي إطار العمل في الهيدرات (X-Powered-By) — نظافة أمنية بلا أثر وظيفي.
   poweredByHeader: false,
+  // تضمين الـCSS الحرج داخل الصفحة وتأجيل الباقي — يزيل حجب الرسم (render-blocking)
+  // فيتحسّن FCP و LCP، خاصةً على الموبايل. يعتمد على حزمة beasties.
+  experimental: { optimizeCss: true },
   images: {
     qualities: [75, 90],
     // AVIF أولًا (ضغط أعلى ~٢٠-٣٠٪ من WebP) ثم WebP كبديل — يقلّل وزن الصور على الموبايل.
