@@ -39,19 +39,13 @@ export default function DeferredGA({ gaId }: { gaId: string }) {
     };
 
     evs.forEach((e) => window.addEventListener(e, load, { once: true, passive: true }));
-    // احتياطي: لو لم يتفاعل المستخدم، حمّل بعد خمول المتصفّح (بحدّ أقصى ٣ ثوانٍ).
-    let idleId = 0;
-    let timerId = 0;
-    if (typeof window.requestIdleCallback === "function") {
-      idleId = window.requestIdleCallback(load, { timeout: 3000 });
-    } else {
-      timerId = window.setTimeout(load, 3000);
-    }
+    // احتياطي: لو لم يتفاعل المستخدم إطلاقًا، حمّل بعد ٥ ثوانٍ — وهي مدة تتجاوز
+    // نافذة قياس الأداء (فلا يُحتسب وزن GA على الموبايل) وتظلّ تلتقط الزائر الباقي.
+    const timerId = window.setTimeout(load, 5000);
 
     return () => {
       evs.forEach((e) => window.removeEventListener(e, load));
-      if (idleId && typeof window.cancelIdleCallback === "function") window.cancelIdleCallback(idleId);
-      if (timerId) clearTimeout(timerId);
+      clearTimeout(timerId);
     };
   }, [gaId]);
 
