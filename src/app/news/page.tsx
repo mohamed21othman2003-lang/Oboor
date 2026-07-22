@@ -82,7 +82,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
   return pageMeta(
     pick(locale, "إعلامنا | مركز عبور للرعاية والتأهيل", "News | Oboor Center for Care & Rehabilitation"),
-    pick(locale, "أحدث أخبار وفعاليات وورش ومقالات مراكز عبور.", "Latest news, events, workshops, and articles from Oboor Centers."),
+    pick(locale, "تابع إعلام عبور: أحدث الأخبار والفعاليات والورش التدريبية والمقالات التوعوية في مجال رعاية وتأهيل الأطفال ذوي الاحتياجات الخاصة.", "Follow Oboor's media: the latest news, events, training workshops, and awareness articles on caring for and rehabilitating children with special needs."),
   );
 }
 

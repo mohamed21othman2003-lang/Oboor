@@ -20,8 +20,8 @@ export async function generateMetadata(): Promise<Metadata> {
     pick(locale, "مراكزنا | مركز عبور للرعاية والتأهيل", "Branches | Oboor Center for Care & Rehabilitation"),
     pick(
       locale,
-      "ابحث عن أقرب فرع إليك واستكشف خدماتنا في مختلف مناطق المملكة العربية السعودية.",
-      "Find your nearest branch and explore our services across the various regions of Saudi Arabia.",
+      "ابحث عن أقرب مركز عبور إليك عبر الخريطة التفاعلية، واستكشف خدمات كل فرع ومواعيده وبيانات التواصل في مختلف مناطق المملكة العربية السعودية.",
+      "Find your nearest Oboor center on the interactive map, and explore each branch's services, hours, and contact details across the regions of Saudi Arabia.",
     ),
   );
 }

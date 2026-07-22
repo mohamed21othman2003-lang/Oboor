@@ -11,7 +11,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
   return pageMeta(
     pick(locale, "المعرض | مركز عبور للرعاية والتأهيل", "Gallery | Oboor Center for Care & Rehabilitation"),
-    pick(locale, "صور المركز — لحظات حقيقية من رحلات التأهيل والتطور داخل مراكز عبور.", "Center photos — real moments from rehabilitation and growth journeys inside Oboor Centers."),
+    pick(locale, "معرض صور مراكز عبور — لحظات حقيقية من داخل قاعات التأهيل والأنشطة والفعاليات، تعكس بيئة الرعاية التي يعيشها أبناؤنا كل يوم.", "Oboor centers photo gallery — real moments from inside our rehabilitation rooms, activities, and events, reflecting the caring environment our children live every day."),
   );
 }
 

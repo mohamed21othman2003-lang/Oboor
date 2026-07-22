@@ -19,7 +19,7 @@ export async function generateMetadata(): Promise<Metadata> {
     pick(locale, "عن عبور | مركز عبور للرعاية والتأهيل", "About Us | Oboor Center for Care & Rehabilitation"),
     pick(
       locale,
-      "تأسست مراكز عبور عام ٢٠٠٧ كأكبر سلسلة مراكز متخصصة في التشخيص والتقييم والتأهيل للأشخاص ذوي الإعاقة.",
+      "تأسست مراكز عبور عام ٢٠٠٧ كأكبر سلسلة مراكز متخصصة في التشخيص والتقييم والتأهيل لذوي الإعاقة — تعرّف على رؤيتنا ورسالتنا وقيمنا وفريق قيادتنا.",
       "Founded in 2007, Oboor Centers are the largest chain specialized in the diagnosis, assessment and rehabilitation of people with disabilities."
     ),
   );

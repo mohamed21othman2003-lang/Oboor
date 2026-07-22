@@ -18,8 +18,8 @@ export async function generateMetadata(): Promise<Metadata> {
     ),
     pick(
       locale,
-      "سجّل طلب التحاق لطفلك الآن — ابدأ رحلة التأهيل بخطوة بسيطة وسريعة.",
-      "Register your child now — start the rehabilitation journey with one simple, quick step."
+      "سجّل طلب التحاق طفلك في مراكز عبور — نموذج بسيط وسريع، واختر الفرع الأنسب لكم، وسيتواصل معك فريقنا لاستكمال خطوات الالتحاق.",
+      "Register your child at Oboor centers — a simple, quick form; choose the branch that suits you and our team will contact you to complete the admission steps."
     ),
   );
 }

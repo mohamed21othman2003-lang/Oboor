@@ -73,8 +73,8 @@ export async function generateMetadata(): Promise<Metadata> {
     ),
     pick(
       locale,
-      "احصل على تقييم أولي سريع يساعدك على فهم احتياجات طفلك وتحديد الخطوات الصحيحة نحو مستقبل أفضل.",
-      "Get a quick preliminary assessment that helps you understand your child's needs and identify the right steps toward a better future."
+      "تقييم أولي مجاني وسريع لطفلك خلال دقائق — أسئلة بسيطة تساعدك على فهم احتياجاته وتحديد الخطوات الصحيحة نحو خطة تأهيل مناسبة.",
+      "A free, quick preliminary assessment for your child in minutes — simple questions that help you understand their needs and identify the right steps toward a suitable rehabilitation plan."
     ),
   );
 }

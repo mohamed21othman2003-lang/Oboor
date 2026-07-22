@@ -40,8 +40,9 @@ const PROD = process.env.NODE_ENV === "production";
 const GA_ENABLED = PROD && GA_ID !== "G-XXXXXXXXXX";
 // تحقّق ملكية Google Search Console (وسم HTML)
 const GSC_VERIFICATION = "EP77NK3NDftWgN2odPPx6hERffJmRdCuoRtdx2wwfR0";
+// الوصف ضمن 120-160 حرفًا (جوجل يقتطع الأطول) والعنوان ضمن 30-60.
 const SITE_DESC =
-  "مركز عبور للرعاية النهارية والتأهيل — برامج تأهيلية وخدمات عيادية متخصصة لذوي الإعاقة والأطفال ذوي الاحتياجات: التدخل المبكر، النطق والتخاطب، العلاج الوظيفي والطبيعي، عبر فروعنا في أنحاء المملكة.";
+  "مركز عبور للرعاية النهارية والتأهيل — برامج وخدمات عيادية متخصصة لذوي الإعاقة: التدخل المبكر، النطق والتخاطب، العلاج الوظيفي والطبيعي في فروعنا بالمملكة.";
 const OG_IMAGE = "/figma/home/imgImageWithFallback.jpg";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -49,7 +50,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const path = (await headers()).get("x-pathname") || "/";
   return {
     metadataBase: new URL(SITE_URL),
-    title: { default: "عبور | Oboor للرعاية والتأهيل", template: "%s | عبور" },
+    title: { default: "مركز عبور للرعاية النهارية والتأهيل | Oboor", template: "%s | عبور" },
     description: SITE_DESC,
     applicationName: "عبور",
     keywords: [
@@ -64,7 +65,7 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       type: "website",
       siteName: "عبور | Oboor",
-      title: "عبور | Oboor للرعاية والتأهيل",
+      title: "مركز عبور للرعاية النهارية والتأهيل | Oboor",
       description: SITE_DESC,
       url: path,
       locale: "ar_SA",
@@ -72,7 +73,7 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     twitter: {
       card: "summary_large_image",
-      title: "عبور | Oboor للرعاية والتأهيل",
+      title: "مركز عبور للرعاية النهارية والتأهيل | Oboor",
       description: SITE_DESC,
       images: [OG_IMAGE],
     },

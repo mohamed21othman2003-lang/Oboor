@@ -62,8 +62,8 @@ export async function generateMetadata(): Promise<Metadata> {
     ),
     pick(
       locale,
-      "تعرف على فريقنا من الأخصائيين المؤهلين في مختلف مجالات التأهيل والعلاج.",
-      "Meet our team of qualified specialists across the various fields of rehabilitation and therapy.",
+      "تعرّف على رُوّاد عبور: نخبة من الأخصائيين المؤهلين في النطق والتخاطب والعلاج الوظيفي والطبيعي وتحليل السلوك التطبيقي والتربية الخاصة.",
+      "Meet Oboor's pioneers: a select team of qualified specialists in speech therapy, occupational and physical therapy, applied behaviour analysis, and special education.",
     ),
   );
 }

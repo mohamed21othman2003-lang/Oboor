@@ -76,8 +76,8 @@ export async function generateMetadata(): Promise<Metadata> {
     ),
     pick(
       locale,
-      "قصص حقيقية من عائلاتنا — أبناؤنا يُلهمونا كل يوم.",
-      "Real stories from our families — our children inspire us every day.",
+      "قصص نجاح حقيقية من عائلات عبور — رحلات أطفال تطوّرت مهاراتهم وثقتهم عبر برامج التأهيل المتخصصة. اقرأ تفاصيل كل قصة ونتائجها الملموسة.",
+      "Real success stories from Oboor families — journeys of children whose skills and confidence grew through specialized rehabilitation programs. Read each story and its results.",
     ),
   );
 }

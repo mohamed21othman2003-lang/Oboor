@@ -65,8 +65,8 @@ export async function generateMetadata(): Promise<Metadata> {
     ),
     pick(
       locale,
-      "برامج تأهيلية وخدمات عيادية وتقنيات تأهيلية من مراكز عبور",
-      "Rehabilitation programs, clinical services, and rehabilitation technologies from Oboor Centers"
+      "اكتشف برامج عبور التمكينية: برامج تأهيلية وخدمات عيادية متخصصة وتقنيات حديثة — التدخل المبكر، النطق والتخاطب، العلاج الوظيفي والطبيعي.",
+      "Explore Oboor's empowerment programs: specialized rehabilitation programs, clinical services, and modern technologies — early intervention, speech therapy, occupational and physical therapy."
     ),
   );
 }

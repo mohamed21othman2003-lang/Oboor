@@ -58,8 +58,8 @@ export async function generateMetadata(): Promise<Metadata> {
     pick(locale, "انضم إلينا | مركز عبور للرعاية والتأهيل", "Join Us | Oboor Center for Care & Rehabilitation"),
     pick(
       locale,
-      "انضم إلى فريق عبور — وظائف تصنع فرقاً حقيقياً في حياة المستفيدين وأسرهم.",
-      "Join the Oboor team — careers that make a real difference in the lives of beneficiaries and their families.",
+      "انضم إلى فريق عبور — وظائف شاغرة لأخصائيي النطق والعلاج الوظيفي والطبيعي وتحليل السلوك في فروعنا بالمملكة. قدّم طلبك اليوم.",
+      "Join the Oboor team — open roles for speech, occupational, physical therapy and behaviour analysis specialists across our branches in Saudi Arabia. Apply today.",
     ),
   );
 }
