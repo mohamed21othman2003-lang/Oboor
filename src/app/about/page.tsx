@@ -84,6 +84,17 @@ export default async function AboutPage() {
   const mcDistricts = Array.isArray(mcDistrictsRaw) && mcDistrictsRaw.length ? (mcDistrictsRaw as string[]) : pick(locale, ["حي العليا", "حي النرجس", "حي الصحافة"], ["Al-Olaya District", "Al-Narjes District", "Al-Sahafa District"]);
   const mcPhone = mainCard?.value || "920-000-001";
 
+  // شارتا الهيرو (قسم «المقدمة العلوية») — عنصران قابلان للتحرير من الـCMS مع fallback ثابت.
+  // العنوان (title) = النص الصغير العلوي، النص (text) = القيمة الكبيرة السفلية.
+  const heroBadge = (key: string, arLabel: string, enLabel: string, arValue: string, enValue: string) => {
+    const r = (about?.hero ?? []).find((x) => x.key === key);
+    const label = r && (en ? r.title_en || r.title_ar : r.title_ar);
+    const value = r && (en ? r.text_en || r.text_ar : r.text_ar);
+    return { label: label || pick(locale, arLabel, enLabel), value: value || pick(locale, arValue, enValue) };
+  };
+  const heroBadge1 = heroBadge("about-hero-badge-1", "برامج متخصصة", "Specialized Programs", "تأهيل شامل ومتكامل", "Comprehensive Rehabilitation");
+  const heroBadge2 = heroBadge("about-hero-badge-2", "تأسّس عام", "Established", "٢٠٠٧", "2007");
+
   // قائمة البرامج: عناصر قسم «البرامج» التي لها أيقونة (العنوان بلا أيقونة) — مع fallback ثابت
   const progRows = (about?.programs ?? []).filter((r) => r.icon);
   const programItems = progRows.length
@@ -106,10 +117,10 @@ export default async function AboutPage() {
             <div className="relative order-1 mx-auto w-full max-w-[480px]">
               {/* الصورة النظيفة (بدون الكارت المطبوع) على مسار جديد لتفادي كاش الصورة القديمة */}
               <Image src={((h) => !h || h.includes("about-hero") ? "/about-hero-v2.png" : h)(blk("hero")?.image)} alt={pick(locale, "مركز عبور للرعاية والتأهيل", "Oboor Center for Care & Rehabilitation")} width={511} height={560} className="h-auto w-full" quality={90} priority />
-              {/* شارة «تأهيل شامل» — أعلى يمين */}
-              <StatBadge className="right-[3%] top-[5%] w-[54%] max-w-[248px] px-3.5 py-2.5" iconClassName="h-5 w-5" iconSize={12} label={pick(locale, "برامج متخصصة", "Specialized Programs")} value={pick(locale, "تأهيل شامل ومتكامل", "Comprehensive Rehabilitation")} />
-              {/* شارة «تأسس عام» — أسفل يسار، ضيّقة حتى لا تتلامس مع الأولى */}
-              <StatBadge className="left-[3%] top-[21%] w-[37%] max-w-[176px] px-3.5 py-2.5" valueClassName="text-lg sm:text-xl" iconClassName="h-5 w-5" iconSize={12} label={pick(locale, "تأسّس عام", "Established")} value={pick(locale, "٢٠٠٧", "2007")} />
+              {/* شارة «تأهيل شامل» — أعلى يمين — نصّها من الـCMS (المقدمة العلوية) */}
+              <StatBadge className="right-[3%] top-[5%] w-[54%] max-w-[248px] px-3.5 py-2.5" iconClassName="h-5 w-5" iconSize={12} label={heroBadge1.label} value={heroBadge1.value} />
+              {/* شارة «تأسس عام» — أسفل يسار، ضيّقة حتى لا تتلامس مع الأولى — نصّها من الـCMS */}
+              <StatBadge className="left-[3%] top-[21%] w-[37%] max-w-[176px] px-3.5 py-2.5" valueClassName="text-lg sm:text-xl" iconClassName="h-5 w-5" iconSize={12} label={heroBadge2.label} value={heroBadge2.value} />
             </div>
 
             {/* Text (left) */}
