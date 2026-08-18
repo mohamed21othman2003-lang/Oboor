@@ -84,9 +84,11 @@ const chipIcon = <svg width="20" height="20" viewBox="0 0 24 24" fill="none" str
 export default function ServicesTabs({
   locale = "ar",
   cards,
+  heads,
 }: {
   locale?: Locale;
   cards?: { programs: Program[]; clinical: Program[]; techniques: Program[] };
+  heads?: { programs?: { heading: string; intro: string }; clinical?: { heading: string; intro: string }; techniques?: { heading: string; intro: string } };
 }) {
   // لو وصلت بيانات من Django (CMS) نستخدمها، وإلا نرجع للبيانات الثابتة (fallback)
   const PROGRAMS = cards ? cards.programs : locale === "en" ? PROGRAMS_EN : PROGRAMS_AR;
@@ -94,9 +96,9 @@ export default function ServicesTabs({
   const TECHNIQUES = cards ? cards.techniques : locale === "en" ? TECHNIQUES_EN : TECHNIQUES_AR;
 
   const TABS = [
-    { key: "programs", label: pick(locale, "البرامج التأهيلية", "Rehabilitation Programs"), heading: pick(locale, "برامجنا التأهيلية", "Our Rehabilitation Programs"), intro: pick(locale, "صُمِّمت كل برامجنا التأهيلية وفق معايير علمية معتمدة لخدمة فئات محددة من الأطفال وفق احتياجاتهم الدقيقة.", "All our rehabilitation programs are designed to accredited scientific standards to serve specific groups of children according to their precise needs."), icon: bookIcon, data: PROGRAMS },
-    { key: "clinical", label: pick(locale, "الخدمات العيادية", "Clinical Services"), heading: pick(locale, "خدماتنا العيادية", "Our Clinical Services"), intro: pick(locale, "تقدم مراكز عبور طيفاً واسعاً من الخدمات العيادية التي يشرف عليها متخصصون مؤهلون في مجالات الصحة والتأهيل.", "Oboor Centers offer a wide range of clinical services supervised by qualified specialists in health and rehabilitation fields."), icon: stethoscopeIcon, data: CLINICAL },
-    { key: "techniques", label: pick(locale, "التقنيات التأهيلية", "Rehabilitation Technologies"), heading: pick(locale, "تقنياتنا التأهيلية", "Our Rehabilitation Technologies"), intro: pick(locale, "نستخدم في مراكز عبور تقنيات تأهيلية مبتكرة تدعم العملية العلاجية وتجعلها أكثر تفاعلاً وفاعلية.", "At Oboor Centers we use innovative rehabilitation technologies that support the therapeutic process and make it more interactive and effective."), icon: chipIcon, data: TECHNIQUES },
+    { key: "programs", label: pick(locale, "البرامج التأهيلية", "Rehabilitation Programs"), heading: heads?.programs?.heading || pick(locale, "برامجنا التأهيلية", "Our Rehabilitation Programs"), intro: heads?.programs?.intro || pick(locale, "صُمِّمت كل برامجنا التأهيلية وفق معايير علمية معتمدة لخدمة فئات محددة من الأطفال وفق احتياجاتهم الدقيقة.", "All our rehabilitation programs are designed to accredited scientific standards to serve specific groups of children according to their precise needs."), icon: bookIcon, data: PROGRAMS },
+    { key: "clinical", label: pick(locale, "الخدمات العيادية", "Clinical Services"), heading: heads?.clinical?.heading || pick(locale, "خدماتنا العيادية", "Our Clinical Services"), intro: heads?.clinical?.intro || pick(locale, "تقدم مراكز عبور طيفاً واسعاً من الخدمات العيادية التي يشرف عليها متخصصون مؤهلون في مجالات الصحة والتأهيل.", "Oboor Centers offer a wide range of clinical services supervised by qualified specialists in health and rehabilitation fields."), icon: stethoscopeIcon, data: CLINICAL },
+    { key: "techniques", label: pick(locale, "التقنيات التأهيلية", "Rehabilitation Technologies"), heading: heads?.techniques?.heading || pick(locale, "تقنياتنا التأهيلية", "Our Rehabilitation Technologies"), intro: heads?.techniques?.intro || pick(locale, "نستخدم في مراكز عبور تقنيات تأهيلية مبتكرة تدعم العملية العلاجية وتجعلها أكثر تفاعلاً وفاعلية.", "At Oboor Centers we use innovative rehabilitation technologies that support the therapeutic process and make it more interactive and effective."), icon: chipIcon, data: TECHNIQUES },
   ] as const;
 
   const [active, setActive] = useState<(typeof TABS)[number]["key"]>("programs");

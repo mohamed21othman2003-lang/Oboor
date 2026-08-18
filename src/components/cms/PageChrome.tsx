@@ -11,7 +11,7 @@ import { CMS_ICONS, ICON_LABELS } from "@/lib/cms/icons";
 const ImageCropModal = dynamic(() => import("@/components/cms/ImageCropModal"), { ssr: false });
 
 // ترتيب الأقسام كما تظهر على الصفحة (لعرضها مرتّبة بدل ترتيب قاعدة البيانات)
-const BLOCK_ORDER = ["hero", "about", "smart_search", "stats", "join", "join_cards", "why_us", "success", "gallery", "news", "certs", "features", "services", "profile_intro", "profile_stats", "journey", "accreditations", "steps", "prelim_questions", "answer_options", "categories", "overview", "list", "cities", "employment_types", "info", "form", "map", "social", "contact_prompt", "highlights"];
+const BLOCK_ORDER = ["hero", "tabs", "about", "smart_search", "stats", "join", "join_cards", "why_us", "success", "gallery", "news", "certs", "features", "services", "profile_intro", "profile_stats", "journey", "accreditations", "steps", "prelim_questions", "answer_options", "categories", "overview", "list", "cities", "employment_types", "info", "form", "map", "social", "contact_prompt", "highlights"];
 const blockRank = (b: string) => { const i = BLOCK_ORDER.indexOf(b); return i === -1 ? 999 : i; };
 // أقسام محتواها منظّم معقّد ⇒ تُحرّر بالمحرّر الكامل (رابط) بدل الحقول المبسّطة
 const COMPLEX_BLOCKS = new Set(["highlights", "services"]);
@@ -90,6 +90,7 @@ const BLOCK_LABELS: Record<string, string> = {
   answer_options: "خيارات الإجابة",
   categories: "تصنيفات الأخبار",
   overview: "الكل (عناوين أقسام الأخبار)",
+  tabs: "عناوين التبويبات (البرامج / العيادية / التقنيات)",
   profile_stats: "إحصائيات ملف الفرع",
   journey: "رحلة التأهيل (ملف الفرع)",
   accreditations: "الاعتمادات (ملف الفرع)",
@@ -123,6 +124,7 @@ const BLOCK_LABELS_EN: Record<string, string> = {
   answer_options: "Answer options",
   categories: "News categories",
   overview: "All (news section headings)",
+  tabs: "Tab headings (Programs / Clinical / Technologies)",
   profile_stats: "Branch profile statistics",
   journey: "Rehabilitation journey (branch profile)",
   accreditations: "Accreditations (branch profile)",

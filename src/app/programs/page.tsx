@@ -123,6 +123,13 @@ export default async function ServicesPage() {
   ]);
   const h = (sections?.hero ?? []).find((r) => r.key === "heading");
   const hbadge = (sections?.hero ?? []).find((r) => r.key === "badge");
+  // عناوين التبويبات (البرامج/العيادية/التقنيات) من الـCMS (بلوك tabs) — العنوان + الوصف
+  const tabHead = (key: string) => {
+    const r = (sections?.tabs ?? []).find((x) => x.key === key);
+    if (!r) return undefined;
+    return { heading: en ? r.title_en || r.title_ar : r.title_ar, intro: en ? r.text_en || r.text_ar : r.text_ar };
+  };
+  const tabHeads = { programs: tabHead("programs"), clinical: tabHead("clinical"), techniques: tabHead("techniques") };
   return (
     <>
       <Hero
@@ -134,7 +141,7 @@ export default async function ServicesPage() {
         regions={regions}
       />
       <Suspense fallback={null}>
-        <ServicesTabs locale={locale} cards={cards} />
+        <ServicesTabs locale={locale} cards={cards} heads={tabHeads} />
       </Suspense>
       <CTA locale={locale} />
     </>
