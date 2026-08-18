@@ -75,6 +75,8 @@ export default async function AboutPage() {
   const aList = (b: string, ar: string[], e: string[]) => { const r = blk(b); const d = r && (en ? r.data_en : r.data_ar) as unknown; const arr = Array.isArray(d) ? (d as string[]) : []; return arr.length ? arr : (en ? e : ar); };
   // صورة القسم من الـCMS (حقل الصورة) مع fallback للصورة الثابتة
   const aImage = (b: string, fallback: string) => { const r = blk(b); const v = String(r?.image ?? "").trim(); return v || fallback; };
+  // الترويسة الصغيرة (eyebrow) فوق العنوان — من حقل tagline بالـCMS مع fallback ثابت
+  const aTag = (b: string, ar: string, e: string) => { const r = blk(b) as Record<string, unknown> | undefined; const v = r ? String((en ? (r.tagline_en || r.tagline_ar) : r.tagline_ar) ?? "").trim() : ""; return v || pick(locale, ar, e); };
 
   // كارت الفرع الرئيسي في قسم «نبذة عن الفروع» (من الـCMS مع fallback)
   const mainCard = (about?.branches ?? []).find((r) => r.key === "main_card");
@@ -145,7 +147,7 @@ export default async function AboutPage() {
         <div className="mx-auto grid max-w-7xl items-center gap-12 px-6 lg:grid-cols-2 lg:px-8">
           {/* Text (right) */}
           <div className="order-2 text-start lg:order-1">
-            <TagLine>{pick(locale, "تعرّف علينا", "Get to know us")}</TagLine>
+            <TagLine>{aTag("intro", "تعرّف علينا", "Get to know us")}</TagLine>
             <h2 className="mt-4 text-3xl font-extrabold text-ink">{aTitle("intro", "تعرّف على مركز عبور", "Get to know Oboor Center")}</h2>
             <div className="mt-5 space-y-4 text-sm leading-8 text-ink-muted">
               {aList("intro",

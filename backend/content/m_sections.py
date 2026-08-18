@@ -29,6 +29,10 @@ class SectionItem(models.Model):
     value = models.CharField("القيمة/الرقم", max_length=60, blank=True)
     color = models.CharField("اللون", max_length=20, blank=True)
 
+    # الترويسة الصغيرة (eyebrow) فوق العنوان — تظهر للأقسام التي تعرضها فقط.
+    tagline_ar = models.CharField("الترويسة الصغيرة فوق العنوان (عربي)", max_length=160, blank=True, default="")
+    tagline_en = models.CharField("الترويسة الصغيرة فوق العنوان (إنجليزي)", max_length=160, blank=True, default="")
+
     title_ar = models.CharField("العنوان (عربي)", max_length=400, blank=True)
     title_en = models.CharField("العنوان (إنجليزي)", max_length=400, blank=True)
     text_ar = models.TextField("النص (عربي)", blank=True)

@@ -205,6 +205,8 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
       if (type === "news" && EVENT_FIELDS.has(f.name) && !["events", "workshops"].includes(String(values.section ?? ""))) continue;
       // شارتا الهيرو: تظهران فقط في «المقدمة العلوية» بصفحة «عن عبور»
       if (BADGE_FIELDS.has(f.name) && !(type === "sections" && String(values.page ?? "") === "about" && sectionBlock === "hero")) continue;
+      // الترويسة الصغيرة (eyebrow): تظهر فقط للأقسام التي تعرضها
+      if (TAGLINE_FIELDS.has(f.name) && !(type === "sections" && TAGLINE_KEYS.has(String(values.key ?? "")))) continue;
       if (f.bilingual) {
         const ar = fields.find((x) => x.base === f.base && x.lang === "ar");
         const en = fields.find((x) => x.base === f.base && x.lang === "en");
@@ -716,6 +718,9 @@ const BADGE_FIELDS = new Set([
   "badge1_label_ar", "badge1_label_en", "badge1_value_ar", "badge1_value_en",
   "badge2_label_ar", "badge2_label_en", "badge2_value_ar", "badge2_value_en",
 ]);
+// الترويسة الصغيرة (eyebrow) فوق العنوان — تظهر فقط لعناصر الأقسام التي تعرضها على الموقع
+const TAGLINE_FIELDS = new Set(["tagline_ar", "tagline_en"]);
+const TAGLINE_KEYS = new Set(["about-intro"]);
 // حقول مقفولة (تُعرض للاطلاع فقط؛ تغييرها يكسر مكان المحتوى)
 const LOCKED_FIELDS = new Set(["block"]);
 // قوائم بطاقات — كل عنصر كائن بخانات معنونة بسيطة (بدل JSON)
