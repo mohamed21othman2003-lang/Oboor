@@ -66,6 +66,11 @@ export default async function BranchesPage() {
   const hF = (k: string) => hero.find((r) => r.key === k);
   const hT = (r?: (typeof hero)[number]) => (r ? (en ? r.title_en || r.title_ar : r.title_ar) : "");
   const hB = (r?: (typeof hero)[number]) => (r ? (en ? r.text_en || r.text_ar : r.text_ar) : "");
+  // قسم التواصل السفلي (CTA) من الـCMS: البادج (tagline) + العنوان + الوصف
+  const ctaRow = (sections?.cta ?? []).find((r) => r.key === "main") as Record<string, string> | undefined;
+  const ctaTitle = ctaRow?.title_ar ? hl(en ? ctaRow.title_en || ctaRow.title_ar : ctaRow.title_ar) : undefined;
+  const ctaSub = ctaRow ? (en ? ctaRow.text_en || ctaRow.text_ar : ctaRow.text_ar) || undefined : undefined;
+  const ctaBadge = ctaRow ? (en ? ctaRow.tagline_en || ctaRow.tagline_ar : ctaRow.tagline_ar) || undefined : undefined;
   return (
     <>
       {/* Hero */}
@@ -131,9 +136,9 @@ export default async function BranchesPage() {
       {/* CTA */}
       <CtaSection
         locale={locale}
-        badge={pick(locale, "فريقنا معك، في كل وقت", "Our team is with you at all times.")}
-        title={pick(locale, "أتحتاجنا بجانبك لاختيار الوجهة؟", "Need help choosing the right option?")}
-        subtitle={pick(locale, "نحن هنا لنكون بوصلتك؛ نختار معًا الفرع الأقرب لروح طفلك، والأنسب لتحقيق طموحه.", "We are here to guide you in finding the most suitable branch for your child's needs and potential, ensuring the best path toward their goals.")}
+        badge={ctaBadge ?? pick(locale, "فريقنا معك، في كل وقت", "Our team is with you at all times.")}
+        title={ctaTitle ?? pick(locale, "أتحتاجنا بجانبك لاختيار الوجهة؟", "Need help choosing the right option?")}
+        subtitle={ctaSub ?? pick(locale, "نحن هنا لنكون بوصلتك؛ نختار معًا الفرع الأقرب لروح طفلك، والأنسب لتحقيق طموحه.", "We are here to guide you in finding the most suitable branch for your child's needs and potential, ensuring the best path toward their goals.")}
       />
     </>
   );

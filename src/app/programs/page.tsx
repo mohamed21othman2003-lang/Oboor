@@ -103,12 +103,13 @@ function Hero({ locale, badge, heading, subtitle, cards, regions }: { locale: Lo
   );
 }
 
-function CTA({ locale }: { locale: Locale }) {
+function CTA({ locale, title, subtitle, badge }: { locale: Locale; title?: React.ReactNode; subtitle?: string; badge?: string }) {
   return (
     <CtaSection
       locale={locale}
-      title={<>{pick(locale, "هل تحتاج مساعدة في اختيار ", "Need help choosing ")}<span className="text-brand">{pick(locale, "الخدمة المناسبة؟", "the right service?")}</span></>}
-      subtitle={pick(locale, "يمكنك التواصل معنا لمساعدتك في اختيار البرنامج أو الخدمة الأنسب وفق احتياجات طفلك.", "Contact us and we'll help you choose the program or service that best fits your child's needs.")}
+      badge={badge}
+      title={title ?? <>{pick(locale, "هل تحتاج مساعدة في اختيار ", "Need help choosing ")}<span className="text-brand">{pick(locale, "الخدمة المناسبة؟", "the right service?")}</span></>}
+      subtitle={subtitle ?? pick(locale, "يمكنك التواصل معنا لمساعدتك في اختيار البرنامج أو الخدمة الأنسب وفق احتياجات طفلك.", "Contact us and we'll help you choose the program or service that best fits your child's needs.")}
     />
   );
 }
@@ -130,6 +131,11 @@ export default async function ServicesPage() {
     return { heading: en ? r.title_en || r.title_ar : r.title_ar, intro: en ? r.text_en || r.text_ar : r.text_ar };
   };
   const tabHeads = { programs: tabHead("programs"), clinical: tabHead("clinical"), techniques: tabHead("techniques") };
+  // قسم التواصل السفلي (CTA) من الـCMS: البادج (tagline) + العنوان + الوصف
+  const ctaRow = (sections?.cta ?? []).find((r) => r.key === "main") as Record<string, string> | undefined;
+  const ctaTitle = ctaRow?.title_ar ? hl(en ? ctaRow.title_en || ctaRow.title_ar : ctaRow.title_ar) : undefined;
+  const ctaSub = ctaRow ? (en ? ctaRow.text_en || ctaRow.text_ar : ctaRow.text_ar) || undefined : undefined;
+  const ctaBadge = ctaRow ? (en ? ctaRow.tagline_en || ctaRow.tagline_ar : ctaRow.tagline_ar) || undefined : undefined;
   return (
     <>
       <Hero
@@ -143,7 +149,7 @@ export default async function ServicesPage() {
       <Suspense fallback={null}>
         <ServicesTabs locale={locale} cards={cards} heads={tabHeads} />
       </Suspense>
-      <CTA locale={locale} />
+      <CTA locale={locale} title={ctaTitle} subtitle={ctaSub} badge={ctaBadge} />
     </>
   );
 }
