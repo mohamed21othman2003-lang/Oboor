@@ -203,6 +203,8 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
       }
       // الأخبار: حقول كارت الفعالية تظهر فقط للفعاليات والورش
       if (type === "news" && EVENT_FIELDS.has(f.name) && !["events", "workshops"].includes(String(values.section ?? ""))) continue;
+      // شارتا الهيرو: تظهران فقط في «المقدمة العلوية» بصفحة «عن عبور»
+      if (BADGE_FIELDS.has(f.name) && !(type === "sections" && String(values.page ?? "") === "about" && sectionBlock === "hero")) continue;
       if (f.bilingual) {
         const ar = fields.find((x) => x.base === f.base && x.lang === "ar");
         const en = fields.find((x) => x.base === f.base && x.lang === "en");
@@ -708,6 +710,11 @@ const listAdd = (base: string, en = false) =>
 const EVENT_FIELDS = new Set([
   "time_ar", "time_en", "location_ar", "location_en", "map_url", "audience_ar", "audience_en",
   "seats_ar", "seats_en", "reg_status_ar", "reg_status_en",
+]);
+// شارتا الهيرو — تظهران فقط في «المقدمة العلوية» بصفحة «عن عبور»
+const BADGE_FIELDS = new Set([
+  "badge1_label_ar", "badge1_label_en", "badge1_value_ar", "badge1_value_en",
+  "badge2_label_ar", "badge2_label_en", "badge2_value_ar", "badge2_value_en",
 ]);
 // حقول مقفولة (تُعرض للاطلاع فقط؛ تغييرها يكسر مكان المحتوى)
 const LOCKED_FIELDS = new Set(["block"]);

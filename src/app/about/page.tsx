@@ -84,16 +84,21 @@ export default async function AboutPage() {
   const mcDistricts = Array.isArray(mcDistrictsRaw) && mcDistrictsRaw.length ? (mcDistrictsRaw as string[]) : pick(locale, ["حي العليا", "حي النرجس", "حي الصحافة"], ["Al-Olaya District", "Al-Narjes District", "Al-Sahafa District"]);
   const mcPhone = mainCard?.value || "920-000-001";
 
-  // شارتا الهيرو (قسم «المقدمة العلوية») — عنصران قابلان للتحرير من الـCMS مع fallback ثابت.
-  // العنوان (title) = النص الصغير العلوي، النص (text) = القيمة الكبيرة السفلية.
-  const heroBadge = (key: string, arLabel: string, enLabel: string, arValue: string, enValue: string) => {
-    const r = (about?.hero ?? []).find((x) => x.key === key);
-    const label = r && (en ? r.title_en || r.title_ar : r.title_ar);
-    const value = r && (en ? r.text_en || r.text_ar : r.text_ar);
-    return { label: label || pick(locale, arLabel, enLabel), value: value || pick(locale, arValue, enValue) };
+  // شارتا الهيرو — حقول داخل عنصر «المقدمة العلوية» نفسه (badge1/2 label+value، عربي/إنجليزي)
+  // تُحرَّر من الـCMS تحت صورة القسم، مع fallback ثابت.
+  const heroRow = blk("hero") as Record<string, unknown> | undefined;
+  const hf = (arField: string, enField: string, arFb: string, enFb: string) => {
+    const v = heroRow ? String((en ? (heroRow[enField] || heroRow[arField]) : heroRow[arField]) ?? "").trim() : "";
+    return v || pick(locale, arFb, enFb);
   };
-  const heroBadge1 = heroBadge("about-hero-badge-1", "برامج متخصصة", "Specialized Programs", "تأهيل شامل ومتكامل", "Comprehensive Rehabilitation");
-  const heroBadge2 = heroBadge("about-hero-badge-2", "تأسّس عام", "Established", "٢٠٠٧", "2007");
+  const heroBadge1 = {
+    label: hf("badge1_label_ar", "badge1_label_en", "برامج متخصصة", "Specialized Programs"),
+    value: hf("badge1_value_ar", "badge1_value_en", "تأهيل شامل ومتكامل", "Comprehensive Rehabilitation"),
+  };
+  const heroBadge2 = {
+    label: hf("badge2_label_ar", "badge2_label_en", "تأسّس عام", "Established"),
+    value: hf("badge2_value_ar", "badge2_value_en", "٢٠٠٧", "2007"),
+  };
 
   // قائمة البرامج: عناصر قسم «البرامج» التي لها أيقونة (العنوان بلا أيقونة) — مع fallback ثابت
   const progRows = (about?.programs ?? []).filter((r) => r.icon);

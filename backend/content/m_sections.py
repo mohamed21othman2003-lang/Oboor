@@ -39,6 +39,16 @@ class SectionItem(models.Model):
     image = models.CharField("مسار الصورة", max_length=300, blank=True)
     image_file = models.ImageField("صورة القسم", upload_to="content/", blank=True)
 
+    # شارتا الهيرو (تظهر فوق صورة القسم في صفحة «عن عبور» فقط). كل شارة = عنوان صغير + نص كبير.
+    badge1_label_ar = models.CharField("الشارة الأولى — العنوان الصغير (عربي)", max_length=120, blank=True)
+    badge1_label_en = models.CharField("الشارة الأولى — العنوان الصغير (إنجليزي)", max_length=120, blank=True)
+    badge1_value_ar = models.CharField("الشارة الأولى — النص الكبير (عربي)", max_length=120, blank=True)
+    badge1_value_en = models.CharField("الشارة الأولى — النص الكبير (إنجليزي)", max_length=120, blank=True)
+    badge2_label_ar = models.CharField("الشارة الثانية — العنوان الصغير (عربي)", max_length=120, blank=True)
+    badge2_label_en = models.CharField("الشارة الثانية — العنوان الصغير (إنجليزي)", max_length=120, blank=True)
+    badge2_value_ar = models.CharField("الشارة الثانية — النص الكبير (عربي)", max_length=120, blank=True)
+    badge2_value_en = models.CharField("الشارة الثانية — النص الكبير (إنجليزي)", max_length=120, blank=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

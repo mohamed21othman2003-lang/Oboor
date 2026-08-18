@@ -8,7 +8,9 @@ class SectionItemSerializer(ResolvedImageMixin):
     class Meta:
         model = SectionItem
         fields = ["page", "block", "key", "order", "icon", "value", "color",
-                  "title_ar", "title_en", "text_ar", "text_en", "data_ar", "data_en", "image"]
+                  "title_ar", "title_en", "text_ar", "text_en", "data_ar", "data_en", "image",
+                  "badge1_label_ar", "badge1_label_en", "badge1_value_ar", "badge1_value_en",
+                  "badge2_label_ar", "badge2_label_en", "badge2_value_ar", "badge2_value_en"]
 
 
 class SectionByPage(PreviewListMixin, generics.ListAPIView):
