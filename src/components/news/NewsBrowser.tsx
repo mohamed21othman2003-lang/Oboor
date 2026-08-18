@@ -116,9 +116,11 @@ function FeaturedArticle({ item, locale }: { item: NewsItem; locale: Locale }) {
   );
 }
 
-export default function NewsBrowser({ locale, categories, workshopFeatured, workshops, centerNews, events, articleFeatured, articles }: {
+type Head = { tag: string; title: string; desc: string };
+export default function NewsBrowser({ locale, categories, heads, workshopFeatured, workshops, centerNews, events, articleFeatured, articles }: {
   locale: Locale;
   categories: Cat[];
+  heads?: { workshops?: Head; center?: Head; events?: Head; articles?: Head };
   workshopFeatured: NewsItem | null;
   workshops: NewsItem[];
   centerNews: NewsItem[];
@@ -149,7 +151,7 @@ export default function NewsBrowser({ locale, categories, workshopFeatured, work
   const sections: React.ReactNode[] = [];
   if (show(3)) sections.push(
     <Section key="workshops">
-      <SectionHead tag={pick(locale, "تعلّم واحتمل", "Learn & Grow")} title={pick(locale, "أحدث الورش التدريبية", "Latest Training Workshops")} linkText={pick(locale, "عرض جميع الورش", "View All Workshops")} onViewAll={() => goToTab(3)} showLink={tab === 0} />
+      <SectionHead tag={heads?.workshops?.tag || pick(locale, "تعلّم واحتمل", "Learn & Grow")} title={heads?.workshops?.title || pick(locale, "أحدث الورش التدريبية", "Latest Training Workshops")} linkText={pick(locale, "عرض جميع الورش", "View All Workshops")} onViewAll={() => goToTab(3)} showLink={tab === 0} />
       <div className="space-y-6">
         {workshopFeatured && <WideCard item={workshopFeatured} cta={pick(locale, "عرض التفاصيل", "View Details")} locale={locale} />}
         <div className="grid gap-6 md:grid-cols-3">
@@ -160,7 +162,7 @@ export default function NewsBrowser({ locale, categories, workshopFeatured, work
   );
   if (show(1)) sections.push(
     <Section key="center">
-      <SectionHead tag={pick(locale, "من داخل عبور", "Inside Oboor")} title={pick(locale, "أخبار المراكز", "Center News")} linkText={pick(locale, "جميع الأخبار", "All News")} onViewAll={() => goToTab(1)} showLink={tab === 0} />
+      <SectionHead tag={heads?.center?.tag || pick(locale, "من داخل عبور", "Inside Oboor")} title={heads?.center?.title || pick(locale, "أخبار المراكز", "Center News")} linkText={pick(locale, "جميع الأخبار", "All News")} onViewAll={() => goToTab(1)} showLink={tab === 0} />
       <div className="grid gap-6 md:grid-cols-3">
         {centerNews.map((n) => <NewsCard key={n.slug} item={n} locale={locale} />)}
       </div>
@@ -168,7 +170,7 @@ export default function NewsBrowser({ locale, categories, workshopFeatured, work
   );
   if (show(2)) sections.push(
     <Section key="events">
-      <SectionHead tag={pick(locale, "شارك معنا", "Join Us")} title={pick(locale, "الفعاليات", "Events")} linkText={pick(locale, "جميع الفعاليات", "All Events")} onViewAll={() => goToTab(2)} showLink={tab === 0} />
+      <SectionHead tag={heads?.events?.tag || pick(locale, "شارك معنا", "Join Us")} title={heads?.events?.title || pick(locale, "الفعاليات", "Events")} linkText={pick(locale, "جميع الفعاليات", "All Events")} onViewAll={() => goToTab(2)} showLink={tab === 0} />
       <div className="grid gap-6 lg:grid-cols-2">
         {events.map((e) => <WideCard key={e.slug} item={e} cta={pick(locale, "عرض التفاصيل", "View Details")} locale={locale} />)}
       </div>
@@ -176,7 +178,7 @@ export default function NewsBrowser({ locale, categories, workshopFeatured, work
   );
   if (show(4)) sections.push(
     <Section key="articles">
-      <SectionHead tag={pick(locale, "ثقّف وابنِ الثقة", "Inform & Build Confidence")} title={pick(locale, "المحتوى التوعوي للأسر", "Awareness Content for Families")} linkText={pick(locale, "جميع المقالات", "All Articles")} onViewAll={() => goToTab(4)} showLink={tab === 0} desc={pick(locale, "مقالات وأدلة متخصصة أُعدّت بعناية لمساعدة أسر المستفيدين على فهم الحالة ودعم أبنائهم.", "Specialized articles and guides carefully prepared to help families understand their child's condition and support them.")} />
+      <SectionHead tag={heads?.articles?.tag || pick(locale, "ثقّف وابنِ الثقة", "Inform & Build Confidence")} title={heads?.articles?.title || pick(locale, "المحتوى التوعوي للأسر", "Awareness Content for Families")} linkText={pick(locale, "جميع المقالات", "All Articles")} onViewAll={() => goToTab(4)} showLink={tab === 0} desc={heads?.articles?.desc || pick(locale, "مقالات وأدلة متخصصة أُعدّت بعناية لمساعدة أسر المستفيدين على فهم الحالة ودعم أبنائهم.", "Specialized articles and guides carefully prepared to help families understand their child's condition and support them.")} />
       <div className="grid gap-6 lg:grid-cols-2">
         {articleFeatured && <FeaturedArticle item={articleFeatured} locale={locale} />}
         <div className="space-y-4">

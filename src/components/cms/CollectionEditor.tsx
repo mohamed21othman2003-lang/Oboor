@@ -205,8 +205,8 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
       if (type === "news" && EVENT_FIELDS.has(f.name) && !["events", "workshops"].includes(String(values.section ?? ""))) continue;
       // شارتا الهيرو: تظهران فقط في «المقدمة العلوية» بصفحة «عن عبور»
       if (BADGE_FIELDS.has(f.name) && !(type === "sections" && String(values.page ?? "") === "about" && sectionBlock === "hero")) continue;
-      // الترويسة الصغيرة (eyebrow): تظهر فقط للأقسام التي تعرضها
-      if (TAGLINE_FIELDS.has(f.name) && !(type === "sections" && TAGLINE_KEYS.has(String(values.key ?? "")))) continue;
+      // الترويسة الصغيرة (eyebrow): تظهر لأقسام محدّدة + كل عناصر بلوك «الكل» (عناوين أقسام الأخبار)
+      if (TAGLINE_FIELDS.has(f.name) && !(type === "sections" && (TAGLINE_KEYS.has(String(values.key ?? "")) || sectionBlock === "overview"))) continue;
       if (f.bilingual) {
         const ar = fields.find((x) => x.base === f.base && x.lang === "ar");
         const en = fields.find((x) => x.base === f.base && x.lang === "en");

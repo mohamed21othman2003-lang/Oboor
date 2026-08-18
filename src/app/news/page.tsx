@@ -105,6 +105,15 @@ export default async function NewsPage() {
     : en
       ? NEWS_CATEGORIES_EN
       : NEWS_CATEGORIES;
+  // «الكل» — عناوين أقسام الأخبار من الـCMS (بلوك overview): ترويسة + عنوان + وصف لكل قسم
+  const ovRows = (sections?.overview ?? []) as unknown as Array<Record<string, string>>;
+  const head = (key: string) => {
+    const r = ovRows.find((x) => x.key === key);
+    if (!r) return undefined;
+    const g = (a: string, e: string) => ((en ? (r[e] || r[a]) : r[a]) || "").trim();
+    return { tag: g("tagline_ar", "tagline_en"), title: g("title_ar", "title_en"), desc: g("text_ar", "text_en") };
+  };
+  const heads = { workshops: head("workshops"), center: head("center"), events: head("events"), articles: head("articles") };
   return (
     <section className="bg-white">
       <div className="mx-auto max-w-7xl px-6 pt-10 lg:px-8">
@@ -118,6 +127,7 @@ export default async function NewsPage() {
       <NewsBrowser
         locale={locale}
         categories={categories}
+        heads={heads}
         workshopFeatured={groups.workshopFeatured}
         workshops={groups.workshops}
         centerNews={groups.centerNews}
