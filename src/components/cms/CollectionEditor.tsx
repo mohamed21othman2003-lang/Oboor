@@ -720,7 +720,7 @@ const BADGE_FIELDS = new Set([
 ]);
 // الترويسة الصغيرة (eyebrow) فوق العنوان — تظهر فقط لعناصر الأقسام التي تعرضها على الموقع
 const TAGLINE_FIELDS = new Set(["tagline_ar", "tagline_en"]);
-const TAGLINE_KEYS = new Set(["about-intro"]);
+const TAGLINE_KEYS = new Set(["about-intro", "about-branches"]);
 // حقول مقفولة (تُعرض للاطلاع فقط؛ تغييرها يكسر مكان المحتوى)
 const LOCKED_FIELDS = new Set(["block"]);
 // قوائم بطاقات — كل عنصر كائن بخانات معنونة بسيطة (بدل JSON)

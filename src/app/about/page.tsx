@@ -265,7 +265,7 @@ export default async function AboutPage() {
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
             <div className="text-start">
-              <TagLine>{pick(locale, "حضور واسع في المملكة", "A wide presence across the Kingdom")}</TagLine>
+              <TagLine>{aTag("branches", "حضور واسع في المملكة", "A wide presence across the Kingdom")}</TagLine>
               <h2 className="mt-3 text-3xl font-extrabold text-ink">{aTitle("branches", "نبذة عن الفروع", "About our branches")}</h2>
               <p className="mt-2 max-w-2xl text-sm leading-7 text-ink-muted">{aText("branches", "تمتد مراكز عبور عبر أكثر من ١١ مدينة رئيسية في المملكة العربية السعودية، لضمان وصول خدماتنا المتخصصة إلى الأسر أينما كانت، مع الحفاظ على نفس مستوى الجودة والتميّز في كل موقع.", "Oboor Centers span more than 11 major cities across Saudi Arabia, ensuring our specialized services reach families wherever they are, while maintaining the same level of quality and excellence at every location.")}</p>
             </div>
