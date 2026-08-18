@@ -397,7 +397,10 @@ export default function PageChrome({ page }: { page: string }) {
     try {
       const e = edits[it.id] || {};
       const payload: Record<string, unknown> = {};
-      for (const k of ["title_ar", "title_en", "text_ar", "text_en", "value", "icon"]) if (k in e) payload[k] = e[k];
+      for (const k of ["title_ar", "title_en", "text_ar", "text_en", "tagline_ar", "tagline_en",
+                        "badge1_label_ar", "badge1_label_en", "badge1_value_ar", "badge1_value_en",
+                        "badge2_label_ar", "badge2_label_en", "badge2_value_ar", "badge2_value_en",
+                        "value", "icon"]) if (k in e) payload[k] = e[k];
       if (Object.keys(payload).length) {
         const saved = await updateItem("sections", it.id, payload) as CmsItem;
         setItems((prev) => prev.map((x) => (x.id === it.id ? saved : x)));
@@ -536,6 +539,10 @@ export default function PageChrome({ page }: { page: string }) {
                   const hasImage = String(it.image ?? "").trim() !== "" || Boolean(it.image_file);
                   const hasTitle = String(it.title_ar ?? "").trim() !== "" || String(it.title_en ?? "").trim() !== "" || ("title_ar" in (edits[it.id] || {}));
                   const showTitle = hasTitle || !hasImage; // العناصر المخصّصة للصورة فقط لا تعرض حقل العنوان
+                  const hasTagline = String(it.tagline_ar ?? "").trim() !== "" || String(it.tagline_en ?? "").trim() !== "" || ("tagline_ar" in (edits[it.id] || {}));
+                  const hasBadges = ["badge1_label_ar", "badge1_value_ar", "badge2_label_ar", "badge2_value_ar"].some(
+                    (k) => String((it as Record<string, unknown>)[k] ?? "").trim() !== "" || (k in (edits[it.id] || {})),
+                  );
                   const imgResolved = resolveSrc(String(it.image ?? ""));
                   const imgSrc = imgResolved && /^(https?:|\/)/.test(imgResolved) ? `${imgResolved}${imgResolved.includes("?") ? "&" : "?"}v=${bust}` : imgResolved;
                   return (
@@ -559,6 +566,15 @@ export default function PageChrome({ page }: { page: string }) {
                           </div>
                           ) : null;
                         })()}
+                        {hasTagline && (
+                          <div>
+                            <p className="mb-1 text-xs font-semibold text-ink-soft">{t("الترويسة الصغيرة (فوق العنوان)", "Eyebrow (above title)")}</p>
+                            <div className="grid gap-2 sm:grid-cols-2">
+                              <input value={val(it, "tagline_ar")} onChange={(e) => setVal(it.id, "tagline_ar", e.target.value)} className={INPUT} placeholder={t("عربي", "Arabic")} />
+                              <input value={val(it, "tagline_en")} onChange={(e) => setVal(it.id, "tagline_en", e.target.value)} dir="ltr" className={INPUT} placeholder="English" />
+                            </div>
+                          </div>
+                        )}
                         {showTitle && (
                           <div>
                             <p className="mb-1 text-xs font-semibold text-ink-soft">{(en ? FIELD_LABELS_EN[key]?.title : FIELD_LABELS[key]?.title) || t("العنوان", "Title")}</p>
@@ -607,6 +623,22 @@ export default function PageChrome({ page }: { page: string }) {
                                 <input type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) pickImage(it, f); e.target.value = ""; }} />
                               </label>
                             </div>
+                          </div>
+                        )}
+                        {hasBadges && (
+                          <div className="rounded-lg border border-line bg-white p-2.5">
+                            <p className="mb-2 text-xs font-bold text-ink">{t("الشارتان العائمتان (فوق الصورة)", "Floating badges (over the image)")}</p>
+                            {[1, 2].map((n) => (
+                              <div key={n} className="mb-2 last:mb-0">
+                                <p className="mb-1 text-[11px] font-semibold text-ink-soft">{t(n === 1 ? "الشارة الأولى" : "الشارة الثانية", `Badge ${n}`)}</p>
+                                <div className="grid gap-1.5 sm:grid-cols-2">
+                                  <input value={val(it, `badge${n}_label_ar`)} onChange={(e) => setVal(it.id, `badge${n}_label_ar`, e.target.value)} className={INPUT} placeholder={t("العنوان الصغير (عربي)", "Label (Arabic)")} />
+                                  <input value={val(it, `badge${n}_label_en`)} onChange={(e) => setVal(it.id, `badge${n}_label_en`, e.target.value)} dir="ltr" className={INPUT} placeholder={t("العنوان الصغير (إنجليزي)", "Label (English)")} />
+                                  <input value={val(it, `badge${n}_value_ar`)} onChange={(e) => setVal(it.id, `badge${n}_value_ar`, e.target.value)} className={INPUT} placeholder={t("النص الكبير (عربي)", "Value (Arabic)")} />
+                                  <input value={val(it, `badge${n}_value_en`)} onChange={(e) => setVal(it.id, `badge${n}_value_en`, e.target.value)} dir="ltr" className={INPUT} placeholder={t("النص الكبير (إنجليزي)", "Value (English)")} />
+                                </div>
+                              </div>
+                            ))}
                           </div>
                         )}
                       </div>
