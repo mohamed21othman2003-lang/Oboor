@@ -11,6 +11,12 @@ import PageChrome from "@/components/cms/PageChrome";
 
 // أنواع المحتوى التي لصفحتها «رأس صفحة» قابل للتعديل من نفس القائمة (نوع ← مفتاح الصفحة)
 const PAGE_CHROME: Record<string, string> = { careers: "careers", success: "success", specialists: "specialists", branches: "branches", news: "news", programs: "programs" };
+// قسم التواصل السفلي (CTA) لصفحات التفاصيل — يُدار من داخل صفحة نوعه (لا صفحة مستقلة)
+const DETAIL_CTA: Record<string, { page: string; ar: string; en: string }> = {
+  programs: { page: "program-detail", ar: "قسم التواصل السفلي — صفحات تفاصيل البرامج", en: "Bottom contact section — Program detail pages" },
+  services: { page: "service-detail", ar: "قسم التواصل السفلي — صفحات تفاصيل الخدمات", en: "Bottom contact section — Service detail pages" },
+  techniques: { page: "technique-detail", ar: "قسم التواصل السفلي — صفحات تفاصيل التقنيات", en: "Bottom contact section — Technique detail pages" },
+};
 
 // أسماء ودّية لأقسام الصفحات (block) — لتجميع العناصر تحت قسمها بدل خلطها
 const BLOCK_LABELS: Record<string, string> = {
@@ -261,6 +267,13 @@ export default function CollectionList({ type }: { type: string }) {
       </div>
 
       {!pageFilter && PAGE_CHROME[type] && <PageChrome page={PAGE_CHROME[type]} />}
+      {!pageFilter && DETAIL_CTA[type] && (
+        <PageChrome
+          page={DETAIL_CTA[type].page}
+          label={[DETAIL_CTA[type].ar, DETAIL_CTA[type].en]}
+          desc={["يظهر أسفل كل صفحة تفاصيل من هذا النوع (مشترك — يُستبدل اسم العنصر تلقائياً)", "Appears at the bottom of every detail page of this type (shared — the item's name is inserted automatically)"]}
+        />
+      )}
 
       {error && <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">{error}</p>}
 
