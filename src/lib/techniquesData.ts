@@ -6,6 +6,8 @@ export type Technique = {
   about: string[]; targets: string[]; offers: string[];
   offerIcons?: string[];
   helpSection?: { title: string; benefitsHeading: string; benefits: string[]; valueHeading: string; values: string[] };
+  // قسم التواصل السفلي (CTA) الخاص بهذه التقنية (اختياري — يسقط للنص الافتراضي إن فارغ)
+  ctaBadge?: string; ctaTitle?: string; ctaText?: string;
 };
 
 export const TECHNIQUES: Technique[] = [

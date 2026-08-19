@@ -7,7 +7,7 @@ import { PROGRAM_DETAILS, getProgram, type ProgramDetail } from "@/lib/programsD
 import { distinctIcons, iconByKey } from "@/lib/areaIcon";
 import { getLocale } from "@/i18n/locale";
 import { pick, type Locale } from "@/i18n/config";
-import { fetchContent, fetchSections } from "@/lib/server/django";
+import { fetchContent } from "@/lib/server/django";
 import { hl } from "@/lib/highlight";
 import CtaSection from "@/components/CtaSection";
 
@@ -32,6 +32,9 @@ type ApiProgram = {
   target_list_ar: string[]; target_list_en: string[];
   stations_intro_ar: string; stations_intro_en: string;
   stations_ar: string[]; stations_en: string[];
+  cta_badge_ar: string; cta_badge_en: string;
+  cta_title_ar: string; cta_title_en: string;
+  cta_text_ar: string; cta_text_en: string;
   image: string; order: number;
 };
 
@@ -63,6 +66,9 @@ function mapProgram(row: ApiProgram, locale: Locale): ProgramDetail {
     targetList: b(row.target_list_ar, row.target_list_en),
     stationsIntro: b(row.stations_intro_ar, row.stations_intro_en),
     stations: b(row.stations_ar, row.stations_en),
+    ctaBadge: b(row.cta_badge_ar || "", row.cta_badge_en || ""),
+    ctaTitle: b(row.cta_title_ar || "", row.cta_title_en || ""),
+    ctaText: b(row.cta_text_ar || "", row.cta_text_en || ""),
   };
 }
 
@@ -98,14 +104,10 @@ export default async function ProgramDetailPage({ params }: { params: Promise<{ 
   const p = await loadProgram(slug, locale);
   if (!p) notFound();
 
-  const en = locale === "en";
-  // قسم التواصل السفلي (CTA) من الـCMS — العنوان قالب يحوي {name} يُستبدل باسم البرنامج
-  const sections = await fetchSections("program-detail");
-  const ctaRow = (sections?.cta ?? []).find((r) => r.key === "main") as Record<string, string> | undefined;
-  const ctaTitleTpl = ctaRow ? (en ? ctaRow.title_en || ctaRow.title_ar : ctaRow.title_ar) : "";
-  const ctaTitle = ctaTitleTpl ? hl(ctaTitleTpl.replace(/\{name\}/g, p.title)) : undefined;
-  const ctaSub = ctaRow ? (en ? ctaRow.text_en || ctaRow.text_ar : ctaRow.text_ar) || undefined : undefined;
-  const ctaBadge = ctaRow ? (en ? ctaRow.tagline_en || ctaRow.tagline_ar : ctaRow.tagline_ar) || undefined : undefined;
+  // قسم التواصل السفلي (CTA) الخاص بهذا البرنامج — يُدار من محرّر البرنامج نفسه (مستقل لكل برنامج)
+  const ctaTitle = p.ctaTitle ? hl(p.ctaTitle) : undefined;
+  const ctaSub = p.ctaText || undefined;
+  const ctaBadge = p.ctaBadge || undefined;
 
   return (
     <>

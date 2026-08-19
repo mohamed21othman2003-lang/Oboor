@@ -6,7 +6,7 @@ import { notFound } from "next/navigation";
 import { TECHNIQUES, getTechnique, type Technique } from "@/lib/techniquesData";
 import { distinctIcons, iconByKey } from "@/lib/areaIcon";
 import CtaSection from "@/components/CtaSection";
-import { fetchContent, fetchSections } from "@/lib/server/django";
+import { fetchContent } from "@/lib/server/django";
 import { hl } from "@/lib/highlight";
 import { getLocale } from "@/i18n/locale";
 import { pick, type Locale } from "@/i18n/config";
@@ -26,6 +26,9 @@ type ApiTechnique = {
   offers_ar: string[]; offers_en: string[];
   offer_icons: string[];
   help_section_ar: Partial<HelpSection>; help_section_en: Partial<HelpSection>;
+  cta_badge_ar: string; cta_badge_en: string;
+  cta_title_ar: string; cta_title_en: string;
+  cta_text_ar: string; cta_text_en: string;
   image: string; order: number;
 };
 
@@ -52,6 +55,9 @@ function toTechnique(row: ApiTechnique, locale: Locale): Technique {
     offers: bi(en, row.offers_en, row.offers_ar),
     offerIcons: row.offer_icons?.length ? row.offer_icons : undefined,
     helpSection,
+    ctaBadge: en ? (row.cta_badge_en || row.cta_badge_ar) : row.cta_badge_ar,
+    ctaTitle: en ? (row.cta_title_en || row.cta_title_ar) : row.cta_title_ar,
+    ctaText: en ? (row.cta_text_en || row.cta_text_ar) : row.cta_text_ar,
   };
 }
 
@@ -87,12 +93,10 @@ export default async function TechniqueDetailPage({ params }: { params: Promise<
   const locale = await getLocale();
   const t = await loadTechnique(slug, locale);
   if (!t) notFound();
-  const cen = locale === "en";
-  const sections = await fetchSections("technique-detail");
-  const ctaRow = (sections?.cta ?? []).find((r) => r.key === "main") as Record<string, string> | undefined;
-  const ctaTitle = ctaRow?.title_ar ? hl(cen ? ctaRow.title_en || ctaRow.title_ar : ctaRow.title_ar) : undefined;
-  const ctaSub = ctaRow ? (cen ? ctaRow.text_en || ctaRow.text_ar : ctaRow.text_ar) || undefined : undefined;
-  const ctaBadge = ctaRow ? (cen ? ctaRow.tagline_en || ctaRow.tagline_ar : ctaRow.tagline_ar) || undefined : undefined;
+  // قسم التواصل السفلي (CTA) الخاص بهذه التقنية — يُدار من محرّر التقنية نفسها (مستقل لكل تقنية)
+  const ctaTitle = t.ctaTitle ? hl(t.ctaTitle) : undefined;
+  const ctaSub = t.ctaText || undefined;
+  const ctaBadge = t.ctaBadge || undefined;
   const available = locale === "en"
     ? !t.badge.toLowerCase().includes("not")
     : t.badge.includes("متوفر") && !t.badge.includes("غير");

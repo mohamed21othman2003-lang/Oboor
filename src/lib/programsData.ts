@@ -10,6 +10,8 @@ export type ProgramDetail = {
   trainingAreaIcons?: string[]; // مفاتيح أيقونات مجالات التدريب (اختياري — لكل مجال) مع سقوط لاختيار تلقائي
   targetList?: string[];
   stationsIntro?: string; stations?: string[];
+  // قسم التواصل السفلي (CTA) الخاص بهذا البرنامج (اختياري — يسقط للنص الافتراضي إن فارغ)
+  ctaBadge?: string; ctaTitle?: string; ctaText?: string;
 };
 
 export const PROGRAM_DETAILS: ProgramDetail[] = [

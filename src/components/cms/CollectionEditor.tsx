@@ -656,11 +656,15 @@ const FIELD_SECTIONS: Record<string, { title: string; title_en: string; bases: s
     { title: "معلومات البرنامج (٣ بطاقات: المنهج + المدة + الفئة المستهدفة)", title_en: "Program info (3 cards: methodology + duration + target group)", bases: ["methods", "duration", "target", "target_tags", "target_list"] },
     { title: "مجالات التدريب", title_en: "Training areas", bases: ["training_intro", "training_areas"] },
     { title: "المحطات التطبيقية", title_en: "Practical stations", bases: ["stations_intro", "stations"] },
+    { title: "قسم التواصل السفلي (CTA)", title_en: "Bottom contact section (CTA)", bases: ["cta_badge", "cta_title", "cta_text"],
+      note: "قسم التواصل أسفل صفحة هذا البرنامج — خاص به وحده. اتركه فارغاً لاستخدام النص الافتراضي.", note_en: "The contact section at the bottom of this program's page — unique to it. Leave empty for the default text.", preview: "/programs/{slug}" },
   ],
   clinical: [
     { title: "أعلى الصفحة (الهيرو)", title_en: "Top of page (Hero)", bases: ["title", "subtitle", "image", "image_file"] },
     { title: "نبذة عن الخدمة", title_en: "About the service", bases: ["about_heading", "about", "about_list", "about_tag"] },
     { title: "أقسام محتوى الصفحة", title_en: "Page content sections", bases: ["blocks"] },
+    { title: "قسم التواصل السفلي (CTA)", title_en: "Bottom contact section (CTA)", bases: ["cta_badge", "cta_title", "cta_text"],
+      note: "قسم التواصل أسفل صفحة هذه الخدمة — خاص بها وحدها. اتركه فارغاً لاستخدام النص الافتراضي.", note_en: "The contact section at the bottom of this service's page — unique to it. Leave empty for the default text.", preview: "/services/{slug}" },
   ],
   techniques: [
     { title: "أعلى الصفحة (الهيرو)", title_en: "Top of page (Hero)", bases: ["title", "badge", "image", "image_file"] },
@@ -668,6 +672,8 @@ const FIELD_SECTIONS: Record<string, { title: string; title_en: string; bases: s
     { title: "الفئات المستهدفة", title_en: "Target groups", bases: ["targets"] },
     { title: "ما تقدّمه التقنية", title_en: "What the technique offers", bases: ["offers", "offer_icons"] },
     { title: "قسم «كيف تساعد التقنية»", title_en: "\"How the technique helps\" section", bases: ["help_section"] },
+    { title: "قسم التواصل السفلي (CTA)", title_en: "Bottom contact section (CTA)", bases: ["cta_badge", "cta_title", "cta_text"],
+      note: "قسم التواصل أسفل صفحة هذه التقنية — خاص بها وحدها. اتركه فارغاً لاستخدام النص الافتراضي.", note_en: "The contact section at the bottom of this technique's page — unique to it. Leave empty for the default text.", preview: "/techniques/{slug}" },
   ],
 };
 // حقول تقنية/اختيارية تُخفى إن كانت فارغة (تقليل التشويش لمن لا يحتاجها)

@@ -20,6 +20,14 @@ class ClinicalService(models.Model):
     blocks_ar = models.JSONField("المحتوى (عربي)", default=list, blank=True)
     blocks_en = models.JSONField("المحتوى (إنجليزي)", default=list, blank=True)
 
+    # قسم التواصل السفلي (CTA) الخاص بصفحة هذه الخدمة — مستقل لكل خدمة
+    cta_badge_ar = models.CharField("CTA — الترويسة الصغيرة (عربي)", max_length=200, blank=True, help_text="نص البادج في قسم التواصل السفلي بصفحة هذه الخدمة (اتركه فارغاً للنص الافتراضي).")
+    cta_badge_en = models.CharField("CTA — الترويسة الصغيرة (إنجليزي)", max_length=200, blank=True)
+    cta_title_ar = models.TextField("CTA — العنوان (عربي)", blank=True, help_text="عنوان قسم التواصل السفلي بصفحة هذه الخدمة (اتركه فارغاً للنص الافتراضي).")
+    cta_title_en = models.TextField("CTA — العنوان (إنجليزي)", blank=True)
+    cta_text_ar = models.TextField("CTA — النص (عربي)", blank=True)
+    cta_text_en = models.TextField("CTA — النص (إنجليزي)", blank=True)
+
     image = models.CharField("مسار الصورة", max_length=300, blank=True)
     image_file = models.ImageField("رفع صورة", upload_to="content/", blank=True)
     order = models.IntegerField("الترتيب", default=0)

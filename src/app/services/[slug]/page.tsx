@@ -7,7 +7,7 @@ import { CLINICAL_SERVICES, getClinicalService, type ClinicalBlock, type Clinica
 import { distinctIcons, iconByKey } from "@/lib/areaIcon";
 import { getLocale } from "@/i18n/locale";
 import { pick, type Locale } from "@/i18n/config";
-import { fetchContent, fetchSections } from "@/lib/server/django";
+import { fetchContent } from "@/lib/server/django";
 import { hl } from "@/lib/highlight";
 import CtaSection from "@/components/CtaSection";
 
@@ -26,6 +26,9 @@ type ApiService = {
   about_tag_ar: { heading: string; label?: string; labels?: string[] } | null;
   about_tag_en: { heading: string; label?: string; labels?: string[] } | null;
   blocks_ar: ClinicalBlock[]; blocks_en: ClinicalBlock[];
+  cta_badge_ar: string; cta_badge_en: string;
+  cta_title_ar: string; cta_title_en: string;
+  cta_text_ar: string; cta_text_en: string;
   image: string;
   order: number;
 };
@@ -53,6 +56,9 @@ function toService(r: ApiService, locale: Locale): ClinicalService {
     aboutTag: biObj(en, r.about_tag_ar, r.about_tag_en),
     aboutList: biArr(en, r.about_list_ar, r.about_list_en),
     blocks: biArr(en, r.blocks_ar, r.blocks_en),
+    ctaBadge: biStr(en, r.cta_badge_ar || "", r.cta_badge_en || ""),
+    ctaTitle: biStr(en, r.cta_title_ar || "", r.cta_title_en || ""),
+    ctaText: biStr(en, r.cta_text_ar || "", r.cta_text_en || ""),
   };
 }
 
@@ -298,12 +304,10 @@ export default async function ClinicalDetailPage({ params }: { params: Promise<{
   const s = await loadService(slug, locale);
   if (!s) notFound();
 
-  const en = locale === "en";
-  const sections = await fetchSections("service-detail");
-  const ctaRow = (sections?.cta ?? []).find((r) => r.key === "main") as Record<string, string> | undefined;
-  const ctaTitle = ctaRow?.title_ar ? hl(en ? ctaRow.title_en || ctaRow.title_ar : ctaRow.title_ar) : undefined;
-  const ctaSub = ctaRow ? (en ? ctaRow.text_en || ctaRow.text_ar : ctaRow.text_ar) || undefined : undefined;
-  const ctaBadge = ctaRow ? (en ? ctaRow.tagline_en || ctaRow.tagline_ar : ctaRow.tagline_ar) || undefined : undefined;
+  // قسم التواصل السفلي (CTA) الخاص بهذه الخدمة — يُدار من محرّر الخدمة نفسها (مستقل لكل خدمة)
+  const ctaTitle = s.ctaTitle ? hl(s.ctaTitle) : undefined;
+  const ctaSub = s.ctaText || undefined;
+  const ctaBadge = s.ctaBadge || undefined;
 
   // العنوان: أول كلمة بلون داكن وباقي العنوان باللون التركوازي (مطابقة للتصميم)
   const [titleFirst, ...titleRest] = s.title.split(" ");

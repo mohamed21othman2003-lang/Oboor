@@ -23,6 +23,7 @@ class ProgramDetailSerializer(ResolvedImageMixin):
             "target_list_ar", "target_list_en",
             "stations_intro_ar", "stations_intro_en",
             "stations_ar", "stations_en",
+            "cta_badge_ar", "cta_badge_en", "cta_title_ar", "cta_title_en", "cta_text_ar", "cta_text_en",
             "image", "order", "published",
         ]
 

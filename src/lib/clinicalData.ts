@@ -20,6 +20,8 @@ export type ClinicalService = {
   aboutTag?: { heading: string; label?: string; labels?: string[] };
   aboutList?: string[];
   blocks: ClinicalBlock[];
+  // قسم التواصل السفلي (CTA) الخاص بهذه الخدمة (اختياري — يسقط للنص الافتراضي إن فارغ)
+  ctaBadge?: string; ctaTitle?: string; ctaText?: string;
 };
 
 const AGE_PROGRAMS = (adultSub: string): ClinicalBlock => ({

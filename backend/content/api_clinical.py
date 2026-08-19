@@ -9,7 +9,9 @@ class ClinicalServiceSerializer(ResolvedImageMixin):
         fields = ["slug", "title_ar", "title_en", "subtitle_ar", "subtitle_en",
                   "about_heading_ar", "about_heading_en", "about_ar", "about_en",
                   "about_list_ar", "about_list_en", "about_tag_ar", "about_tag_en",
-                  "blocks_ar", "blocks_en", "image", "order", "published"]
+                  "blocks_ar", "blocks_en",
+                  "cta_badge_ar", "cta_badge_en", "cta_title_ar", "cta_title_en", "cta_text_ar", "cta_text_en",
+                  "image", "order", "published"]
 
 
 from .preview import PreviewListMixin
