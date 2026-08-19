@@ -92,6 +92,11 @@ export default async function SpecialistsPage() {
   // نص زر «انضم إلى فريقنا» (فوق العنوان) — من حقل tagline بالـCMS مع fallback ثابت
   const ji = joinItem as Record<string, string> | undefined;
   const joinBtn = (en ? ji?.tagline_en || ji?.tagline_ar : ji?.tagline_ar) || "";
+  // قسم التواصل السفلي (CTA) من الـCMS: البادج (tagline) + العنوان + الوصف
+  const ctaRow = (sections?.cta ?? []).find((r) => r.key === "main") as Record<string, string> | undefined;
+  const ctaTitle = ctaRow?.title_ar ? hl(en ? ctaRow.title_en || ctaRow.title_ar : ctaRow.title_ar) : undefined;
+  const ctaSub = ctaRow ? (en ? ctaRow.text_en || ctaRow.text_ar : ctaRow.text_ar) || undefined : undefined;
+  const ctaBadge = ctaRow ? (en ? ctaRow.tagline_en || ctaRow.tagline_ar : ctaRow.tagline_ar) || undefined : undefined;
 
   // القائمة الكاملة لتخصصات وفروع عبور (تظهر في الفلتر حتى قبل إضافة كل الأخصائيين)
   const specialtyOptions = pick(
@@ -246,8 +251,9 @@ export default async function SpecialistsPage() {
       {/* CTA */}
       <CtaSection
         locale={locale}
-        title={pick(locale, "هل تحتاج إلى استشارة أو مزيد من المعلومات؟", "Need a consultation or more information?")}
-        subtitle={pick(locale, "فريقنا من المختصين جاهز للإجابة على كل استفساراتكم ومساعدتكم في اختيار البرنامج الأنسب لطفلكم. تواصلوا معنا الآن.", "Our team of specialists is ready to answer all your questions and help you choose the most suitable program for your child. Get in touch with us now.")}
+        badge={ctaBadge}
+        title={ctaTitle ?? pick(locale, "هل تحتاج إلى استشارة أو مزيد من المعلومات؟", "Need a consultation or more information?")}
+        subtitle={ctaSub ?? pick(locale, "فريقنا من المختصين جاهز للإجابة على كل استفساراتكم ومساعدتكم في اختيار البرنامج الأنسب لطفلكم. تواصلوا معنا الآن.", "Our team of specialists is ready to answer all your questions and help you choose the most suitable program for your child. Get in touch with us now.")}
       />
     </>
   );

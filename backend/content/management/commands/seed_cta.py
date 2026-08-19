@@ -25,6 +25,11 @@ CTA = {
         text_en="Early assessment is the beginning of every success story. Our team of certified specialists is ready to provide a comprehensive, accurate assessment of your child and design a personalized rehabilitation plan.",
         data_ar=["تقييم شامل ومتخصص", "خطة علاجية مخصصة", "متابعة دورية مستمرة", "دعم الأسرة الكامل"],
         data_en=["Comprehensive specialized assessment", "Personalized treatment plan", "Ongoing periodic follow-up", "Full family support"]),
+    "specialists": dict(
+        tagline_ar="خدمة العملاء متاحة على مدار الساعة", tagline_en="Customer service available around the clock",
+        title_ar="هل تحتاج إلى استشارة أو مزيد من المعلومات؟", title_en="Need a consultation or more information?",
+        text_ar="فريقنا من المختصين جاهز للإجابة على كل استفساراتكم ومساعدتكم في اختيار البرنامج الأنسب لطفلكم. تواصلوا معنا الآن.",
+        text_en="Our team of specialists is ready to answer all your questions and help you choose the most suitable program for your child. Get in touch with us now."),
 }
 
 
