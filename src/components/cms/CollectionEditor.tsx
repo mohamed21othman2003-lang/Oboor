@@ -14,6 +14,7 @@ import { iconByKey, OFFER_ICON_KEYS } from "@/lib/areaIcon";
 import { useCmsLang } from "@/lib/cms/i18n";
 import { fieldLabelEn } from "@/lib/cms/fieldLabels";
 import CustomSelect from "@/components/ui/Select";
+import { ItemPreview } from "@/components/cms/SectionPreview";
 // تحميل مكوّن قصّ الصورة عند الحاجة فقط (يقلّل حجم باندل المحرّر)
 const ImageCropModal = dynamic(() => import("@/components/cms/ImageCropModal"), { ssr: false });
 
@@ -238,6 +239,17 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
     return out;
   }, [rows, type, en]);
 
+  // فصل «فيلدز البطاقة» (صورة/عنوان/تصنيف/وصف) لعرضها بجوار المعاينة الحيّة —
+  // فقط لمحرّرات عناصر القوائم (لا أقسام الصفحات، فتلك لها معاينتها في «محتوى الصفحة»).
+  const baseOfRow = (r: Row) => r.f?.base ?? r.ar?.base ?? r.en?.base ?? "";
+  const isCardRow = (r: Row) => r.f?.type === "image" || CARD_BASES.has(baseOfRow(r));
+  const showCardPreview = type !== "sections";
+  const cardRows = showCardPreview ? rows.filter(isCardRow) : [];
+  const cardRowSet = new Set(cardRows);
+  const formGroups = showCardPreview
+    ? sectionGroups.map((g) => ({ ...g, rows: g.rows.filter((r) => !cardRowSet.has(r)) })).filter((g) => g.rows.length)
+    : sectionGroups;
+
   async function onSave() {
     setSaving(true);
     setError("");
@@ -445,8 +457,27 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
         ) : null;
       })()}
 
+      {showCardPreview && cardRows.length > 0 && (
+        <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start lg:gap-6">
+          <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-line sm:p-8">
+            <h2 className="mb-3 flex items-center gap-2.5 border-b border-line pb-3 text-lg font-extrabold text-brand-dark">
+              <span className="h-5 w-1.5 shrink-0 rounded-full bg-brand" />
+              {t("محتوى البطاقة", "Card content")}
+            </h2>
+            <div className="space-y-7">{cardRows.map(renderRow)}</div>
+          </div>
+          <div className="mt-4 lg:mt-0 lg:sticky lg:top-4">
+            <p className="mb-1.5 flex items-center gap-1.5 text-[11px] font-semibold text-ink-soft">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" /><circle cx="12" cy="12" r="3" /></svg>
+              {t("كما يظهر على الموقع", "As shown on the site")}
+            </p>
+            <ItemPreview type={type} values={values} lang={lang} />
+          </div>
+        </div>
+      )}
+
       <div className="space-y-5">
-        {sectionGroups.map((g, gi) => (
+        {formGroups.map((g, gi) => (
           <div key={gi} className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-line sm:p-8">
             {g.title && (
               <h2 className="mb-3 flex items-center gap-2.5 border-b border-line pb-3 text-lg font-extrabold text-brand-dark">
@@ -604,6 +635,9 @@ function previewHref(type: string, v: Record<string, unknown>): string | null {
 // حقول مخفية من الفورم (الترتيب يُدار بأسهم القائمة)
 // «مسار الصورة» النصّي مخفي — الصورة تُدار بأداة الرفع (image_file) التي تعرض الصورة الحالية تلقائياً
 const HIDDEN_IN_FORM = new Set(["order", "page", "image"]);
+// «فيلدز البطاقة» = ما يظهر داخل كارت العنصر على الموقع (صورة + عنوان + تصنيف/وسم + وصف).
+// تُعرض بجوار المعاينة الحيّة؛ وباقي الحقول (المحتوى، التواريخ…) تبقى أسفلها عادي.
+const CARD_BASES = new Set(["name", "title", "heading", "specialty", "category", "badge", "region", "tag", "role", "desc", "excerpt", "subtitle", "bio"]);
 // أقسام صفحات تعرض صورة على الموقع ⇒ يظهر لها رافع الصورة (حتى قبل رفع صورة) وتُحتسب في الاكتمال.
 // بقية الأقسام (عناوين/نصوص) لا تعرض صورة، فلا نعرض لها رافعاً ولا نحسبها ناقصة.
 const IMAGE_SECTION_KEYS = new Set(["about-intro", "about-programs"]);
