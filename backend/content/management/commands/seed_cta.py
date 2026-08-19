@@ -18,6 +18,13 @@ CTA = {
         title_ar="أتحتاجنا بجانبك لاختيار الوجهة؟", title_en="Need help choosing the right option?",
         text_ar="نحن هنا لنكون بوصلتك؛ نختار معًا الفرع الأقرب لروح طفلك، والأنسب لتحقيق طموحه.",
         text_en="We are here to guide you in finding the most suitable branch for your child's needs and potential, ensuring the best path toward their goals."),
+    "success": dict(
+        tagline_ar="الخطوة الأولى نحو التغير", tagline_en="The first step toward change",
+        title_ar="ابدأ تقييم طفلك الآن", title_en="Start your child's assessment now",
+        text_ar="التقييم المبكر هو بداية كل قصة نجاح. فريقنا من الأخصائيين المعتمدين جاهز لتقديم تقييم شامل ودقيق لوضع طفلك ورسم خطة تأهيلية مخصصة له.",
+        text_en="Early assessment is the beginning of every success story. Our team of certified specialists is ready to provide a comprehensive, accurate assessment of your child and design a personalized rehabilitation plan.",
+        data_ar=["تقييم شامل ومتخصص", "خطة علاجية مخصصة", "متابعة دورية مستمرة", "دعم الأسرة الكامل"],
+        data_en=["Comprehensive specialized assessment", "Personalized treatment plan", "Ongoing periodic follow-up", "Full family support"]),
 }
 
 

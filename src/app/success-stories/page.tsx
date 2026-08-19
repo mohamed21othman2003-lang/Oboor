@@ -117,6 +117,15 @@ export default async function SuccessStoriesPage() {
     ? { ...cmsHighlights, journeyTemplate: cmsHighlights.journeyTemplate || "" }
     : getStoryHighlightsData(locale);
 
+  // قسم التواصل السفلي (CTA) من الـCMS: البادج (tagline) + العنوان + الوصف + النقاط (data)
+  const ctaRow = (sections?.cta ?? []).find((r) => r.key === "main") as Record<string, unknown> | undefined;
+  const cg = (a: string, e: string) => (ctaRow ? String((en ? (ctaRow[e] || ctaRow[a]) : ctaRow[a]) ?? "").trim() : "");
+  const ctaBadge = cg("tagline_ar", "tagline_en") || undefined;
+  const ctaTitle = ctaRow?.title_ar ? hl(cg("title_ar", "title_en")) : undefined;
+  const ctaSub = cg("text_ar", "text_en") || undefined;
+  const ctaFeatsRaw = en ? ctaRow?.data_en : ctaRow?.data_ar;
+  const ctaFeats = Array.isArray(ctaFeatsRaw) && ctaFeatsRaw.length ? (ctaFeatsRaw as string[]) : undefined;
+
   // HERO: المقدمة العلوية من الـ CMS (مع fallback للنص الثابت)
   const heroRows = sections?.hero ?? [];
   const sFind = (k: string) => heroRows.find((r) => r.key === k);
@@ -182,10 +191,10 @@ export default async function SuccessStoriesPage() {
       <CtaSection
         locale={locale}
         starBadge
-        badge={pick(locale, "الخطوة الأولى نحو التغير", "The first step toward change")}
-        title={pick(locale, "ابدأ تقييم طفلك الآن", "Start your child's assessment now")}
-        subtitle={pick(locale, "التقييم المبكر هو بداية كل قصة نجاح. فريقنا من الأخصائيين المعتمدين جاهز لتقديم تقييم شامل ودقيق لوضع طفلك ورسم خطة تأهيلية مخصصة له.", "Early assessment is the beginning of every success story. Our team of certified specialists is ready to provide a comprehensive, accurate assessment of your child and design a personalized rehabilitation plan.")}
-        features={[
+        badge={ctaBadge ?? pick(locale, "الخطوة الأولى نحو التغير", "The first step toward change")}
+        title={ctaTitle ?? pick(locale, "ابدأ تقييم طفلك الآن", "Start your child's assessment now")}
+        subtitle={ctaSub ?? pick(locale, "التقييم المبكر هو بداية كل قصة نجاح. فريقنا من الأخصائيين المعتمدين جاهز لتقديم تقييم شامل ودقيق لوضع طفلك ورسم خطة تأهيلية مخصصة له.", "Early assessment is the beginning of every success story. Our team of certified specialists is ready to provide a comprehensive, accurate assessment of your child and design a personalized rehabilitation plan.")}
+        features={ctaFeats ?? [
           pick(locale, "تقييم شامل ومتخصص", "Comprehensive specialized assessment"),
           pick(locale, "خطة علاجية مخصصة", "Personalized treatment plan"),
           pick(locale, "متابعة دورية مستمرة", "Ongoing periodic follow-up"),

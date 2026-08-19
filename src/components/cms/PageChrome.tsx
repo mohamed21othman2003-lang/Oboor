@@ -369,7 +369,7 @@ export default function PageChrome({ page }: { page: string }) {
   const en = lang === "en";
   const t = (ar: string, e: string) => (en ? e : ar);
   const [items, setItems] = useState<CmsItem[]>([]);
-  const [edits, setEdits] = useState<Record<number, Record<string, string>>>({});
+  const [edits, setEdits] = useState<Record<number, Record<string, string | string[]>>>({});
   const [open, setOpen] = useState(false);
   const [openBlock, setOpenBlock] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(true);
@@ -393,8 +393,9 @@ export default function PageChrome({ page }: { page: string }) {
   if (loading || !items.length) return null;
 
   const val = (it: CmsItem, k: string) => String(edits[it.id]?.[k] ?? it[k] ?? "");
+  const listVal = (it: CmsItem, k: string) => { const v = edits[it.id]?.[k] ?? (it as Record<string, unknown>)[k]; return Array.isArray(v) ? (v as string[]) : []; };
   const dirty = (id: number) => !!edits[id] && Object.keys(edits[id]).length > 0;
-  const setVal = (id: number, k: string, v: string) => { setOkId(null); setEdits((p) => ({ ...p, [id]: { ...p[id], [k]: v } })); };
+  const setVal = (id: number, k: string, v: string | string[]) => { setOkId(null); setEdits((p) => ({ ...p, [id]: { ...p[id], [k]: v } })); };
 
   async function save(it: CmsItem) {
     setSavingId(it.id); setErr(""); setOkId(null);
@@ -404,7 +405,7 @@ export default function PageChrome({ page }: { page: string }) {
       for (const k of ["title_ar", "title_en", "text_ar", "text_en", "tagline_ar", "tagline_en",
                         "badge1_label_ar", "badge1_label_en", "badge1_value_ar", "badge1_value_en",
                         "badge2_label_ar", "badge2_label_en", "badge2_value_ar", "badge2_value_en",
-                        "value", "icon"]) if (k in e) payload[k] = e[k];
+                        "data_ar", "data_en", "value", "icon"]) if (k in e) payload[k] = e[k];
       if (Object.keys(payload).length) {
         const saved = await updateItem("sections", it.id, payload) as CmsItem;
         setItems((prev) => prev.map((x) => (x.id === it.id ? saved : x)));
@@ -547,6 +548,7 @@ export default function PageChrome({ page }: { page: string }) {
                   const hasBadges = ["badge1_label_ar", "badge1_value_ar", "badge2_label_ar", "badge2_value_ar"].some(
                     (k) => String((it as Record<string, unknown>)[k] ?? "").trim() !== "" || (k in (edits[it.id] || {})),
                   );
+                  const hasData = (Array.isArray(it.data_ar) && (it.data_ar as unknown[]).length > 0) || (Array.isArray(it.data_en) && (it.data_en as unknown[]).length > 0) || ("data_ar" in (edits[it.id] || {}));
                   const imgResolved = resolveSrc(String(it.image ?? ""));
                   const imgSrc = imgResolved && /^(https?:|\/)/.test(imgResolved) ? `${imgResolved}${imgResolved.includes("?") ? "&" : "?"}v=${bust}` : imgResolved;
                   return (
@@ -603,6 +605,15 @@ export default function PageChrome({ page }: { page: string }) {
                         )}
                         {/* «الرقم» يظهر فقط لعناصر تحمل رقماً فعلاً — لا لعنصر العنوان (main)
                             الذي هو عنوان+جملة فقط. أرقام الرئيسية تُدار من «الأرقام والإحصائيات». */}
+                        {g.block === "cta" && hasData && (
+                          <div>
+                            <p className="mb-1 text-xs font-semibold text-ink-soft">{t("النقاط (كل سطر نقطة)", "Bullet points (one per line)")}</p>
+                            <div className="grid gap-2 sm:grid-cols-2">
+                              <AutoTextarea value={listVal(it, "data_ar").join("\n")} onChange={(v) => setVal(it.id, "data_ar", v.split("\n").map((x) => x.trim()).filter(Boolean))} placeholder={t("عربي", "Arabic")} />
+                              <AutoTextarea value={listVal(it, "data_en").join("\n")} onChange={(v) => setVal(it.id, "data_en", v.split("\n").map((x) => x.trim()).filter(Boolean))} dir="ltr" placeholder="English" />
+                            </div>
+                          </div>
+                        )}
                         {(String(it.value ?? "").trim() !== "" || (g.block === "stats" && String(it.key ?? "") !== "main")) && (
                           <div>
                             <p className="mb-1 text-xs font-semibold text-ink-soft">{t("الرقم", "Number")}</p>
