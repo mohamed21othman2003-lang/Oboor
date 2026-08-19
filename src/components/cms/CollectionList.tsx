@@ -122,7 +122,12 @@ export default function CollectionList({ type }: { type: string }) {
   }
 
   function titleOf(it: CmsItem): string {
-    const v = it[titleField] ?? it["title_ar"] ?? it["name_ar"] ?? it["label_ar"] ?? it["value"] ?? it["key"] ?? `#${it.id}`;
+    // تتبع لغة اللوحة: في الوضع الإنجليزي فضّل الحقل الإنجليزي (name_en/title_en…) مع fallback للعربي
+    const enField = titleField.replace(/_ar$/, "_en");
+    const primary = en ? (it[enField] || it[titleField]) : it[titleField];
+    const v = primary
+      ?? (en ? (it["title_en"] || it["name_en"] || it["label_en"]) : undefined)
+      ?? it["title_ar"] ?? it["name_ar"] ?? it["label_ar"] ?? it["value"] ?? it["key"] ?? `#${it.id}`;
     return String(v || `#${it.id}`);
   }
   function published(it: CmsItem): boolean | null {
