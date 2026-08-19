@@ -217,13 +217,15 @@ export function GroupPreview({ bases, values, lang }: { type: string; bases: str
   const en = lang === "en";
   const dir = en ? "ltr" : "rtl";
   const has = (b: string) => bases.includes(b);
-  const gs = (base: string) => { const v = en ? (values[`${base}_en`] || values[`${base}_ar`]) : values[`${base}_ar`]; return typeof v === "string" ? v : ""; };
+  // المعاينة تقرأ فيلدز مجموعتها فقط (لا تتسرّب لحقول أقسام تانية)
+  const gs = (base: string) => { if (!has(base)) return ""; const v = en ? (values[`${base}_en`] || values[`${base}_ar`]) : values[`${base}_ar`]; return typeof v === "string" ? v : ""; };
   const gl = (base: string): unknown[] => {
+    if (!has(base)) return [];
     const arEn = values[`${base}_en`]; const arAr = values[`${base}_ar`];
     const v = en ? ((Array.isArray(arEn) && arEn.length) ? arEn : arAr) : arAr;
     return Array.isArray(v) ? v : (Array.isArray(values[base]) ? (values[base] as unknown[]) : []);
   };
-  const rawImg = String(values.image_file || values.image || values.image_path || "");
+  const rawImg = (has("image") || has("image_file")) ? String(values.image_file || values.image || values.image_path || "") : "";
   const img = rawImg ? (/^(https?:|data:|blob:|\/)/.test(rawImg) ? rawImg : "/" + rawImg.replace(/^\/+/, "")) : "";
 
   // 1) قوائم المحتوى (فقرات / نقاط / بطاقات / صور)
