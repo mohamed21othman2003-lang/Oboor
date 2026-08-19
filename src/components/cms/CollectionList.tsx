@@ -122,12 +122,7 @@ export default function CollectionList({ type }: { type: string }) {
   }
 
   function titleOf(it: CmsItem): string {
-    // تتبع لغة اللوحة: في الوضع الإنجليزي فضّل الحقل الإنجليزي (name_en/title_en…) مع fallback للعربي
-    const enField = titleField.replace(/_ar$/, "_en");
-    const primary = en ? (it[enField] || it[titleField]) : it[titleField];
-    const v = primary
-      ?? (en ? (it["title_en"] || it["name_en"] || it["label_en"]) : undefined)
-      ?? it["title_ar"] ?? it["name_ar"] ?? it["label_ar"] ?? it["value"] ?? it["key"] ?? `#${it.id}`;
+    const v = it[titleField] ?? it["title_ar"] ?? it["name_ar"] ?? it["label_ar"] ?? it["value"] ?? it["key"] ?? `#${it.id}`;
     return String(v || `#${it.id}`);
   }
   function published(it: CmsItem): boolean | null {
@@ -256,6 +251,13 @@ export default function CollectionList({ type }: { type: string }) {
           <h1 className="mt-1 text-2xl font-extrabold text-ink">{pageFilter ? pageLabel : label}</h1>
           <p className="mt-1 text-sm text-ink-soft">{(pageFilter ? pageItems.length : grouped ? grouped.reduce((n, g) => n + g.items.length, 0) : items.length)} {t("عنصر", "items")}</p>
         </div>
+        {/* زر الإضافة العلوي: فقط لعرض القسم المفلتر (وإلا الإضافة تكون أسفل القائمة أو داخل كل مجموعة) */}
+        {!readonly && pageFilter && (
+          <Link href={`/cms/content/${type}/new?page=${pageFilter}`} className="inline-flex items-center gap-2 rounded-xl bg-brand px-4 py-2.5 text-sm font-bold text-white shadow-sm transition-colors hover:bg-brand-dark">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" d="M12 5v14M5 12h14" /></svg>
+            {addLabelFor(type, lang)}
+          </Link>
+        )}
       </div>
 
       {!pageFilter && PAGE_CHROME[type] && <PageChrome page={PAGE_CHROME[type]} />}
@@ -264,19 +266,29 @@ export default function CollectionList({ type }: { type: string }) {
 
       {loading ? (
         <p className="text-ink-soft">{t("جارٍ التحميل…", "Loading…")}</p>
-      ) : pageFilter ? (
-        // صفحات الأقسام المفلترة (عن عبور، طلب التحاق، صفحات التفاصيل…) تُحرَّر بلوحة
-        // «محتوى وعناوين الصفحة» نفسها — بمعاينة حيّة لكل قسم بجوار حقوله (section view موحّد).
-        <PageChrome page={pageFilter} />
-      ) : items.length === 0 ? (
+      ) : (pageFilter ? pageItems.length === 0 : items.length === 0) ? (
         <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-line bg-white p-10 text-center text-ink-soft">
           <span>{t("لا توجد عناصر بعد.", "No items yet.")}</span>
           {!readonly && (
-            <Link href={`/cms/content/${type}/new`} className="inline-flex items-center gap-2 rounded-xl bg-brand px-5 py-2.5 text-sm font-bold text-white shadow-sm transition-colors hover:bg-brand-dark">
+            <Link href={pageFilter ? `/cms/content/${type}/new?page=${pageFilter}` : `/cms/content/${type}/new`} className="inline-flex items-center gap-2 rounded-xl bg-brand px-5 py-2.5 text-sm font-bold text-white shadow-sm transition-colors hover:bg-brand-dark">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" d="M12 5v14M5 12h14" /></svg>
               {addLabelFor(type, lang)}
             </Link>
           )}
+        </div>
+      ) : pageFilter ? (
+        <div className="space-y-4">
+          {(blockGroups(pageItems) ?? [{ block: "", items: pageItems }]).map((sg) => (
+            <div key={sg.block}>
+              {sg.block && (
+                <p className="mb-2 flex items-center gap-2 px-1 text-xs font-bold text-brand-dark">
+                  <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-brand/10 px-1.5 text-[11px]">{sg.items.length}</span>
+                  {blockLabel(sg.block, en)}
+                </p>
+              )}
+              <Table list={sg.items} hideSub />
+            </div>
+          ))}
         </div>
       ) : grouped ? (
         <div className="space-y-3">

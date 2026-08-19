@@ -14,7 +14,6 @@ import { iconByKey, OFFER_ICON_KEYS } from "@/lib/areaIcon";
 import { useCmsLang } from "@/lib/cms/i18n";
 import { fieldLabelEn } from "@/lib/cms/fieldLabels";
 import CustomSelect from "@/components/ui/Select";
-import { ItemPreview, GroupPreview } from "@/components/cms/SectionPreview";
 // تحميل مكوّن قصّ الصورة عند الحاجة فقط (يقلّل حجم باندل المحرّر)
 const ImageCropModal = dynamic(() => import("@/components/cms/ImageCropModal"), { ssr: false });
 
@@ -239,11 +238,6 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
     return out;
   }, [rows, type, en]);
 
-  // كل مجموعة حقول تُعرض بعمودين: [محرّرها] + [معاينتها الحيّة بشكلها على الموقع].
-  // (لا يُطبَّق على أقسام الصفحات type=sections فتلك معاينتها في لوحة «محتوى الصفحة».)
-  const baseOfRow = (r: Row) => r.f?.base ?? r.ar?.base ?? r.en?.base ?? "";
-  const showPreview = type !== "sections";
-
   async function onSave() {
     setSaving(true);
     setError("");
@@ -403,7 +397,7 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
 
   const canPreview = !isNew && !readonly && previewHref(type, values) !== null;
   return (
-    <div className="mx-auto max-w-6xl space-y-6 pb-24">
+    <div className="mx-auto max-w-4xl space-y-6 pb-24">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <Link href={`/cms/content/${type}`} className="text-xs font-semibold text-brand hover:text-brand-dark">← {label}</Link>
@@ -452,54 +446,33 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
       })()}
 
       <div className="space-y-5">
-        {sectionGroups.map((g, gi) => {
-          const groupBases = g.rows.map(baseOfRow);
-          const isCardGroup = groupBases.some((b) => ["image"].includes(b) || b === "image_file")
-            && groupBases.some((b) => CARD_TITLE_BASES.includes(b))
-            && groupBases.some((b) => CARD_TAG_BASES.includes(b));
-          const editor = (
-            <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-line sm:p-8">
-              {g.title && (
-                <h2 className="mb-3 flex items-center gap-2.5 border-b border-line pb-3 text-lg font-extrabold text-brand-dark">
-                  <span className="h-5 w-1.5 shrink-0 rounded-full bg-brand" />
-                  {g.title}
-                </h2>
-              )}
-              {g.note && (
-                <div className="mb-5 rounded-lg border border-brand/20 bg-brand/5 px-3 py-2.5 text-[11px] leading-5 text-ink-soft">
-                  ℹ️ {g.note}
-                  {g.preview && (
-                    <a href={g.preview.replace("{slug}", String(values.slug ?? ""))} target="_blank" rel="noopener noreferrer" className="ms-1 inline-flex items-center gap-1 font-semibold text-brand hover:underline">
-                      {t("عاين على الموقع", "Preview on site")}
-                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3" /></svg>
-                    </a>
-                  )}
-                </div>
-              )}
-              <div className="space-y-7">{g.rows.map(renderRow)}</div>
-            </div>
-          );
-          if (!showPreview) return <div key={gi}>{editor}</div>;
-          return (
-            <div key={gi} className="lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start lg:gap-6">
-              {editor}
-              <div className="mt-4 lg:mt-0 lg:sticky lg:top-4">
-                <p className="mb-1.5 flex items-center gap-1.5 text-[11px] font-semibold text-ink-soft">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" /><circle cx="12" cy="12" r="3" /></svg>
-                  {t("كما يظهر على الموقع", "As shown on the site")}
-                </p>
-                {isCardGroup
-                  ? <ItemPreview type={type} values={values} lang={lang} />
-                  : <GroupPreview type={type} bases={groupBases} values={values} lang={lang} />}
+        {sectionGroups.map((g, gi) => (
+          <div key={gi} className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-line sm:p-8">
+            {g.title && (
+              <h2 className="mb-3 flex items-center gap-2.5 border-b border-line pb-3 text-lg font-extrabold text-brand-dark">
+                <span className="h-5 w-1.5 shrink-0 rounded-full bg-brand" />
+                {g.title}
+              </h2>
+            )}
+            {g.note && (
+              <div className="mb-5 rounded-lg border border-brand/20 bg-brand/5 px-3 py-2.5 text-[11px] leading-5 text-ink-soft">
+                ℹ️ {g.note}
+                {g.preview && (
+                  <a href={g.preview.replace("{slug}", String(values.slug ?? ""))} target="_blank" rel="noopener noreferrer" className="ms-1 inline-flex items-center gap-1 font-semibold text-brand hover:underline">
+                    {t("عاين على الموقع", "Preview on site")}
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3" /></svg>
+                  </a>
+                )}
               </div>
-            </div>
-          );
-        })}
+            )}
+            <div className="space-y-7">{g.rows.map(renderRow)}</div>
+          </div>
+        ))}
       </div>
 
       {/* شريط الحفظ */}
       <div className="fixed bottom-0 left-0 right-0 z-20 border-t border-line bg-white/95 px-6 py-3 backdrop-blur lg:right-72">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3">
+        <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <span className="text-sm font-semibold text-emerald-600">{ok}</span>
             {dirty && !ok && <span className="text-sm font-semibold text-amber-600">{t("• تعديلات غير محفوظة", "• Unsaved changes")}</span>}
@@ -631,9 +604,6 @@ function previewHref(type: string, v: Record<string, unknown>): string | null {
 // حقول مخفية من الفورم (الترتيب يُدار بأسهم القائمة)
 // «مسار الصورة» النصّي مخفي — الصورة تُدار بأداة الرفع (image_file) التي تعرض الصورة الحالية تلقائياً
 const HIDDEN_IN_FORM = new Set(["order", "page", "image"]);
-// توقيع «مجموعة البطاقة»: تحتوي صورة + عنوان + تصنيف/وسم ⇒ تُعاين ككارت العنصر.
-const CARD_TITLE_BASES = ["title", "name", "heading"];
-const CARD_TAG_BASES = ["category", "specialty", "badge", "region", "tag", "role"];
 // أقسام صفحات تعرض صورة على الموقع ⇒ يظهر لها رافع الصورة (حتى قبل رفع صورة) وتُحتسب في الاكتمال.
 // بقية الأقسام (عناوين/نصوص) لا تعرض صورة، فلا نعرض لها رافعاً ولا نحسبها ناقصة.
 const IMAGE_SECTION_KEYS = new Set(["about-intro", "about-programs"]);
@@ -652,16 +622,6 @@ const SHARED_CONTENT_NOTES: Record<string, { ar: string; en: string }> = {
 // تجميع حقول المحرّر في أقسام مرئية بعناوين بارزة تطابق أقسام الصفحة على الموقع —
 // حتى يعرف الأدمن أي مجموعة حقول تتحكّم في أي قسم. الحقول غير المُدرَجة تظهر تحت «إعدادات».
 const FIELD_SECTIONS: Record<string, { title: string; title_en: string; bases: string[]; note?: string; note_en?: string; preview?: string }[]> = {
-  news: [
-    { title: "بطاقة الخبر", title_en: "News card", bases: ["title", "category", "image", "image_file", "desc"],
-      note: "تظهر على بطاقة الخبر في صفحة إعلامنا وأعلى صفحة المقال.", note_en: "Shown on the news card in the Media page and at the top of the article page." },
-    { title: "تفاصيل الفعالية", title_en: "Event details", bases: ["date", "time", "location", "audience", "seats", "reg_status"],
-      note: "بطاقة «تفاصيل الفعالية» الجانبية في صفحة الفعالية/الورشة (تظهر للفعاليات والورش فقط).", note_en: "The side \"Event details\" card on the event/workshop page (shown for events and workshops only)." },
-    { title: "فقرات المحتوى", title_en: "Content paragraphs", bases: ["body"],
-      note: "نص المقال داخل صفحته — كل فقرة سطر مستقل.", note_en: "The article body on its page — each paragraph is a separate line." },
-    { title: "ما الذي ستتعلمه", title_en: "What you'll learn", bases: ["learn"],
-      note: "قائمة النقاط في قسم «ما الذي ستتعلمه» بصفحة المقال.", note_en: "The bullet list in the \"What you'll learn\" section on the article page." },
-  ],
   success: [
     { title: "بيانات القصة (البطاقة)", title_en: "Story info (card)", bases: ["name", "age", "category", "image", "image_file", "duration_label", "before", "after"],
       note: "تظهر على بطاقة القصة في صفحة قصص النجاح.", note_en: "Shown on the story card in the Success Stories page.", preview: "/success-stories" },

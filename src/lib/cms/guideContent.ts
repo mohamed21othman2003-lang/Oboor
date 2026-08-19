@@ -73,7 +73,6 @@ export const GUIDE: GuidePart[] = [
           p("القائمة الجانبية مقسّمة إلى مجموعات: الطلبات والرسائل، صفحات الموقع، والإعدادات. اضغط أي عنصر للانتقال إليه.", "The sidebar is split into groups: Requests & Messages, Site Pages, and Settings. Click any item to go to it."),
           p("خانة البحث أعلى القائمة تصفّي الأقسام بالاسم — اكتب جزءاً من الاسم لتصل بسرعة.", "The search box at the top of the sidebar filters areas by name — type part of a name to jump quickly."),
           p("زر الكرة الأرضية أعلى الشريط يبدّل لغة اللوحة. هذا يغيّر لغة الأزرار والقوائم فقط — لا يؤثّر على محتوى الموقع.", "The globe button in the top bar switches the panel language. This changes only buttons and menus — it does not affect the site's content."),
-          p("عند تبديل اللوحة إلى الإنجليزية تظهر عناوين عناصر القوائم (مثل أسماء الأخصائيين) بنسختها الإنجليزية إن كانت متوفّرة — تمامًا كما تظهر على الموقع؛ وإن كانت الإنجليزية فارغة يظهر النص العربي كبديل.", "When you switch the panel to English, list item titles (like specialist names) show in their English version if available — exactly as on the site; if the English is empty, the Arabic shows as a fallback."),
           p("زر «رجوع» يعيدك للصفحة السابقة، وشعار «عبور» يعيدك للوحة الرئيسية.", "The “Back” button returns to the previous page, and the Oboor logo returns to the main dashboard."),
         ],
       },
@@ -183,26 +182,6 @@ export const GUIDE: GuidePart[] = [
           p("الفتح على مستويين: أولًا افتح اللوحة نفسها، ثم اضغط رأس القسم المرقّم الذي تريده (مثل «١ — القسم الرئيسي») ليُفتح وتظهر حقوله. هذا الترتيب يمنع الزحام ويريك جزءًا واحدًا في كل مرّة.", "Two-level opening: first open the panel itself, then click the numbered section header you want (e.g. “1 — Hero”) to expand it and reveal its fields. This keeps things uncluttered and shows one part at a time."),
           p("انتبه لفارق مهم عن محرّر القوائم: هنا لكل عنصر زرّ «حفظ» خاص به بجانبه مباشرة — لا يوجد زر حفظ واحد أسفل الصفحة ولا شريط اكتمال. عدّلت نصًا؟ اضغط زر «حفظ» الخاص به قبل الانتقال لغيره.", "Note an important difference from the list editor: here each item has its own “Save” button right beside it — there's no single bottom Save bar and no completion bar. Edited a text? Click that item's own “Save” before moving to another."),
           p("العناصر ذات الصور تُعدَّل من نفس المكان بزر «تغيير الصورة»، والأرقام والإحصاءات تُكتب مباشرة في خانتها.", "Items with images are edited right there via a “Change image” button, and numbers/stats are typed straight into their box."),
-          cms("live-preview", "جديد — معاينة حيّة بجوار كل قسم: بجانب الحقول تظهر لوحة «كما يظهر على الموقع» تعرض القسم بتصميمه الفعلي (الألوان والأزرار والشارات والصور). وأثناء كتابتك في أي حقل تتحدّث المعاينة فورًا حرفًا بحرف — فترى الشكل النهائي قبل الضغط على «حفظ».", "New — a live preview beside every section: next to the fields a “As shown on the site” panel shows the section in its real design (colors, buttons, badges, images). As you type in any field, the preview updates instantly, letter by letter — so you see the final look before clicking “Save”.", "لوحة المعاينة الحيّة بجانب حقول القسم — تتحدّث مع كل حرف تكتبه.", "The live preview panel beside the section fields — it updates with every keystroke."),
-          p("المعاينة تتبع لغة اللوحة (عربي/إنجليزي)، وتُبرِز الأجزاء الموضوعة بين نجمتين **هكذا** بلون التصميم تمامًا كما ستظهر على الموقع.", "The preview follows the panel language (Arabic/English) and highlights parts wrapped in **asterisks** in the brand color, exactly as they'll appear on the site."),
-          p("المعاينة للاطمئنان فقط؛ التغيير لا يُطبَّق على الموقع إلا بعد الضغط على «حفظ». وبعد الحفظ يظهر مباشرةً — فإن لم تلحظ التغيير في متصفّحك فحدّث الصفحة تحديثًا كاملًا (Ctrl + Shift + R) لتجاوز الذاكرة المؤقتة للمتصفّح.", "The preview is just for reassurance; the change is only applied to the site after you click “Save”. Once saved it appears immediately — if you don't notice it in your browser, do a full refresh (Ctrl + Shift + R) to bypass the browser cache."),
-        ],
-      },
-      {
-        id: "cta-section",
-        title_ar: "قسم التواصل السفلي (CTA) في كل صفحة",
-        title_en: "The Bottom Contact Section (CTA) on Every Page",
-        intro_ar: "«قسم التواصل السفلي» هو الشريط الأخضر في نهاية الصفحات (بادج + عنوان + جملة + أزرار: طلب التحاق، واتساب، أقرب فرع). أصبح الآن متحكَّمًا فيه من الـCMS في كل صفحة يظهر فيها، وكلٌّ مستقلٌّ بنصّه.",
-        intro_en: "The “bottom contact section” is the green bar at the end of pages (badge + title + line + buttons: Apply, WhatsApp, Nearest branch). It's now editable from the CMS on every page it appears on, each with its own independent text.",
-        steps: [
-          p("افتح الصفحة التي تريدها من القائمة (روّادنا، برامجنا، فروعنا، قصص النجاح، طلب التحاق، أو صفحات التفاصيل)، ثم افتح قسم «قسم التواصل السفلي (CTA)» — يظهر في آخر ترتيب أقسام الصفحة تمامًا كموضعه على الموقع.", "Open the page you want from the sidebar (Pioneers, Programs, Branches, Success Stories, Admission, or the detail pages), then open the “Bottom contact section (CTA)” — it appears last in the page's section order, matching its place on the site."),
-          pl("تتحكّم في ثلاثة أجزاء، ولكلٍّ معاينته الحيّة بجانبه:", "You control three parts, each with its live preview beside it:", [
-            ["«الترويسة الصغيرة» — النص داخل البادج أعلى القسم (مثل «خدمة العملاء متاحة على مدار الساعة»).", "“Eyebrow” — the text inside the badge at the top (e.g. “Customer service available around the clock”)."],
-            ["«العنوان» — السطر الكبير (يمكن إبراز جزء منه بين نجمتين **هكذا**).", "“Title” — the large line (you can highlight part of it between **asterisks**)."],
-            ["«النص» — الجملة التوضيحية أسفل العنوان.", "“Text” — the descriptive line below the title."],
-          ]),
-          p("الأزرار الثلاثة (طلب التحاق، واتساب، أقرب فرع) ثابتة في التصميم لتوحيد الشكل — أنت تتحكّم في النصوص المحيطة بها فقط. (رقم واتساب نفسه يُضبط من «إعدادات الموقع».)", "The three buttons (Apply, WhatsApp, Nearest branch) are fixed in the design for consistency — you control only the surrounding text. (The WhatsApp number itself is set in “Site Settings”.)"),
-          p("في صفحات التفاصيل (تفاصيل البرنامج/الخدمة/التقنية) قد يحتوي العنوان على {name} — وهي كلمة تُستبدل تلقائيًا باسم البرنامج أو الخدمة المفتوحة. اترك {name} كما هي في مكانها المناسب داخل الجملة.", "On detail pages (program/service/technique details) the title may contain {name} — a placeholder replaced automatically with the opened program's or service's name. Leave {name} as-is in its proper spot within the sentence."),
         ],
       },
       {
@@ -365,7 +344,6 @@ export const GUIDE: GuidePart[] = [
           p("شريط «نسبة الاكتمال» أعلى المحرّر يوضّح كم حقلاً أساسياً تبقّى، ويكتب أسماء «الحقول الناقصة». حاول ملء الحقول الأساسية المذكورة — ولا يلزم الوصول إلى 100% لكي يعمل العنصر.", "The “Completion” bar at the top shows how many essential fields remain and lists the “Missing” fields. Try to fill the listed essential fields — you don't have to reach 100% for the item to work."),
           p("«حفظ التعديلات» يعمل فقط عند وجود تغيير فعلي. بعد الحفظ تظهر رسالة «تم الحفظ بنجاح ✓» ويظهر التعديل على الموقع خلال لحظات.", "“Save Changes” is active only when there's a real change. After saving, a “Saved successfully ✓” message appears and the change shows on the site within moments."),
           p("زر «معاينة التعديلات» يفتح الصفحة الحقيقية بتعديلاتك الحالية قبل الحفظ — لتتأكّد من الشكل النهائي. (يظهر فقط للعناصر المحفوظة مسبقًا، لا أثناء إنشاء عنصر جديد.)", "The “Preview changes” button opens the real page with your current unsaved changes — to check the final look before saving. (It appears only for already-saved items, not while creating a new one.)"),
-          p("إضافةً لذلك، في لوحة «محتوى وعناوين الصفحة» لكل قسم معاينة حيّة «كما يظهر على الموقع» بجانب حقوله تتحدّث فورًا أثناء الكتابة — فترى الشكل لحظة بلحظة دون فتح صفحة منفصلة (مشروح في قسم «تعديل نصوص وعناوين الصفحات»).", "Additionally, in the “Page content & headings” panel each section has a live “As shown on the site” preview beside its fields that updates instantly as you type — so you see the look moment by moment without opening a separate page (explained in “Editing page texts & headings”)."),
           p("«تجاهل التعديلات» يرجّع الحقول لآخر نسخة محفوظة. «استرجاع النسخة الافتراضية» يعيد العنصر لمحتواه الأصلي بالكامل، ويظهر فقط للعناصر الأصلية الجاهزة مع الموقع لا لما أضفته أنت (استخدمه بحذر).", "“Discard changes” reverts to the last saved version. “Restore Default” resets the item to its original content entirely, and appears only for the original items shipped with the site, not ones you added (use with care)."),
           p("الحقول التقنية النادرة (مثل المعرّف الداخلي) تُملأ تلقائياً وتبقى مخفيّة ما دامت فارغة — لا تحتاج للتعامل معها عادةً.", "Rare technical fields (like the internal identifier) are filled automatically and stay hidden while empty — you normally don't deal with them."),
         ],
@@ -567,7 +545,6 @@ export const GUIDE: GuidePart[] = [
             ["[الخدمات العيادية](/cms/content/services).", "[Clinical Services](/cms/content/services)."],
             ["[التقنيات](/cms/content/techniques).", "[Techniques](/cms/content/techniques)."],
           ]),
-          p("عناوين التبويبات (البرامج/العيادية/التقنيات) و«قسم التواصل السفلي (CTA)» أسفل الصفحة تُدار من لوحة «محتوى وعناوين الصفحة» في [نفس صفحة برامجنا](/cms/content/sections?page=programs). ولكل صفحة تفاصيل (تفاصيل البرنامج/الخدمة/التقنية) صفحتها الخاصة في القائمة الجانبية للتحكّم في قسم التواصل السفلي بها.", "The tab headings (Programs/Clinical/Techniques) and the “Bottom contact section (CTA)” at the page's end are managed from the “Page content & headings” panel on [the Programs page](/cms/content/sections?page=programs). Each detail page (program/service/technique detail) has its own page in the sidebar to control its bottom contact section."),
         ],
       },
       {
@@ -595,7 +572,6 @@ export const GUIDE: GuidePart[] = [
         steps: [
           site("specialists", "فريق الأخصائيين مع فلترة بالتخصص والفرع، ولكل أخصائي بطاقة تفاصيل.", "The specialists team with filtering by specialty and branch, and a details card per specialist."),
           p("تُدار من [صفحة «روّادنا (الأخصائيون)»](/cms/content/specialists) — لكل أخصائي صورة واسم وتخصص ونبذة.", "Controlled from [the “Our Pioneers (Specialists)” page](/cms/content/specialists) — each has an image, name, specialty, and bio."),
-          p("من نفس الصفحة (لوحة «محتوى وعناوين الصفحة») تُدار أيضًا: قسم «انضم إلى الفريق» (عنوانه ووصفه وصورته ونصّ زر «انضم إلى فريقنا»)، و«بطاقات الانضمام» الأربعة، و«قسم التواصل السفلي (CTA)» أسفل الصفحة.", "The same page (the “Page content & headings” panel) also manages: the “Join the Team” section (its heading, text, image, and the “Join our team” button text), the four “Join cards”, and the “Bottom contact section (CTA)” at the page's end."),
         ],
       },
       {
@@ -606,7 +582,6 @@ export const GUIDE: GuidePart[] = [
           site("success-stories", "قصص نجاح المستفيدين، ولكل قصة نافذة «عرض التفاصيل».", "Beneficiaries' success stories, each with a “View Details” popup."),
           p("تُدار من [صفحة «أبطال عبور (قصص النجاح)»](/cms/content/success). محرّر كل قصة مقسّم إلى: «بيانات القصة (البطاقة)» و«نافذة عرض التفاصيل».", "Managed from [the “Oboor Champions (Success Stories)” page](/cms/content/success). Each story's editor is split into “Story info (card)” and “View Details popup”."),
           p("قسم «نافذة عرض التفاصيل» يتحكّم في محتوى النافذة التي تُفتح عند الضغط على «عرض التفاصيل» لتلك القصة (الوسم، البرنامج، رحلة العلاج، أبرز النتائج) — لكل قصة تفاصيلها الخاصة.", "The “View Details popup” section controls the popup opened via “View Details” for that story (badge, program, treatment journey, key results) — each story has its own details."),
-          p("«قسم التواصل السفلي (CTA)» أسفل الصفحة (بنقاطه) يُدار من لوحة «محتوى وعناوين الصفحة» في نفس الصفحة.", "The “Bottom contact section (CTA)” at the page's end (with its bullet points) is managed from the “Page content & headings” panel on the same page."),
         ],
       },
       {
@@ -659,7 +634,6 @@ export const GUIDE: GuidePart[] = [
           site("admission", "«طلب الالتحاق» ونموذج التواصل نماذج يملؤها الزائر لإرسال طلبه.", "“Admission” and the contact form are forms visitors fill to send a request."),
           site("assessment", "نموذج التقييم خطوات متتابعة (Wizard) تنتهي بإرسال النتيجة.", "The assessment form is a step-by-step wizard that ends by submitting the result."),
           p("كل ما يُرسَل من هذه النماذج يصلك في مجموعة «الطلبات والرسائل» في اللوحة.", "Everything sent from these forms arrives in the “Requests & Messages” group in the panel."),
-          p("«قسم التواصل السفلي (CTA)» أسفل صفحة «طلب الالتحاق» يُدار من [صفحة «طلب التحاق»](/cms/content/sections?page=admission) في القائمة الجانبية (لوحة «محتوى وعناوين الصفحة»).", "The “Bottom contact section (CTA)” at the bottom of the “Admission” page is managed from [the “Admission” page](/cms/content/sections?page=admission) in the sidebar (the “Page content & headings” panel)."),
         ],
       },
     ],

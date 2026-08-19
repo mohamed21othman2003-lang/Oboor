@@ -7,7 +7,6 @@ import dynamic from "next/dynamic";
 import { listCollection, updateItem, createItem, deleteItem, uploadField, type CmsItem } from "@/lib/cms/api";
 import { useCmsLang } from "@/lib/cms/i18n";
 import { CMS_ICONS, ICON_LABELS } from "@/lib/cms/icons";
-import { BlockPreview, type PItem } from "@/components/cms/SectionPreview";
 // تحميل مكوّن قصّ الصورة عند الحاجة فقط
 const ImageCropModal = dynamic(() => import("@/components/cms/ImageCropModal"), { ssr: false });
 
@@ -524,8 +523,6 @@ export default function PageChrome({ page }: { page: string }) {
                     </div>
                   );
                 })()}
-                <div className="lg:grid lg:grid-cols-2 lg:gap-4 lg:items-start">
-                <div className="space-y-3">
                 {g.items.map((it) => {
                   // أقسام بمحتوى منظّم معقّد — تُحرّر بالمحرّر الكامل
                   if (COMPLEX_BLOCKS.has(g.block)) {
@@ -554,8 +551,8 @@ export default function PageChrome({ page }: { page: string }) {
                   const hasData = (Array.isArray(it.data_ar) && (it.data_ar as unknown[]).length > 0) || (Array.isArray(it.data_en) && (it.data_en as unknown[]).length > 0) || ("data_ar" in (edits[it.id] || {}));
                   const imgResolved = resolveSrc(String(it.image ?? ""));
                   const imgSrc = imgResolved && /^(https?:|\/)/.test(imgResolved) ? `${imgResolved}${imgResolved.includes("?") ? "&" : "?"}v=${bust}` : imgResolved;
-                  const editor = (
-                    <div className="rounded-xl border border-line bg-surface/40 p-3">
+                  return (
+                    <div key={it.id} className="rounded-xl border border-line bg-surface/40 p-3">
                       <p className="mb-2 text-xs font-bold text-ink">{(en ? ITEM_LABELS_EN[key] : ITEM_LABELS[key]) || ITEM_LABELS[key] || String(it.title_ar || it.key || "")}</p>
                       {ITEM_NOTES[key] && <p className="mb-2 rounded-lg bg-brand/5 px-3 py-2 text-[11px] leading-5 text-ink-soft">ℹ️ {(en ? ITEM_NOTES_EN[key] : ITEM_NOTES[key]) || ITEM_NOTES[key]}</p>}
                       <div className="space-y-2">
@@ -670,7 +667,6 @@ export default function PageChrome({ page }: { page: string }) {
                       </div>
                     </div>
                   );
-                  return <div key={it.id}>{editor}</div>;
                 })}
                 {LIST_BLOCKS.has(g.block) && (
                   <button type="button" onClick={() => addItem(g.block)} disabled={addingBlock === g.block} className="inline-flex items-center gap-1 rounded-lg bg-brand px-3.5 py-2 text-xs font-bold text-white hover:bg-brand-dark disabled:opacity-50">
@@ -678,36 +674,6 @@ export default function PageChrome({ page }: { page: string }) {
                     {addingBlock === g.block ? t("جارٍ الإضافة…", "Adding…") : ((en ? BLOCK_ADD_EN[g.block] : BLOCK_ADD[g.block]) || BLOCK_ADD[g.block] || t("إضافة عنصر جديد", "Add new item"))}
                   </button>
                 )}
-                </div>
-                {!COMPLEX_BLOCKS.has(g.block) && (() => {
-                  const pvItems: PItem[] = g.items.map((it) => {
-                    const ir = resolveSrc(String(it.image ?? ""));
-                    const image = ir && /^(https?:|\/)/.test(ir) ? `${ir}${ir.includes("?") ? "&" : "?"}v=${bust}` : ir;
-                    return {
-                      tagline: en ? (val(it, "tagline_en") || val(it, "tagline_ar")) : val(it, "tagline_ar"),
-                      title: en ? (val(it, "title_en") || val(it, "title_ar")) : val(it, "title_ar"),
-                      text: en ? (val(it, "text_en") || val(it, "text_ar")) : val(it, "text_ar"),
-                      value: val(it, "value"),
-                      icon: val(it, "icon"),
-                      image,
-                      bullets: en ? (listVal(it, "data_en").length ? listVal(it, "data_en") : listVal(it, "data_ar")) : listVal(it, "data_ar"),
-                      badges: [1, 2].map((n) => ({
-                        label: en ? (val(it, `badge${n}_label_en`) || val(it, `badge${n}_label_ar`)) : val(it, `badge${n}_label_ar`),
-                        value: en ? (val(it, `badge${n}_value_en`) || val(it, `badge${n}_value_ar`)) : val(it, `badge${n}_value_ar`),
-                      })).filter((b) => b.label || b.value),
-                    };
-                  });
-                  return (
-                    <div className="mt-3 lg:mt-0 lg:sticky lg:top-4">
-                      <p className="mb-1.5 flex items-center gap-1.5 text-[11px] font-semibold text-ink-soft">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" /><circle cx="12" cy="12" r="3" /></svg>
-                        {t("كما يظهر على الموقع", "As shown on the site")}
-                      </p>
-                      <BlockPreview block={g.block} items={pvItems} lang={lang} itemKeys={g.items.map((it) => String(it.key ?? ""))} />
-                    </div>
-                  );
-                })()}
-                </div>
               </div>
               )}
             </div>
