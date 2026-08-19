@@ -198,6 +198,118 @@ export function BlockPreview({ block, items, lang, itemKeys }: { block: string; 
   );
 }
 
+// ===== معاينة مجموعة حقول داخل محرّر العنصر — تتكيّف مع نوع المحتوى =====
+const EVENT_BASES = ["date", "time", "location", "audience", "seats", "reg_status"];
+const EVENT_ICON: Record<string, string> = { date: "calendar", time: "clock", location: "target", audience: "team", seats: "clipboard" };
+const LIST_BASES = ["body", "learn", "offers", "targets", "about_list", "target_list", "results", "distinctions", "stations", "training_areas", "journey", "gallery", "service_cards", "philosophy", "accreditations"];
+
+function itemText(it: unknown, en: boolean): string {
+  if (typeof it === "string") return it;
+  if (it && typeof it === "object") {
+    const o = it as Record<string, unknown>;
+    const v = (en ? (o.text_en || o.title_en || o.label_en || o.name_en) : 0) || o.text_ar || o.title_ar || o.label_ar || o.name_ar || o.text || o.title || o.label || o.name;
+    return typeof v === "string" ? v : "";
+  }
+  return "";
+}
+
+export function GroupPreview({ bases, values, lang }: { type: string; bases: string[]; values: Record<string, unknown>; lang: "ar" | "en" }) {
+  const en = lang === "en";
+  const dir = en ? "ltr" : "rtl";
+  const has = (b: string) => bases.includes(b);
+  const gs = (base: string) => { const v = en ? (values[`${base}_en`] || values[`${base}_ar`]) : values[`${base}_ar`]; return typeof v === "string" ? v : ""; };
+  const gl = (base: string): unknown[] => {
+    const arEn = values[`${base}_en`]; const arAr = values[`${base}_ar`];
+    const v = en ? ((Array.isArray(arEn) && arEn.length) ? arEn : arAr) : arAr;
+    return Array.isArray(v) ? v : (Array.isArray(values[base]) ? (values[base] as unknown[]) : []);
+  };
+  const rawImg = String(values.image_file || values.image || values.image_path || "");
+  const img = rawImg ? (/^(https?:|data:|blob:|\/)/.test(rawImg) ? rawImg : "/" + rawImg.replace(/^\/+/, "")) : "";
+
+  // 1) قوائم المحتوى (فقرات / نقاط / بطاقات / صور)
+  const listBase = LIST_BASES.find(has);
+  if (listBase) {
+    const items = gl(listBase);
+    if (listBase === "gallery") {
+      const imgs = items.map((x) => String(typeof x === "string" ? x : ((x as Record<string, unknown>)?.image ?? ""))).filter(Boolean).map((s) => (/^(https?:|\/)/.test(s) ? s : "/" + s.replace(/^\/+/, "")));
+      if (!imgs.length) return <PreviewShell dir={dir} empty en={en} />;
+      return <div className="grid grid-cols-3 gap-2 rounded-xl bg-surface/40 p-3">{imgs.map((s, i) => (/* eslint-disable-next-line @next/next/no-img-element */<img key={i} src={s} alt="" className="h-20 w-full rounded-lg object-cover ring-1 ring-line" />))}</div>;
+    }
+    const objCards = items.length > 0 && typeof items[0] === "object" && (("title_ar" in (items[0] as object)) || ("desc_ar" in (items[0] as object)) || ("icon" in (items[0] as object)));
+    if (objCards) {
+      return (
+        <div dir={dir} className="grid gap-2 rounded-xl bg-surface/40 p-3 sm:grid-cols-2">
+          {items.map((it, i) => { const o = it as Record<string, unknown>; const icon = String(o.icon ?? ""); const title = en ? String(o.title_en || o.title_ar || "") : String(o.title_ar || ""); const desc = en ? String(o.desc_en || o.desc_ar || "") : String(o.desc_ar || ""); return (
+            <div key={i} className="rounded-2xl border border-line bg-white p-3 text-center shadow-sm">
+              {icon && <span className="mx-auto flex h-9 w-9 items-center justify-center rounded-full bg-brand/10 text-brand">{CMS_ICONS[icon] ?? CMS_ICONS.star}</span>}
+              <h5 className="mt-1.5 text-[13px] font-bold text-ink">{title || "—"}</h5>
+              {desc && <p className="mt-1 text-[11px] leading-5 text-ink-muted">{desc}</p>}
+            </div>); })}
+        </div>
+      );
+    }
+    // body = فقرات؛ باقي القوائم النصية = نقاط بعلامة صح
+    const strs = items.map((it) => itemText(it, en)).filter(Boolean);
+    if (!strs.length) return <PreviewShell dir={dir} empty en={en} />;
+    if (listBase === "body") {
+      return <div dir={dir} className="space-y-3 rounded-xl bg-white p-4 text-start shadow-sm ring-1 ring-line">{strs.map((s, i) => <p key={i} className="text-[12px] leading-7 text-ink-muted">{s}</p>)}</div>;
+    }
+    return (
+      <ul dir={dir} className="space-y-2 rounded-xl bg-white p-4 text-start shadow-sm ring-1 ring-line">
+        {strs.map((s, i) => <li key={i} className="flex items-start gap-2 text-[12px] leading-6 text-ink-muted"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="mt-0.5 shrink-0 text-brand"><circle cx="12" cy="12" r="9" /><path d="M8.5 12l2.2 2.2L15.5 9.5" strokeLinecap="round" strokeLinejoin="round" /></svg>{s}</li>)}
+      </ul>
+    );
+  }
+
+  // 2) تفاصيل الفعالية (تاريخ/وقت/مكان/فئة/مقاعد)
+  if (EVENT_BASES.some(has)) {
+    const rows = EVENT_BASES.filter((b) => b !== "reg_status").map((b) => ({ b, label: { date: en ? "Date" : "التاريخ", time: en ? "Time" : "الوقت", location: en ? "Location" : "المكان", audience: en ? "Audience" : "الفئة المستهدفة", seats: en ? "Seats" : "عدد المقاعد" }[b], value: gs(b) })).filter((r) => r.value);
+    const reg = gs("reg_status");
+    if (!rows.length && !reg) return <PreviewShell dir={dir} empty en={en} />;
+    return (
+      <div dir={dir} className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-line">
+        <div className="bg-brand px-4 py-3 text-center text-sm font-bold text-white">{en ? "Event details" : "تفاصيل الفعالية"}</div>
+        <div className="space-y-3 p-4">
+          {rows.map((r) => (
+            <div key={r.b} className="flex items-center justify-between gap-3 text-start">
+              <div><p className="text-[10px] text-ink-soft">{r.label}</p><p className="text-[12px] font-semibold text-ink">{r.value}</p></div>
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-brand/10 text-brand">{CMS_ICONS[EVENT_ICON[r.b]] ?? CMS_ICONS.star}</span>
+            </div>
+          ))}
+          {reg && <p className="rounded-lg bg-brand/5 px-3 py-2 text-center text-[11px] font-semibold text-brand">{reg}</p>}
+        </div>
+      </div>
+    );
+  }
+
+  // 3) هيرو (صورة + عنوان + عنوان فرعي)
+  const title = gs("title") || gs("name") || gs("heading");
+  const sub = gs("subtitle") || gs("about") || gs("badge");
+  if (img && title) {
+    return (
+      <div dir={dir} className="overflow-hidden rounded-2xl border border-line bg-white shadow-sm">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={img} alt="" className="h-36 w-full object-cover" />
+        <div className="p-4 text-start"><h4 className="text-base font-bold text-ink">{highlight(title)}</h4>{sub && <p className="mt-1 text-[12px] leading-6 text-ink-muted">{sub}</p>}</div>
+      </div>
+    );
+  }
+
+  // 4) عام: عنوان + نص/فقرات
+  const text = gs("text") || gs("about") || gs("desc") || gs("subtitle") || sub;
+  if (!title && !text) return <PreviewShell dir={dir} empty en={en} />;
+  return (
+    <div dir={dir} className="rounded-xl bg-white p-4 text-start shadow-sm ring-1 ring-line">
+      {title && <h4 className="text-base font-bold leading-snug text-ink">{highlight(title)}</h4>}
+      {text.split("\n").filter((p) => p.trim()).map((p, i) => <p key={i} className="mt-1.5 text-[12px] leading-6 text-ink-muted">{p}</p>)}
+    </div>
+  );
+}
+
+function PreviewShell({ dir, empty, en }: { dir: string; empty?: boolean; en: boolean }) {
+  return <div dir={dir} className="rounded-xl border border-dashed border-line bg-white p-6 text-center text-[12px] text-ink-soft/60">{empty ? (en ? "Preview appears here as you type" : "المعاينة تظهر هنا أثناء الكتابة") : ""}</div>;
+}
+
 // ===== معاينة عنصر قائمة مفرد (خبر/فرع/أخصائي/قصة…) — كارت عام =====
 export function ItemPreview({ values, lang }: { type: string; values: Record<string, unknown>; lang: "ar" | "en" }) {
   const en = lang === "en";
