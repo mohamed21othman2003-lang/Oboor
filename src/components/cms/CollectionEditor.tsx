@@ -14,6 +14,7 @@ import { iconByKey, OFFER_ICON_KEYS } from "@/lib/areaIcon";
 import { useCmsLang } from "@/lib/cms/i18n";
 import { fieldLabelEn } from "@/lib/cms/fieldLabels";
 import CustomSelect from "@/components/ui/Select";
+import { ItemPreview } from "@/components/cms/SectionPreview";
 // تحميل مكوّن قصّ الصورة عند الحاجة فقط (يقلّل حجم باندل المحرّر)
 const ImageCropModal = dynamic(() => import("@/components/cms/ImageCropModal"), { ssr: false });
 
@@ -397,7 +398,7 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
 
   const canPreview = !isNew && !readonly && previewHref(type, values) !== null;
   return (
-    <div className="mx-auto max-w-4xl space-y-6 pb-24">
+    <div className="mx-auto max-w-7xl pb-24">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <Link href={`/cms/content/${type}`} className="text-xs font-semibold text-brand hover:text-brand-dark">← {label}</Link>
@@ -416,6 +417,9 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
           </button>
         )}
       </div>
+
+      <div className="mt-6 lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-6 lg:items-start">
+      <div className="space-y-6">
 
       {/* نسبة الاكتمال */}
       {!readonly && (
@@ -469,10 +473,19 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
           </div>
         ))}
       </div>
+      </div>
+      <div className="mt-6 lg:mt-0 lg:sticky lg:top-4">
+        <p className="mb-1.5 flex items-center gap-1.5 text-[11px] font-semibold text-ink-soft">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" /><circle cx="12" cy="12" r="3" /></svg>
+          {t("كما يظهر على الموقع", "As shown on the site")}
+        </p>
+        <ItemPreview type={type} values={values} lang={lang} />
+      </div>
+      </div>
 
       {/* شريط الحفظ */}
       <div className="fixed bottom-0 left-0 right-0 z-20 border-t border-line bg-white/95 px-6 py-3 backdrop-blur lg:right-72">
-        <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-3">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <span className="text-sm font-semibold text-emerald-600">{ok}</span>
             {dirty && !ok && <span className="text-sm font-semibold text-amber-600">{t("• تعديلات غير محفوظة", "• Unsaved changes")}</span>}
