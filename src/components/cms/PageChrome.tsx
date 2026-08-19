@@ -228,8 +228,8 @@ const ITEM_LABELS_EN: Record<string, string> = {
   "certs.cert4": "Fourth certificate",
 };
 // تسميات مخصّصة لحقلَي «العنوان/النص» حسب العنصر (لتوضيح ما يمثّله كل حقل)
-const FIELD_LABELS: Record<string, { title?: string; text?: string }> = {
-  "join.visual": { title: "العنوان", text: "الوصف" },
+const FIELD_LABELS: Record<string, { title?: string; text?: string; tagline?: string }> = {
+  "join.visual": { title: "العنوان", text: "الوصف", tagline: "نص الزر «انضم إلى فريقنا» (فوق العنوان)" },
   "hero.chrome": { title: "الوسم العلوي", text: "نص زر الإجراء" },
   "hero.heading": { title: "العنوان", text: "الجملة التوضيحية" },
   "hero.map_heading": { title: "العنوان", text: "الجملة التوضيحية" },
@@ -255,8 +255,8 @@ const FIELD_LABELS: Record<string, { title?: string; text?: string }> = {
   "certs.cert3": { title: "اسم/كود الشهادة", text: "التصنيف" },
   "certs.cert4": { title: "اسم/كود الشهادة", text: "التصنيف" },
 };
-const FIELD_LABELS_EN: Record<string, { title?: string; text?: string }> = {
-  "join.visual": { title: "Heading", text: "Description" },
+const FIELD_LABELS_EN: Record<string, { title?: string; text?: string; tagline?: string }> = {
+  "join.visual": { title: "Heading", text: "Description", tagline: "Button text “Join Our Team” (above title)" },
   "hero.chrome": { title: "Top badge", text: "Action button text" },
   "hero.heading": { title: "Heading", text: "Descriptive line" },
   "hero.map_heading": { title: "Heading", text: "Descriptive line" },
@@ -574,7 +574,7 @@ export default function PageChrome({ page }: { page: string }) {
                         })()}
                         {hasTagline && (
                           <div>
-                            <p className="mb-1 text-xs font-semibold text-ink-soft">{t("الترويسة الصغيرة (فوق العنوان)", "Eyebrow (above title)")}</p>
+                            <p className="mb-1 text-xs font-semibold text-ink-soft">{(en ? FIELD_LABELS_EN[key]?.tagline : FIELD_LABELS[key]?.tagline) || t("الترويسة الصغيرة (فوق العنوان)", "Eyebrow (above title)")}</p>
                             <div className="grid gap-2 sm:grid-cols-2">
                               <input value={val(it, "tagline_ar")} onChange={(e) => setVal(it.id, "tagline_ar", e.target.value)} className={INPUT} placeholder={t("عربي", "Arabic")} />
                               <input value={val(it, "tagline_en")} onChange={(e) => setVal(it.id, "tagline_en", e.target.value)} dir="ltr" className={INPUT} placeholder="English" />

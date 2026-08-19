@@ -89,6 +89,9 @@ export default async function SpecialistsPage() {
   const joinImg = joinItem?.image || "/figma/specialists/team.jpg";
   const joinHeading = (en ? joinItem?.title_en || joinItem?.title_ar : joinItem?.title_ar) || "";
   const joinDesc = (en ? joinItem?.text_en || joinItem?.text_ar : joinItem?.text_ar) || "";
+  // نص زر «انضم إلى فريقنا» (فوق العنوان) — من حقل tagline بالـCMS مع fallback ثابت
+  const ji = joinItem as Record<string, string> | undefined;
+  const joinBtn = (en ? ji?.tagline_en || ji?.tagline_ar : ji?.tagline_ar) || "";
 
   // القائمة الكاملة لتخصصات وفروع عبور (تظهر في الفلتر حتى قبل إضافة كل الأخصائيين)
   const specialtyOptions = pick(
@@ -198,7 +201,7 @@ export default async function SpecialistsPage() {
           {/* Text (right) */}
           <div className="w-full text-start xl:w-[412px] xl:shrink-0">
             <span className="inline-flex items-center gap-2 rounded-full border border-brand/30 bg-[#e8f7f9] px-4 py-1.5 text-xs font-bold text-brand">
-              {pick(locale, "انضم إلى فريقنا", "Join Our Team")}
+              {joinBtn || pick(locale, "انضم إلى فريقنا", "Join Our Team")}
               <UsersIcon small />
             </span>
             <h2 className="mt-5 text-3xl font-extrabold leading-tight text-ink sm:text-4xl">{joinHeading ? hl(joinHeading) : <>{pick(locale, "انضم إلى فريق ", "Join the ")}<span className="text-brand">{pick(locale, "الأخصائيين", "Specialists")}</span>{pick(locale, "", " Team")}</>}</h2>
