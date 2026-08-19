@@ -47,7 +47,7 @@ const iconChoicesFor = (block: string, key: string): string[] | undefined =>
 const PAGE_URL: Record<string, string> = {
   home: "/", careers: "/careers", success: "/success-stories", specialists: "/specialists",
   branches: "/branches", news: "/news", assessment: "/assessment", about: "/about", programs: "/programs",
-  contact: "/contact",
+  contact: "/contact", admission: "/admission",
 };
 const BLOCK_ADD: Record<string, string> = {
   answer_options: "إضافة خيار إجابة", prelim_questions: "إضافة سؤال",

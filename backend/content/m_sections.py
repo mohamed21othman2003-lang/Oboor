@@ -15,6 +15,10 @@ class SectionItem(models.Model):
         ("careers", "الوظائف"),
         ("news", "الأخبار"),
         ("programs", "البرامج"),
+        ("admission", "طلب التحاق"),
+        ("program-detail", "تفاصيل البرنامج"),
+        ("service-detail", "تفاصيل الخدمة"),
+        ("technique-detail", "تفاصيل التقنية"),
         ("header", "الهيدر (القائمة العلوية)"),
         ("footer", "الفوتر (التذييل)"),
     ]

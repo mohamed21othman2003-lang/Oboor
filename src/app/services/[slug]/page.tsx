@@ -7,7 +7,8 @@ import { CLINICAL_SERVICES, getClinicalService, type ClinicalBlock, type Clinica
 import { distinctIcons, iconByKey } from "@/lib/areaIcon";
 import { getLocale } from "@/i18n/locale";
 import { pick, type Locale } from "@/i18n/config";
-import { fetchContent } from "@/lib/server/django";
+import { fetchContent, fetchSections } from "@/lib/server/django";
+import { hl } from "@/lib/highlight";
 import CtaSection from "@/components/CtaSection";
 
 export function generateStaticParams() {
@@ -297,6 +298,13 @@ export default async function ClinicalDetailPage({ params }: { params: Promise<{
   const s = await loadService(slug, locale);
   if (!s) notFound();
 
+  const en = locale === "en";
+  const sections = await fetchSections("service-detail");
+  const ctaRow = (sections?.cta ?? []).find((r) => r.key === "main") as Record<string, string> | undefined;
+  const ctaTitle = ctaRow?.title_ar ? hl(en ? ctaRow.title_en || ctaRow.title_ar : ctaRow.title_ar) : undefined;
+  const ctaSub = ctaRow ? (en ? ctaRow.text_en || ctaRow.text_ar : ctaRow.text_ar) || undefined : undefined;
+  const ctaBadge = ctaRow ? (en ? ctaRow.tagline_en || ctaRow.tagline_ar : ctaRow.tagline_ar) || undefined : undefined;
+
   // العنوان: أول كلمة بلون داكن وباقي العنوان باللون التركوازي (مطابقة للتصميم)
   const [titleFirst, ...titleRest] = s.title.split(" ");
   const [aboutFirst, ...aboutRest] = (s.aboutHeading || "").split(" ");
@@ -370,8 +378,9 @@ export default async function ClinicalDetailPage({ params }: { params: Promise<{
       {/* CTA */}
       <CtaSection
         locale={locale}
-        title={<>{pick(locale, "هل ترغب في تسجيل طفلك في ", "Would you like to enroll your child in ")}<span className="text-brand">{pick(locale, "خدمات عبور العيادية", "Oboor's Clinical Services")}</span>{pick(locale, " ؟", "?")}</>}
-        subtitle={pick(locale, "يمكنك التواصل معنا لمساعدتك في اختيار البرنامج أو الخدمة الأنسب وفق احتياجات طفلك.", "Get in touch and we'll help you choose the program or service that best fits your child's needs.")}
+        badge={ctaBadge}
+        title={ctaTitle ?? <>{pick(locale, "هل ترغب في تسجيل طفلك في ", "Would you like to enroll your child in ")}<span className="text-brand">{pick(locale, "خدمات عبور العيادية", "Oboor's Clinical Services")}</span>{pick(locale, " ؟", "?")}</>}
+        subtitle={ctaSub ?? pick(locale, "يمكنك التواصل معنا لمساعدتك في اختيار البرنامج أو الخدمة الأنسب وفق احتياجات طفلك.", "Get in touch and we'll help you choose the program or service that best fits your child's needs.")}
       />
     </>
   );

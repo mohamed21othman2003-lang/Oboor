@@ -30,6 +30,26 @@ CTA = {
         title_ar="هل تحتاج إلى استشارة أو مزيد من المعلومات؟", title_en="Need a consultation or more information?",
         text_ar="فريقنا من المختصين جاهز للإجابة على كل استفساراتكم ومساعدتكم في اختيار البرنامج الأنسب لطفلكم. تواصلوا معنا الآن.",
         text_en="Our team of specialists is ready to answer all your questions and help you choose the most suitable program for your child. Get in touch with us now."),
+    "admission": dict(
+        tagline_ar="خدمة العملاء متاحة على مدار الساعة", tagline_en="Customer service available around the clock",
+        title_ar="إن راودك أي سؤال، فريقنا معك على مدار الساعة وفي كل حال.", title_en="If you have any questions, our team is available around the clock to support you at all times.",
+        text_ar="خبراؤنا في أتمّ الاستعداد للإجابة عن استفساراتك، وتوجيهك نحو البرنامج الأمثل لطفلك. تواصل الآن.",
+        text_en="Our experts are fully prepared to answer your inquiries and guide you toward the most suitable program for your child. Get in touch with us today."),
+    "program-detail": dict(
+        tagline_ar="خدمة العملاء متاحة على مدار الساعة", tagline_en="Customer service available around the clock",
+        title_ar="هل ترغب في التسجيل بـ**{name}**؟", title_en="Would you like to enroll in **{name}**?",
+        text_ar="يمكنك التواصل معنا لمساعدتك في اختيار البرنامج أو الخدمة الأنسب وفق احتياجات طفلك.",
+        text_en="Contact us and we will help you choose the program or service best suited to your child's needs."),
+    "service-detail": dict(
+        tagline_ar="خدمة العملاء متاحة على مدار الساعة", tagline_en="Customer service available around the clock",
+        title_ar="هل ترغب في تسجيل طفلك في **خدمات عبور العيادية** ؟", title_en="Would you like to enroll your child in **Oboor's Clinical Services**?",
+        text_ar="يمكنك التواصل معنا لمساعدتك في اختيار البرنامج أو الخدمة الأنسب وفق احتياجات طفلك.",
+        text_en="Get in touch and we'll help you choose the program or service that best fits your child's needs."),
+    "technique-detail": dict(
+        tagline_ar="خدمة العملاء متاحة على مدار الساعة", tagline_en="Customer service available around the clock",
+        title_ar="هل ترغب في تسجيل طفلك في **هذه التقنية** ؟", title_en="Would you like to enroll your child in **this technology**?",
+        text_ar="يمكنك التواصل معنا لمساعدتك في اختيار البرنامج أو الخدمة أو التقنية الأنسب وفق احتياجات طفلك.",
+        text_en="You can reach out to us for help choosing the program, service, or technology best suited to your child's needs."),
 }
 
 

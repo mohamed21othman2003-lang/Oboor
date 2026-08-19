@@ -6,7 +6,8 @@ import { notFound } from "next/navigation";
 import { TECHNIQUES, getTechnique, type Technique } from "@/lib/techniquesData";
 import { distinctIcons, iconByKey } from "@/lib/areaIcon";
 import CtaSection from "@/components/CtaSection";
-import { fetchContent } from "@/lib/server/django";
+import { fetchContent, fetchSections } from "@/lib/server/django";
+import { hl } from "@/lib/highlight";
 import { getLocale } from "@/i18n/locale";
 import { pick, type Locale } from "@/i18n/config";
 
@@ -86,6 +87,12 @@ export default async function TechniqueDetailPage({ params }: { params: Promise<
   const locale = await getLocale();
   const t = await loadTechnique(slug, locale);
   if (!t) notFound();
+  const cen = locale === "en";
+  const sections = await fetchSections("technique-detail");
+  const ctaRow = (sections?.cta ?? []).find((r) => r.key === "main") as Record<string, string> | undefined;
+  const ctaTitle = ctaRow?.title_ar ? hl(cen ? ctaRow.title_en || ctaRow.title_ar : ctaRow.title_ar) : undefined;
+  const ctaSub = ctaRow ? (cen ? ctaRow.text_en || ctaRow.text_ar : ctaRow.text_ar) || undefined : undefined;
+  const ctaBadge = ctaRow ? (cen ? ctaRow.tagline_en || ctaRow.tagline_ar : ctaRow.tagline_ar) || undefined : undefined;
   const available = locale === "en"
     ? !t.badge.toLowerCase().includes("not")
     : t.badge.includes("متوفر") && !t.badge.includes("غير");
@@ -195,8 +202,9 @@ export default async function TechniqueDetailPage({ params }: { params: Promise<
       {/* CTA */}
       <CtaSection
         locale={locale}
-        title={<>{pick(locale, "هل ترغب في تسجيل طفلك في ", "Would you like to enroll your child in ")}<span className="text-brand">{pick(locale, "هذه التقنية", "this technology")}</span>{pick(locale, " ؟", "?")}</>}
-        subtitle={pick(locale, "يمكنك التواصل معنا لمساعدتك في اختيار البرنامج أو الخدمة أو التقنية الأنسب وفق احتياجات طفلك.", "You can reach out to us for help choosing the program, service, or technology best suited to your child's needs.")}
+        badge={ctaBadge}
+        title={ctaTitle ?? <>{pick(locale, "هل ترغب في تسجيل طفلك في ", "Would you like to enroll your child in ")}<span className="text-brand">{pick(locale, "هذه التقنية", "this technology")}</span>{pick(locale, " ؟", "?")}</>}
+        subtitle={ctaSub ?? pick(locale, "يمكنك التواصل معنا لمساعدتك في اختيار البرنامج أو الخدمة أو التقنية الأنسب وفق احتياجات طفلك.", "You can reach out to us for help choosing the program, service, or technology best suited to your child's needs.")}
       />
     </>
   );

@@ -7,7 +7,8 @@ import { PROGRAM_DETAILS, getProgram, type ProgramDetail } from "@/lib/programsD
 import { distinctIcons, iconByKey } from "@/lib/areaIcon";
 import { getLocale } from "@/i18n/locale";
 import { pick, type Locale } from "@/i18n/config";
-import { fetchContent } from "@/lib/server/django";
+import { fetchContent, fetchSections } from "@/lib/server/django";
+import { hl } from "@/lib/highlight";
 import CtaSection from "@/components/CtaSection";
 
 export function generateStaticParams() {
@@ -96,6 +97,15 @@ export default async function ProgramDetailPage({ params }: { params: Promise<{ 
   const locale = await getLocale();
   const p = await loadProgram(slug, locale);
   if (!p) notFound();
+
+  const en = locale === "en";
+  // قسم التواصل السفلي (CTA) من الـCMS — العنوان قالب يحوي {name} يُستبدل باسم البرنامج
+  const sections = await fetchSections("program-detail");
+  const ctaRow = (sections?.cta ?? []).find((r) => r.key === "main") as Record<string, string> | undefined;
+  const ctaTitleTpl = ctaRow ? (en ? ctaRow.title_en || ctaRow.title_ar : ctaRow.title_ar) : "";
+  const ctaTitle = ctaTitleTpl ? hl(ctaTitleTpl.replace(/\{name\}/g, p.title)) : undefined;
+  const ctaSub = ctaRow ? (en ? ctaRow.text_en || ctaRow.text_ar : ctaRow.text_ar) || undefined : undefined;
+  const ctaBadge = ctaRow ? (en ? ctaRow.tagline_en || ctaRow.tagline_ar : ctaRow.tagline_ar) || undefined : undefined;
 
   return (
     <>
@@ -258,8 +268,9 @@ export default async function ProgramDetailPage({ params }: { params: Promise<{ 
       {/* CTA */}
       <CtaSection
         locale={locale}
-        title={pick(locale, `هل ترغب في التسجيل ب${p.title} ؟`, `Would you like to enroll in ${p.title}?`)}
-        subtitle={pick(locale, "يمكنك التواصل معنا لمساعدتك في اختيار البرنامج أو الخدمة الأنسب وفق احتياجات طفلك.", "Contact us and we will help you choose the program or service best suited to your child's needs.")}
+        badge={ctaBadge}
+        title={ctaTitle ?? pick(locale, `هل ترغب في التسجيل ب${p.title} ؟`, `Would you like to enroll in ${p.title}?`)}
+        subtitle={ctaSub ?? pick(locale, "يمكنك التواصل معنا لمساعدتك في اختيار البرنامج أو الخدمة الأنسب وفق احتياجات طفلك.", "Contact us and we will help you choose the program or service best suited to your child's needs.")}
       />
     </>
   );

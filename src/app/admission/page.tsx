@@ -7,6 +7,8 @@ import { getLocale } from "@/i18n/locale";
 import { pick } from "@/i18n/config";
 import { loadBranches } from "@/lib/server/branches";
 import { branchSelectOptions } from "@/lib/branchesData";
+import { fetchSections } from "@/lib/server/django";
+import { hl } from "@/lib/highlight";
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
@@ -30,7 +32,13 @@ function Chev() {
 
 export default async function AdmissionPage() {
   const locale = await getLocale();
-  const branches = await loadBranches(locale);
+  const en = locale === "en";
+  const [branches, sections] = await Promise.all([loadBranches(locale), fetchSections("admission")]);
+  // قسم التواصل السفلي (CTA) من الـCMS
+  const ctaRow = (sections?.cta ?? []).find((r) => r.key === "main") as Record<string, string> | undefined;
+  const ctaTitle = ctaRow?.title_ar ? hl(en ? ctaRow.title_en || ctaRow.title_ar : ctaRow.title_ar) : undefined;
+  const ctaSub = ctaRow ? (en ? ctaRow.text_en || ctaRow.text_ar : ctaRow.text_ar) || undefined : undefined;
+  const ctaBadge = ctaRow ? (en ? ctaRow.tagline_en || ctaRow.tagline_ar : ctaRow.tagline_ar) || undefined : undefined;
   return (
     <>
       {/* Hero */}
@@ -67,8 +75,9 @@ export default async function AdmissionPage() {
       {/* CTA */}
       <CtaSection
         locale={locale}
-        title={pick(locale, "إن راودك أي سؤال، فريقنا معك على مدار الساعة وفي كل حال.", "If you have any questions, our team is available around the clock to support you at all times.")}
-        subtitle={pick(locale, "خبراؤنا في أتمّ الاستعداد للإجابة عن استفساراتك، وتوجيهك نحو البرنامج الأمثل لطفلك. تواصل الآن.", "Our experts are fully prepared to answer your inquiries and guide you toward the most suitable program for your child. Get in touch with us today.")}
+        badge={ctaBadge}
+        title={ctaTitle ?? pick(locale, "إن راودك أي سؤال، فريقنا معك على مدار الساعة وفي كل حال.", "If you have any questions, our team is available around the clock to support you at all times.")}
+        subtitle={ctaSub ?? pick(locale, "خبراؤنا في أتمّ الاستعداد للإجابة عن استفساراتك، وتوجيهك نحو البرنامج الأمثل لطفلك. تواصل الآن.", "Our experts are fully prepared to answer your inquiries and guide you toward the most suitable program for your child. Get in touch with us today.")}
       />
     </>
   );
