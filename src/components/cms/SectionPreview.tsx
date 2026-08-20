@@ -141,8 +141,12 @@ function GalleryGrid({ items }: { items: PItem[] }) {
 // ===== ترويسة قسم عامة (سطر علوي + عنوان + نص + صورة + نقاط + بادچات) =====
 function HeadingCard({ lang, it, itemKey }: { lang: "ar" | "en"; it: PItem; itemKey?: string }) {
   const en = lang === "en";
-  const paragraphs = it.text ? it.text.split("\n").filter((p) => p.trim() !== "") : [];
-  const isPill = itemKey === "badge" && it.title && !it.text && !it.image;
+  // نصّ الأقسام العامة يُخزَّن في text (أسطر) أو data (قائمة فقرات) — نعرضهما كفقرات عادية مثل الموقع
+  const paragraphs = [
+    ...(it.text ? it.text.split("\n").filter((p) => p.trim() !== "") : []),
+    ...it.bullets.filter((b) => b.trim() !== ""),
+  ];
+  const isPill = itemKey === "badge" && it.title && !it.text && !it.image && it.bullets.length === 0;
   if (isPill) {
     return (
       <div dir={en ? "ltr" : "rtl"} className="rounded-xl bg-white p-4 text-center shadow-sm ring-1 ring-line">
@@ -154,12 +158,7 @@ function HeadingCard({ lang, it, itemKey }: { lang: "ar" | "en"; it: PItem; item
     <div dir={en ? "ltr" : "rtl"} className="rounded-xl bg-white p-4 text-center shadow-sm ring-1 ring-line">
       {it.tagline && <span className="inline-flex items-center gap-1.5 rounded-full bg-brand/10 px-3 py-1 text-[11px] font-bold text-brand"><span className="h-1.5 w-1.5 rounded-full bg-brand" />{it.tagline}</span>}
       {it.title && <h4 className="mt-2 text-lg font-extrabold leading-snug text-ink">{highlight(it.title)}</h4>}
-      {paragraphs.map((p, i) => <p key={i} className="mx-auto mt-1.5 max-w-md text-[12px] leading-6 text-ink-muted">{p}</p>)}
-      {it.bullets.length > 0 && (
-        <ul className="mx-auto mt-2 grid w-fit gap-1 text-start">
-          {it.bullets.map((b, i) => <li key={i} className="flex items-center gap-1.5 text-[12px] text-ink-muted"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0 text-brand"><circle cx="12" cy="12" r="9" /><path d="M8.5 12l2.2 2.2L15.5 9.5" strokeLinecap="round" strokeLinejoin="round" /></svg>{b}</li>)}
-        </ul>
-      )}
+      {paragraphs.map((p, i) => <p key={i} className="mx-auto mt-1.5 max-w-md text-start text-[12px] leading-6 text-ink-muted">{p}</p>)}
       {it.image && (
         <div className="relative mx-auto mt-3 w-full max-w-xs">
           {/* eslint-disable-next-line @next/next/no-img-element */}

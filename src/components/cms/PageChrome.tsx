@@ -616,9 +616,9 @@ export default function PageChrome({ page }: { page: string }) {
                         )}
                         {/* «الرقم» يظهر فقط لعناصر تحمل رقماً فعلاً — لا لعنصر العنوان (main)
                             الذي هو عنوان+جملة فقط. أرقام الرئيسية تُدار من «الأرقام والإحصائيات». */}
-                        {g.block === "cta" && hasData && (
+                        {hasData && (
                           <div>
-                            <p className="mb-1 text-xs font-semibold text-ink-soft">{t("النقاط (كل سطر نقطة)", "Bullet points (one per line)")}</p>
+                            <p className="mb-1 text-xs font-semibold text-ink-soft">{t("النقاط / الفقرات (كل سطر عنصر)", "Points / paragraphs (one per line)")}</p>
                             <div className="grid gap-2 sm:grid-cols-2">
                               <AutoTextarea value={listVal(it, "data_ar").join("\n")} onChange={(v) => setVal(it.id, "data_ar", v.split("\n").map((x) => x.trim()).filter(Boolean))} placeholder={t("عربي", "Arabic")} />
                               <AutoTextarea value={listVal(it, "data_en").join("\n")} onChange={(v) => setVal(it.id, "data_en", v.split("\n").map((x) => x.trim()).filter(Boolean))} dir="ltr" placeholder="English" />
