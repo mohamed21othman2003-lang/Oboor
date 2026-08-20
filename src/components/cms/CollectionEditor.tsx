@@ -687,8 +687,10 @@ const FIELD_SECTIONS: Record<string, { title: string; title_en: string; bases: s
       note_en: "The gallery photos at the bottom of the branch page (slideshow + viewer).", preview: "/branches/{slug}" },
   ],
   programs: [
-    { title: "أعلى الصفحة (الهيرو)", title_en: "Top of page (Hero)", bases: ["title", "subtitle", "image", "image_file"] },
-    { title: "نبذة عن البرنامج", title_en: "About the program", bases: ["about"] },
+    { title: "أعلى الصفحة (الهيرو)", title_en: "Top of page (Hero)", bases: ["title", "subtitle"],
+      note: "بادج + عنوان البرنامج + وصف مختصر، تظهر في أعلى صفحة البرنامج.", note_en: "Badge + program title + short subtitle, shown at the top of the program page.", preview: "/programs/{slug}" },
+    { title: "نبذة عن البرنامج", title_en: "About the program", bases: ["image", "image_file", "about"],
+      note: "الصورة تظهر بجانب فقرات النبذة في قسم «عن البرنامج».", note_en: "The image appears beside the About paragraphs in the \"About the program\" section.", preview: "/programs/{slug}" },
     { title: "فلسفة البرنامج", title_en: "Program philosophy", bases: ["philosophy_intro", "philosophy"] },
     { title: "معلومات البرنامج (٣ بطاقات: المنهج + المدة + الفئة المستهدفة)", title_en: "Program info (3 cards: methodology + duration + target group)", bases: ["methods", "duration", "target", "target_tags", "target_list"] },
     { title: "مجالات التدريب", title_en: "Training areas", bases: ["training_intro", "training_areas"] },
@@ -714,7 +716,7 @@ const FIELD_SECTIONS: Record<string, { title: string; title_en: string; bases: s
   ],
 };
 // أنواع العناصر التي تعرض معاينة حيّة بجوار الحقول (كما في الموقع)
-const LIVE_PREVIEW_TYPES = new Set(["news"]);
+const LIVE_PREVIEW_TYPES = new Set(["news", "programs"]);
 // حقول تقنية/اختيارية تُخفى إن كانت فارغة (تقليل التشويش لمن لا يحتاجها)
 // تشمل حقول البرامج الشرطية (قائمة الفئة المستهدفة + المحطات التطبيقية):
 // تظهر فقط في البرامج التي تستخدمها فعلاً على الصفحة، وتختفي في غيرها.

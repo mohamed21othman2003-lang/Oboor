@@ -340,10 +340,173 @@ function itemText(it: unknown, en: boolean): string {
   return "";
 }
 
-export function GroupPreview({ bases, values, lang }: { type: string; bases: string[]; values: Record<string, unknown>; lang: "ar" | "en" }) {
+// ===== معاينة أقسام صفحة البرنامج (مطابقة لـ /programs/[slug]) =====
+function ProgramGroupPreview({ bases, values, lang }: { bases: string[]; values: Record<string, unknown>; lang: "ar" | "en" }) {
   const en = lang === "en";
   const dir = en ? "ltr" : "rtl";
   const has = (b: string) => bases.includes(b);
+  const ps = (base: string) => { const v = en ? (values[`${base}_en`] || values[`${base}_ar`]) : values[`${base}_ar`]; return typeof v === "string" ? v : ""; };
+  const pl = (base: string): Record<string, unknown>[] => {
+    const e = values[`${base}_en`], a = values[`${base}_ar`];
+    const v = en ? ((Array.isArray(e) && e.length) ? e : a) : a;
+    return Array.isArray(v) ? (v as Record<string, unknown>[]) : [];
+  };
+  const strs = (base: string) => pl(base).map((x) => (typeof x === "string" ? x : String((x as Record<string, unknown>)?.text ?? ""))).filter(Boolean);
+  const progTitle = ps("title") || (en ? "Program name" : "اسم البرنامج");
+  const rawImg = String(values.image_file || values.image || "");
+  const img = rawImg ? (/^(https?:|data:|blob:|\/)/.test(rawImg) ? rawImg : "/" + rawImg.replace(/^\/+/, "")) : "";
+
+  // 1) الهيرو — بادج وسط + عنوان + وصف (خلفية متدرّجة فاتحة)
+  if (has("subtitle") || (has("title") && !has("about"))) {
+    return (
+      <div dir={dir} className="overflow-hidden rounded-2xl bg-gradient-to-b from-[#ebf7f9] to-white p-6 text-center ring-1 ring-line">
+        <span className="inline-block rounded-full bg-white px-3 py-1 text-[11px] font-medium text-brand-dark shadow-sm ring-1 ring-line">{en ? "Our Services in Saudi Arabia" : "برامجنا التمكينية في المملكة"}</span>
+        <h1 className="mt-3 text-lg font-extrabold text-ink">{ps("title") || progTitle}</h1>
+        {ps("subtitle") && <p className="mx-auto mt-2 max-w-md text-[12px] leading-7 text-ink-muted">{ps("subtitle")}</p>}
+      </div>
+    );
+  }
+
+  // 2) نبذة عن البرنامج — صورة + عنوان «عن …» + فقرات (عمودان)
+  if (has("about")) {
+    const paras = strs("about");
+    return (
+      <div dir={dir} className="grid gap-4 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-line sm:grid-cols-2">
+        <div className="relative h-40 overflow-hidden rounded-2xl bg-surface">
+          {img
+            ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={img} alt="" className="h-40 w-full object-contain bg-surface" />
+            : <div className="flex h-40 items-center justify-center text-[11px] text-ink-soft">{en ? "No image" : "لا صورة"}</div>}
+        </div>
+        <div className="text-start">
+          <h2 className="text-base font-extrabold text-ink">{en ? "About " : "عن "}{progTitle}</h2>
+          <div className="mt-2 space-y-2">
+            {paras.length ? paras.map((p, i) => <p key={i} className="text-[12px] leading-7 text-ink-muted">{p}</p>) : <p className="text-[11px] text-ink-soft">{en ? "No paragraphs yet" : "لا توجد فقرات بعد"}</p>}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // 3) فلسفة البرنامج — قسم داكن + بطاقات
+  if (has("philosophy")) {
+    const cards = strs("philosophy");
+    return (
+      <div dir={dir} className="rounded-2xl bg-gradient-to-bl from-[#003333] via-[#0f4a54] to-[#174646] p-5 text-start">
+        <h2 className="text-base font-extrabold text-white">{en ? "Program " : "فلسفة "}<span className="text-brand">{en ? "Philosophy" : "البرنامج"}</span></h2>
+        {ps("philosophy_intro") && <p className="mt-2 text-[12px] leading-7 text-white/75">{ps("philosophy_intro")}</p>}
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          {cards.length ? cards.map((c, i) => <div key={i} className="rounded-2xl border border-white/10 bg-[#124e5a] p-3 text-[12px] leading-7 text-white/85">{c}</div>) : <p className="text-[11px] text-white/60">{en ? "No cards yet" : "لا توجد بطاقات بعد"}</p>}
+        </div>
+      </div>
+    );
+  }
+
+  // 4) معلومات البرنامج — ٣ بطاقات (المنهج + المدة + الفئة)
+  if (has("methods") || has("duration") || has("target") || has("target_tags") || has("target_list")) {
+    const methods = pl("methods");
+    const duration = ps("duration");
+    const target = ps("target");
+    const tags = strs("target_tags");
+    const tlist = strs("target_list");
+    const Card = ({ icon, title, children }: { icon: string; title: string; children: React.ReactNode }) => (
+      <div className="rounded-2xl border border-line border-t-4 border-t-brand bg-white p-4 shadow-sm">
+        <div className="mb-3 flex items-center gap-2 border-b border-line pb-3">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand/10 text-brand">{CMS_ICONS[icon] ?? CMS_ICONS.star}</span>
+          <h3 className="text-sm font-bold text-ink">{title}</h3>
+        </div>
+        {children}
+      </div>
+    );
+    return (
+      <div dir={dir} className="space-y-3 text-start">
+        {methods.length > 0 && (
+          <Card icon="book" title={en ? "Scientific Methodology" : "المنهج العلمي"}>
+            <ul className="space-y-2">
+              {methods.map((m, i) => { const name = en ? String(m.name_en || m.name || "") : String(m.name_ar || m.name || ""); const desc = en ? String(m.desc_en || m.desc || "") : String(m.desc_ar || m.desc || ""); return (
+                <li key={i} className="border-e-2 border-brand pe-2">{name && <p className="text-[12px] font-bold text-ink">{name}</p>}{desc && <p className="text-[11px] text-ink-muted">{desc}</p>}</li>
+              ); })}
+            </ul>
+          </Card>
+        )}
+        {duration && <Card icon="clock" title={en ? "Program Duration" : "مدة البرنامج"}><p className="text-[12px] leading-7 text-ink-muted">{duration}</p></Card>}
+        {(target || tags.length > 0 || tlist.length > 0) && (
+          <Card icon="team" title={en ? "Target Group" : "الفئة المستهدفة"}>
+            {target && <p className="text-[12px] leading-7 text-ink-muted">{target}</p>}
+            {tags.length > 0 && <div className="mt-2 flex flex-wrap gap-1.5">{tags.map((tg, i) => <span key={i} className="rounded-full bg-brand/10 px-2.5 py-1 text-[11px] font-medium text-brand-dark">{tg}</span>)}</div>}
+            {tlist.length > 0 && <ul className="mt-2 space-y-1.5">{tlist.map((tl, i) => <li key={i} className="flex items-start gap-2 text-[12px] text-ink-muted"><span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand" />{tl}</li>)}</ul>}
+          </Card>
+        )}
+      </div>
+    );
+  }
+
+  // 5) مجالات التدريب — عنوان + بطاقات (أيقونة + رقم + عنوان + وصف)
+  if (has("training_areas")) {
+    const areas = pl("training_areas");
+    return (
+      <div dir={dir} className="rounded-2xl bg-white p-4 text-start shadow-sm ring-1 ring-line">
+        <h2 className="text-base font-extrabold text-ink">{en ? "Training " : "مجالات "}<span className="text-brand">{en ? "Areas" : "التدريب"}</span></h2>
+        {ps("training_intro") && <p className="mt-1.5 text-[12px] text-ink-muted">{ps("training_intro")}</p>}
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+          {areas.length ? areas.map((a, i) => { const title = en ? String(a.title_en || a.title || "") : String(a.title_ar || a.title || ""); const desc = en ? String(a.desc_en || a.desc || "") : String(a.desc_ar || a.desc || ""); const icon = String(a.icon || ""); return (
+            <div key={i} className="rounded-2xl border border-line bg-white p-3 shadow-sm">
+              <div className="flex items-start gap-2">
+                <div className="flex shrink-0 flex-col items-center gap-0.5">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand/10 text-brand">{CMS_ICONS[icon] ?? CMS_ICONS.star}</span>
+                  <span className="text-[10px] font-semibold text-ink-soft">{String(i + 1).padStart(2, "0")}</span>
+                </div>
+                <h3 className="flex-1 text-[13px] font-bold leading-6 text-ink">{title || "—"}</h3>
+              </div>
+              {desc && <p className="mt-2 text-[12px] leading-6 text-ink-muted">{desc}</p>}
+            </div>
+          ); }) : <p className="text-[11px] text-ink-soft">{en ? "No areas yet" : "لا توجد مجالات بعد"}</p>}
+        </div>
+      </div>
+    );
+  }
+
+  // 6) المحطات التطبيقية — عنوان وسط + شرائح متدرّجة
+  if (has("stations")) {
+    const st = strs("stations");
+    return (
+      <div dir={dir} className="rounded-2xl bg-surface p-4 text-center ring-1 ring-line">
+        <h2 className="text-base font-extrabold text-ink">{en ? "Applied Practical Stations" : "المحطات التطبيقية"}</h2>
+        {ps("stations_intro") && <p className="mx-auto mt-1.5 max-w-md text-[12px] text-ink-muted">{ps("stations_intro")}</p>}
+        <div className="mt-3 grid gap-2 sm:grid-cols-2">
+          {st.length ? st.map((s, i) => <div key={i} className="rounded-xl bg-gradient-to-bl from-brand to-brand-deep py-3 text-[12px] font-bold text-white shadow-md">{s}</div>) : <p className="text-[11px] text-ink-soft">{en ? "No stations yet" : "لا توجد محطات بعد"}</p>}
+        </div>
+      </div>
+    );
+  }
+
+  // 7) قسم التواصل السفلي (CTA) — قسم أزرق متدرّج + بادج + عنوان + وصف + أزرار
+  if (has("cta_title") || has("cta_text") || has("cta_badge")) {
+    const badge = ps("cta_badge") || (en ? "Customer service available around the clock" : "خدمة العملاء متاحة على مدار الساعة");
+    const title = ps("cta_title") || (en ? `Would you like to enroll in ${progTitle}?` : `هل ترغب في التسجيل ب${progTitle} ؟`);
+    const sub = ps("cta_text") || (en ? "Contact us and we will help you choose the program best suited to your child's needs." : "يمكنك التواصل معنا لمساعدتك في اختيار البرنامج أو الخدمة الأنسب وفق احتياجات طفلك.");
+    return (
+      <div dir={dir} className="overflow-hidden rounded-2xl bg-gradient-to-br from-[#0e4048] via-[#1a6c75] to-[#0e4048] p-5 text-center">
+        <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-[11px] font-medium text-white/90"><span className="h-2 w-2 rounded-full bg-success" />{badge}</span>
+        <h2 className="mt-3 text-base font-extrabold leading-snug text-white">{highlight(title, "text-brand")}</h2>
+        <p className="mx-auto mt-2 max-w-md text-[12px] text-white/75">{sub}</p>
+        <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+          <span className="rounded-xl bg-brand px-3 py-2 text-[11px] font-semibold text-white">{en ? "Apply Now" : "طلب التحاق"}</span>
+          <span className="rounded-xl bg-[#2ba73e] px-3 py-2 text-[11px] font-semibold text-white">{en ? "WhatsApp" : "واتساب"}</span>
+          <span className="rounded-xl bg-white px-3 py-2 text-[11px] font-semibold text-ink">{en ? "Nearest Branch" : "أقرب فرع"}</span>
+        </div>
+      </div>
+    );
+  }
+
+  return <PreviewShell dir={dir} empty en={en} />;
+}
+
+export function GroupPreview({ type, bases, values, lang }: { type: string; bases: string[]; values: Record<string, unknown>; lang: "ar" | "en" }) {
+  const en = lang === "en";
+  const dir = en ? "ltr" : "rtl";
+  const has = (b: string) => bases.includes(b);
+  // معاينات مطابقة بحسب نوع العنصر (كل صفحة لها تصميم أقسامها)
+  if (type === "programs") return <ProgramGroupPreview bases={bases} values={values} lang={lang} />;
   // المعاينة تقرأ فيلدز مجموعتها فقط (لا تتسرّب لحقول أقسام تانية)
   const gs = (base: string) => { if (!has(base)) return ""; const v = en ? (values[`${base}_en`] || values[`${base}_ar`]) : values[`${base}_ar`]; return typeof v === "string" ? v : ""; };
   const gl = (base: string): unknown[] => {
