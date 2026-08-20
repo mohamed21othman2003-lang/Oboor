@@ -179,10 +179,29 @@ function HeadingCard({ lang, it, itemKey }: { lang: "ar" | "en"; it: PItem; item
   );
 }
 
+// ===== كارت CTA السفلي في صفحة «عن عبور» — كارت أفقي فاتح بأيقونة دبوس (يطابق الموقع) =====
+function AboutCta({ lang, it }: { lang: "ar" | "en"; it: PItem }) {
+  const en = lang === "en";
+  return (
+    <div dir={en ? "ltr" : "rtl"} className="flex flex-col items-center justify-between gap-4 rounded-2xl bg-[#e8f7f9] p-5 sm:flex-row">
+      <div className="flex items-center gap-3 text-start">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand text-white">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>
+        </span>
+        <div>
+          <p className="text-sm font-bold text-ink">{it.title || (en ? "Heading" : "العنوان")}</p>
+          {it.text && <p className="mt-0.5 text-[12px] text-ink-muted">{it.text}</p>}
+        </div>
+      </div>
+      <span className="flex shrink-0 items-center gap-1.5 rounded-xl bg-brand px-4 py-2 text-[12px] font-semibold text-white">{en ? "Take the Step to Oboor" : "خذ الخطوة لعبور"}</span>
+    </div>
+  );
+}
+
 // ===== الموزّع على مستوى البلوك: يعرض السكشن كامل بشكله الحقيقي =====
-export function BlockPreview({ block, items, lang, itemKeys }: { block: string; items: PItem[]; lang: "ar" | "en"; itemKeys?: string[] }) {
+export function BlockPreview({ block, items, lang, itemKeys, page }: { block: string; items: PItem[]; lang: "ar" | "en"; itemKeys?: string[]; page?: string }) {
   if (!items.length) return null;
-  if (block === "cta") return <CtaCard lang={lang} it={items[0]} />;
+  if (block === "cta") return page === "about" ? <AboutCta lang={lang} it={items[0]} /> : <CtaCard lang={lang} it={items[0]} />;
   if (block === "categories" || block === "tabs") return <TabsBar lang={lang} items={items} />;
   if (block === "features") return <FeatureGrid lang={lang} items={items} />;
   if (block === "join_cards") return <JoinGrid lang={lang} items={items} />;

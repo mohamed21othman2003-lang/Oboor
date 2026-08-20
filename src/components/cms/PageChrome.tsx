@@ -707,7 +707,7 @@ export default function PageChrome({ page }: { page: string }) {
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" /><circle cx="12" cy="12" r="3" /></svg>
                         {t("كما يظهر على الموقع", "As shown on the site")}
                       </p>
-                      <BlockPreview block={g.block} items={pvItems} lang={lang} itemKeys={g.items.map((it) => String(it.key ?? ""))} />
+                      <BlockPreview page={page} block={g.block} items={pvItems} lang={lang} itemKeys={g.items.map((it) => String(it.key ?? ""))} />
                     </div>
                   );
                 })()}
