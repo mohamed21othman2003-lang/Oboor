@@ -355,6 +355,30 @@ export function GroupPreview({ bases, values, lang }: { type: string; bases: str
   const rawImg = (has("image") || has("image_file")) ? String(values.image_file || values.image || values.image_path || "") : "";
   const img = rawImg ? (/^(https?:|data:|blob:|\/)/.test(rawImg) ? rawImg : "/" + rawImg.replace(/^\/+/, "")) : "";
 
+  // 0) بطاقة الخبر (إعلامنا) — صورة + وسم التصنيف + تاريخ + عنوان + وصف (مطابقة NewsCard)
+  if (has("desc") && (has("image") || has("image_file")) && (has("title") || has("name"))) {
+    const cardTitle = gs("title") || gs("name");
+    const cat = gs("category");
+    const date = gs("date");
+    const desc = gs("desc");
+    return (
+      <article dir={dir} className="flex flex-col overflow-hidden rounded-2xl border border-line bg-white shadow-sm">
+        <div className="relative h-44 w-full bg-surface">
+          {img
+            ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={img} alt="" className="h-44 w-full object-cover" />
+            : <div className="flex h-44 w-full items-center justify-center text-[11px] text-ink-soft">{en ? "No image" : "لا صورة"}</div>}
+          {cat && <span className="absolute end-3 top-3 rounded-full bg-white/95 px-3 py-1 text-[11px] font-bold text-brand shadow-sm backdrop-blur">{cat}</span>}
+        </div>
+        <div className="flex flex-1 flex-col p-5 text-start">
+          {date && <p className="flex items-center gap-1.5 text-xs text-ink-soft"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" /></svg>{date}</p>}
+          <h3 className="mt-2 text-base font-bold leading-7 text-ink">{cardTitle || (en ? "Article title" : "عنوان الخبر")}</h3>
+          {desc && <p className="mt-2 flex-1 text-sm leading-7 text-ink-muted">{desc}</p>}
+          <span className="mt-4 flex items-center gap-1 text-sm font-semibold text-brand">{en ? "Read More" : "اقرأ المزيد"}<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="dir-flip"><path strokeLinecap="round" strokeLinejoin="round" d="M15 18l-6-6 6-6" /></svg></span>
+        </div>
+      </article>
+    );
+  }
+
   // 1) قوائم المحتوى (فقرات / نقاط / بطاقات / صور)
   const listBase = LIST_BASES.find(has);
   if (listBase) {

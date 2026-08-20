@@ -12,6 +12,7 @@ import {
 import { CMS_ICONS, ICON_LABELS, iconNamesFor } from "@/lib/cms/icons";
 import { iconByKey, OFFER_ICON_KEYS } from "@/lib/areaIcon";
 import { useCmsLang } from "@/lib/cms/i18n";
+import { GroupPreview } from "@/components/cms/SectionPreview";
 import { fieldLabelEn } from "@/lib/cms/fieldLabels";
 import CustomSelect from "@/components/ui/Select";
 // تحميل مكوّن قصّ الصورة عند الحاجة فقط (يقلّل حجم باندل المحرّر)
@@ -224,17 +225,17 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
   // تقسيم الحقول إلى أقسام مرئية بعناوين بارزة (حسب FIELD_SECTIONS)؛ الحقول غير المُدرَجة في «إعدادات»
   const sectionGroups = useMemo(() => {
     const cfg = FIELD_SECTIONS[type];
-    if (!cfg) return [{ title: null as string | null, rows, note: undefined as string | undefined, preview: undefined as string | undefined }];
+    if (!cfg) return [{ title: null as string | null, rows, note: undefined as string | undefined, preview: undefined as string | undefined, bases: [] as string[] }];
     const baseOf = (r: Row) => r.f?.base ?? r.ar?.base ?? r.en?.base ?? "";
     const used = new Set<Row>();
-    const out: { title: string | null; rows: Row[]; note?: string; preview?: string }[] = [];
+    const out: { title: string | null; rows: Row[]; note?: string; preview?: string; bases: string[] }[] = [];
     for (const sec of cfg) {
       const secRows = rows.filter((r) => sec.bases.includes(baseOf(r)));
       secRows.forEach((r) => used.add(r));
-      if (secRows.length) out.push({ title: en ? sec.title_en : sec.title, rows: secRows, note: en ? sec.note_en : sec.note, preview: sec.preview });
+      if (secRows.length) out.push({ title: en ? sec.title_en : sec.title, rows: secRows, note: en ? sec.note_en : sec.note, preview: sec.preview, bases: sec.bases });
     }
     const leftover = rows.filter((r) => !used.has(r));
-    if (leftover.length) out.push({ title: en ? "Settings" : "إعدادات", rows: leftover });
+    if (leftover.length) out.push({ title: en ? "Settings" : "إعدادات", rows: leftover, bases: [] });
     return out;
   }, [rows, type, en]);
 
@@ -446,28 +447,47 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
       })()}
 
       <div className="space-y-5">
-        {sectionGroups.map((g, gi) => (
-          <div key={gi} className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-line sm:p-8">
-            {g.title && (
-              <h2 className="mb-3 flex items-center gap-2.5 border-b border-line pb-3 text-lg font-extrabold text-brand-dark">
-                <span className="h-5 w-1.5 shrink-0 rounded-full bg-brand" />
-                {g.title}
-              </h2>
-            )}
-            {g.note && (
-              <div className="mb-5 rounded-lg border border-brand/20 bg-brand/5 px-3 py-2.5 text-[11px] leading-5 text-ink-soft">
-                ℹ️ {g.note}
-                {g.preview && (
-                  <a href={g.preview.replace("{slug}", String(values.slug ?? ""))} target="_blank" rel="noopener noreferrer" className="ms-1 inline-flex items-center gap-1 font-semibold text-brand hover:underline">
-                    {t("عاين على الموقع", "Preview on site")}
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3" /></svg>
-                  </a>
-                )}
-              </div>
-            )}
-            <div className="space-y-7">{g.rows.map(renderRow)}</div>
-          </div>
-        ))}
+        {sectionGroups.map((g, gi) => {
+          // معاينة حيّة لعناصر «إعلامنا»: عمودان [حقول | كارت الموقع]
+          const showPreview = LIVE_PREVIEW_TYPES.has(type) && (g.bases?.length ?? 0) > 0;
+          const header = (
+            <>
+              {g.title && (
+                <h2 className="mb-3 flex items-center gap-2.5 border-b border-line pb-3 text-lg font-extrabold text-brand-dark">
+                  <span className="h-5 w-1.5 shrink-0 rounded-full bg-brand" />
+                  {g.title}
+                </h2>
+              )}
+              {g.note && (
+                <div className="mb-5 rounded-lg border border-brand/20 bg-brand/5 px-3 py-2.5 text-[11px] leading-5 text-ink-soft">
+                  ℹ️ {g.note}
+                  {g.preview && (
+                    <a href={g.preview.replace("{slug}", String(values.slug ?? ""))} target="_blank" rel="noopener noreferrer" className="ms-1 inline-flex items-center gap-1 font-semibold text-brand hover:underline">
+                      {t("عاين على الموقع", "Preview on site")}
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3" /></svg>
+                    </a>
+                  )}
+                </div>
+              )}
+            </>
+          );
+          return (
+            <div key={gi} className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-line sm:p-8">
+              {header}
+              {showPreview ? (
+                <div className="lg:grid lg:grid-cols-2 lg:gap-6 lg:items-start">
+                  <div className="space-y-7">{g.rows.map(renderRow)}</div>
+                  <div className="mt-6 lg:mt-0 lg:sticky lg:top-4">
+                    <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-ink-soft">{t("كما يظهر في الموقع", "As shown on the site")}</p>
+                    <GroupPreview type={type} bases={g.bases} values={values} lang={lang} />
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-7">{g.rows.map(renderRow)}</div>
+              )}
+            </div>
+          );
+        })}
       </div>
 
       {/* شريط الحفظ */}
@@ -622,6 +642,20 @@ const SHARED_CONTENT_NOTES: Record<string, { ar: string; en: string }> = {
 // تجميع حقول المحرّر في أقسام مرئية بعناوين بارزة تطابق أقسام الصفحة على الموقع —
 // حتى يعرف الأدمن أي مجموعة حقول تتحكّم في أي قسم. الحقول غير المُدرَجة تظهر تحت «إعدادات».
 const FIELD_SECTIONS: Record<string, { title: string; title_en: string; bases: string[]; note?: string; note_en?: string; preview?: string }[]> = {
+  news: [
+    { title: "بطاقة الخبر", title_en: "News card", bases: ["title", "category", "date", "image", "image_file", "desc"],
+      note: "الكارت الذي يظهر في قائمة «إعلامنا» وأعلى صفحة الخبر (صورة + تصنيف + تاريخ + عنوان + وصف).",
+      note_en: "The card shown in the \"News\" list and at the top of the article (image + category + date + title + description).", preview: "/news/{slug}" },
+    { title: "تفاصيل الفعالية", title_en: "Event details", bases: ["time", "location", "map_url", "audience", "seats", "reg_status"],
+      note: "تظهر فقط لعناصر «الفعاليات» و«الورش» — بطاقة التفاصيل الجانبية (الوقت/المكان/الفئة/المقاعد/حالة التسجيل).",
+      note_en: "Shown only for \"Events\" and \"Workshops\" — the side details card (time/location/audience/seats/registration).", preview: "/news/{slug}" },
+    { title: "محتوى المقال", title_en: "Article content", bases: ["body"],
+      note: "فقرات المقال داخل صفحة الخبر — كل فقرة في حقل منفصل.",
+      note_en: "The article paragraphs inside the news page — each paragraph in its own field.", preview: "/news/{slug}" },
+    { title: "أبرز النقاط / ماذا ستتعلم", title_en: "Key points / What you'll learn", bases: ["learn"],
+      note: "قائمة النقاط المميّزة في صفحة الخبر (تظهر كنقاط بعلامة صح).",
+      note_en: "The key-points list on the news page (shown as checkmarked points).", preview: "/news/{slug}" },
+  ],
   success: [
     { title: "بيانات القصة (البطاقة)", title_en: "Story info (card)", bases: ["name", "age", "category", "image", "image_file", "duration_label", "before", "after"],
       note: "تظهر على بطاقة القصة في صفحة قصص النجاح.", note_en: "Shown on the story card in the Success Stories page.", preview: "/success-stories" },
@@ -676,6 +710,8 @@ const FIELD_SECTIONS: Record<string, { title: string; title_en: string; bases: s
       note: "قسم التواصل أسفل صفحة هذه التقنية — خاص بها وحدها. اتركه فارغاً لاستخدام النص الافتراضي.", note_en: "The contact section at the bottom of this technique's page — unique to it. Leave empty for the default text.", preview: "/techniques/{slug}" },
   ],
 };
+// أنواع العناصر التي تعرض معاينة حيّة بجوار الحقول (كما في الموقع)
+const LIVE_PREVIEW_TYPES = new Set(["news"]);
 // حقول تقنية/اختيارية تُخفى إن كانت فارغة (تقليل التشويش لمن لا يحتاجها)
 // تشمل حقول البرامج الشرطية (قائمة الفئة المستهدفة + المحطات التطبيقية):
 // تظهر فقط في البرامج التي تستخدمها فعلاً على الصفحة، وتختفي في غيرها.
