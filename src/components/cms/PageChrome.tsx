@@ -17,7 +17,7 @@ const SAVE_FIELDS = ["title_ar", "title_en", "text_ar", "text_en", "tagline_ar",
 const ImageCropModal = dynamic(() => import("@/components/cms/ImageCropModal"), { ssr: false });
 
 // ترتيب الأقسام كما تظهر على الصفحة (لعرضها مرتّبة بدل ترتيب قاعدة البيانات)
-const BLOCK_ORDER = ["hero", "tabs", "about", "smart_search", "stats", "join", "join_cards", "why_us", "success", "gallery", "news", "certs", "features", "services", "profile_intro", "profile_stats", "journey", "accreditations", "steps", "prelim_questions", "answer_options", "categories", "overview", "list", "cities", "employment_types", "info", "form", "map", "social", "contact_prompt", "cta", "highlights"];
+const BLOCK_ORDER = ["hero", "intro", "mission", "vision", "programs", "specialists", "branches", "tabs", "about", "smart_search", "stats", "join", "join_cards", "why_us", "success", "gallery", "news", "certs", "features", "services", "profile_intro", "profile_stats", "journey", "accreditations", "steps", "prelim_questions", "answer_options", "categories", "overview", "list", "cities", "employment_types", "info", "form", "map", "social", "contact_prompt", "cta", "highlights"];
 const blockRank = (b: string) => { const i = BLOCK_ORDER.indexOf(b); return i === -1 ? 999 : i; };
 // أقسام محتواها منظّم معقّد ⇒ تُحرّر بالمحرّر الكامل (رابط) بدل الحقول المبسّطة
 const COMPLEX_BLOCKS = new Set(["highlights", "services"]);
