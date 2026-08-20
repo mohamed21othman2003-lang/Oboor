@@ -154,24 +154,31 @@ function HeadingCard({ lang, it, itemKey }: { lang: "ar" | "en"; it: PItem; item
       </div>
     );
   }
-  return (
-    <div dir={en ? "ltr" : "rtl"} className="rounded-xl bg-white p-4 text-center shadow-sm ring-1 ring-line">
-      {it.tagline && <span className="inline-flex items-center gap-1.5 rounded-full bg-brand/10 px-3 py-1 text-[11px] font-bold text-brand"><span className="h-1.5 w-1.5 rounded-full bg-brand" />{it.tagline}</span>}
-      {it.title && <h4 className="mt-2 text-lg font-extrabold leading-snug text-ink">{highlight(it.title)}</h4>}
-      {paragraphs.map((p, i) => <p key={i} className="mx-auto mt-1.5 max-w-md text-start text-[12px] leading-6 text-ink-muted">{p}</p>)}
-      {it.image && (
-        <div className="relative mx-auto mt-3 w-full max-w-xs">
+  // السطر العلوي بشكل الخط (— نص) زي TagLine بالموقع
+  const eyebrow = it.tagline ? <span className="flex items-center gap-2 text-[11px] font-bold text-brand"><span className="h-px w-5 shrink-0 bg-brand" />{it.tagline}</span> : null;
+  const heading = it.title ? <h4 className="mt-2 text-xl font-extrabold leading-snug text-ink">{highlight(it.title)}</h4> : null;
+  const paras = paragraphs.map((p, i) => <p key={i} className="mt-2 text-[12px] leading-6 text-ink-muted">{p}</p>);
+
+  // فيه صورة ⇒ عمودين (نص + صورة) زي أقسام «عن عبور»؛ من غير صورة ⇒ عمود واحد
+  if (it.image) {
+    return (
+      <div dir={en ? "ltr" : "rtl"} className="grid items-center gap-4 rounded-xl bg-white p-4 text-start shadow-sm ring-1 ring-line sm:grid-cols-2">
+        <div>{eyebrow}{heading}{paras}</div>
+        <div className="relative">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={it.image} alt="" className="h-32 w-full rounded-xl object-cover ring-1 ring-line" />
-          {it.badges.length > 0 && (
-            <div className="absolute inset-x-2 bottom-2 flex flex-wrap justify-center gap-1.5">
-              {it.badges.map((bd, i) => <span key={i} className="rounded-lg bg-white/95 px-2 py-1 text-[10px] font-semibold text-ink shadow-sm">{bd.value && <span className="text-brand">{bd.value} </span>}{bd.label}</span>)}
-            </div>
-          )}
+          <img src={it.image} alt="" className="h-44 w-full rounded-2xl object-cover" />
+          {it.badges.map((bd, i) => (
+            <span key={i} className={`absolute rounded-xl bg-white/95 px-2 py-1 text-[10px] font-semibold shadow-sm ${i === 0 ? "end-2 top-2" : "start-2 bottom-2"}`}>{bd.value && <span className="text-brand">{bd.value} </span>}{bd.label}</span>
+          ))}
         </div>
-      )}
-      {!it.image && it.badges.length > 0 && (
-        <div className="mt-2 flex flex-wrap justify-center gap-1.5">
+      </div>
+    );
+  }
+  return (
+    <div dir={en ? "ltr" : "rtl"} className="rounded-xl bg-white p-4 text-start shadow-sm ring-1 ring-line">
+      {eyebrow}{heading}{paras}
+      {it.badges.length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-1.5">
           {it.badges.map((bd, i) => <span key={i} className="rounded-lg bg-brand/5 px-2.5 py-1 text-[11px] font-semibold text-ink ring-1 ring-line">{bd.value && <span className="text-brand">{bd.value} </span>}{bd.label}</span>)}
         </div>
       )}
