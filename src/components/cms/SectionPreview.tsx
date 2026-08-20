@@ -820,6 +820,138 @@ function TechniqueGroupPreview({ bases, values, lang }: { bases: string[]; value
   return <PreviewShell dir={dir} empty en={en} />;
 }
 
+// ===== معاينة أقسام صفحة الفرع (مطابقة لـ /branches/[slug] وملف الـPDF) =====
+function BranchGroupPreview({ bases, values, lang }: { bases: string[]; values: Record<string, unknown>; lang: "ar" | "en" }) {
+  const en = lang === "en";
+  const dir = en ? "ltr" : "rtl";
+  const has = (b: string) => bases.includes(b);
+  const ps = (base: string) => { const v = en ? (values[`${base}_en`] || values[`${base}_ar`]) : values[`${base}_ar`]; return typeof v === "string" ? v : ""; };
+  const raw = (key: string) => { const v = values[key]; return typeof v === "string" ? v : (v == null ? "" : String(v)); };
+  const arr = (key: string): Record<string, unknown>[] => (Array.isArray(values[key]) ? (values[key] as Record<string, unknown>[]) : []);
+  const il = (it: Record<string, unknown>, sub: string) => { const v = en ? (it[`${sub}_en`] || it[`${sub}_ar`] || it[sub]) : (it[`${sub}_ar`] || it[sub]); return typeof v === "string" ? v : ""; };
+  const ilArr = (it: Record<string, unknown>, sub: string): string[] => { const e = it[`${sub}_en`], a = it[`${sub}_ar`]; const v = en ? ((Array.isArray(e) && e.length) ? e : a) : a; return Array.isArray(v) ? (v as string[]) : []; };
+  const branchName = ps("name") || (en ? "Branch" : "الفرع");
+  const Check = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0 text-brand"><circle cx="12" cy="12" r="9" /><path d="M8.5 12l2.2 2.2L15.5 9.5" strokeLinecap="round" strokeLinejoin="round" /></svg>;
+  const PinSm = () => <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-brand"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>;
+  const regions = en ? ["Riyadh", "Jeddah", "Eastern Province"] : ["الرياض", "جدة", "الشرقية"];
+
+  // 1) الخدمات المقدَّمة — عنوان + كروت خدمات (كارت ProgramCard) + وسوم الخدمات السريعة
+  if (has("service_cards") || has("services")) {
+    const cards = arr("service_cards").map((c) => ({ title: il(c, "title"), desc: il(c, "desc"), features: ilArr(c, "features") })).filter((c) => c.title);
+    const svcTags = ((): string[] => { const e = values.services_en, a = values.services_ar; const v = en ? ((Array.isArray(e) && e.length) ? e : a) : a; return Array.isArray(v) ? (v as string[]) : []; })();
+    return (
+      <div dir={dir} className="rounded-2xl bg-white p-4 text-start ring-1 ring-line">
+        <h2 className="text-base font-extrabold text-ink">{en ? "Services Offered at the " : "الخدمات المقدمة في "}<span className="text-brand">{en ? "Branch" : "الفرع"}</span></h2>
+        {cards.length > 0 ? (
+          <div className="mt-3 grid gap-3 sm:grid-cols-2">
+            {cards.map((s, i) => (
+              <div key={i} className="flex h-full flex-col rounded-2xl border border-line border-t-4 border-t-brand bg-white p-3 shadow-sm">
+                <div className="mb-2 flex items-start gap-2">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand/[0.08] text-brand"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a7 7 0 0 0-4 12.7V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.3A7 7 0 0 0 12 2z" /><path d="M9 21h6M10 18v3M14 18v3" /></svg></span>
+                  <div className="min-w-0"><span className="inline-block rounded-full border border-[#b8ebf0] bg-[#e8f7f8] px-2 py-0.5 text-[10px] font-bold text-ink">{en ? "Service" : "خدمة"}</span><h3 className="mt-1 text-[13px] font-bold leading-5 text-ink">{s.title}</h3></div>
+                </div>
+                {s.desc && <p className="text-[12px] leading-6 text-ink-muted">{s.desc}</p>}
+                {s.features.length > 0 && <ul className="mt-2 space-y-1.5">{s.features.map((f, j) => <li key={j} className="flex items-center gap-2 text-[12px] text-ink-muted"><Check />{f}</li>)}</ul>}
+                <div className="mt-2 flex flex-wrap gap-1.5">{regions.map((r, j) => <span key={j} className="inline-flex items-center gap-1 rounded-full bg-surface px-2 py-0.5 text-[10px] text-ink-muted"><PinSm />{r}</span>)}</div>
+                <div className="mt-2 rounded-xl bg-brand py-2 text-center text-[11px] font-semibold text-white">{en ? "View Details" : "عرض التفاصيل"}</div>
+              </div>
+            ))}
+          </div>
+        ) : <p className="mt-2 text-[11px] text-ink-soft">{en ? "No service cards yet (default services shown on the site)." : "لا توجد كروت خدمات بعد (تظهر الخدمات الافتراضية على الموقع)."}</p>}
+        {svcTags.length > 0 && <div className="mt-3 border-t border-line pt-2"><p className="mb-1.5 text-[10px] text-ink-soft">{en ? "Quick service tags (branch card & PDF):" : "وسوم الخدمات السريعة (بطاقة الفرع وملف الـPDF):"}</p><div className="flex flex-wrap gap-1.5">{svcTags.map((t, i) => <span key={i} className="rounded-full bg-brand/10 px-2.5 py-1 text-[11px] font-medium text-brand-dark">{t}</span>)}</div></div>}
+      </div>
+    );
+  }
+
+  // 2) ما يميّز الفرع — عنوان + بطاقات (أيقونة دائرية + عنوان + وصف)
+  if (has("distinctions")) {
+    const cards = arr("distinctions").map((d) => ({ icon: String(d.icon || ""), title: il(d, "title"), desc: il(d, "desc") })).filter((d) => d.title);
+    return (
+      <div dir={dir} className="rounded-2xl bg-surface p-4 text-center ring-1 ring-line">
+        <h2 className="text-base font-extrabold text-ink">{en ? "What Sets " : "ما يميّز "}<span className="text-brand">{branchName}</span>{en ? " Apart" : ""}</h2>
+        {cards.length > 0 ? (
+          <div className="mt-3 grid gap-3 sm:grid-cols-2">
+            {cards.map((f, i) => (
+              <div key={i} className="rounded-2xl border border-line bg-white p-3 text-center shadow-sm">
+                <span className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-brand/10 text-brand">{CMS_ICONS[f.icon] ?? CMS_ICONS.building ?? CMS_ICONS.star}</span>
+                <h3 className="mt-2 text-[13px] font-bold text-ink">{f.title}</h3>
+                {f.desc && <p className="mt-1 text-[12px] leading-6 text-ink-muted">{f.desc}</p>}
+              </div>
+            ))}
+          </div>
+        ) : <p className="mt-2 text-[11px] text-ink-soft">{en ? "No cards yet (default features shown on the site)." : "لا توجد بطاقات بعد (تظهر المميزات الافتراضية على الموقع)."}</p>}
+      </div>
+    );
+  }
+
+  // 3) قصص النجاح — عنوان + وصف (البطاقات نفسها من صفحة «أبطال عبور»)
+  if (has("success_heading") || has("success_sub")) {
+    const heading = ps("success_heading");
+    const sub = ps("success_sub");
+    return (
+      <div dir={dir} className="rounded-2xl bg-white p-4 text-start ring-1 ring-line">
+        <h2 className="text-base font-extrabold text-ink">{heading ? highlight(heading) : <>{en ? "Success Stories from " : "قصص نجاح من "}<span className="text-brand">{branchName}</span></>}</h2>
+        <p className="mt-1.5 text-[12px] text-ink-muted">{sub || (en ? "Every success story reflects a real journey from challenge to achievement." : "كل قصة نجاح تُعبّر عن رحلة حقيقية من التحدي إلى الإنجاز.")}</p>
+        <div className="mt-3 grid gap-2 sm:grid-cols-3">{[0, 1, 2].map((i) => <div key={i} className="rounded-xl border border-dashed border-line bg-surface/50 p-3 text-center text-[10px] text-ink-soft">{en ? "Story card" : "بطاقة قصة"}</div>)}</div>
+        <p className="mt-2 text-[10px] leading-4 text-ink-soft">ℹ️ {en ? "The story cards themselves are managed from the \"Oboor Heroes\" page." : "بطاقات القصص نفسها تُدار من صفحة «أبطال عبور»."}</p>
+      </div>
+    );
+  }
+
+  // 4) ملف الفرع (PDF) — نبذة + أرقام + رحلة التأهيل + اعتمادات
+  if (has("profile_intro") || has("profile_stats") || has("journey") || has("accreditations")) {
+    const intro = ps("profile_intro");
+    const stats = arr("profile_stats").map((s) => ({ value: String(s.value || ""), label: il(s, "label") })).filter((s) => s.value || s.label);
+    const journey = arr("journey").map((j) => ({ title: il(j, "title"), desc: il(j, "desc") })).filter((j) => j.title || j.desc);
+    const accr = arr("accreditations").map((a) => il(a, "title")).filter(Boolean);
+    return (
+      <div dir={dir} className="space-y-3 rounded-2xl bg-white p-4 text-start ring-1 ring-line">
+        <p className="text-[10px] font-semibold uppercase tracking-wide text-ink-soft">{en ? "Branch profile (PDF)" : "ملف الفرع (PDF)"}</p>
+        {intro && <p className="text-[12px] leading-7 text-ink-muted">{intro}</p>}
+        {stats.length > 0 && <div className="grid grid-cols-4 gap-2 rounded-xl bg-brand-deep p-3 text-center text-white">{stats.map((h, i) => <div key={i}><p className="text-base font-extrabold text-brand" dir="ltr">{h.value}</p><p className="mt-0.5 text-[9px] leading-3 text-white/80">{h.label}</p></div>)}</div>}
+        {journey.length > 0 && <div><h3 className="mb-2 text-[13px] font-bold text-brand-deep">{en ? "The Rehabilitation Journey" : "رحلة التأهيل في الفرع"}</h3><div className="grid gap-2 sm:grid-cols-2">{journey.map((j, i) => <div key={i} className="flex gap-2 rounded-xl border border-line p-2.5"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand text-[11px] font-bold text-white">{i + 1}</span><div><h4 className="text-[12px] font-bold text-ink">{j.title}</h4>{j.desc && <p className="mt-0.5 text-[11px] leading-5 text-ink-muted">{j.desc}</p>}</div></div>)}</div></div>}
+        {accr.length > 0 && <div><h3 className="mb-2 text-[13px] font-bold text-brand-deep">{en ? "Accreditations & Quality" : "الاعتمادات والجودة"}</h3><div className="flex flex-wrap gap-1.5">{accr.map((a, i) => <span key={i} className="rounded-full bg-surface px-3 py-1 text-[11px] font-semibold text-brand-dark ring-1 ring-brand/15">{a}</span>)}</div></div>}
+        {!intro && !stats.length && !journey.length && !accr.length && <PreviewShell dir={dir} empty en={en} />}
+      </div>
+    );
+  }
+
+  // 5) معرض صور الفرع — شبكة صور
+  if (has("gallery")) {
+    const imgs = (Array.isArray(values.gallery) ? (values.gallery as unknown[]) : []).map((x) => String(typeof x === "string" ? x : ((x as Record<string, unknown>)?.image ?? ""))).filter(Boolean).map((s) => (/^(https?:|data:|blob:|\/)/.test(s) ? s : "/" + s.replace(/^\/+/, "")));
+    if (!imgs.length) return <PreviewShell dir={dir} empty en={en} />;
+    return <div dir={dir} className="grid grid-cols-3 gap-2 rounded-xl bg-surface/40 p-3">{imgs.map((s, i) => (/* eslint-disable-next-line @next/next/no-img-element */<img key={i} src={s} alt="" className="h-20 w-full rounded-lg object-cover ring-1 ring-line" />))}</div>;
+  }
+
+  // 6) بيانات الفرع الأساسية (الهيرو) — الاسم + المدينة + التقييم + صفوف معلومات + زرّان
+  const rating = raw("rating");
+  const reviews = raw("reviews_count");
+  const infoRows = [
+    { label: en ? "Phone Number" : "رقم الهاتف", value: raw("phone"), icon: "phone" },
+    { label: en ? "Evening Phone" : "رقم المساء", value: raw("phone_evening"), icon: "phone" },
+    { label: en ? "Email" : "البريد الإلكتروني", value: raw("email"), icon: "mail" },
+    { label: en ? "Branch Manager" : "مدير الفرع", value: en ? (raw("manager_en") || raw("manager")) : raw("manager"), icon: "user" },
+    { label: en ? "Working Hours" : "ساعات العمل", value: ps("hours"), icon: "clock" },
+    { label: en ? "Address" : "العنوان", value: ps("address"), icon: "pin" },
+  ].filter((r) => r.value);
+  const ICON: Record<string, React.ReactNode> = {
+    phone: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z" /></svg>,
+    mail: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="M3 7l9 6 9-6" /></svg>,
+    user: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>,
+    clock: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" strokeLinecap="round" /></svg>,
+    pin: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>,
+  };
+  return (
+    <div dir={dir} className="rounded-2xl bg-gradient-to-b from-[#ebf7f9] to-white p-4 text-start ring-1 ring-line">
+      <h1 className="text-xl font-extrabold text-ink">{ps("name") || branchName}</h1>
+      {ps("city") && <p className="mt-1 text-[13px] text-brand">{en ? `${ps("city")}, Saudi Arabia` : `${ps("city")} ، السعودية`}</p>}
+      {(rating || reviews) && <div className="mt-2 flex items-center gap-2">{reviews && <span className="text-[11px] text-ink-soft">{en ? `(${reviews} reviews)` : `(${reviews} تقييم)`}</span>}{rating && <span className="text-[12px] font-bold text-ink">{rating}</span>}<span className="flex">{Array.from({ length: 5 }).map((_, i) => <svg key={i} width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="text-brand"><polygon points="12 2 15 8.9 22.5 9.3 16.7 14 18.6 21.2 12 17.2 5.4 21.2 7.3 14 1.5 9.3 9 8.9" /></svg>)}</span></div>}
+      {infoRows.length > 0 && <div className="mt-4 space-y-2.5">{infoRows.map((r, i) => <div key={i} className="flex items-center gap-2.5"><span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand/10 text-brand">{ICON[r.icon]}</span><div><p className="text-[10px] text-ink-soft">{r.label}</p><p className="text-[12px] font-semibold text-ink" dir={r.icon === "phone" || r.icon === "mail" ? "ltr" : undefined}>{r.value}</p></div></div>)}</div>}
+      <div className="mt-4 flex flex-col gap-2 sm:flex-row"><span className="flex items-center justify-center gap-1.5 rounded-xl bg-brand px-4 py-2 text-[11px] font-semibold text-white"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" /></svg>{en ? "Download Profile" : "تحميل البروفايل"}</span><span className="flex items-center justify-center gap-1.5 rounded-xl border border-brand px-4 py-2 text-[11px] font-semibold text-brand"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11" /></svg>{en ? "Directions" : "الاتجاهات"}</span></div>
+    </div>
+  );
+}
+
 export function GroupPreview({ type, bases, values, lang }: { type: string; bases: string[]; values: Record<string, unknown>; lang: "ar" | "en" }) {
   const en = lang === "en";
   const dir = en ? "ltr" : "rtl";
@@ -828,6 +960,7 @@ export function GroupPreview({ type, bases, values, lang }: { type: string; base
   if (type === "programs") return <ProgramGroupPreview bases={bases} values={values} lang={lang} />;
   if (type === "services") return <ClinicalGroupPreview bases={bases} values={values} lang={lang} />;
   if (type === "techniques") return <TechniqueGroupPreview bases={bases} values={values} lang={lang} />;
+  if (type === "branches") return <BranchGroupPreview bases={bases} values={values} lang={lang} />;
   // المعاينة تقرأ فيلدز مجموعتها فقط (لا تتسرّب لحقول أقسام تانية)
   const gs = (base: string) => { if (!has(base)) return ""; const v = en ? (values[`${base}_en`] || values[`${base}_ar`]) : values[`${base}_ar`]; return typeof v === "string" ? v : ""; };
   const gl = (base: string): unknown[] => {
