@@ -230,10 +230,39 @@ function AboutHero({ lang, it }: { lang: "ar" | "en"; it: PItem }) {
   );
 }
 
+// ===== كارت «رسالتنا» في عن عبور — كارت غامق بأيقونة هدف + زر =====
+function MissionCard({ lang, it }: { lang: "ar" | "en"; it: PItem }) {
+  const en = lang === "en";
+  return (
+    <div dir={en ? "ltr" : "rtl"} className="rounded-3xl bg-gradient-to-bl from-brand-deep to-[#0a2329] p-5 text-start text-white">
+      <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-brand/20 text-brand"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="5" /><circle cx="12" cy="12" r="1.5" /></svg></span>
+      <p className="mt-3 text-[12px] text-brand">{en ? "Our Mission" : "رسالتنا"}</p>
+      <h4 className="mt-1 text-base font-extrabold">{it.title || "—"}</h4>
+      {it.text && <p className="mt-2 text-[12px] leading-6 text-white/75">{it.text}</p>}
+      <span className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-brand px-4 py-2 text-[12px] font-semibold text-white">{en ? "View Services" : "عرض الخدمات"}</span>
+    </div>
+  );
+}
+
+// ===== كارت «رؤيتنا» في عن عبور — كارت فاتح بأيقونة عين =====
+function VisionCard({ lang, it }: { lang: "ar" | "en"; it: PItem }) {
+  const en = lang === "en";
+  return (
+    <div dir={en ? "ltr" : "rtl"} className="rounded-3xl bg-[#e8f7f9] p-5 text-start">
+      <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-brand shadow-sm"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z" /><circle cx="12" cy="12" r="3" /></svg></span>
+      <p className="mt-3 text-[12px] text-brand-dark">{en ? "Our Vision" : "رؤيتنا"}</p>
+      <h4 className="mt-1 text-base font-extrabold text-ink">{it.title || "—"}</h4>
+      {it.text && <p className="mt-2 text-[12px] leading-6 text-ink-muted">{it.text}</p>}
+    </div>
+  );
+}
+
 // ===== الموزّع على مستوى البلوك: يعرض السكشن كامل بشكله الحقيقي =====
 export function BlockPreview({ block, items, lang, itemKeys, page }: { block: string; items: PItem[]; lang: "ar" | "en"; itemKeys?: string[]; page?: string }) {
   if (!items.length) return null;
   if (block === "hero" && page === "about") return <AboutHero lang={lang} it={items[0]} />;
+  if (block === "mission" && page === "about") return <MissionCard lang={lang} it={items[0]} />;
+  if (block === "vision" && page === "about") return <VisionCard lang={lang} it={items[0]} />;
   if (block === "cta") return page === "about" ? <AboutCta lang={lang} it={items[0]} /> : <CtaCard lang={lang} it={items[0]} />;
   if (block === "categories" || block === "tabs") return <TabsBar lang={lang} items={items} />;
   if (block === "features") return <FeatureGrid lang={lang} items={items} />;
