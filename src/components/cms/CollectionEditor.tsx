@@ -397,8 +397,11 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
   if (loading) return <p className="text-ink-soft">{t("جارٍ التحميل…", "Loading…")}</p>;
 
   const canPreview = !isNew && !readonly && previewHref(type, values) !== null;
+  // اتساع الصفحة: عناصر بمعاينة حيّة تحتاج مساحة أوسع (حقول عربي/إنجليزي + المعاينة جنبها)
+  const wide = LIVE_PREVIEW_TYPES.has(type);
+  const widthClass = wide ? "max-w-7xl" : "max-w-4xl";
   return (
-    <div className="mx-auto max-w-4xl space-y-6 pb-24">
+    <div className={`mx-auto ${widthClass} space-y-6 pb-24`}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <Link href={`/cms/content/${type}`} className="text-xs font-semibold text-brand hover:text-brand-dark">← {label}</Link>
@@ -475,7 +478,7 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
             <div key={gi} className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-line sm:p-8">
               {header}
               {showPreview ? (
-                <div className="lg:grid lg:grid-cols-2 lg:gap-6 lg:items-start">
+                <div className="lg:grid lg:grid-cols-[minmax(0,1.75fr)_minmax(0,1fr)] lg:gap-8 lg:items-start">
                   <div className="space-y-7">{g.rows.map(renderRow)}</div>
                   <div className="mt-6 lg:mt-0 lg:sticky lg:top-4">
                     <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-ink-soft">{t("كما يظهر في الموقع", "As shown on the site")}</p>
@@ -492,7 +495,7 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
 
       {/* شريط الحفظ */}
       <div className="fixed bottom-0 left-0 right-0 z-20 border-t border-line bg-white/95 px-6 py-3 backdrop-blur lg:right-72">
-        <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-3">
+        <div className={`mx-auto flex ${widthClass} flex-wrap items-center justify-between gap-3`}>
           <div className="flex items-center gap-3">
             <span className="text-sm font-semibold text-emerald-600">{ok}</span>
             {dirty && !ok && <span className="text-sm font-semibold text-amber-600">{t("• تعديلات غير محفوظة", "• Unsaved changes")}</span>}
