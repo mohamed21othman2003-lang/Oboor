@@ -132,7 +132,7 @@ function GalleryGrid({ items }: { items: PItem[] }) {
     <div className="grid grid-cols-3 gap-2 rounded-xl bg-surface/40 p-3">
       {imgs.map((it, i) => (
         // eslint-disable-next-line @next/next/no-img-element
-        <img key={i} src={it.image} alt="" className="h-24 w-full rounded-lg object-cover ring-1 ring-line" />
+        <img key={i} src={it.image} alt="" className="h-24 w-full rounded-lg object-contain bg-surface ring-1 ring-line" />
       ))}
     </div>
   );
@@ -166,7 +166,7 @@ function HeadingCard({ lang, it, itemKey }: { lang: "ar" | "en"; it: PItem; item
         <div>{eyebrow}{heading}{paras}</div>
         <div className="relative">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={it.image} alt="" className="h-44 w-full rounded-2xl object-cover" />
+          <img src={it.image} alt="" className="h-44 w-full rounded-2xl object-contain bg-surface" />
           {it.badges.map((bd, i) => (
             <span key={i} className={`absolute rounded-xl bg-white/95 px-2 py-1 text-[10px] font-semibold shadow-sm ${i === 0 ? "end-2 top-2" : "start-2 bottom-2"}`}>{bd.value && <span className="text-brand">{bd.value} </span>}{bd.label}</span>
           ))}
@@ -217,7 +217,7 @@ function AboutHero({ lang, it }: { lang: "ar" | "en"; it: PItem }) {
       </div>
       <div className="relative">
         {it.image
-          ? (/* eslint-disable-next-line @next/next/no-img-element */ <img src={it.image} alt="" className="h-44 w-full rounded-2xl object-cover" />)
+          ? (/* eslint-disable-next-line @next/next/no-img-element */ <img src={it.image} alt="" className="h-44 w-full rounded-2xl object-contain bg-surface" />)
           : <div className="h-44 w-full rounded-2xl bg-brand/20" />}
         {it.badges.map((bd, i) => (
           <span key={i} className={`absolute rounded-xl bg-white px-2.5 py-1.5 text-[10px] shadow ${i === 0 ? "end-2 top-2" : "start-2 top-1/2"}`}>
@@ -278,7 +278,7 @@ function AboutPrograms({ lang, items, itemKeys }: { lang: "ar" | "en"; items: PI
           ))}
         </div>
       )}
-      {head?.image && (/* eslint-disable-next-line @next/next/no-img-element */ <img src={head.image} alt="" className="mt-3 h-32 w-full rounded-2xl object-cover" />)}
+      {head?.image && (/* eslint-disable-next-line @next/next/no-img-element */ <img src={head.image} alt="" className="mt-3 h-32 w-full rounded-2xl object-contain bg-surface" />)}
     </div>
   );
 }
@@ -342,7 +342,7 @@ export function GroupPreview({ bases, values, lang }: { type: string; bases: str
     if (listBase === "gallery") {
       const imgs = items.map((x) => String(typeof x === "string" ? x : ((x as Record<string, unknown>)?.image ?? ""))).filter(Boolean).map((s) => (/^(https?:|\/)/.test(s) ? s : "/" + s.replace(/^\/+/, "")));
       if (!imgs.length) return <PreviewShell dir={dir} empty en={en} />;
-      return <div className="grid grid-cols-3 gap-2 rounded-xl bg-surface/40 p-3">{imgs.map((s, i) => (/* eslint-disable-next-line @next/next/no-img-element */<img key={i} src={s} alt="" className="h-20 w-full rounded-lg object-cover ring-1 ring-line" />))}</div>;
+      return <div className="grid grid-cols-3 gap-2 rounded-xl bg-surface/40 p-3">{imgs.map((s, i) => (/* eslint-disable-next-line @next/next/no-img-element */<img key={i} src={s} alt="" className="h-20 w-full rounded-lg object-contain bg-surface ring-1 ring-line" />))}</div>;
     }
     const objCards = items.length > 0 && typeof items[0] === "object" && (("title_ar" in (items[0] as object)) || ("desc_ar" in (items[0] as object)) || ("icon" in (items[0] as object)));
     if (objCards) {
@@ -398,7 +398,7 @@ export function GroupPreview({ bases, values, lang }: { type: string; bases: str
     return (
       <div dir={dir} className="overflow-hidden rounded-2xl border border-line bg-white shadow-sm">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={img} alt="" className="h-36 w-full object-cover" />
+        <img src={img} alt="" className="h-36 w-full object-contain bg-surface" />
         <div className="p-4 text-start"><h4 className="text-base font-bold text-ink">{highlight(title)}</h4>{sub && <p className="mt-1 text-[12px] leading-6 text-ink-muted">{sub}</p>}</div>
       </div>
     );
@@ -437,7 +437,7 @@ export function ItemPreview({ values, lang }: { type: string; values: Record<str
       {img && (
         <div className="relative h-40 w-full bg-surface">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={img} alt="" className="h-full w-full object-cover" />
+          <img src={img} alt="" className="h-full w-full object-contain bg-surface" />
         </div>
       )}
       <div className="p-4 text-start">
