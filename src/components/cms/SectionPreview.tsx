@@ -283,9 +283,29 @@ function AboutPrograms({ lang, items, itemKeys }: { lang: "ar" | "en"; items: PI
   );
 }
 
+// ===== عناوين أقسام الأخبار (overview) — ترويسة + أيقونة شرارة + عنوان + وصف + «عرض الكل» =====
+function OverviewHeads({ lang, items }: { lang: "ar" | "en"; items: PItem[] }) {
+  const en = lang === "en";
+  return (
+    <div dir={en ? "ltr" : "rtl"} className="space-y-4 rounded-xl bg-white p-4 text-start shadow-sm ring-1 ring-line">
+      {items.map((it, i) => (
+        <div key={i} className="flex flex-wrap items-end justify-between gap-2 border-b border-line pb-3 last:border-0 last:pb-0">
+          <div>
+            {it.tagline && <span className="inline-flex items-center gap-1.5 text-[12px] font-bold text-brand">{it.tagline}<span className="flex h-5 w-5 items-center justify-center rounded-md bg-brand/10"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.2 6.6L21 11l-6.8 2.4L12 20l-2.2-6.6L3 11l6.8-2.4z" /></svg></span></span>}
+            <h4 className="mt-1 text-base font-extrabold text-ink">{it.title || "—"}</h4>
+            {it.text && <p className="mt-1 text-[11px] leading-5 text-ink-muted">{it.text}</p>}
+          </div>
+          <span className="flex items-center gap-1 whitespace-nowrap text-[11px] font-semibold text-brand">{en ? "View All" : "عرض الكل"} ›</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // ===== الموزّع على مستوى البلوك: يعرض السكشن كامل بشكله الحقيقي =====
 export function BlockPreview({ block, items, lang, itemKeys, page }: { block: string; items: PItem[]; lang: "ar" | "en"; itemKeys?: string[]; page?: string }) {
   if (!items.length) return null;
+  if (block === "overview" && page === "news") return <OverviewHeads lang={lang} items={items} />;
   if (block === "hero" && page === "about") return <AboutHero lang={lang} it={items[0]} />;
   if (block === "mission" && page === "about") return <MissionCard lang={lang} it={items[0]} />;
   if (block === "vision" && page === "about") return <VisionCard lang={lang} it={items[0]} />;
