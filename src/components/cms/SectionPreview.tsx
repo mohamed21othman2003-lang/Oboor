@@ -1,6 +1,7 @@
 "use client";
 
 import { CMS_ICONS } from "@/lib/cms/icons";
+import { distinctIcons, iconByKey } from "@/lib/areaIcon";
 
 // معاينات حيّة لأقسام الصفحة داخل الـCMS — تعرض السكشن «كما يظهر على الموقع» بشكله
 // الحقيقي (كل العناصر مع بعض)، وتتحدّث لحظياً مع كل حرف قبل الحفظ.
@@ -443,19 +444,21 @@ function ProgramGroupPreview({ bases, values, lang }: { bases: string[]; values:
   // 5) مجالات التدريب — عنوان + بطاقات (أيقونة + رقم + عنوان + وصف)
   if (has("training_areas")) {
     const areas = pl("training_areas");
+    const areaTitles = areas.map((a) => (en ? String(a.title_en || a.title || "") : String(a.title_ar || a.title || "")));
+    const autoIcons = distinctIcons(areaTitles);
     return (
       <div dir={dir} className="rounded-2xl bg-white p-4 text-start shadow-sm ring-1 ring-line">
         <h2 className="text-base font-extrabold text-ink">{en ? "Training " : "مجالات "}<span className="text-brand">{en ? "Areas" : "التدريب"}</span></h2>
         {ps("training_intro") && <p className="mt-1.5 text-[12px] text-ink-muted">{ps("training_intro")}</p>}
         <div className="mt-3 grid gap-3 sm:grid-cols-2">
-          {areas.length ? areas.map((a, i) => { const title = en ? String(a.title_en || a.title || "") : String(a.title_ar || a.title || ""); const desc = en ? String(a.desc_en || a.desc || "") : String(a.desc_ar || a.desc || ""); const icon = String(a.icon || ""); return (
+          {areas.length ? areas.map((a, i) => { const desc = en ? String(a.desc_en || a.desc || "") : String(a.desc_ar || a.desc || ""); const icon = String(a.icon || ""); return (
             <div key={i} className="rounded-2xl border border-line bg-white p-3 shadow-sm">
               <div className="flex items-start gap-2">
                 <div className="flex shrink-0 flex-col items-center gap-0.5">
-                  <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand/10 text-brand">{CMS_ICONS[icon] ?? CMS_ICONS.star}</span>
+                  <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand/10 text-brand">{icon ? iconByKey(icon) : autoIcons[i]}</span>
                   <span className="text-[10px] font-semibold text-ink-soft">{String(i + 1).padStart(2, "0")}</span>
                 </div>
-                <h3 className="flex-1 text-[13px] font-bold leading-6 text-ink">{title || "—"}</h3>
+                <h3 className="flex-1 text-[13px] font-bold leading-6 text-ink">{areaTitles[i] || "—"}</h3>
               </div>
               {desc && <p className="mt-2 text-[12px] leading-6 text-ink-muted">{desc}</p>}
             </div>
@@ -582,18 +585,22 @@ function ClinicalBlockMini({ b, en }: { b: Record<string, unknown>; en: boolean 
     );
   }
   if (kind === "areas") {
+    const titles = items.map((a) => (en ? String(a.title_en || a.title || "") : String(a.title_ar || a.title || "")));
+    const autoIcons = distinctIcons(titles);
     return (
       <div className="rounded-2xl bg-white p-4 text-start ring-1 ring-line">
         <SplitHeading text={heading} cls="text-base" />
         {intro && <p className="mt-1.5 text-[12px] text-ink-muted">{intro}</p>}
-        <div className="mt-3 grid gap-3 sm:grid-cols-2">{items.map((a, i) => { const title = en ? String(a.title_en || a.title || "") : String(a.title_ar || a.title || ""); const desc = en ? String(a.desc_en || a.desc || "") : String(a.desc_ar || a.desc || ""); const icon = String(a.icon || ""); return (
-          <div key={i} className="rounded-2xl border border-line bg-white p-3 shadow-sm"><div className="flex items-start gap-2"><div className="flex shrink-0 flex-col items-center gap-0.5"><span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand/10 text-brand">{CMS_ICONS[icon] ?? CMS_ICONS.star}</span><span className="text-[10px] font-semibold text-ink-soft">{String(i + 1).padStart(2, "0")}</span></div><h3 className="flex-1 text-[13px] font-bold leading-6 text-ink">{title || "—"}</h3></div>{desc && <p className="mt-2 text-[12px] leading-6 text-ink-muted">{desc}</p>}</div>
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">{items.map((a, i) => { const desc = en ? String(a.desc_en || a.desc || "") : String(a.desc_ar || a.desc || ""); const icon = String(a.icon || ""); return (
+          <div key={i} className="rounded-2xl border border-line bg-white p-3 shadow-sm"><div className="flex items-start gap-2"><div className="flex shrink-0 flex-col items-center gap-0.5"><span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand/10 text-brand">{icon ? iconByKey(icon) : autoIcons[i]}</span><span className="text-[10px] font-semibold text-ink-soft">{String(i + 1).padStart(2, "0")}</span></div><h3 className="flex-1 text-[13px] font-bold leading-6 text-ink">{titles[i] || "—"}</h3></div>{desc && <p className="mt-2 text-[12px] leading-6 text-ink-muted">{desc}</p>}</div>
         ); })}</div>
       </div>
     );
   }
   // cards (light or dark)
   const cols = Number(b.cols || 0);
+  const cardTitles = items.map((it) => (en ? String(it.title_en || it.title || "") : String(it.title_ar || it.title || "")));
+  const cardAutoIcons = distinctIcons(cardTitles);
   return (
     <div className={`rounded-2xl p-4 ${dark ? `${DARK_SECT} text-white` : "bg-white ring-1 ring-line"}`}>
       <div className={dark ? "text-center" : "text-center"}>
@@ -601,7 +608,7 @@ function ClinicalBlockMini({ b, en }: { b: Record<string, unknown>; en: boolean 
         {intro && <p className={`mx-auto mt-2 max-w-md text-[12px] leading-7 ${dark ? "text-white/70" : "text-ink-muted"}`}>{intro}</p>}
       </div>
       <div className={`mt-3 grid gap-3 ${cols >= 3 ? "sm:grid-cols-2 lg:grid-cols-3" : "sm:grid-cols-2"}`}>{items.map((it, i) => {
-        const title = en ? String(it.title_en || it.title || "") : String(it.title_ar || it.title || "");
+        const title = cardTitles[i];
         const sub = en ? String(it.sub_en || it.sub || "") : String(it.sub_ar || it.sub || "");
         const desc = en ? String(it.desc_en || it.desc || "") : String(it.desc_ar || it.desc || "");
         const bullets = Array.isArray(it.bullets) ? (it.bullets as string[]) : (Array.isArray(it.bullets_ar) ? (it.bullets_ar as string[]) : []);
@@ -609,8 +616,9 @@ function ClinicalBlockMini({ b, en }: { b: Record<string, unknown>; en: boolean 
         if (dark) return (
           <div key={i} className={`rounded-2xl ${DARK_CARD} p-3 text-start`}><h3 className="text-sm font-bold text-white">{title}{sub && <span className="ms-1 text-[11px] font-medium text-brand"> {sub}</span>}</h3>{desc && <p className="mt-1.5 text-[12px] leading-6 text-white/75">{desc}</p>}{bullets.length > 0 && <ul className="mt-2 space-y-1.5">{bullets.map((bl, j) => <li key={j} className="flex items-start gap-2 text-[12px] leading-6 text-white/75"><span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand" />{bl}</li>)}</ul>}{tags.length > 0 && <div className="mt-2 flex flex-wrap gap-1.5">{tags.map((t, j) => <span key={j} className="rounded-full bg-brand/20 px-2.5 py-1 text-[11px] font-medium text-[#7ee8f0]">{t}</span>)}</div>}</div>
         );
+        const icon = String(it.icon || "");
         return (
-          <div key={i} className="rounded-2xl border border-line bg-white p-3 text-start shadow-sm"><div className="mb-2 flex items-center gap-2"><span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand/10 text-brand">{CMS_ICONS[String(it.icon || "")] ?? CMS_ICONS.star}</span><h3 className="text-[13px] font-bold text-ink">{title}</h3></div>{desc && <p className="text-[12px] leading-6 text-ink-muted">{desc}</p>}</div>
+          <div key={i} className="rounded-2xl border border-line bg-white p-3 text-start shadow-sm"><div className="mb-2 flex items-center gap-2"><span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand/10 text-brand">{icon ? iconByKey(icon) : cardAutoIcons[i]}</span><h3 className="text-[13px] font-bold text-ink">{title}</h3></div>{desc && <p className="text-[12px] leading-6 text-ink-muted">{desc}</p>}</div>
         );
       })}</div>
     </div>
