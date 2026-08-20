@@ -484,16 +484,26 @@ function ProgramGroupPreview({ bases, values, lang }: { bases: string[]; values:
     const badge = ps("cta_badge") || (en ? "Customer service available around the clock" : "خدمة العملاء متاحة على مدار الساعة");
     const title = ps("cta_title") || (en ? `Would you like to enroll in ${progTitle}?` : `هل ترغب في التسجيل ب${progTitle} ؟`);
     const sub = ps("cta_text") || (en ? "Contact us and we will help you choose the program best suited to your child's needs." : "يمكنك التواصل معنا لمساعدتك في اختيار البرنامج أو الخدمة الأنسب وفق احتياجات طفلك.");
+    // كل الحقول فارغة ⇐ النص المعروض افتراضي (مولّد تلقائياً)، لتنبيه المحرّر أنّ الحقول فارغة عن قصد
+    const usingDefault = !ps("cta_title") && !ps("cta_text") && !ps("cta_badge");
     return (
-      <div dir={dir} className="overflow-hidden rounded-2xl bg-gradient-to-br from-[#0e4048] via-[#1a6c75] to-[#0e4048] p-5 text-center">
-        <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-[11px] font-medium text-white/90"><span className="h-2 w-2 rounded-full bg-success" />{badge}</span>
-        <h2 className="mt-3 text-base font-extrabold leading-snug text-white">{highlight(title, "text-brand")}</h2>
-        <p className="mx-auto mt-2 max-w-md text-[12px] text-white/75">{sub}</p>
-        <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
-          <span className="rounded-xl bg-brand px-3 py-2 text-[11px] font-semibold text-white">{en ? "Apply Now" : "طلب التحاق"}</span>
-          <span className="rounded-xl bg-[#2ba73e] px-3 py-2 text-[11px] font-semibold text-white">{en ? "WhatsApp" : "واتساب"}</span>
-          <span className="rounded-xl bg-white px-3 py-2 text-[11px] font-semibold text-ink">{en ? "Nearest Branch" : "أقرب فرع"}</span>
+      <div dir={dir}>
+        <div className="overflow-hidden rounded-2xl bg-gradient-to-br from-[#0e4048] via-[#1a6c75] to-[#0e4048] p-5 text-center">
+          <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-[11px] font-medium text-white/90"><span className="h-2 w-2 rounded-full bg-success" />{badge}</span>
+          <h2 className="mt-3 text-base font-extrabold leading-snug text-white">{highlight(title, "text-brand")}</h2>
+          <p className="mx-auto mt-2 max-w-md text-[12px] text-white/75">{sub}</p>
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+            <span className="rounded-xl bg-brand px-3 py-2 text-[11px] font-semibold text-white">{en ? "Apply Now" : "طلب التحاق"}</span>
+            <span className="rounded-xl bg-[#2ba73e] px-3 py-2 text-[11px] font-semibold text-white">{en ? "WhatsApp" : "واتساب"}</span>
+            <span className="rounded-xl bg-white px-3 py-2 text-[11px] font-semibold text-ink">{en ? "Nearest Branch" : "أقرب فرع"}</span>
+          </div>
         </div>
+        {usingDefault && (
+          <p className="mt-2 flex items-center gap-1.5 rounded-lg bg-amber-50 px-3 py-2 text-[11px] leading-5 text-amber-700 ring-1 ring-amber-200">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><circle cx="12" cy="12" r="10" /><path d="M12 8h.01M11 12h1v4h1" /></svg>
+            {en ? "This is the default text (the fields are empty). Fill the fields to override it." : "هذا هو النص الافتراضي (الحقول فارغة). املأ الحقول لتخصيصه واستبداله."}
+          </p>
+        )}
       </div>
     );
   }
