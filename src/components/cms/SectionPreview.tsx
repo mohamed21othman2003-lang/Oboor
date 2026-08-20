@@ -257,12 +257,39 @@ function VisionCard({ lang, it }: { lang: "ar" | "en"; it: PItem }) {
   );
 }
 
+// ===== قسم «نبذة عن البرامج» في عن عبور — عنوان + كروت (أيقونة + عنوان + وصف) =====
+function AboutPrograms({ lang, items, itemKeys }: { lang: "ar" | "en"; items: PItem[]; itemKeys?: string[] }) {
+  const en = lang === "en";
+  const headIdx = (itemKeys ?? []).findIndex((k) => k === "about-programs" || !/prog/.test(k));
+  const hi = headIdx < 0 ? 0 : headIdx;
+  const head = items[hi];
+  const cards = items.filter((_, i) => i !== hi);
+  return (
+    <div dir={en ? "ltr" : "rtl"} className="rounded-xl bg-white p-4 text-start shadow-sm ring-1 ring-line">
+      {head?.title && <h4 className="text-lg font-extrabold text-ink">{highlight(head.title)}</h4>}
+      {head?.text && <p className="mt-1 text-[12px] leading-6 text-ink-muted">{head.text}</p>}
+      {cards.length > 0 && (
+        <div className="mt-3 grid gap-2 sm:grid-cols-2">
+          {cards.map((c, i) => (
+            <div key={i} className="flex items-start gap-2 rounded-2xl border border-line bg-white p-3 shadow-sm">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand/10 text-brand">{CMS_ICONS[c.icon] ?? CMS_ICONS.heart}</span>
+              <div><h5 className="text-[13px] font-bold text-ink">{c.title || "—"}</h5>{c.text && <p className="mt-0.5 text-[11px] leading-5 text-ink-muted">{c.text}</p>}</div>
+            </div>
+          ))}
+        </div>
+      )}
+      {head?.image && (/* eslint-disable-next-line @next/next/no-img-element */ <img src={head.image} alt="" className="mt-3 h-32 w-full rounded-2xl object-cover" />)}
+    </div>
+  );
+}
+
 // ===== الموزّع على مستوى البلوك: يعرض السكشن كامل بشكله الحقيقي =====
 export function BlockPreview({ block, items, lang, itemKeys, page }: { block: string; items: PItem[]; lang: "ar" | "en"; itemKeys?: string[]; page?: string }) {
   if (!items.length) return null;
   if (block === "hero" && page === "about") return <AboutHero lang={lang} it={items[0]} />;
   if (block === "mission" && page === "about") return <MissionCard lang={lang} it={items[0]} />;
   if (block === "vision" && page === "about") return <VisionCard lang={lang} it={items[0]} />;
+  if (block === "programs" && page === "about") return <AboutPrograms lang={lang} items={items} itemKeys={itemKeys} />;
   if (block === "cta") return page === "about" ? <AboutCta lang={lang} it={items[0]} /> : <CtaCard lang={lang} it={items[0]} />;
   if (block === "categories" || block === "tabs") return <TabsBar lang={lang} items={items} />;
   if (block === "features") return <FeatureGrid lang={lang} items={items} />;
