@@ -709,17 +709,22 @@ const FIELD_SECTIONS: Record<string, { title: string; title_en: string; bases: s
       note: "قسم التواصل أسفل صفحة هذه الخدمة — خاص بها وحدها. اتركه فارغاً لاستخدام النص الافتراضي.", note_en: "The contact section at the bottom of this service's page — unique to it. Leave empty for the default text.", preview: "/services/{slug}" },
   ],
   techniques: [
-    { title: "أعلى الصفحة (الهيرو)", title_en: "Top of page (Hero)", bases: ["title", "badge", "image", "image_file"] },
-    { title: "نبذة عن التقنية", title_en: "About the technique", bases: ["about"] },
-    { title: "الفئات المستهدفة", title_en: "Target groups", bases: ["targets"] },
-    { title: "ما تقدّمه التقنية", title_en: "What the technique offers", bases: ["offers", "offer_icons"] },
-    { title: "قسم «كيف تساعد التقنية»", title_en: "\"How the technique helps\" section", bases: ["help_section"] },
+    { title: "أعلى الصفحة (الهيرو)", title_en: "Top of page (Hero)", bases: ["title", "badge", "image", "image_file"],
+      note: "الصورة + بادج التوفّر + اسم التقنية، في أعلى الصفحة.", note_en: "Image + availability badge + technique name, at the top of the page.", preview: "/techniques/{slug}" },
+    { title: "نبذة عن التقنية", title_en: "About the technique", bases: ["about"],
+      note: "فقرات النبذة بجانب الصورة في أعلى الصفحة.", note_en: "The About paragraphs beside the image at the top of the page.", preview: "/techniques/{slug}" },
+    { title: "الفئات المستهدفة", title_en: "Target groups", bases: ["targets"],
+      note: "وسوم الفئات المستهدفة أسفل النبذة.", note_en: "The target-group tags below the About text.", preview: "/techniques/{slug}" },
+    { title: "ما تقدّمه التقنية", title_en: "What the technique offers", bases: ["offers", "offer_icons"],
+      note: "بطاقات «ماذا تقدّم التقنية» (أيقونة + عنوان).", note_en: "The \"What the technique offers\" cards (icon + title).", preview: "/techniques/{slug}" },
+    { title: "قسم «كيف تساعد التقنية»", title_en: "\"How the technique helps\" section", bases: ["help_section"],
+      note: "بطاقتا الفوائد والقيمة بقوائم تحقّق.", note_en: "The benefits and value cards with checklists.", preview: "/techniques/{slug}" },
     { title: "قسم التواصل السفلي (CTA)", title_en: "Bottom contact section (CTA)", bases: ["cta_badge", "cta_title", "cta_text"],
       note: "قسم التواصل أسفل صفحة هذه التقنية — خاص بها وحدها. اتركه فارغاً لاستخدام النص الافتراضي.", note_en: "The contact section at the bottom of this technique's page — unique to it. Leave empty for the default text.", preview: "/techniques/{slug}" },
   ],
 };
 // أنواع العناصر التي تعرض معاينة حيّة بجوار الحقول (كما في الموقع)
-const LIVE_PREVIEW_TYPES = new Set(["news", "programs", "services"]);
+const LIVE_PREVIEW_TYPES = new Set(["news", "programs", "services", "techniques"]);
 // حقول تقنية/اختيارية تُخفى إن كانت فارغة (تقليل التشويش لمن لا يحتاجها)
 // تشمل حقول البرامج الشرطية (قائمة الفئة المستهدفة + المحطات التطبيقية):
 // تظهر فقط في البرامج التي تستخدمها فعلاً على الصفحة، وتختفي في غيرها.

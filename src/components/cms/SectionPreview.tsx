@@ -698,6 +698,128 @@ function ClinicalGroupPreview({ bases, values, lang }: { bases: string[]; values
   return <PreviewShell dir={dir} empty en={en} />;
 }
 
+// ===== معاينة أقسام صفحة التقنية (مطابقة لـ /techniques/[slug]) =====
+function TechniqueGroupPreview({ bases, values, lang }: { bases: string[]; values: Record<string, unknown>; lang: "ar" | "en" }) {
+  const en = lang === "en";
+  const dir = en ? "ltr" : "rtl";
+  const has = (b: string) => bases.includes(b);
+  const ps = (base: string) => { const v = en ? (values[`${base}_en`] || values[`${base}_ar`]) : values[`${base}_ar`]; return typeof v === "string" ? v : ""; };
+  const pl = (base: string): unknown[] => { const e = values[`${base}_en`], a = values[`${base}_ar`]; const v = en ? ((Array.isArray(e) && e.length) ? e : a) : a; return Array.isArray(v) ? v : []; };
+  const strs = (base: string) => pl(base).map((x) => (typeof x === "string" ? x : String((x as Record<string, unknown>)?.text ?? ""))).filter(Boolean);
+  const pobj = (base: string): Record<string, unknown> | null => { const e = values[`${base}_en`], a = values[`${base}_ar`]; const v = (en && e) ? e : a; return v && typeof v === "object" && !Array.isArray(v) ? (v as Record<string, unknown>) : null; };
+  const techTitle = ps("title") || (en ? "Technique name" : "اسم التقنية");
+  const rawImg = String(values.image_file || values.image || "");
+  const img = rawImg ? (/^(https?:|data:|blob:|\/)/.test(rawImg) ? rawImg : "/" + rawImg.replace(/^\/+/, "")) : "";
+  const Check = () => <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="mt-0.5 shrink-0 text-brand"><circle cx="12" cy="12" r="9" /><path d="M8.5 12l2.2 2.2L15.5 9.5" strokeLinecap="round" strokeLinejoin="round" /></svg>;
+
+  // ماذا تقدّم التقنية — عنوان + بطاقات متدرّجة (أيقونة + عنوان)
+  if (has("offers")) {
+    const offers = strs("offers");
+    const iconKeys = (Array.isArray(values.offer_icons) ? (values.offer_icons as string[]) : []);
+    const icons = iconKeys.length ? iconKeys.map((k) => iconByKey(k)) : distinctIcons(offers);
+    return (
+      <div dir={dir} className="rounded-2xl bg-white p-4 text-center ring-1 ring-line">
+        <h2 className="text-base font-extrabold text-ink">{en ? "What " : "ماذا يقدم "}<span className="text-brand">{techTitle}</span>{en ? " offers" : ""}</h2>
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+          {offers.length ? offers.map((o, i) => (
+            <div key={i} className="flex flex-col items-center gap-2 rounded-2xl bg-gradient-to-bl from-brand to-brand-deep p-4 text-center shadow-md">
+              <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/15 text-white">{icons[i] ?? CMS_ICONS.star}</span>
+              <p className="text-[13px] font-bold text-white">{o}</p>
+            </div>
+          )) : <p className="text-[11px] text-ink-soft">{en ? "No items yet" : "لا توجد عناصر بعد"}</p>}
+        </div>
+      </div>
+    );
+  }
+
+  // قسم «كيف تساعد التقنية» — عنوان + بطاقتان (فوائد + قيمة) بقوائم تحقّق
+  if (has("help_section")) {
+    const hs = pobj("help_section");
+    if (!hs) return <PreviewShell dir={dir} empty en={en} />;
+    const gtitle = String(hs.title || "");
+    const benefitsHeading = String(hs.benefitsHeading || "");
+    const valueHeading = String(hs.valueHeading || "");
+    const benefits = Array.isArray(hs.benefits) ? (hs.benefits as string[]) : [];
+    const vals = Array.isArray(hs.values) ? (hs.values as string[]) : [];
+    return (
+      <div dir={dir} className="rounded-2xl bg-white p-4 ring-1 ring-line">
+        {gtitle && <h2 className="mb-3 text-center text-base font-extrabold text-ink">{highlight(gtitle.replace(techTitle, `**${techTitle}**`))}</h2>}
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div className="rounded-2xl border border-line bg-white p-3 text-start shadow-sm">
+            {benefitsHeading && <h3 className="mb-2 border-b border-line pb-2 text-[13px] font-bold text-ink">{benefitsHeading}</h3>}
+            <ul className="space-y-1.5">{benefits.map((it, i) => <li key={i} className="flex items-start gap-2 text-[12px] leading-6 text-ink-muted"><Check />{it}</li>)}</ul>
+          </div>
+          <div className="rounded-2xl border border-line bg-white p-3 text-start shadow-sm">
+            {valueHeading && <h3 className="mb-2 border-b border-line pb-2 text-[13px] font-bold text-ink">{valueHeading}</h3>}
+            <ul className="space-y-1.5">{vals.map((it, i) => <li key={i} className="flex items-start gap-2 text-[12px] leading-6 text-ink-muted"><Check />{it}</li>)}</ul>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // CTA — نفس النمط مع الافتراضي الخاص بالتقنيات
+  if (has("cta_title") || has("cta_text") || has("cta_badge")) {
+    const badge = ps("cta_badge") || (en ? "Customer service available around the clock" : "خدمة العملاء متاحة على مدار الساعة");
+    const title = ps("cta_title") || (en ? "Would you like to enroll your child in this technology?" : "هل ترغب في تسجيل طفلك في هذه التقنية ؟");
+    const sub = ps("cta_text") || (en ? "You can reach out to us for help choosing the program, service, or technology best suited to your child's needs." : "يمكنك التواصل معنا لمساعدتك في اختيار البرنامج أو الخدمة أو التقنية الأنسب وفق احتياجات طفلك.");
+    const usingDefault = !ps("cta_title") && !ps("cta_text") && !ps("cta_badge");
+    return (
+      <div dir={dir}>
+        <div className="overflow-hidden rounded-2xl bg-gradient-to-br from-[#0e4048] via-[#1a6c75] to-[#0e4048] p-5 text-center">
+          <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-[11px] font-medium text-white/90"><span className="h-2 w-2 rounded-full bg-success" />{badge}</span>
+          <h2 className="mt-3 text-base font-extrabold leading-snug text-white">{highlight(title, "text-brand")}</h2>
+          <p className="mx-auto mt-2 max-w-md text-[12px] text-white/75">{sub}</p>
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-2"><span className="rounded-xl bg-brand px-3 py-2 text-[11px] font-semibold text-white">{en ? "Apply Now" : "طلب التحاق"}</span><span className="rounded-xl bg-[#2ba73e] px-3 py-2 text-[11px] font-semibold text-white">{en ? "WhatsApp" : "واتساب"}</span><span className="rounded-xl bg-white px-3 py-2 text-[11px] font-semibold text-ink">{en ? "Nearest Branch" : "أقرب فرع"}</span></div>
+        </div>
+        {usingDefault && <p className="mt-2 flex items-center gap-1.5 rounded-lg bg-amber-50 px-3 py-2 text-[11px] leading-5 text-amber-700 ring-1 ring-amber-200"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><circle cx="12" cy="12" r="10" /><path d="M12 8h.01M11 12h1v4h1" /></svg>{en ? "This is the default text (the fields are empty). Fill the fields to override it." : "هذا هو النص الافتراضي (الحقول فارغة). املأ الحقول لتخصيصه واستبداله."}</p>}
+      </div>
+    );
+  }
+
+  // الفئات المستهدفة — وسوم بحدود تركوازية ونقطة
+  if (has("targets")) {
+    const targets = strs("targets");
+    return (
+      <div dir={dir} className="rounded-2xl bg-white p-4 text-start ring-1 ring-line">
+        <h2 className="mb-2 text-[13px] font-bold text-ink">{en ? "Target Groups" : "الفئات المستهدفة"}</h2>
+        <div className="flex flex-wrap gap-2">
+          {targets.length ? targets.map((tg, i) => <span key={i} className="inline-flex items-center gap-2 rounded-full border border-brand/30 bg-brand/5 px-3 py-1.5 text-[11px] font-medium text-brand-dark"><span className="h-1.5 w-1.5 rounded-full bg-brand" />{tg}</span>) : <p className="text-[11px] text-ink-soft">{en ? "No groups yet" : "لا توجد فئات بعد"}</p>}
+        </div>
+      </div>
+    );
+  }
+
+  // نبذة عن التقنية — فقرات
+  if (has("about")) {
+    const paras = strs("about");
+    return (
+      <div dir={dir} className="rounded-2xl bg-white p-4 text-start ring-1 ring-line">
+        {paras.length ? paras.map((p, i) => <p key={i} className="text-[12px] leading-7 text-ink-muted [&:not(:first-child)]:mt-2">{p}</p>) : <p className="text-[11px] text-ink-soft">{en ? "No paragraphs yet" : "لا توجد فقرات بعد"}</p>}
+      </div>
+    );
+  }
+
+  // الهيرو — صورة + بادج التوفّر + عنوان التقنية (تركوازي)
+  if (has("title") || has("badge")) {
+    const badge = ps("badge");
+    const available = en ? !badge.toLowerCase().includes("not") : (badge.includes("متوفر") && !badge.includes("غير"));
+    return (
+      <div dir={dir} className="grid gap-4 rounded-2xl bg-gradient-to-b from-[#ebf7f9] to-white p-4 ring-1 ring-line sm:grid-cols-2">
+        <div className="relative h-40 overflow-hidden rounded-2xl bg-surface">
+          {img ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={img} alt="" className="h-40 w-full object-contain bg-surface" /> : <div className="flex h-40 items-center justify-center text-[11px] text-ink-soft">{en ? "No image" : "لا صورة"}</div>}
+        </div>
+        <div className="text-start">
+          {badge && <span className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-medium ${available ? "bg-brand/10 text-brand-dark" : "bg-surface text-ink-soft"}`}><span className={`h-2 w-2 rounded-full ${available ? "bg-success" : "bg-ink-soft"}`} />{badge}</span>}
+          <h1 className="mt-2 text-lg font-extrabold text-brand">{ps("title") || techTitle}</h1>
+        </div>
+      </div>
+    );
+  }
+
+  return <PreviewShell dir={dir} empty en={en} />;
+}
+
 export function GroupPreview({ type, bases, values, lang }: { type: string; bases: string[]; values: Record<string, unknown>; lang: "ar" | "en" }) {
   const en = lang === "en";
   const dir = en ? "ltr" : "rtl";
@@ -705,6 +827,7 @@ export function GroupPreview({ type, bases, values, lang }: { type: string; base
   // معاينات مطابقة بحسب نوع العنصر (كل صفحة لها تصميم أقسامها)
   if (type === "programs") return <ProgramGroupPreview bases={bases} values={values} lang={lang} />;
   if (type === "services") return <ClinicalGroupPreview bases={bases} values={values} lang={lang} />;
+  if (type === "techniques") return <TechniqueGroupPreview bases={bases} values={values} lang={lang} />;
   // المعاينة تقرأ فيلدز مجموعتها فقط (لا تتسرّب لحقول أقسام تانية)
   const gs = (base: string) => { if (!has(base)) return ""; const v = en ? (values[`${base}_en`] || values[`${base}_ar`]) : values[`${base}_ar`]; return typeof v === "string" ? v : ""; };
   const gl = (base: string): unknown[] => {
