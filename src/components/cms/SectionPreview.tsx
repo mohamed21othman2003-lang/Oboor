@@ -198,9 +198,35 @@ function AboutCta({ lang, it }: { lang: "ar" | "en"; it: PItem }) {
   );
 }
 
+// ===== هيرو صفحة «عن عبور» — عمودين: نص (سطر علوي + عنوان + فقرة) + صورة بشارتين =====
+function AboutHero({ lang, it }: { lang: "ar" | "en"; it: PItem }) {
+  const en = lang === "en";
+  return (
+    <div dir={en ? "ltr" : "rtl"} className="grid items-center gap-4 rounded-xl bg-gradient-to-b from-[#ebf7f9] to-white p-4 shadow-sm ring-1 ring-line sm:grid-cols-2">
+      <div className="text-start">
+        {it.title && <p className="flex items-center gap-2 text-[11px] font-bold text-brand"><span className="h-px w-5 shrink-0 bg-brand" />{it.title}</p>}
+        <h4 className="mt-2 text-2xl font-extrabold text-brand">{en ? "About Oboor" : "عن عبور"}</h4>
+        {it.text && <p className="mt-2 text-[12px] leading-6 text-ink-muted">{it.text}</p>}
+      </div>
+      <div className="relative">
+        {it.image
+          ? (/* eslint-disable-next-line @next/next/no-img-element */ <img src={it.image} alt="" className="h-44 w-full rounded-2xl object-cover" />)
+          : <div className="h-44 w-full rounded-2xl bg-brand/20" />}
+        {it.badges.map((bd, i) => (
+          <span key={i} className={`absolute rounded-xl bg-white px-2.5 py-1.5 text-[10px] shadow ${i === 0 ? "end-2 top-2" : "start-2 top-1/2"}`}>
+            {bd.label && <span className="block text-[9px] text-ink-soft">{bd.label}</span>}
+            <b className="text-ink">{bd.value}</b>
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ===== الموزّع على مستوى البلوك: يعرض السكشن كامل بشكله الحقيقي =====
 export function BlockPreview({ block, items, lang, itemKeys, page }: { block: string; items: PItem[]; lang: "ar" | "en"; itemKeys?: string[]; page?: string }) {
   if (!items.length) return null;
+  if (block === "hero" && page === "about") return <AboutHero lang={lang} it={items[0]} />;
   if (block === "cta") return page === "about" ? <AboutCta lang={lang} it={items[0]} /> : <CtaCard lang={lang} it={items[0]} />;
   if (block === "categories" || block === "tabs") return <TabsBar lang={lang} items={items} />;
   if (block === "features") return <FeatureGrid lang={lang} items={items} />;

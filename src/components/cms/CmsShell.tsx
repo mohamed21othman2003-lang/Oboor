@@ -98,7 +98,7 @@ export default function CmsShell({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div dir={dir} className="flex min-h-screen overflow-x-hidden bg-[#F7FAFA] text-ink">
+    <div dir={dir} className="flex min-h-screen overflow-x-clip bg-[#F7FAFA] text-ink">
       {/* Sidebar (فاتح بلمسات تركوازية — حسب تصميم الديزاينر) */}
       <aside className={`fixed inset-y-0 z-40 flex w-72 transform flex-col border-[#e6eff0] bg-white transition-transform lg:static lg:translate-x-0 ${en ? "left-0 border-e" : "right-0 border-s"} ${open ? "translate-x-0" : `${en ? "-translate-x-full" : "translate-x-full"} lg:translate-x-0`}`}>
         {/* Brand */}
@@ -189,7 +189,7 @@ export default function CmsShell({ children }: { children: React.ReactNode }) {
           </div>
         </header>
 
-        <main className="flex-1 overflow-x-hidden p-4 sm:p-5 lg:p-8">{children}</main>
+        <main className="flex-1 overflow-x-clip p-4 sm:p-5 lg:p-8">{children}</main>
       </div>
     </div>
   );

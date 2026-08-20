@@ -481,7 +481,7 @@ export default function PageChrome({ page }: { page: string }) {
   blocks.sort((a, b) => blockRank(a.block) - blockRank(b.block));
 
   return (
-    <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-line">
+    <div className="rounded-2xl bg-white shadow-sm ring-1 ring-line">
       <button onClick={() => setOpen((v) => !v)} className="flex w-full items-center justify-between gap-3 px-5 py-4 text-start transition-colors hover:bg-surface/60">
         <div className="flex items-center gap-2">
           <span className="flex h-8 w-8 items-center justify-center rounded-full bg-brand/10 text-brand">
@@ -507,7 +507,7 @@ export default function PageChrome({ page }: { page: string }) {
           {blocks.map((g, gi) => {
             const isOpen = openBlock[g.block] ?? false;
             return (
-            <div key={g.block} className="overflow-hidden rounded-xl border border-line">
+            <div key={g.block} className="rounded-xl border border-line">
               <button onClick={() => setOpenBlock((p) => ({ ...p, [g.block]: !isOpen }))} className="flex w-full items-center justify-between gap-3 bg-surface/60 px-4 py-3 text-start transition-colors hover:bg-surface">
                 <span className="flex items-center gap-2">
                   <span className="flex h-6 w-6 items-center justify-center rounded-full bg-brand text-[11px] font-bold text-white">{gi + 1}</span>
