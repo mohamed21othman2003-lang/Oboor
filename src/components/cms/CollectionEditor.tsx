@@ -698,10 +698,13 @@ const FIELD_SECTIONS: Record<string, { title: string; title_en: string; bases: s
     { title: "قسم التواصل السفلي (CTA)", title_en: "Bottom contact section (CTA)", bases: ["cta_badge", "cta_title", "cta_text"],
       note: "قسم التواصل أسفل صفحة هذا البرنامج — خاص به وحده. اتركه فارغاً لاستخدام النص الافتراضي.", note_en: "The contact section at the bottom of this program's page — unique to it. Leave empty for the default text.", preview: "/programs/{slug}" },
   ],
-  clinical: [
-    { title: "أعلى الصفحة (الهيرو)", title_en: "Top of page (Hero)", bases: ["title", "subtitle", "image", "image_file"] },
-    { title: "نبذة عن الخدمة", title_en: "About the service", bases: ["about_heading", "about", "about_list", "about_tag"] },
-    { title: "أقسام محتوى الصفحة", title_en: "Page content sections", bases: ["blocks"] },
+  services: [
+    { title: "أعلى الصفحة (الهيرو)", title_en: "Top of page (Hero)", bases: ["title", "subtitle"],
+      note: "بادج + عنوان الخدمة + وصف مختصر، تظهر في أعلى صفحة الخدمة.", note_en: "Badge + service title + short subtitle, shown at the top of the service page.", preview: "/services/{slug}" },
+    { title: "نبذة عن الخدمة", title_en: "About the service", bases: ["image", "image_file", "about_heading", "about", "about_list", "about_tag"],
+      note: "الصورة + فقرات النبذة + قائمة النقاط + وسوم، في قسم «عن الخدمة».", note_en: "Image + About paragraphs + points list + tags, in the \"About the service\" section.", preview: "/services/{slug}" },
+    { title: "أقسام محتوى الصفحة", title_en: "Page content sections", bases: ["blocks"],
+      note: "الأقسام التفصيلية للصفحة (بطاقات/نقاط/وسوم/مجالات…) بترتيب ظهورها.", note_en: "The page's detailed sections (cards/points/tags/areas…) in order.", preview: "/services/{slug}" },
     { title: "قسم التواصل السفلي (CTA)", title_en: "Bottom contact section (CTA)", bases: ["cta_badge", "cta_title", "cta_text"],
       note: "قسم التواصل أسفل صفحة هذه الخدمة — خاص بها وحدها. اتركه فارغاً لاستخدام النص الافتراضي.", note_en: "The contact section at the bottom of this service's page — unique to it. Leave empty for the default text.", preview: "/services/{slug}" },
   ],
@@ -716,7 +719,7 @@ const FIELD_SECTIONS: Record<string, { title: string; title_en: string; bases: s
   ],
 };
 // أنواع العناصر التي تعرض معاينة حيّة بجوار الحقول (كما في الموقع)
-const LIVE_PREVIEW_TYPES = new Set(["news", "programs"]);
+const LIVE_PREVIEW_TYPES = new Set(["news", "programs", "services"]);
 // حقول تقنية/اختيارية تُخفى إن كانت فارغة (تقليل التشويش لمن لا يحتاجها)
 // تشمل حقول البرامج الشرطية (قائمة الفئة المستهدفة + المحطات التطبيقية):
 // تظهر فقط في البرامج التي تستخدمها فعلاً على الصفحة، وتختفي في غيرها.

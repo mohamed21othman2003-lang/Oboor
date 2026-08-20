@@ -511,12 +511,192 @@ function ProgramGroupPreview({ bases, values, lang }: { bases: string[]; values:
   return <PreviewShell dir={dir} empty en={en} />;
 }
 
+// ===== معاينة أقسام صفحة الخدمة العيادية (مطابقة لـ /services/[slug]) =====
+// عنوان بأول كلمة داكنة وباقيه تركوازي (مطابق للتصميم)
+function SplitHeading({ text, cls = "text-3xl", white = false }: { text: string; cls?: string; white?: boolean }) {
+  const parts = (text || "").trim().split(" ");
+  const first = parts[0] || "";
+  const rest = parts.slice(1).join(" ");
+  return <h2 className={`${cls} font-extrabold ${white ? "text-white" : "text-ink"}`}>{first} {rest && <span className="text-brand">{rest}</span>}</h2>;
+}
+const DARK_SECT = "bg-gradient-to-bl from-[#0d3d45] via-[#13505b] to-[#123749]";
+const DARK_CARD = "bg-gradient-to-br from-[#1c4e57] to-[#215d68] border border-white/10";
+
+function ClinicalBlockMini({ b, en }: { b: Record<string, unknown>; en: boolean }) {
+  const kind = String(b.kind || "");
+  const heading = String(b.heading || "");
+  const intro = String(b.intro || "");
+  const dark = !!b.dark;
+  const items = Array.isArray(b.items) ? (b.items as Record<string, unknown>[]) : [];
+  const CheckMini = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0 text-brand"><circle cx="12" cy="12" r="9" /><path d="M8.5 12l2.2 2.2L15.5 9.5" strokeLinecap="round" strokeLinejoin="round" /></svg>;
+
+  if (kind === "prose") {
+    const paras = Array.isArray(b.paragraphs) ? (b.paragraphs as string[]) : [];
+    return <div className="rounded-2xl bg-white p-4 text-center ring-1 ring-line"><SplitHeading text={heading} cls="text-base" />{paras.map((p, i) => <p key={i} className="mt-2 text-[12px] leading-7 text-ink-muted">{p}</p>)}</div>;
+  }
+  if (kind === "agePrograms") {
+    const adult = (b.adult || {}) as Record<string, unknown>; const child = (b.child || {}) as Record<string, unknown>;
+    const chip = "rounded-lg bg-white px-3 py-1.5 text-center text-[11px] font-medium text-brand-dark";
+    const levels = Array.isArray(child.levels) ? (child.levels as string[]) : [];
+    return (
+      <div className={`rounded-2xl ${DARK_SECT} p-4 text-white`}>
+        <h2 className="mb-3 text-center text-base font-extrabold">{heading}</h2>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div className={`flex flex-col items-center rounded-2xl ${DARK_CARD} p-4 text-center`}><h3 className="text-sm font-bold">{String(adult.title || "")}</h3><p className="mt-1 text-[11px] text-white/70">{String(adult.sub || "")}</p><span className={`mt-3 ${chip}`}>{String(adult.label || "")}</span></div>
+          <div className={`flex flex-col items-center rounded-2xl ${DARK_CARD} p-4 text-center`}><h3 className="text-sm font-bold">{String(child.title || "")}</h3><p className="mt-1 text-[11px] text-white/70">{String(child.label || "")}</p><div className="mt-3 grid w-full grid-cols-2 gap-1.5">{levels.map((l, i) => <span key={i} className={chip}>{l}</span>)}</div></div>
+        </div>
+      </div>
+    );
+  }
+  if (kind === "pills") {
+    const pills = Array.isArray(b.items) ? (b.items as string[]) : [];
+    return (
+      <div className={`rounded-2xl p-4 text-center ${dark ? `${DARK_SECT} text-white` : "bg-white ring-1 ring-line"}`}>
+        <SplitHeading text={heading} cls="text-base" white={dark} />
+        {intro && <p className={`mx-auto mt-2 max-w-md text-[12px] leading-7 ${dark ? "text-white/70" : "text-ink-muted"}`}>{intro}</p>}
+        <div className="mt-3 flex flex-wrap justify-center gap-1.5">{pills.map((p, i) => <span key={i} className="rounded-full bg-brand-deep px-3 py-1.5 text-[11px] font-medium text-white">{p}</span>)}</div>
+      </div>
+    );
+  }
+  if (kind === "tiles") {
+    const tiles = Array.isArray(b.items) ? (b.items as string[]) : [];
+    return (
+      <div className={`rounded-2xl p-4 ${dark ? `${DARK_SECT} text-white text-center` : "bg-white ring-1 ring-line text-center"}`}>
+        {dark ? <h2 className="mb-3 text-base font-extrabold">{heading}</h2> : <SplitHeading text={heading} cls="text-base" />}
+        <div className="mt-3 grid gap-2 sm:grid-cols-2">{tiles.map((tl, i) => dark
+          ? <div key={i} className={`rounded-2xl ${DARK_CARD} p-3 text-center text-[12px] leading-6 text-white/85`}>{tl}</div>
+          : <div key={i} className="flex items-center justify-center rounded-2xl bg-gradient-to-b from-brand-dark to-brand-deep p-3 text-center text-[12px] font-semibold leading-6 text-white shadow-md">{tl}</div>)}
+        </div>
+      </div>
+    );
+  }
+  if (kind === "checklist") {
+    const list = Array.isArray(b.items) ? (b.items as string[]) : [];
+    return (
+      <div className={`rounded-2xl p-4 ${dark ? `${DARK_SECT} text-white` : "bg-white ring-1 ring-line"}`}>
+        {heading && (dark ? <SplitHeading text={heading} cls="text-base" white /> : <h2 className="text-base font-extrabold text-ink">{heading}</h2>)}
+        <ul className="mt-3 grid gap-2 sm:grid-cols-2">{list.map((it, i) => (
+          <li key={i} className={`flex items-start gap-2 rounded-xl p-2.5 text-start text-[12px] leading-6 ${dark ? `${DARK_CARD} text-white/85` : "border border-line bg-surface text-ink-muted"}`}><span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${dark ? "bg-brand/15" : ""}`}><CheckMini /></span><span>{it}</span></li>
+        ))}</ul>
+      </div>
+    );
+  }
+  if (kind === "areas") {
+    return (
+      <div className="rounded-2xl bg-white p-4 text-start ring-1 ring-line">
+        <SplitHeading text={heading} cls="text-base" />
+        {intro && <p className="mt-1.5 text-[12px] text-ink-muted">{intro}</p>}
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">{items.map((a, i) => { const title = en ? String(a.title_en || a.title || "") : String(a.title_ar || a.title || ""); const desc = en ? String(a.desc_en || a.desc || "") : String(a.desc_ar || a.desc || ""); const icon = String(a.icon || ""); return (
+          <div key={i} className="rounded-2xl border border-line bg-white p-3 shadow-sm"><div className="flex items-start gap-2"><div className="flex shrink-0 flex-col items-center gap-0.5"><span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand/10 text-brand">{CMS_ICONS[icon] ?? CMS_ICONS.star}</span><span className="text-[10px] font-semibold text-ink-soft">{String(i + 1).padStart(2, "0")}</span></div><h3 className="flex-1 text-[13px] font-bold leading-6 text-ink">{title || "—"}</h3></div>{desc && <p className="mt-2 text-[12px] leading-6 text-ink-muted">{desc}</p>}</div>
+        ); })}</div>
+      </div>
+    );
+  }
+  // cards (light or dark)
+  const cols = Number(b.cols || 0);
+  return (
+    <div className={`rounded-2xl p-4 ${dark ? `${DARK_SECT} text-white` : "bg-white ring-1 ring-line"}`}>
+      <div className={dark ? "text-center" : "text-center"}>
+        {dark ? <h2 className="text-base font-extrabold">{heading}</h2> : <SplitHeading text={heading} cls="text-base" />}
+        {intro && <p className={`mx-auto mt-2 max-w-md text-[12px] leading-7 ${dark ? "text-white/70" : "text-ink-muted"}`}>{intro}</p>}
+      </div>
+      <div className={`mt-3 grid gap-3 ${cols >= 3 ? "sm:grid-cols-2 lg:grid-cols-3" : "sm:grid-cols-2"}`}>{items.map((it, i) => {
+        const title = en ? String(it.title_en || it.title || "") : String(it.title_ar || it.title || "");
+        const sub = en ? String(it.sub_en || it.sub || "") : String(it.sub_ar || it.sub || "");
+        const desc = en ? String(it.desc_en || it.desc || "") : String(it.desc_ar || it.desc || "");
+        const bullets = Array.isArray(it.bullets) ? (it.bullets as string[]) : (Array.isArray(it.bullets_ar) ? (it.bullets_ar as string[]) : []);
+        const tags = Array.isArray(it.tags) ? (it.tags as string[]) : (Array.isArray(it.tags_ar) ? (it.tags_ar as string[]) : []);
+        if (dark) return (
+          <div key={i} className={`rounded-2xl ${DARK_CARD} p-3 text-start`}><h3 className="text-sm font-bold text-white">{title}{sub && <span className="ms-1 text-[11px] font-medium text-brand"> {sub}</span>}</h3>{desc && <p className="mt-1.5 text-[12px] leading-6 text-white/75">{desc}</p>}{bullets.length > 0 && <ul className="mt-2 space-y-1.5">{bullets.map((bl, j) => <li key={j} className="flex items-start gap-2 text-[12px] leading-6 text-white/75"><span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand" />{bl}</li>)}</ul>}{tags.length > 0 && <div className="mt-2 flex flex-wrap gap-1.5">{tags.map((t, j) => <span key={j} className="rounded-full bg-brand/20 px-2.5 py-1 text-[11px] font-medium text-[#7ee8f0]">{t}</span>)}</div>}</div>
+        );
+        return (
+          <div key={i} className="rounded-2xl border border-line bg-white p-3 text-start shadow-sm"><div className="mb-2 flex items-center gap-2"><span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand/10 text-brand">{CMS_ICONS[String(it.icon || "")] ?? CMS_ICONS.star}</span><h3 className="text-[13px] font-bold text-ink">{title}</h3></div>{desc && <p className="text-[12px] leading-6 text-ink-muted">{desc}</p>}</div>
+        );
+      })}</div>
+    </div>
+  );
+}
+
+function ClinicalGroupPreview({ bases, values, lang }: { bases: string[]; values: Record<string, unknown>; lang: "ar" | "en" }) {
+  const en = lang === "en";
+  const dir = en ? "ltr" : "rtl";
+  const has = (b: string) => bases.includes(b);
+  const ps = (base: string) => { const v = en ? (values[`${base}_en`] || values[`${base}_ar`]) : values[`${base}_ar`]; return typeof v === "string" ? v : ""; };
+  const pl = (base: string): Record<string, unknown>[] => { const e = values[`${base}_en`], a = values[`${base}_ar`]; const v = en ? ((Array.isArray(e) && e.length) ? e : a) : a; return Array.isArray(v) ? (v as Record<string, unknown>[]) : []; };
+  const strs = (base: string) => pl(base).map((x) => (typeof x === "string" ? x : String((x as Record<string, unknown>)?.text ?? ""))).filter(Boolean);
+  const pobj = (base: string): Record<string, unknown> | null => { const e = values[`${base}_en`], a = values[`${base}_ar`]; const v = (en && e) ? e : a; return v && typeof v === "object" && !Array.isArray(v) ? (v as Record<string, unknown>) : null; };
+  const rawImg = String(values.image_file || values.image || "");
+  const img = rawImg ? (/^(https?:|data:|blob:|\/)/.test(rawImg) ? rawImg : "/" + rawImg.replace(/^\/+/, "")) : "";
+
+  // نبذة عن الخدمة — صورة + عنوان + فقرات + قائمة تحقّق + وسوم
+  if (has("about") || has("about_heading") || has("about_list") || has("about_tag")) {
+    const paras = strs("about");
+    const list = strs("about_list");
+    const tag = pobj("about_tag");
+    const tagHeading = tag ? String((en && tag.heading_en ? tag.heading_en : tag.heading) || "") : "";
+    const tagLabels = tag ? ((Array.isArray(tag.labels) && (tag.labels as string[]).length ? tag.labels : (tag.label ? [tag.label] : [])) as string[]).filter((t) => t && String(t).trim()) : [];
+    return (
+      <div dir={dir} className="grid gap-4 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-line sm:grid-cols-2">
+        <div className="relative h-52 overflow-hidden rounded-2xl bg-surface">
+          {img ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={img} alt="" className="h-52 w-full object-contain bg-surface" /> : <div className="flex h-52 items-center justify-center text-[11px] text-ink-soft">{en ? "No image" : "لا صورة"}</div>}
+        </div>
+        <div className="text-start">
+          <SplitHeading text={ps("about_heading") || (en ? "About the service" : "عن الخدمة")} cls="text-base" />
+          <div className="mt-2 space-y-2">{paras.map((p, i) => <p key={i} className="text-[12px] leading-7 text-ink-muted">{p}</p>)}</div>
+          {list.length > 0 && <ul className="mt-3 space-y-2">{list.map((it, i) => <li key={i} className="flex items-start gap-2 text-[12px] leading-6 text-ink-muted"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="mt-0.5 shrink-0 text-brand"><circle cx="12" cy="12" r="9" /><path d="M8.5 12l2.2 2.2L15.5 9.5" strokeLinecap="round" strokeLinejoin="round" /></svg>{it}</li>)}</ul>}
+          {tagHeading && tagLabels.length > 0 && <div className="mt-4"><h3 className="mb-2 text-[13px] font-bold text-ink">{tagHeading}</h3><div className="flex flex-wrap gap-2">{tagLabels.map((t, i) => <span key={i} className="rounded-2xl bg-gradient-to-b from-brand-dark to-brand-deep px-4 py-2 text-[11px] font-semibold text-white shadow-md ring-1 ring-white/30">{t}</span>)}</div></div>}
+        </div>
+      </div>
+    );
+  }
+
+  // أقسام محتوى الصفحة — قائمة بلوكات غير متجانسة
+  if (has("blocks")) {
+    const blocks = pl("blocks");
+    if (!blocks.length) return <PreviewShell dir={dir} empty en={en} />;
+    return <div dir={dir} className="space-y-3">{blocks.map((b, i) => <ClinicalBlockMini key={i} b={b} en={en} />)}</div>;
+  }
+
+  // CTA — نفس نمط البرامج مع الافتراضي الخاص بالخدمات العيادية
+  if (has("cta_title") || has("cta_text") || has("cta_badge")) {
+    const badge = ps("cta_badge") || (en ? "Customer service available around the clock" : "خدمة العملاء متاحة على مدار الساعة");
+    const title = ps("cta_title") || (en ? "Would you like to enroll your child in Oboor's Clinical Services?" : "هل ترغب في تسجيل طفلك في خدمات عبور العيادية ؟");
+    const sub = ps("cta_text") || (en ? "Get in touch and we'll help you choose the program or service that best fits your child's needs." : "يمكنك التواصل معنا لمساعدتك في اختيار البرنامج أو الخدمة الأنسب وفق احتياجات طفلك.");
+    const usingDefault = !ps("cta_title") && !ps("cta_text") && !ps("cta_badge");
+    return (
+      <div dir={dir}>
+        <div className="overflow-hidden rounded-2xl bg-gradient-to-br from-[#0e4048] via-[#1a6c75] to-[#0e4048] p-5 text-center">
+          <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-[11px] font-medium text-white/90"><span className="h-2 w-2 rounded-full bg-success" />{badge}</span>
+          <h2 className="mt-3 text-base font-extrabold leading-snug text-white">{highlight(title, "text-brand")}</h2>
+          <p className="mx-auto mt-2 max-w-md text-[12px] text-white/75">{sub}</p>
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-2"><span className="rounded-xl bg-brand px-3 py-2 text-[11px] font-semibold text-white">{en ? "Apply Now" : "طلب التحاق"}</span><span className="rounded-xl bg-[#2ba73e] px-3 py-2 text-[11px] font-semibold text-white">{en ? "WhatsApp" : "واتساب"}</span><span className="rounded-xl bg-white px-3 py-2 text-[11px] font-semibold text-ink">{en ? "Nearest Branch" : "أقرب فرع"}</span></div>
+        </div>
+        {usingDefault && <p className="mt-2 flex items-center gap-1.5 rounded-lg bg-amber-50 px-3 py-2 text-[11px] leading-5 text-amber-700 ring-1 ring-amber-200"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><circle cx="12" cy="12" r="10" /><path d="M12 8h.01M11 12h1v4h1" /></svg>{en ? "This is the default text (the fields are empty). Fill the fields to override it." : "هذا هو النص الافتراضي (الحقول فارغة). املأ الحقول لتخصيصه واستبداله."}</p>}
+      </div>
+    );
+  }
+
+  // الهيرو — بادج وسط + عنوان (أول كلمة داكنة) + وصف
+  if (has("title") || has("subtitle")) {
+    return (
+      <div dir={dir} className="overflow-hidden rounded-2xl bg-gradient-to-b from-[#ebf7f9] to-white p-6 text-center ring-1 ring-line">
+        <span className="inline-block rounded-full bg-white px-3 py-1 text-[11px] font-medium text-brand-dark shadow-sm ring-1 ring-line">{en ? "Our Services in the Kingdom" : "خدماتنا في المملكة"}</span>
+        <div className="mt-3"><SplitHeading text={ps("title") || (en ? "Service name" : "اسم الخدمة")} cls="text-lg" /></div>
+        {ps("subtitle") && <p className="mx-auto mt-2 max-w-md text-[12px] leading-7 text-ink-muted">{ps("subtitle")}</p>}
+      </div>
+    );
+  }
+
+  return <PreviewShell dir={dir} empty en={en} />;
+}
+
 export function GroupPreview({ type, bases, values, lang }: { type: string; bases: string[]; values: Record<string, unknown>; lang: "ar" | "en" }) {
   const en = lang === "en";
   const dir = en ? "ltr" : "rtl";
   const has = (b: string) => bases.includes(b);
   // معاينات مطابقة بحسب نوع العنصر (كل صفحة لها تصميم أقسامها)
   if (type === "programs") return <ProgramGroupPreview bases={bases} values={values} lang={lang} />;
+  if (type === "services") return <ClinicalGroupPreview bases={bases} values={values} lang={lang} />;
   // المعاينة تقرأ فيلدز مجموعتها فقط (لا تتسرّب لحقول أقسام تانية)
   const gs = (base: string) => { if (!has(base)) return ""; const v = en ? (values[`${base}_en`] || values[`${base}_ar`]) : values[`${base}_ar`]; return typeof v === "string" ? v : ""; };
   const gl = (base: string): unknown[] => {
