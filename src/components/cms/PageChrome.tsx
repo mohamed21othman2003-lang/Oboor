@@ -618,11 +618,12 @@ export default function PageChrome({ page }: { page: string }) {
                             الذي هو عنوان+جملة فقط. أرقام الرئيسية تُدار من «الأرقام والإحصائيات». */}
                         {hasData && (
                           <div>
-                            <p className="mb-1 text-xs font-semibold text-ink-soft">{t("النقاط / الفقرات (كل سطر عنصر)", "Points / paragraphs (one per line)")}</p>
-                            <div className="grid gap-2 sm:grid-cols-2">
-                              <AutoTextarea value={listVal(it, "data_ar").join("\n")} onChange={(v) => setVal(it.id, "data_ar", v.split("\n").map((x) => x.trim()).filter(Boolean))} placeholder={t("عربي", "Arabic")} />
-                              <AutoTextarea value={listVal(it, "data_en").join("\n")} onChange={(v) => setVal(it.id, "data_en", v.split("\n").map((x) => x.trim()).filter(Boolean))} dir="ltr" placeholder="English" />
-                            </div>
+                            <p className="mb-1 text-xs font-semibold text-ink-soft">{t("النقاط / الفقرات (كل عنصر في حقل مستقل)", "Points / paragraphs (each in its own field)")}</p>
+                            <ParagraphsField
+                              ar={listVal(it, "data_ar").join("\n")}
+                              en={listVal(it, "data_en").join("\n")}
+                              onChange={(a, e) => { setVal(it.id, "data_ar", a.split("\n")); setVal(it.id, "data_en", e.split("\n")); }}
+                            />
                           </div>
                         )}
                         {(String(it.value ?? "").trim() !== "" || (g.block === "stats" && String(it.key ?? "") !== "main")) && (
