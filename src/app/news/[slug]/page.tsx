@@ -172,8 +172,8 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
                   <h2 className="text-lg font-extrabold text-ink">{pick(locale, "ما الذي ستتعلمه في هذه الفعالية؟", "What will you learn at this event?")}</h2>
                   <ul className="mt-4 space-y-3">
                     {n.learn.map((l) => (
-                      <li key={l} className="flex items-start justify-start gap-2.5 text-sm leading-7 text-ink-muted">
-                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="mt-0.5 shrink-0 text-brand"><circle cx="12" cy="12" r="9" /><path d="M8.5 12l2.2 2.2L15.5 9.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                      <li key={l} className="flex items-start justify-start gap-2.5 text-sm leading-6 text-ink-muted">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="mt-[3px] shrink-0 text-brand"><circle cx="12" cy="12" r="9" /><path d="M8.5 12l2.2 2.2L15.5 9.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
                         <span>{l}</span>
                       </li>
                     ))}
