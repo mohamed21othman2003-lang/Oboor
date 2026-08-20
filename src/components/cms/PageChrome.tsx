@@ -7,12 +7,6 @@ import dynamic from "next/dynamic";
 import { listCollection, updateItem, createItem, deleteItem, uploadField, type CmsItem } from "@/lib/cms/api";
 import { useCmsLang } from "@/lib/cms/i18n";
 import { CMS_ICONS, ICON_LABELS } from "@/lib/cms/icons";
-import { BlockPreview, type PItem } from "@/components/cms/SectionPreview";
-// الحقول التي يحفظها المحرّر (تُجمع لكل عنصر عند «حفظ كل التغييرات»)
-const SAVE_FIELDS = ["title_ar", "title_en", "text_ar", "text_en", "tagline_ar", "tagline_en",
-  "badge1_label_ar", "badge1_label_en", "badge1_value_ar", "badge1_value_en",
-  "badge2_label_ar", "badge2_label_en", "badge2_value_ar", "badge2_value_en",
-  "data_ar", "data_en", "value", "icon"];
 // تحميل مكوّن قصّ الصورة عند الحاجة فقط
 const ImageCropModal = dynamic(() => import("@/components/cms/ImageCropModal"), { ssr: false });
 
@@ -370,7 +364,7 @@ function ParagraphsField({ ar, en, onChange }: { ar: string; en: string; onChang
   );
 }
 
-export default function PageChrome({ page, label, desc }: { page: string; label?: [string, string]; desc?: [string, string] }) {
+export default function PageChrome({ page }: { page: string }) {
   const { lang } = useCmsLang();
   const en = lang === "en";
   const t = (ar: string, e: string) => (en ? e : ar);
@@ -380,6 +374,7 @@ export default function PageChrome({ page, label, desc }: { page: string; label?
   const [openBlock, setOpenBlock] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(true);
   const [savingId, setSavingId] = useState<number | null>(null);
+  const [okId, setOkId] = useState<number | null>(null);
   const [addingBlock, setAddingBlock] = useState<string | null>(null);
   const [pendingImg, setPendingImg] = useState<{ it: CmsItem; file: File } | null>(null);
   const [err, setErr] = useState("");
@@ -387,8 +382,6 @@ export default function PageChrome({ page, label, desc }: { page: string; label?
   // كاسر كاش: التخزين قد يعيد استخدام نفس مسار الملف عند التغيير فيعرض المتصفح
   // النسخة القديمة. بصمة تتغيّر عند الفتح وبعد كل رفع تضمن ظهور الصورة الحالية.
   const [bust, setBust] = useState(() => Date.now());
-  const [savingAll, setSavingAll] = useState(false);
-  const [savedAll, setSavedAll] = useState(false);
 
   useEffect(() => {
     listCollection("sections")
@@ -401,28 +394,26 @@ export default function PageChrome({ page, label, desc }: { page: string; label?
 
   const val = (it: CmsItem, k: string) => String(edits[it.id]?.[k] ?? it[k] ?? "");
   const listVal = (it: CmsItem, k: string) => { const v = edits[it.id]?.[k] ?? (it as Record<string, unknown>)[k]; return Array.isArray(v) ? (v as string[]) : []; };
-  const setVal = (id: number, k: string, v: string | string[]) => { setSavedAll(false); setEdits((p) => ({ ...p, [id]: { ...p[id], [k]: v } })); };
+  const dirty = (id: number) => !!edits[id] && Object.keys(edits[id]).length > 0;
+  const setVal = (id: number, k: string, v: string | string[]) => { setOkId(null); setEdits((p) => ({ ...p, [id]: { ...p[id], [k]: v } })); };
 
-  // حفظ موحّد: يجمع تعديلات كل الأقسام ويحفظها دفعة واحدة
-  const dirtyIds = () => Object.keys(edits).map(Number).filter((id) => edits[id] && Object.keys(edits[id]).length > 0);
-  async function saveAll() {
-    const ids = dirtyIds();
-    if (!ids.length) return;
-    setSavingAll(true); setErr(""); setSavedAll(false);
+  async function save(it: CmsItem) {
+    setSavingId(it.id); setErr(""); setOkId(null);
     try {
-      for (const id of ids) {
-        const e = edits[id] || {};
-        const payload: Record<string, unknown> = {};
-        for (const k of SAVE_FIELDS) if (k in e) payload[k] = e[k];
-        if (Object.keys(payload).length) {
-          const saved = await updateItem("sections", id, payload) as CmsItem;
-          setItems((prev) => prev.map((x) => (x.id === id ? saved : x)));
-        }
+      const e = edits[it.id] || {};
+      const payload: Record<string, unknown> = {};
+      for (const k of ["title_ar", "title_en", "text_ar", "text_en", "tagline_ar", "tagline_en",
+                        "badge1_label_ar", "badge1_label_en", "badge1_value_ar", "badge1_value_en",
+                        "badge2_label_ar", "badge2_label_en", "badge2_value_ar", "badge2_value_en",
+                        "data_ar", "data_en", "value", "icon"]) if (k in e) payload[k] = e[k];
+      if (Object.keys(payload).length) {
+        const saved = await updateItem("sections", it.id, payload) as CmsItem;
+        setItems((prev) => prev.map((x) => (x.id === it.id ? saved : x)));
+        setEdits((p) => { const c = { ...p }; delete c[it.id]; return c; });
       }
-      setEdits({});
-      setSavedAll(true);
+      setOkId(it.id);
     } catch (e) { setErr(e instanceof Error ? e.message : t("تعذّر الحفظ.", "Could not save.")); }
-    finally { setSavingAll(false); }
+    finally { setSavingId(null); }
   }
 
   // اختيار صورة → فتح المعاينة قبل الرفع
@@ -435,19 +426,19 @@ export default function PageChrome({ page, label, desc }: { page: string; label?
   async function onImage(it: CmsItem, out: Blob | File) {
     setPendingImg(null);
     const file = out instanceof File ? out : new File([out], "image.jpg", { type: out.type || "image/jpeg" });
-    setSavingId(it.id); setErr("");
+    setSavingId(it.id); setErr(""); setOkId(null);
     try {
       const saved = await uploadField("sections", it.id, "image_file", file) as CmsItem;
       setItems((prev) => prev.map((x) => (x.id === it.id ? saved : x)));
       setBust(Date.now()); // اعرض الصورة الجديدة فوراً حتى لو أعاد التخزين نفس المسار
-      setSavedAll(true);
+      setOkId(it.id);
     } catch (e) { setErr(e instanceof Error ? e.message : t("تعذّر رفع الصورة.", "Could not upload the image.")); }
     finally { setSavingId(null); }
   }
 
   // إضافة عنصر جديد لقسم قائمة (بنفس بنية باقي العناصر)
   async function addItem(block: string) {
-    setAddingBlock(block); setErr("");
+    setAddingBlock(block); setErr(""); setOkId(null);
     try {
       const orders = items.filter((i) => String(i.block) === block).map((i) => Number(i.order) || 0);
       const order = (orders.length ? Math.max(...orders) : -1) + 1;
@@ -488,8 +479,8 @@ export default function PageChrome({ page, label, desc }: { page: string; label?
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="7" rx="1.5" /><path d="M3 14h18M3 18h12" /></svg>
           </span>
           <div className="text-start">
-            <span className="block font-bold text-ink">{label ? t(label[0], label[1]) : t("محتوى وعناوين الصفحة", "Page content & headings")}</span>
-            <span className="block text-[11px] text-ink-soft">{desc ? t(desc[0], desc[1]) : t("العناوين والنصوص والأرقام والصور — مرتّبة حسب ظهورها في الصفحة", "Headings, text, numbers and images — ordered by their appearance on the page")}</span>
+            <span className="block font-bold text-ink">{t("محتوى وعناوين الصفحة", "Page content & headings")}</span>
+            <span className="block text-[11px] text-ink-soft">{t("العناوين والنصوص والأرقام والصور — مرتّبة حسب ظهورها في الصفحة", "Headings, text, numbers and images — ordered by their appearance on the page")}</span>
           </div>
         </div>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={`shrink-0 text-ink-soft transition-transform ${open ? "rotate-180" : ""}`}><path strokeLinecap="round" d="M6 9l6 6 6-6" /></svg>
@@ -532,8 +523,6 @@ export default function PageChrome({ page, label, desc }: { page: string; label?
                     </div>
                   );
                 })()}
-                <div className="lg:grid lg:grid-cols-2 lg:gap-4 lg:items-start">
-                <div className="space-y-3">
                 {g.items.map((it) => {
                   // أقسام بمحتوى منظّم معقّد — تُحرّر بالمحرّر الكامل
                   if (COMPLEX_BLOCKS.has(g.block)) {
@@ -668,11 +657,14 @@ export default function PageChrome({ page, label, desc }: { page: string; label?
                           </div>
                         )}
                       </div>
-                      {LIST_BLOCKS.has(g.block) && (
-                        <div className="mt-3 flex">
-                          <button type="button" onClick={() => removeItem(it)} disabled={savingId === it.id} className="ms-auto rounded-lg bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-600 hover:text-white disabled:opacity-50">{savingId === it.id ? "…" : t("حذف", "Delete")}</button>
-                        </div>
-                      )}
+                      <div className="mt-3 flex items-center gap-3">
+                        <button type="button" onClick={() => save(it)} disabled={savingId === it.id || !dirty(it.id)} className="rounded-lg bg-brand px-4 py-1.5 text-xs font-bold text-white hover:bg-brand-dark disabled:opacity-40">
+                          {savingId === it.id ? t("جارٍ الحفظ…", "Saving…") : t("حفظ", "Save")}
+                        </button>
+                        {okId === it.id && <span className="text-xs font-semibold text-emerald-600">{t("تم الحفظ ✓", "Saved ✓")}</span>}
+                        {dirty(it.id) && okId !== it.id && <span className="text-xs font-semibold text-amber-600">{t("تعديلات غير محفوظة", "Unsaved changes")}</span>}
+                        {LIST_BLOCKS.has(g.block) && <button type="button" onClick={() => removeItem(it)} className="ms-auto rounded-lg bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-600 hover:text-white">{t("حذف", "Delete")}</button>}
+                      </div>
                     </div>
                   );
                 })}
@@ -682,55 +674,12 @@ export default function PageChrome({ page, label, desc }: { page: string; label?
                     {addingBlock === g.block ? t("جارٍ الإضافة…", "Adding…") : ((en ? BLOCK_ADD_EN[g.block] : BLOCK_ADD[g.block]) || BLOCK_ADD[g.block] || t("إضافة عنصر جديد", "Add new item"))}
                   </button>
                 )}
-                </div>
-                {!COMPLEX_BLOCKS.has(g.block) && (() => {
-                  const pvItems: PItem[] = g.items.map((it) => {
-                    const ir = resolveSrc(String(it.image ?? ""));
-                    const image = ir && /^(https?:|\/)/.test(ir) ? `${ir}${ir.includes("?") ? "&" : "?"}v=${bust}` : ir;
-                    return {
-                      tagline: en ? (val(it, "tagline_en") || val(it, "tagline_ar")) : val(it, "tagline_ar"),
-                      title: en ? (val(it, "title_en") || val(it, "title_ar")) : val(it, "title_ar"),
-                      text: en ? (val(it, "text_en") || val(it, "text_ar")) : val(it, "text_ar"),
-                      value: val(it, "value"),
-                      icon: val(it, "icon"),
-                      image,
-                      bullets: en ? (listVal(it, "data_en").length ? listVal(it, "data_en") : listVal(it, "data_ar")) : listVal(it, "data_ar"),
-                      badges: [1, 2].map((n) => ({
-                        label: en ? (val(it, `badge${n}_label_en`) || val(it, `badge${n}_label_ar`)) : val(it, `badge${n}_label_ar`),
-                        value: en ? (val(it, `badge${n}_value_en`) || val(it, `badge${n}_value_ar`)) : val(it, `badge${n}_value_ar`),
-                      })).filter((b) => b.label || b.value),
-                    };
-                  });
-                  return (
-                    <div className="mt-3 lg:mt-0 lg:sticky lg:top-4">
-                      <p className="mb-1.5 flex items-center gap-1.5 text-[11px] font-semibold text-ink-soft">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" /><circle cx="12" cy="12" r="3" /></svg>
-                        {t("كما يظهر على الموقع", "As shown on the site")}
-                      </p>
-                      <BlockPreview block={g.block} items={pvItems} lang={lang} itemKeys={g.items.map((it) => String(it.key ?? ""))} />
-                    </div>
-                  );
-                })()}
-                </div>
               </div>
               )}
             </div>
             );
           })}
           <p className="px-1 text-[11px] text-ink-soft">{t("تلميح: في العنوان الرئيسي، ضع الجزء الذي تريده باللون المميّز بين نجمتين **هكذا**.", "Tip: in the main heading, wrap the part you want highlighted between two asterisks **like this**.")}</p>
-
-          {/* شريط الحفظ الموحّد — لكل الأقسام دفعة واحدة */}
-          <div className="sticky bottom-0 -mx-4 -mb-4 mt-2 flex items-center justify-between gap-3 border-t border-line bg-white/95 px-4 py-3 backdrop-blur">
-            <span className="text-xs font-semibold">
-              {savingAll ? <span className="text-brand">{t("جارٍ الحفظ…", "Saving…")}</span>
-                : dirtyIds().length > 0 ? <span className="text-amber-600">{t(`• ${dirtyIds().length} تغييرات غير محفوظة`, `• ${dirtyIds().length} unsaved change(s)`)}</span>
-                : savedAll ? <span className="text-emerald-600">{t("تم حفظ كل التغييرات ✓", "All changes saved ✓")}</span>
-                : <span className="text-ink-soft">{t("لا توجد تغييرات", "No changes")}</span>}
-            </span>
-            <button type="button" onClick={saveAll} disabled={savingAll || dirtyIds().length === 0} className="rounded-xl bg-brand px-5 py-2 text-sm font-bold text-white shadow-sm transition-colors hover:bg-brand-dark disabled:opacity-40">
-              {savingAll ? t("جارٍ الحفظ…", "Saving…") : t("حفظ كل التغييرات", "Save all changes")}
-            </button>
-          </div>
         </div>
       )}
       {pendingImg && <ImageCropModal file={pendingImg.file} onCancel={() => setPendingImg(null)} onConfirm={(out) => onImage(pendingImg.it, out)} />}
