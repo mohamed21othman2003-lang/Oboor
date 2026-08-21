@@ -732,7 +732,7 @@ const FIELD_SECTIONS: Record<string, { title: string; title_en: string; bases: s
   ],
 };
 // أنواع العناصر التي تعرض معاينة حيّة بجوار الحقول (كما في الموقع)
-const LIVE_PREVIEW_TYPES = new Set(["news", "programs", "services", "techniques", "branches", "specialists"]);
+const LIVE_PREVIEW_TYPES = new Set(["news", "programs", "services", "techniques", "branches", "specialists", "success"]);
 // حقول تقنية/اختيارية تُخفى إن كانت فارغة (تقليل التشويش لمن لا يحتاجها)
 // تشمل حقول البرامج الشرطية (قائمة الفئة المستهدفة + المحطات التطبيقية):
 // تظهر فقط في البرامج التي تستخدمها فعلاً على الصفحة، وتختفي في غيرها.

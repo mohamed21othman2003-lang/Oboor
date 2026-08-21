@@ -1101,11 +1101,74 @@ function SpecialistGroupPreview({ bases, values, lang }: { bases: string[]; valu
   );
 }
 
+// ===== معاينة أقسام «أبطال عبور» (قصة نجاح): البطاقة + نافذة التفاصيل =====
+function SuccessGroupPreview({ bases, values, lang }: { bases: string[]; values: Record<string, unknown>; lang: "ar" | "en" }) {
+  const en = lang === "en";
+  const dir = en ? "ltr" : "rtl";
+  const has = (b: string) => bases.includes(b);
+  const ps = (base: string) => { const v = en ? (values[`${base}_en`] || values[`${base}_ar`]) : values[`${base}_ar`]; return typeof v === "string" ? v : ""; };
+  const pl = (base: string): string[] => { const e = values[`${base}_en`], a = values[`${base}_ar`]; const v = en ? ((Array.isArray(e) && e.length) ? e : a) : a; return Array.isArray(v) ? (v as string[]) : []; };
+  const rawImg = String(values.image_file || values.image || "");
+  const img = rawImg ? (/^(https?:|data:|blob:|\/)/.test(rawImg) ? rawImg : "/" + rawImg.replace(/^\/+/, "")) : "";
+
+  // نافذة «عرض التفاصيل»
+  if (has("journey") || has("results") || has("program") || has("badge")) {
+    const badge = ps("badge"); const program = ps("program"); const journey = ps("journey"); const results = pl("results");
+    const clock = <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" strokeLinecap="round" /></svg>;
+    const users = <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" /></svg>;
+    const book = <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" /><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" /></svg>;
+    const stats = [
+      { i: clock, label: en ? "Duration" : "المدة", v: ps("meta_duration") },
+      { i: users, label: en ? "Age" : "الفئة العمرية", v: ps("age") },
+      { i: book, label: en ? "Program" : "البرنامج", v: program },
+    ].filter((s) => s.v);
+    return (
+      <div dir={dir} className="overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-line">
+        {/* رأس زخرفي */}
+        <div className="relative h-24 bg-[#e8f7f9]">
+          <span className="absolute start-1/2 top-3 -translate-x-1/2 text-lg font-extrabold tracking-tight text-brand/30">{en ? "Oboor" : "عبور"}</span>
+          {badge && <span className="absolute end-2 top-1/2 z-10 inline-flex -translate-y-1/2 items-center gap-1 rounded-full bg-brand px-2 py-0.5 text-[9px] font-bold text-white shadow">{badge}</span>}
+          <div className="absolute left-1/2 top-1/2 h-16 w-14 -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-xl bg-white p-1 shadow-md">
+            {img ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={img} alt="" className="h-full w-full rounded-lg object-cover" /> : <div className="h-full w-full rounded-lg bg-surface" />}
+          </div>
+        </div>
+        <div className="space-y-2 p-4">
+          <h3 className="text-center text-sm font-extrabold text-ink">{ps("name") || (en ? "Name" : "الاسم")}{ps("age") ? ` - ${ps("age")}` : ""}</h3>
+          {stats.length > 0 && (
+            <div className="grid grid-cols-3 gap-2">
+              {stats.map((s, i) => <div key={i} className="rounded-xl border border-brand/15 bg-[#f3fbfc] p-2 text-start"><span className="flex items-center gap-1 text-[9px] font-medium text-brand-dark"><span className="text-brand">{s.i}</span>{s.label}</span><p className="mt-0.5 text-[11px] font-bold text-ink">{s.v}</p></div>)}
+            </div>
+          )}
+          <div className="grid grid-cols-2 gap-2">
+            <div className="rounded-xl border border-[#f4dcdc] bg-[#fdf3f3] p-2 text-start"><p className="text-[9px] font-bold text-[#d9534f]">{en ? "Before" : "قبل الالتحاق"}</p><p className="mt-0.5 text-[10px] leading-4 text-ink-muted">{ps("before")}</p></div>
+            <div className="rounded-xl border border-brand/15 bg-[#eef9fa] p-2 text-start"><p className="text-[9px] font-bold text-brand-dark">{en ? "After" : "بعد البرنامج"}</p><p className="mt-0.5 text-[10px] leading-4 text-ink-muted">{ps("after")}</p></div>
+          </div>
+          {journey && <div><h4 className="flex items-center gap-1.5 text-[12px] font-bold text-ink"><span className="h-3.5 w-1 rounded-full bg-brand" />{en ? "Treatment Journey" : "رحلة العلاج"}</h4><p className="mt-1 text-[11px] leading-5 text-ink-muted">{journey}</p></div>}
+          {results.length > 0 && <div><h4 className="flex items-center gap-1.5 text-[12px] font-bold text-ink"><span className="h-3.5 w-1 rounded-full bg-brand" />{en ? "Key Results" : "أبرز النتائج"}</h4><ul className="mt-1 grid grid-cols-1 gap-1 sm:grid-cols-2">{results.map((r, i) => <li key={i} className="flex items-start gap-1.5 text-[11px] leading-5 text-ink-muted"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="mt-0.5 shrink-0 text-brand"><circle cx="12" cy="12" r="9" /><path d="M8.5 12l2.2 2.2L15.5 9.5" strokeLinecap="round" strokeLinejoin="round" /></svg>{r}</li>)}</ul></div>}
+          {ps("quote") && (
+            <div className="rounded-2xl border border-brand/20 bg-[#f3fbfc] p-3 text-start">
+              <p className="text-[11px] leading-5 text-ink">“{ps("quote")}”</p>
+              <div className="mt-2 flex items-center justify-between">
+                <span className="flex items-center gap-1.5 text-[10px] font-semibold text-ink"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>{ps("author")}{ps("meta_duration") && <span className="text-ink-soft"> · {ps("meta_duration")}</span>}</span>
+                <div className="flex gap-0.5">{Array.from({ length: 5 }).map((_, i) => <svg key={i} width="11" height="11" viewBox="0 0 24 24" fill="currentColor" className="text-[#f5b50a]"><polygon points="12 2 15 8.9 22.5 9.3 16.7 14 18.6 21.2 12 17.2 5.4 21.2 7.3 14 1.5 9.3 9 8.9" /></svg>)}</div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // بطاقة القصة (نفس كارت الموقع)
+  return <div dir={dir}><MiniStoryCard s={values} en={en} /></div>;
+}
+
 export function GroupPreview({ type, bases, values, lang }: { type: string; bases: string[]; values: Record<string, unknown>; lang: "ar" | "en" }) {
   const en = lang === "en";
   const dir = en ? "ltr" : "rtl";
   const has = (b: string) => bases.includes(b);
   // معاينات مطابقة بحسب نوع العنصر (كل صفحة لها تصميم أقسامها)
+  if (type === "success") return <SuccessGroupPreview bases={bases} values={values} lang={lang} />;
   if (type === "programs") return <ProgramGroupPreview bases={bases} values={values} lang={lang} />;
   if (type === "services") return <ClinicalGroupPreview bases={bases} values={values} lang={lang} />;
   if (type === "techniques") return <TechniqueGroupPreview bases={bases} values={values} lang={lang} />;
