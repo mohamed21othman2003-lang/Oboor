@@ -835,8 +835,8 @@ function MiniStoryCard({ s, en }: { s: Record<string, unknown>; en: boolean }) {
   const users = <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" /></svg>;
   return (
     <div className="overflow-hidden rounded-2xl border border-line bg-white shadow-sm">
-      <div className="relative h-24 w-full bg-surface">
-        {img ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={img} alt="" className="h-24 w-full object-cover" /> : <div className="flex h-24 items-center justify-center text-[10px] text-ink-soft">{en ? "No image" : "لا صورة"}</div>}
+      <div className="relative h-40 w-full bg-surface">
+        {img ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={img} alt="" className="h-40 w-full object-contain" /> : <div className="flex h-40 items-center justify-center text-[10px] text-ink-soft">{en ? "No image" : "لا صورة"}</div>}
         {cat && <span className="absolute right-2 top-2 rounded-lg bg-brand px-2 py-0.5 text-[10px] font-bold text-white shadow-sm">{cat}</span>}
         {dur && <span className="absolute bottom-2 left-2 flex items-center gap-1 rounded-lg bg-[#36474d]/90 px-2 py-0.5 text-[10px] font-medium text-white">{clock}{dur}</span>}
       </div>
@@ -1004,7 +1004,7 @@ function BranchGroupPreview({ bases, values, lang }: { bases: string[]; values: 
   if (has("gallery")) {
     const imgs = (Array.isArray(values.gallery) ? (values.gallery as unknown[]) : []).map((x) => String(typeof x === "string" ? x : ((x as Record<string, unknown>)?.image ?? ""))).filter(Boolean).map((s) => (/^(https?:|data:|blob:|\/)/.test(s) ? s : "/" + s.replace(/^\/+/, "")));
     if (!imgs.length) return <PreviewShell dir={dir} empty en={en} />;
-    return <div dir={dir} className="grid grid-cols-3 gap-2 rounded-xl bg-surface/40 p-3">{imgs.map((s, i) => (/* eslint-disable-next-line @next/next/no-img-element */<img key={i} src={s} alt="" className="h-20 w-full rounded-lg object-cover ring-1 ring-line" />))}</div>;
+    return <div dir={dir} className="grid grid-cols-3 gap-2 rounded-xl bg-surface/40 p-3">{imgs.map((s, i) => (/* eslint-disable-next-line @next/next/no-img-element */<img key={i} src={s} alt="" className="h-24 w-full rounded-lg bg-white object-contain ring-1 ring-line" />))}</div>;
   }
 
   // 6) بيانات الفرع الأساسية (الهيرو) — الاسم + المدينة + التقييم + صفوف معلومات + زرّان
@@ -1063,7 +1063,7 @@ function SpecialistGroupPreview({ bases, values, lang }: { bases: string[]; valu
     return (
       <div dir={dir} className="overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-line">
         <div className="flex items-center gap-3 bg-gradient-to-bl from-brand to-brand-dark p-4 text-white">
-          <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-2xl bg-white/10 ring-2 ring-white/20">{img ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={img} alt="" className="h-16 w-16 object-cover" /> : null}</div>
+          <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-2xl bg-white/10 ring-2 ring-white/20">{img ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={img} alt="" className="h-16 w-16 object-contain" /> : null}</div>
           <div className="flex-1 text-start">
             <h3 className="text-base font-extrabold">{ps("name") || (en ? "Specialist name" : "اسم الأخصائي")}</h3>
             {ps("specialty") && <span className="mt-1 inline-block rounded-full bg-white/20 px-2.5 py-0.5 text-[11px] font-semibold">{ps("specialty")}</span>}
@@ -1086,7 +1086,7 @@ function SpecialistGroupPreview({ bases, values, lang }: { bases: string[]; valu
   // بطاقة الأخصائي (الشبكة) — صورة + وسم التخصص + الاسم + الوصف + شبكة معلومات + زر
   return (
     <div dir={dir} className="flex flex-col overflow-hidden rounded-[18px] border border-line bg-white">
-      <div className="relative h-40 w-full bg-[#f3f5f6]">{img ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={img} alt="" className="h-40 w-full object-cover" /> : <div className="flex h-40 items-center justify-center text-[11px] text-ink-soft">{en ? "No image" : "لا صورة"}</div>}</div>
+      <div className="relative h-48 w-full bg-[#f3f5f6]">{img ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={img} alt="" className="h-48 w-full object-contain" /> : <div className="flex h-48 items-center justify-center text-[11px] text-ink-soft">{en ? "No image" : "لا صورة"}</div>}</div>
       <div className="flex flex-1 flex-col gap-2.5 p-4 text-start">
         {ps("specialty") && <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-[#e8f7f8] px-2.5 py-1 text-[11px] font-semibold text-[#1a9aa5]">{ps("specialty")}<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" /><circle cx="7" cy="7" r="1.2" /></svg></span>}
         <h3 className="text-base font-bold text-ink">{ps("name") || (en ? "Specialist name" : "اسم الأخصائي")}</h3>
@@ -1129,7 +1129,7 @@ function SuccessGroupPreview({ bases, values, lang }: { bases: string[]; values:
           <span className="absolute start-1/2 top-3 -translate-x-1/2 text-lg font-extrabold tracking-tight text-brand/30">{en ? "Oboor" : "عبور"}</span>
           {badge && <span className="absolute end-2 top-1/2 z-10 inline-flex -translate-y-1/2 items-center gap-1 rounded-full bg-brand px-2 py-0.5 text-[9px] font-bold text-white shadow">{badge}</span>}
           <div className="absolute left-1/2 top-1/2 h-16 w-14 -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-xl bg-white p-1 shadow-md">
-            {img ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={img} alt="" className="h-full w-full rounded-lg object-cover" /> : <div className="h-full w-full rounded-lg bg-surface" />}
+            {img ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={img} alt="" className="h-full w-full rounded-lg object-contain" /> : <div className="h-full w-full rounded-lg bg-surface" />}
           </div>
         </div>
         <div className="space-y-2 p-4">
@@ -1195,7 +1195,7 @@ export function GroupPreview({ type, bases, values, lang }: { type: string; base
       <article dir={dir} className="flex flex-col overflow-hidden rounded-2xl border border-line bg-white shadow-sm">
         <div className="relative h-44 w-full bg-surface">
           {img
-            ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={img} alt="" className="h-44 w-full object-cover" />
+            ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={img} alt="" className="h-44 w-full object-contain" />
             : <div className="flex h-44 w-full items-center justify-center text-[11px] text-ink-soft">{en ? "No image" : "لا صورة"}</div>}
           {cat && <span className="absolute end-3 top-3 rounded-full bg-white/95 px-3 py-1 text-[11px] font-bold text-brand shadow-sm backdrop-blur">{cat}</span>}
         </div>
