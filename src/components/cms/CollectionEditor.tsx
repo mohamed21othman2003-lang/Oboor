@@ -6,7 +6,7 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
-  getSchema, getItem, createItem, updateItem, uploadField, uploadImage, resetDefault,
+  getSchema, getItem, createItem, updateItem, uploadField, uploadImage, resetDefault, listCollection,
   savePreviewDraft, typeLabel, addLabelFor, type FieldSchema, type CmsItem,
 } from "@/lib/cms/api";
 import { CMS_ICONS, ICON_LABELS, iconNamesFor } from "@/lib/cms/icons";
@@ -676,7 +676,7 @@ const FIELD_SECTIONS: Record<string, { title: string; title_en: string; bases: s
     { title: "ما يميّز الفرع", title_en: "What sets the branch apart", bases: ["distinctions"],
       note: "البطاقات في قسم «ما يميّز الفرع» داخل صفحة الفرع — لكل بطاقة أيقونة + عنوان + وصف.",
       note_en: "The cards in the \"What sets the branch apart\" section on the branch page — each card has an icon + title + description.", preview: "/branches/{slug}" },
-    { title: "قصص النجاح", title_en: "Success stories", bases: ["success_heading", "success_sub"],
+    { title: "قصص النجاح", title_en: "Success stories", bases: ["success_heading", "success_sub", "success_story_slugs", "success_stories"],
       note: "عنوان ووصف قسم «قصص النجاح» في صفحة الفرع فقط. أمّا بطاقات القصص نفسها فتُدار من صفحة «أبطال عبور». (لتمييز جزء من العنوان بلون مختلف ضعه بين نجمتين **هكذا**).",
       note_en: "The heading and subtitle of the \"Success stories\" section on the branch page only. The story cards themselves are managed from the \"Oboor Heroes\" page. (Wrap part of the heading in **asterisks** to highlight it).", preview: "/branches/{slug}" },
     { title: "ملف الفرع (PDF)", title_en: "Branch profile (PDF)", bases: ["profile_intro", "profile_stats", "journey", "accreditations"],
@@ -990,6 +990,10 @@ function FieldInput({ f, value, onChange, badge, dir }: { f: FieldSchema; value:
           <AboutTagEditor value={value} onChange={onChange} dir={dir} />
         ) : f.base === "service_cards" ? (
           <ServiceCardsEditor value={value} onChange={onChange} />
+        ) : f.base === "success_story_slugs" ? (
+          <StorySelectEditor value={value} onChange={onChange} />
+        ) : f.base === "success_stories" ? (
+          <BranchStoriesEditor value={value} onChange={onChange} />
         ) : BRANCH_LIST_FIELDS[f.base] ? (
           <BranchListEditor value={value} onChange={onChange} base={f.base} />
         ) : OBJECT_FIELDS[f.base] ? (
@@ -1502,6 +1506,120 @@ function ServiceCardsEditor({ value, onChange }: { value: unknown; onChange: (v:
       <button type="button" onClick={add} className="inline-flex items-center gap-1.5 rounded-lg bg-brand px-3.5 py-2 text-xs font-bold text-white hover:bg-brand-dark">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path strokeLinecap="round" d="M12 5v14M5 12h14" /></svg>
         {tt("إضافة خدمة", "Add Service")}
+      </button>
+    </div>
+  );
+}
+
+// محرّر «اختيار قصص من أبطال عبور» — قائمة اختيار (checkbox) بأسماء القصص العامة
+// القيمة = قائمة slugs بالترتيب الذي اختيرت به. تظهر القصص المختارة على صفحة هذا الفرع.
+function StorySelectEditor({ value, onChange }: { value: unknown; onChange: (v: unknown) => void }) {
+  const { lang } = useCmsLang();
+  const isEn = lang === "en";
+  const tt = (a: string, e: string) => (isEn ? e : a);
+  const selected = Array.isArray(value) ? (value as unknown[]).filter((x): x is string => typeof x === "string") : [];
+  const [items, setItems] = useState<CmsItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    let alive = true;
+    listCollection("success").then((r) => { if (alive) { setItems(r.items || []); setLoading(false); } }).catch(() => { if (alive) setLoading(false); });
+    return () => { alive = false; };
+  }, []);
+  const toggle = (slug: string) => onChange(selected.includes(slug) ? selected.filter((s) => s !== slug) : [...selected, slug]);
+  const nameOf = (it: CmsItem) => String((isEn ? it.name_en || it.name_ar : it.name_ar) || it.name_ar || it.slug || `#${it.id}`);
+  const ageOf = (it: CmsItem) => String((isEn ? it.age_en || it.age_ar : it.age_ar) || "");
+  if (loading) return <p className="rounded-xl border border-dashed border-line bg-surface px-3 py-2 text-[11px] text-ink-soft">{tt("جارٍ تحميل القصص…", "Loading stories…")}</p>;
+  if (!items.length) return <p className="rounded-xl border border-dashed border-line bg-surface px-3 py-2 text-[11px] text-ink-soft">{tt("لا توجد قصص في «أبطال عبور» بعد.", "No stories in “Oboor Heroes” yet.")}</p>;
+  return (
+    <div className="space-y-1.5">
+      <div className="grid gap-1.5 sm:grid-cols-2">
+        {items.map((it) => {
+          const slug = String(it.slug || "");
+          const on = selected.includes(slug);
+          const order = selected.indexOf(slug) + 1;
+          return (
+            <button key={it.id} type="button" onClick={() => toggle(slug)}
+              className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-start transition-colors ${on ? "border-brand bg-brand/5" : "border-line bg-surface hover:border-brand/40"}`}>
+              <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md text-[10px] font-bold ${on ? "bg-brand text-white" : "border border-line bg-white text-transparent"}`}>{on ? order : ""}</span>
+              <span className="min-w-0"><span className="block truncate text-[13px] font-semibold text-ink">{nameOf(it)}</span>{ageOf(it) && <span className="block truncate text-[11px] text-ink-soft">{ageOf(it)}</span>}</span>
+            </button>
+          );
+        })}
+      </div>
+      <p className="text-[11px] leading-4 text-ink-soft">{tt("اختر القصص التي تظهر في هذا الفرع — الرقم يوضّح ترتيب الظهور. محتوى الكارت ونافذة التفاصيل يُحرَّر في صفحة «أبطال عبور».", "Pick the stories shown on this branch — the number shows display order. Each card's content & popup are edited in the “Oboor Heroes” page.")}</p>
+    </div>
+  );
+}
+
+// محرّر «قصص نجاح خاصة بالفرع» — قائمة قصص كاملة (الكارت + نافذة التفاصيل) ثنائية اللغة.
+// كل قصة تُخزَّن كـ {name_ar/en, age_ar/en, image, category_ar/en, ... , results_ar/en}.
+function BranchStoriesEditor({ value, onChange }: { value: unknown; onChange: (v: unknown) => void }) {
+  const { lang } = useCmsLang();
+  const isEn = lang === "en";
+  const tt = (a: string, e: string) => (isEn ? e : a);
+  const stories = blkObjArr(value);
+  const commit = (next: Rec[]) => onChange(next);
+  const patch = (i: number, key: string, v: unknown) => commit(stories.map((s, j) => (j === i ? { ...s, [key]: v } : s)));
+  const move = (i: number, d: -1 | 1) => { const j = i + d; if (j < 0 || j >= stories.length) return; const next = [...stories]; [next[i], next[j]] = [next[j], next[i]]; commit(next); };
+  const removeAt = (i: number) => commit(stories.filter((_, j) => j !== i));
+  const add = () => commit([...stories, { slug: `branch-story-${stories.length + 1}` }]);
+  const bi = (i: number, base: string, label: string) => (
+    <BiScalar label={label} a={blkStr(stories[i][`${base}_ar`])} e={blkStr(stories[i][`${base}_en`])} onA={(v) => patch(i, `${base}_ar`, v)} onE={(v) => patch(i, `${base}_en`, v)} />
+  );
+  return (
+    <div className="space-y-4">
+      {stories.length === 0 && <p className="rounded-xl border border-dashed border-line bg-surface px-3 py-2 text-[11px] text-ink-soft">{tt("لا توجد قصص خاصة بالفرع — اضغط «إضافة قصة».", "No branch-specific stories — click “Add Story”.")}</p>}
+      {stories.map((s, i) => (
+        <div key={i} className="rounded-2xl border border-line bg-surface/40 p-4">
+          <div className="mb-3 flex items-center justify-between">
+            <span className="text-xs font-bold text-brand-dark">{tt("قصة", "Story")} {i + 1}{blkStr(s.name_ar) || blkStr(s.name_en) ? ` — ${blkStr(isEn ? s.name_en || s.name_ar : s.name_ar)}` : ""}</span>
+            <div className="flex items-center gap-1">
+              <button type="button" onClick={() => move(i, -1)} disabled={i === 0} className="rounded-lg border border-line px-2 py-1 text-[11px] disabled:opacity-40">↑</button>
+              <button type="button" onClick={() => move(i, 1)} disabled={i === stories.length - 1} className="rounded-lg border border-line px-2 py-1 text-[11px] disabled:opacity-40">↓</button>
+              <button type="button" onClick={() => removeAt(i)} className="rounded-lg bg-red-50 px-2 py-1 text-[11px] font-semibold text-red-600 hover:bg-red-600 hover:text-white">{tt("حذف", "Remove")}</button>
+            </div>
+          </div>
+          {/* الصورة */}
+          <div className="mb-3">
+            <p className="mb-1 text-xs font-semibold text-ink-soft">{tt("صورة القصة", "Story image")}</p>
+            <div className="flex items-center gap-3">
+              {blkStr(s.image) ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={blkStr(s.image)} alt="" className="h-16 w-16 rounded-xl object-cover ring-1 ring-line" /> : <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-white text-[10px] text-ink-soft ring-1 ring-line">{tt("لا صورة", "No image")}</div>}
+              <label className="cursor-pointer rounded-xl border border-line bg-white px-3 py-2 text-[11px] font-semibold text-brand hover:border-brand">
+                {tt("رفع صورة", "Upload image")}
+                <input type="file" accept="image/*" className="hidden" onChange={async (e) => { const f = e.target.files?.[0]; if (!f) return; try { const r = await uploadImage(f); patch(i, "image", r.url); } catch { /* ignore */ } e.target.value = ""; }} />
+              </label>
+            </div>
+          </div>
+          {/* بيانات الكارت */}
+          <p className="mb-2 text-[11px] font-bold uppercase tracking-wide text-ink-soft">{tt("بيانات الكارت", "Card fields")}</p>
+          <div className="space-y-2.5">
+            {bi(i, "name", tt("الاسم", "Name"))}
+            {bi(i, "age", tt("العمر (مثل: ٣ سنوات)", "Age (e.g. 3 years)"))}
+            {bi(i, "category", tt("الفئة (الوسم أعلى الصورة)", "Category (badge over image)"))}
+            {bi(i, "duration_label", tt("شارة المدة (أسفل الصورة)", "Duration badge (under image)"))}
+            {bi(i, "before", tt("قبل الالتحاق", "Before"))}
+            {bi(i, "after", tt("بعد البرنامج", "After"))}
+            {bi(i, "quote", tt("الاقتباس", "Quote"))}
+            {bi(i, "author", tt("راوي القصة (مثل: أم فهد)", "Story author (e.g. Fahd's mom)"))}
+            {bi(i, "meta_duration", tt("مدة العلاج (أيقونة الساعة)", "Treatment duration (clock)"))}
+          </div>
+          {/* نافذة التفاصيل */}
+          <p className="mb-2 mt-4 text-[11px] font-bold uppercase tracking-wide text-ink-soft">{tt("نافذة التفاصيل (عرض التفاصيل)", "Details popup (View details)")}</p>
+          <div className="space-y-2.5">
+            {bi(i, "badge", tt("الوسم أعلى النافذة (مثل: حياة جديدة وثقة)", "Top badge (e.g. New life & confidence)"))}
+            {bi(i, "program", tt("البرنامج", "Program"))}
+            {bi(i, "meta_age", tt("الفئة العمرية (داخل النافذة)", "Age group (in popup)"))}
+            {bi(i, "journey", tt("رحلة العلاج (سرد)", "Treatment journey (narrative)"))}
+            <div>
+              <p className="mb-1 text-xs font-semibold text-ink-soft">{tt("أبرز النتائج", "Key results")}</p>
+              <BiStrList a={blkStrArr(s.results_ar)} e={blkStrArr(s.results_en)} addLabel={tt("إضافة نتيجة", "Add result")} onChange={(av, ev) => commit(stories.map((ss, j) => (j === i ? { ...ss, results_ar: av, results_en: ev } : ss)))} />
+            </div>
+          </div>
+        </div>
+      ))}
+      <button type="button" onClick={add} className="inline-flex items-center gap-1.5 rounded-lg bg-brand px-3.5 py-2 text-xs font-bold text-white hover:bg-brand-dark">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path strokeLinecap="round" d="M12 5v14M5 12h14" /></svg>
+        {tt("إضافة قصة", "Add Story")}
       </button>
     </div>
   );

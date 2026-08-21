@@ -76,7 +76,15 @@ export default async function BranchDetailPage({ params }: { params: Promise<{ s
   if (!b) notFound();
 
   const en = locale === "en";
-  const successStories = getSuccessStories(locale);
+  const allStories = getSuccessStories(locale);
+  // قصص نجاح هذا الفرع: المختارة من «أبطال عبور» (بالـslug) + القصص الخاصة بالفرع.
+  // لو الفرع لم يحدّد أياً منها ⇒ نرجع لأول ٣ قصص عامة (السلوك الافتراضي القديم).
+  const selectedStories = (b.successStorySlugs ?? [])
+    .map((sl) => allStories.find((s) => s.slug === sl))
+    .filter((s): s is NonNullable<typeof s> => Boolean(s));
+  const branchOwnStories = b.branchStories ?? [];
+  const merged = [...selectedStories, ...branchOwnStories];
+  const successStories = merged.length ? merged : allStories.slice(0, 3);
   // «ما يميّز الفرع» — خاص بهذا الفرع (يتحكّم فيه من لوحة الفرع) مع fallback ثابت
   const branchFeatures = b.distinctions?.length
     ? b.distinctions
@@ -214,7 +222,7 @@ export default async function BranchDetailPage({ params }: { params: Promise<{ s
             <p className="mt-2 text-sm text-ink-muted">{b.successSub || pick(locale, "كل قصة نجاح تُعبّر عن رحلة حقيقية من التحدي إلى الإنجاز.", "Every success story reflects a real journey from challenge to achievement.")}</p>
           </div>
           <div className="grid gap-7 md:grid-cols-2 lg:grid-cols-3">
-            {successStories.slice(0, 3).map((s) => <SuccessStoryCard key={s.slug} story={s} locale={locale} />)}
+            {successStories.map((s, i) => <SuccessStoryCard key={s.slug || i} story={s} locale={locale} />)}
           </div>
         </div>
       </section>

@@ -14,6 +14,7 @@ class BranchSerializer(serializers.ModelSerializer):
                   "services_ar", "services_en", "service_cards",
                   "profile_intro_ar", "profile_intro_en", "profile_stats", "journey", "accreditations",
                   "distinctions", "success_heading_ar", "success_heading_en", "success_sub_ar", "success_sub_en",
+                  "success_story_slugs", "success_stories",
                   "gallery", "lat", "lng", "is_new", "order"]
 
 

@@ -884,16 +884,55 @@ function BranchGroupPreview({ bases, values, lang }: { bases: string[]; values: 
     );
   }
 
-  // 3) قصص النجاح — عنوان + وصف (البطاقات نفسها من صفحة «أبطال عبور»)
-  if (has("success_heading") || has("success_sub")) {
+  // 3) قصص النجاح — عنوان + وصف + كروت (مختارة من أبطال عبور + خاصة بالفرع)
+  if (has("success_heading") || has("success_sub") || has("success_story_slugs") || has("success_stories")) {
     const heading = ps("success_heading");
     const sub = ps("success_sub");
+    const slugs = Array.isArray(values.success_story_slugs) ? (values.success_story_slugs as unknown[]).filter((x): x is string => typeof x === "string") : [];
+    const custom = arr("success_stories");
+    const hasCustom = custom.some((s) => il(s, "name"));
     return (
       <div dir={dir} className="rounded-2xl bg-white p-4 text-start ring-1 ring-line">
         <h2 className="text-base font-extrabold text-ink">{heading ? highlight(heading) : <>{en ? "Success Stories from " : "قصص نجاح من "}<span className="text-brand">{branchName}</span></>}</h2>
         <p className="mt-1.5 text-[12px] text-ink-muted">{sub || (en ? "Every success story reflects a real journey from challenge to achievement." : "كل قصة نجاح تُعبّر عن رحلة حقيقية من التحدي إلى الإنجاز.")}</p>
-        <div className="mt-3 grid gap-2 sm:grid-cols-3">{[0, 1, 2].map((i) => <div key={i} className="rounded-xl border border-dashed border-line bg-surface/50 p-3 text-center text-[10px] text-ink-soft">{en ? "Story card" : "بطاقة قصة"}</div>)}</div>
-        <p className="mt-2 text-[10px] leading-4 text-ink-soft">ℹ️ {en ? "The story cards themselves are managed from the \"Oboor Heroes\" page." : "بطاقات القصص نفسها تُدار من صفحة «أبطال عبور»."}</p>
+        {slugs.length > 0 && (
+          <div className="mt-3">
+            <p className="mb-1.5 text-[10px] font-semibold text-ink-soft">{en ? "Selected from Oboor Heroes:" : "مختارة من أبطال عبور:"}</p>
+            <div className="flex flex-wrap gap-1.5">{slugs.map((sl, i) => <span key={i} className="inline-flex items-center gap-1 rounded-full bg-brand/10 px-2.5 py-1 text-[11px] font-medium text-brand-dark"><span className="flex h-4 w-4 items-center justify-center rounded-full bg-brand text-[9px] font-bold text-white">{i + 1}</span>{sl}</span>)}</div>
+          </div>
+        )}
+        {hasCustom && (
+          <div className="mt-3 grid gap-3 sm:grid-cols-2">
+            {custom.filter((s) => il(s, "name")).map((s, i) => {
+              const rawImg2 = String(s.image || "");
+              const cimg = rawImg2 ? (/^(https?:|data:|blob:|\/)/.test(rawImg2) ? rawImg2 : "/" + rawImg2.replace(/^\/+/, "")) : "";
+              const cat = il(s, "category"); const dur = il(s, "duration_label");
+              return (
+                <div key={i} className="overflow-hidden rounded-2xl border border-line bg-white shadow-sm">
+                  <div className="relative h-24 w-full bg-surface">
+                    {cimg ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={cimg} alt="" className="h-24 w-full object-cover" /> : <div className="flex h-24 items-center justify-center text-[10px] text-ink-soft">{en ? "No image" : "لا صورة"}</div>}
+                    {cat && <span className="absolute end-2 top-2 rounded-full bg-brand px-2 py-0.5 text-[10px] font-bold text-white">{cat}</span>}
+                    {dur && <span className="absolute start-2 bottom-2 rounded-full bg-black/55 px-2 py-0.5 text-[10px] font-medium text-white">{dur}</span>}
+                  </div>
+                  <div className="p-3 text-start">
+                    <h3 className="text-[13px] font-bold text-ink">{il(s, "name")}{il(s, "age") ? ` - ${il(s, "age")}` : ""}</h3>
+                    <div className="mt-2 grid grid-cols-2 gap-1.5">
+                      <div className="rounded-lg bg-[#e8f7f9] p-1.5"><p className="text-[9px] font-bold text-brand">{en ? "After" : "بعد البرنامج"}</p><p className="mt-0.5 text-[10px] leading-4 text-ink-muted">{il(s, "after")}</p></div>
+                      <div className="rounded-lg bg-red-50 p-1.5"><p className="text-[9px] font-bold text-red-400">{en ? "Before" : "قبل الالتحاق"}</p><p className="mt-0.5 text-[10px] leading-4 text-ink-muted">{il(s, "before")}</p></div>
+                    </div>
+                    {il(s, "quote") && <p className="mt-2 rounded-lg bg-surface p-2 text-[10px] leading-5 text-ink-muted">“{il(s, "quote")}”</p>}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+        {slugs.length === 0 && !hasCustom && (
+          <>
+            <div className="mt-3 grid gap-2 sm:grid-cols-3">{[0, 1, 2].map((i) => <div key={i} className="rounded-xl border border-dashed border-line bg-surface/50 p-3 text-center text-[10px] text-ink-soft">{en ? "Story card" : "بطاقة قصة"}</div>)}</div>
+            <p className="mt-2 text-[10px] leading-4 text-ink-soft">ℹ️ {en ? "No stories chosen — the first 3 global stories from \"Oboor Heroes\" are shown by default." : "لم تُختَر قصص — تظهر افتراضياً أول ٣ قصص عامة من «أبطال عبور»."}</p>
+          </>
+        )}
       </div>
     );
   }

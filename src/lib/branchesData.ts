@@ -29,6 +29,10 @@ export type Branch = {
   // عنوان ووصف قسم قصص النجاح (يدعمان تمييز الجزء بين نجمتين **)
   successHeading?: string;
   successSub?: string;
+  // قصص نجاح مختارة من صفحة «أبطال عبور» تظهر في هذا الفرع (slugs)
+  successStorySlugs?: string[];
+  // قصص نجاح خاصة بهذا الفرع فقط (محلولة حسب اللغة) — كارت + نافذة تفاصيل
+  branchStories?: import("@/lib/successStoriesData").SuccessStory[];
   gallery?: string[];
   lat?: number | null;
   lng?: number | null;

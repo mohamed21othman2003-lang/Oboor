@@ -61,6 +61,10 @@ class Branch(models.Model):
     success_heading_en = models.CharField("عنوان قصص النجاح (إنجليزي)", max_length=300, blank=True)
     success_sub_ar = models.TextField("وصف قصص النجاح (عربي)", blank=True)
     success_sub_en = models.TextField("وصف قصص النجاح (إنجليزي)", blank=True)
+    # قصص نجاح مختارة من صفحة «أبطال عبور» تظهر في هذا الفرع (قائمة slugs بالترتيب)
+    success_story_slugs = models.JSONField("قصص مختارة من أبطال عبور", default=list, blank=True)
+    # قصص نجاح خاصة بهذا الفرع فقط (كل قصة: الكارت + نافذة التفاصيل، ثنائية اللغة)
+    success_stories = models.JSONField("قصص نجاح خاصة بالفرع", default=list, blank=True)
 
     gallery = models.JSONField("معرض صور الفرع", default=list, blank=True)
 

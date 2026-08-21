@@ -3,7 +3,33 @@
 
 import { fetchContent } from "@/lib/server/django";
 import { ALL_BRANCHES, ALL_BRANCHES_EN, REGION_EN, serviceEn, type Branch } from "@/lib/branchesData";
+import { type SuccessStory } from "@/lib/successStoriesData";
 import { type Locale } from "@/i18n/config";
+
+// تحويل قصة نجاح خاصة بالفرع (مخزّنة ثنائية اللغة) إلى شكل SuccessStory حسب اللغة
+type RawBranchStory = NonNullable<ApiBranch["success_stories"]>[number];
+function mapBranchStory(s: RawBranchStory, en: boolean): SuccessStory {
+  const g = (ar?: string, e?: string) => (en ? (e || ar) : ar) || "";
+  const gl = (ar?: string[], e?: string[]) => (en ? (e && e.length ? e : ar) : ar) || [];
+  return {
+    slug: s.slug || "",
+    name: g(s.name_ar, s.name_en),
+    age: g(s.age_ar, s.age_en),
+    image: s.image || "",
+    category: g(s.category_ar, s.category_en),
+    durationLabel: g(s.duration_label_ar, s.duration_label_en),
+    before: g(s.before_ar, s.before_en),
+    after: g(s.after_ar, s.after_en),
+    quote: g(s.quote_ar, s.quote_en),
+    metaDuration: g(s.meta_duration_ar, s.meta_duration_en),
+    metaAge: g(s.meta_age_ar, s.meta_age_en),
+    author: g(s.author_ar, s.author_en),
+    badge: g(s.badge_ar, s.badge_en) || undefined,
+    program: g(s.program_ar, s.program_en) || undefined,
+    journey: g(s.journey_ar, s.journey_en) || undefined,
+    results: gl(s.results_ar, s.results_en),
+  };
+}
 
 // الشكل اللي بيرجع من Django (content/branches)
 type ApiBranch = {
@@ -28,6 +54,17 @@ type ApiBranch = {
   distinctions?: { icon?: string; title_ar?: string; title_en?: string; desc_ar?: string; desc_en?: string }[];
   success_heading_ar?: string; success_heading_en?: string;
   success_sub_ar?: string; success_sub_en?: string;
+  success_story_slugs?: string[];
+  success_stories?: {
+    slug?: string; image?: string;
+    name_ar?: string; name_en?: string; age_ar?: string; age_en?: string;
+    category_ar?: string; category_en?: string; duration_label_ar?: string; duration_label_en?: string;
+    before_ar?: string; before_en?: string; after_ar?: string; after_en?: string;
+    quote_ar?: string; quote_en?: string; meta_duration_ar?: string; meta_duration_en?: string;
+    meta_age_ar?: string; meta_age_en?: string; author_ar?: string; author_en?: string;
+    badge_ar?: string; badge_en?: string; program_ar?: string; program_en?: string;
+    journey_ar?: string; journey_en?: string; results_ar?: string[]; results_en?: string[];
+  }[];
   gallery: string[];
   lat: number | null; lng: number | null;
   is_new: boolean;
@@ -81,6 +118,8 @@ function toBranch(row: ApiBranch, locale: Locale): Branch {
     })).filter((d) => d.title),
     successHeading: en ? (row.success_heading_en || row.success_heading_ar || "") : (row.success_heading_ar || ""),
     successSub: en ? (row.success_sub_en || row.success_sub_ar || "") : (row.success_sub_ar || ""),
+    successStorySlugs: Array.isArray(row.success_story_slugs) ? row.success_story_slugs.filter(Boolean) : [],
+    branchStories: (Array.isArray(row.success_stories) ? row.success_stories : []).map((s) => mapBranchStory(s, en)).filter((s) => s.name),
     gallery: Array.isArray(row.gallery) ? row.gallery : [],
     lat: row.lat ?? null,
     lng: row.lng ?? null,
