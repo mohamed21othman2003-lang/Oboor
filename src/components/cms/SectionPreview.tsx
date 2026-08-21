@@ -1036,6 +1036,71 @@ function BranchGroupPreview({ bases, values, lang }: { bases: string[]; values: 
   );
 }
 
+// ===== معاينة أقسام «روّادنا» (مطابقة لبطاقة الأخصائي + نافذة التفاصيل) =====
+function SpecialistGroupPreview({ bases, values, lang }: { bases: string[]; values: Record<string, unknown>; lang: "ar" | "en" }) {
+  const en = lang === "en";
+  const dir = en ? "ltr" : "rtl";
+  const has = (b: string) => bases.includes(b);
+  const ps = (base: string) => { const v = en ? (values[`${base}_en`] || values[`${base}_ar`]) : values[`${base}_ar`]; return typeof v === "string" ? v : ""; };
+  const pl = (base: string): string[] => { const e = values[`${base}_en`], a = values[`${base}_ar`]; const v = en ? ((Array.isArray(e) && e.length) ? e : a) : a; return Array.isArray(v) ? (v as string[]) : []; };
+  const rawImg = String(values.image_file || values.image || "");
+  const img = rawImg ? (/^(https?:|data:|blob:|\/)/.test(rawImg) ? rawImg : "/" + rawImg.replace(/^\/+/, "")) : "";
+  const cal = <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" /></svg>;
+  const pin = <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>;
+  const ribbon = <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><circle cx="12" cy="8" r="6" /><path d="M8.5 13.5L7 22l5-3 5 3-1.5-8.5" /></svg>;
+  const clock = <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" strokeLinecap="round" /></svg>;
+  const Info = ({ i, t }: { i: React.ReactNode; t: string }) => t ? <span className="flex items-center gap-1.5 text-[11px] text-ink-muted"><span className="text-ink-soft">{i}</span>{t}</span> : null;
+
+  // نافذة التفاصيل — رأس متدرّج + شرائح + نبذة + مؤهلات
+  if (has("about") || has("qualifications")) {
+    const chips = [
+      { i: ribbon, label: en ? "Years of Experience" : "سنوات الخبرة", v: ps("experience") },
+      { i: pin, label: en ? "Available Branches" : "الفروع المتواجد بها", v: ps("branches") },
+      { i: cal, label: en ? "Working Days" : "أيام العمل", v: ps("days") },
+      { i: clock, label: en ? "Working Hours" : "ساعات العمل", v: ps("hours") },
+    ].filter((c) => c.v);
+    const quals = pl("qualifications");
+    return (
+      <div dir={dir} className="overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-line">
+        <div className="flex items-center gap-3 bg-gradient-to-bl from-brand to-brand-dark p-4 text-white">
+          <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-2xl bg-white/10 ring-2 ring-white/20">{img ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={img} alt="" className="h-16 w-16 object-cover" /> : null}</div>
+          <div className="flex-1 text-start">
+            <h3 className="text-base font-extrabold">{ps("name") || (en ? "Specialist name" : "اسم الأخصائي")}</h3>
+            {ps("specialty") && <span className="mt-1 inline-block rounded-full bg-white/20 px-2.5 py-0.5 text-[11px] font-semibold">{ps("specialty")}</span>}
+            {ps("branch") && <p className="mt-1 flex items-center gap-1.5 text-[12px] text-white/90">{pin}{ps("branch")}</p>}
+          </div>
+        </div>
+        <div className="space-y-3 p-4">
+          {chips.length > 0 && (
+            <div className="grid grid-cols-2 gap-2">
+              {chips.map((c, i) => <div key={i} className="rounded-xl bg-surface p-2 text-start"><span className="flex items-center gap-1.5 text-[10px] text-ink-soft"><span className="text-brand">{c.i}</span>{c.label}</span><p className="mt-0.5 text-[12px] font-bold text-ink">{c.v}</p></div>)}
+            </div>
+          )}
+          {ps("about") && <div><h4 className="flex items-center gap-2 text-[13px] font-bold text-ink"><span className="h-4 w-1 rounded-full bg-brand" />{en ? "About the Specialist" : "نبذة عن الأخصائي"}</h4><p className="mt-1.5 text-[12px] leading-6 text-ink-muted">{ps("about")}</p></div>}
+          {quals.length > 0 && <div><h4 className="flex items-center gap-2 text-[13px] font-bold text-ink"><span className="h-4 w-1 rounded-full bg-brand" />{en ? "Certifications & Qualifications" : "الشهادات والمؤهلات"}</h4><ul className="mt-1.5 space-y-1">{quals.map((q, i) => <li key={i} className="flex items-start gap-2 text-[12px] leading-6 text-ink-muted"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="mt-0.5 shrink-0 text-brand"><circle cx="12" cy="12" r="9" /><path d="M8.5 12l2.2 2.2L15.5 9.5" strokeLinecap="round" strokeLinejoin="round" /></svg>{q}</li>)}</ul></div>}
+        </div>
+      </div>
+    );
+  }
+
+  // بطاقة الأخصائي (الشبكة) — صورة + وسم التخصص + الاسم + الوصف + شبكة معلومات + زر
+  return (
+    <div dir={dir} className="flex flex-col overflow-hidden rounded-[18px] border border-line bg-white">
+      <div className="relative h-40 w-full bg-[#f3f5f6]">{img ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={img} alt="" className="h-40 w-full object-cover" /> : <div className="flex h-40 items-center justify-center text-[11px] text-ink-soft">{en ? "No image" : "لا صورة"}</div>}</div>
+      <div className="flex flex-1 flex-col gap-2.5 p-4 text-start">
+        {ps("specialty") && <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-[#e8f7f8] px-2.5 py-1 text-[11px] font-semibold text-[#1a9aa5]">{ps("specialty")}<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" /><circle cx="7" cy="7" r="1.2" /></svg></span>}
+        <h3 className="text-base font-bold text-ink">{ps("name") || (en ? "Specialist name" : "اسم الأخصائي")}</h3>
+        {ps("desc") && <p className="text-[12px] leading-6 text-ink-muted">{ps("desc")}</p>}
+        <div className="grid grid-cols-2 gap-y-2">
+          <Info i={cal} t={ps("days")} /><Info i={pin} t={ps("branch")} />
+          <Info i={ribbon} t={ps("experience")} /><Info i={clock} t={ps("hours")} />
+        </div>
+        <div className="mt-1 flex items-center justify-center gap-1.5 rounded-[14px] bg-brand py-2 text-[11px] font-semibold text-white">{en ? "View Details" : "عرض التفاصيل"}<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z" /><circle cx="12" cy="12" r="3" /></svg></div>
+      </div>
+    </div>
+  );
+}
+
 export function GroupPreview({ type, bases, values, lang }: { type: string; bases: string[]; values: Record<string, unknown>; lang: "ar" | "en" }) {
   const en = lang === "en";
   const dir = en ? "ltr" : "rtl";
@@ -1045,6 +1110,7 @@ export function GroupPreview({ type, bases, values, lang }: { type: string; base
   if (type === "services") return <ClinicalGroupPreview bases={bases} values={values} lang={lang} />;
   if (type === "techniques") return <TechniqueGroupPreview bases={bases} values={values} lang={lang} />;
   if (type === "branches") return <BranchGroupPreview bases={bases} values={values} lang={lang} />;
+  if (type === "specialists") return <SpecialistGroupPreview bases={bases} values={values} lang={lang} />;
   // المعاينة تقرأ فيلدز مجموعتها فقط (لا تتسرّب لحقول أقسام تانية)
   const gs = (base: string) => { if (!has(base)) return ""; const v = en ? (values[`${base}_en`] || values[`${base}_ar`]) : values[`${base}_ar`]; return typeof v === "string" ? v : ""; };
   const gl = (base: string): unknown[] => {

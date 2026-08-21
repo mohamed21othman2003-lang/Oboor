@@ -708,6 +708,14 @@ const FIELD_SECTIONS: Record<string, { title: string; title_en: string; bases: s
     { title: "قسم التواصل السفلي (CTA)", title_en: "Bottom contact section (CTA)", bases: ["cta_badge", "cta_title", "cta_text"],
       note: "قسم التواصل أسفل صفحة هذه الخدمة — خاص بها وحدها. اتركه فارغاً لاستخدام النص الافتراضي.", note_en: "The contact section at the bottom of this service's page — unique to it. Leave empty for the default text.", preview: "/services/{slug}" },
   ],
+  specialists: [
+    { title: "بطاقة الأخصائي", title_en: "Specialist card", bases: ["image", "image_file", "name", "specialty", "desc", "days", "branch", "experience", "hours"],
+      note: "البطاقة في شبكة «روّادنا» (صورة + التخصص + الاسم + الوصف + أيام/فرع/خبرة/ساعات + زر عرض التفاصيل).",
+      note_en: "The card in the \"Our Pioneers\" grid (image + specialty + name + desc + days/branch/experience/hours + View Details button).", preview: "/specialists" },
+    { title: "نافذة التفاصيل", title_en: "Details popup", bases: ["about", "qualifications", "branches"],
+      note: "تظهر عند الضغط على «عرض التفاصيل»: رأس + شرائح (خبرة/فروع/أيام/ساعات) + نبذة + الشهادات والمؤهلات.",
+      note_en: "Shown when clicking \"View Details\": header + chips (experience/branches/days/hours) + about + certifications.", preview: "/specialists" },
+  ],
   techniques: [
     { title: "أعلى الصفحة (الهيرو)", title_en: "Top of page (Hero)", bases: ["title", "badge", "image", "image_file"],
       note: "الصورة + بادج التوفّر + اسم التقنية، في أعلى الصفحة.", note_en: "Image + availability badge + technique name, at the top of the page.", preview: "/techniques/{slug}" },
@@ -724,7 +732,7 @@ const FIELD_SECTIONS: Record<string, { title: string; title_en: string; bases: s
   ],
 };
 // أنواع العناصر التي تعرض معاينة حيّة بجوار الحقول (كما في الموقع)
-const LIVE_PREVIEW_TYPES = new Set(["news", "programs", "services", "techniques", "branches"]);
+const LIVE_PREVIEW_TYPES = new Set(["news", "programs", "services", "techniques", "branches", "specialists"]);
 // حقول تقنية/اختيارية تُخفى إن كانت فارغة (تقليل التشويش لمن لا يحتاجها)
 // تشمل حقول البرامج الشرطية (قائمة الفئة المستهدفة + المحطات التطبيقية):
 // تظهر فقط في البرامج التي تستخدمها فعلاً على الصفحة، وتختفي في غيرها.
