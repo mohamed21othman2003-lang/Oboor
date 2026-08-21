@@ -829,20 +829,41 @@ function MiniStoryCard({ s, en }: { s: Record<string, unknown>; en: boolean }) {
   const rawImg = String(s.image || "");
   const img = rawImg ? (/^(https?:|data:|blob:|\/)/.test(rawImg) ? rawImg : "/" + rawImg.replace(/^\/+/, "")) : "";
   const cat = g("category"); const dur = g("duration_label"); const name = g("name"); const age = g("age");
+  const author = g("author"); const metaAge = g("meta_age"); const metaDuration = g("meta_duration");
+  const clock = <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" strokeLinecap="round" /></svg>;
+  const user = <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>;
+  const users = <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" /></svg>;
   return (
     <div className="overflow-hidden rounded-2xl border border-line bg-white shadow-sm">
       <div className="relative h-24 w-full bg-surface">
         {img ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={img} alt="" className="h-24 w-full object-cover" /> : <div className="flex h-24 items-center justify-center text-[10px] text-ink-soft">{en ? "No image" : "لا صورة"}</div>}
-        {cat && <span className="absolute end-2 top-2 rounded-full bg-brand px-2 py-0.5 text-[10px] font-bold text-white">{cat}</span>}
-        {dur && <span className="absolute start-2 bottom-2 rounded-full bg-black/55 px-2 py-0.5 text-[10px] font-medium text-white">{dur}</span>}
+        {cat && <span className="absolute right-2 top-2 rounded-lg bg-brand px-2 py-0.5 text-[10px] font-bold text-white shadow-sm">{cat}</span>}
+        {dur && <span className="absolute bottom-2 left-2 flex items-center gap-1 rounded-lg bg-[#36474d]/90 px-2 py-0.5 text-[10px] font-medium text-white">{clock}{dur}</span>}
       </div>
       <div className="p-3 text-start">
-        <h3 className="text-[13px] font-bold text-ink">{name || "—"}{age ? ` - ${age}` : ""}</h3>
+        <h3 className="text-[13px] font-extrabold text-ink">{name || "—"}{age ? ` - ${age}` : ""}</h3>
         <div className="mt-2 grid grid-cols-2 gap-1.5">
-          <div className="rounded-lg bg-[#e8f7f9] p-1.5"><p className="text-[9px] font-bold text-brand">{en ? "After" : "بعد البرنامج"}</p><p className="mt-0.5 text-[10px] leading-4 text-ink-muted">{g("after")}</p></div>
-          <div className="rounded-lg bg-red-50 p-1.5"><p className="text-[9px] font-bold text-red-400">{en ? "Before" : "قبل الالتحاق"}</p><p className="mt-0.5 text-[10px] leading-4 text-ink-muted">{g("before")}</p></div>
+          <div className="rounded-lg border border-[#f4dcdc] bg-[#fdf3f3] p-1.5"><p className="text-[9px] font-bold text-[#d9534f]">{en ? "Before" : "قبل الالتحاق"}</p><p className="mt-0.5 text-[10px] leading-4 text-ink-muted">{g("before")}</p></div>
+          <div className="rounded-lg border border-brand/15 bg-[#eef9fa] p-1.5"><p className="text-[9px] font-bold text-brand-dark">{en ? "After" : "بعد البرنامج"}</p><p className="mt-0.5 text-[10px] leading-4 text-ink-muted">{g("after")}</p></div>
         </div>
-        {g("quote") && <p className="mt-2 rounded-lg bg-surface p-2 text-[10px] leading-5 text-ink-muted">“{g("quote")}”</p>}
+        {(g("quote") || author || metaAge || metaDuration) && (
+          <div className="mt-2 rounded-lg border border-brand/15 bg-[#f7fcfd] p-2">
+            {g("quote") && <p className="text-[10px] leading-5 text-ink-muted">“{g("quote")}”</p>}
+            {(author || metaAge || metaDuration) && (
+              <div className="mt-2 flex items-center justify-between gap-2 border-t border-brand/10 pt-2 text-[9px] text-ink-soft">
+                <div className="flex items-center gap-2">
+                  {author && <span className="flex items-center gap-1"><span className="text-brand">{user}</span>{author}</span>}
+                  {metaAge && <span className="flex items-center gap-1"><span className="text-brand">{users}</span>{metaAge}</span>}
+                </div>
+                {metaDuration && <span className="flex items-center gap-1"><span className="text-brand">{clock}</span>{metaDuration}</span>}
+              </div>
+            )}
+          </div>
+        )}
+        <div className="mt-2 flex items-center justify-center gap-1.5 rounded-lg bg-brand py-1.5 text-[10px] font-semibold text-white">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" /><circle cx="12" cy="12" r="3" /></svg>
+          {en ? "View Details" : "عرض التفاصيل"}
+        </div>
       </div>
     </div>
   );
