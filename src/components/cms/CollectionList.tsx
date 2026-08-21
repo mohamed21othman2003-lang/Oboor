@@ -122,7 +122,12 @@ export default function CollectionList({ type }: { type: string }) {
   }
 
   function titleOf(it: CmsItem): string {
-    const v = it[titleField] ?? it["title_ar"] ?? it["name_ar"] ?? it["label_ar"] ?? it["value"] ?? it["key"] ?? `#${it.id}`;
+    // في اللوحة الإنجليزية نعرض الاسم الإنجليزي (زي الموقع) مع الرجوع للعربي لو فارغ.
+    const enField = titleField.replace(/_ar$/, "_en");
+    const cands = en
+      ? [it[enField], it[titleField], it["title_en"], it["title_ar"], it["name_en"], it["name_ar"], it["label_en"], it["label_ar"], it["value"], it["key"]]
+      : [it[titleField], it["title_ar"], it["name_ar"], it["label_ar"], it["value"], it["key"]];
+    const v = cands.find((x) => typeof x === "string" && x.trim() !== "");
     return String(v || `#${it.id}`);
   }
   function published(it: CmsItem): boolean | null {
