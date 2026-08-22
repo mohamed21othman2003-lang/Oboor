@@ -21,7 +21,14 @@ const common = {
       privacy: "سياسة الخصوصية",
       rights: "© 2026 مركز عبور للرعاية والتأهيل. جميع الحقوق محفوظة.",
       quick: { about: "عن عبور", services: "برامجنا التمكينية", branches: "مراكزنا", programs: "البرامج التأهيلية", blog: "المدوّنة والمقالات", contact: "خذ الخطوة لعبور" },
-      services: ["التدخل المبكر", "النطق والتخاطب", "العلاج الوظيفي", "العلاج الفيزيائي", "التحليل السلوكي التطبيقي (ABA)", "الدعم التربوي والأكاديمي"],
+      services: [
+        { label: "التدخل المبكر", href: "/programs" },
+        { label: "النطق والتخاطب", href: "/services/speech" },
+        { label: "العلاج الوظيفي", href: "/services/occupational" },
+        { label: "العلاج الفيزيائي", href: "/services/physical" },
+        { label: "التحليل السلوكي التطبيقي (ABA)", href: "/programs" },
+        { label: "الدعم التربوي والأكاديمي", href: "/programs" },
+      ],
     },
   },
   en: {
@@ -43,7 +50,14 @@ const common = {
       privacy: "Privacy Policy",
       rights: "© 2026 Oboor Center for Care & Rehabilitation. All rights reserved.",
       quick: { about: "About Us", services: "Services", branches: "Branches", programs: "Rehabilitation Programs", blog: "Blog & Articles", contact: "Take the Step to Oboor" },
-      services: ["Early Intervention", "Speech & Language Therapy", "Occupational Therapy", "Physical Therapy", "Applied Behavior Analysis (ABA)", "Educational & Academic Support"],
+      services: [
+        { label: "Early Intervention", href: "/programs" },
+        { label: "Speech & Language Therapy", href: "/services/speech" },
+        { label: "Occupational Therapy", href: "/services/occupational" },
+        { label: "Physical Therapy", href: "/services/physical" },
+        { label: "Applied Behavior Analysis (ABA)", href: "/programs" },
+        { label: "Educational & Academic Support", href: "/programs" },
+      ],
     },
   },
 } as const;

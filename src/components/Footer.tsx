@@ -100,7 +100,7 @@ export default function Footer({
     : QUICK_LINKS.map((l) => ({ label: t.quick[l.key], href: l.href }));
   const services = footer?.services?.length
     ? footer.services
-    : t.services.map((s) => ({ label: s, href: "/programs" }));
+    : t.services.map((s) => ({ label: s.label, href: s.href }));
 
   const social: { platform: string; url: string; label: string }[] = footer?.social?.length
     ? footer.social

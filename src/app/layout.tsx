@@ -135,7 +135,7 @@ export default async function RootLayout({
 
   const services = footer?.services?.length
     ? mapRows(footer.services)
-    : t.footer.services.map((s) => ({ label: s, href: "/programs" }));
+    : t.footer.services.map((s) => ({ label: s.label, href: s.href }));
 
   const social = footer?.social?.length
     ? [...footer.social]
