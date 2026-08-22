@@ -1163,12 +1163,64 @@ function SuccessGroupPreview({ bases, values, lang }: { bases: string[]; values:
   return <div dir={dir}><MiniStoryCard s={values} en={en} /></div>;
 }
 
+// ===== معاينة «بطاقات أنواع التقييم» (assessment-cards) =====
+function AssessmentCardGroupPreview({ bases, values, lang }: { bases: string[]; values: Record<string, unknown>; lang: "ar" | "en" }) {
+  const en = lang === "en";
+  const dir = en ? "ltr" : "rtl";
+  const has = (b: string) => bases.includes(b);
+  const ps = (base: string) => { const v = en ? (values[`${base}_en`] || values[`${base}_ar`]) : values[`${base}_ar`]; return typeof v === "string" ? v : ""; };
+  const qlist = ((): string[] => { const e = values.question_list_en, a = values.question_list_ar; const v = en ? ((Array.isArray(e) && e.length) ? e : a) : a; return Array.isArray(v) ? v.map((x) => (typeof x === "string" ? x : String((x as Record<string, unknown>)?.q ?? (x as Record<string, unknown>)?.text ?? (x as Record<string, unknown>)?.question_ar ?? ""))).filter(Boolean) : []; })();
+  const clock = <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" strokeLinecap="round" /></svg>;
+  const qic = <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><circle cx="12" cy="12" r="10" /><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3" /><path d="M12 17h.01" /></svg>;
+  const age = <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" /></svg>;
+
+  // قائمة الأسئلة (الأسئلة التمهيدية لهذا النوع)
+  if (has("question_list")) {
+    if (!qlist.length) return <PreviewShell dir={dir} empty en={en} />;
+    return (
+      <div dir={dir} className="space-y-2">
+        <p className="text-[11px] font-semibold text-ink-soft">{en ? "Preliminary Questions" : "أسئلة تمهيدية"}</p>
+        {qlist.map((q, i) => (
+          <div key={i} className="rounded-2xl border border-line bg-surface/40 p-2.5 text-start">
+            <p className="text-[12px] font-semibold text-ink"><span className="me-1 text-brand">{i + 1}.</span>{q}</p>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  // بطاقة نوع التقييم — أيقونة + عنوان + وصف + شبكة (المدة/الأسئلة/الفئة)
+  const metas = [
+    { i: clock, label: en ? "Duration" : "المدة", v: ps("duration") },
+    { i: qic, label: en ? "Questions" : "الأسئلة", v: ps("questions") },
+    { i: age, label: en ? "Age" : "الفئة", v: ps("age_range") },
+  ];
+  return (
+    <div dir={dir} className="flex flex-col rounded-2xl border border-line bg-white p-4 text-start shadow-sm">
+      <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand/10 text-brand">{CMS_ICONS[ps("icon") || String(values.icon || "")] ?? CMS_ICONS[String(values.icon || "")] ?? CMS_ICONS.star}</span>
+      <h3 className="mt-2 text-[14px] font-bold text-ink">{ps("title") || (en ? "Assessment type" : "نوع التقييم")}</h3>
+      {ps("desc") && <p className="mt-1 text-[12px] leading-6 text-ink-muted">{ps("desc")}</p>}
+      {metas.some((m) => m.v) && (
+        <div className="mt-3 grid grid-cols-3 gap-1 border-t border-line pt-3 text-center">
+          {metas.map((m, i) => (
+            <div key={i}>
+              <span className="flex items-center justify-center gap-1 text-[10px] text-ink-soft"><span className="text-brand">{m.i}</span>{m.label}</span>
+              <p className="mt-0.5 text-[11px] font-bold text-ink">{m.v || "—"}</p>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function GroupPreview({ type, bases, values, lang }: { type: string; bases: string[]; values: Record<string, unknown>; lang: "ar" | "en" }) {
   const en = lang === "en";
   const dir = en ? "ltr" : "rtl";
   const has = (b: string) => bases.includes(b);
   // معاينات مطابقة بحسب نوع العنصر (كل صفحة لها تصميم أقسامها)
   if (type === "success") return <SuccessGroupPreview bases={bases} values={values} lang={lang} />;
+  if (type === "assessment-cards") return <AssessmentCardGroupPreview bases={bases} values={values} lang={lang} />;
   if (type === "programs") return <ProgramGroupPreview bases={bases} values={values} lang={lang} />;
   if (type === "services") return <ClinicalGroupPreview bases={bases} values={values} lang={lang} />;
   if (type === "techniques") return <TechniqueGroupPreview bases={bases} values={values} lang={lang} />;

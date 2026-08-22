@@ -708,6 +708,13 @@ const FIELD_SECTIONS: Record<string, { title: string; title_en: string; bases: s
     { title: "قسم التواصل السفلي (CTA)", title_en: "Bottom contact section (CTA)", bases: ["cta_badge", "cta_title", "cta_text"],
       note: "قسم التواصل أسفل صفحة هذه الخدمة — خاص بها وحدها. اتركه فارغاً لاستخدام النص الافتراضي.", note_en: "The contact section at the bottom of this service's page — unique to it. Leave empty for the default text.", preview: "/services/{slug}" },
   ],
+  "assessment-cards": [
+    { title: "بطاقة نوع التقييم", title_en: "Assessment-type card", bases: ["icon", "title", "desc", "duration", "questions", "age_range"],
+      note: "الكارت في قسم «اختر التقييم المناسب» بصفحة التقييم (أيقونة + عنوان + وصف + المدة/الأسئلة/الفئة).",
+      note_en: "The card in the \"Choose the right assessment\" section on the Assessment page (icon + title + desc + duration/questions/age).", preview: "/assessment" },
+    { title: "أسئلة هذا النوع", title_en: "Questions for this type", bases: ["question_list"],
+      note: "الأسئلة التمهيدية التي تظهر عند اختيار هذا النوع من التقييم.", note_en: "The preliminary questions shown when this assessment type is selected.", preview: "/assessment" },
+  ],
   specialists: [
     { title: "بطاقة الأخصائي", title_en: "Specialist card", bases: ["image", "image_file", "name", "specialty", "desc", "days", "branch", "experience", "hours"],
       note: "البطاقة في شبكة «روّادنا» (صورة + التخصص + الاسم + الوصف + أيام/فرع/خبرة/ساعات + زر عرض التفاصيل).",
@@ -732,7 +739,7 @@ const FIELD_SECTIONS: Record<string, { title: string; title_en: string; bases: s
   ],
 };
 // أنواع العناصر التي تعرض معاينة حيّة بجوار الحقول (كما في الموقع)
-const LIVE_PREVIEW_TYPES = new Set(["news", "programs", "services", "techniques", "branches", "specialists", "success"]);
+const LIVE_PREVIEW_TYPES = new Set(["news", "programs", "services", "techniques", "branches", "specialists", "success", "assessment-cards"]);
 // حقول تقنية/اختيارية تُخفى إن كانت فارغة (تقليل التشويش لمن لا يحتاجها)
 // تشمل حقول البرامج الشرطية (قائمة الفئة المستهدفة + المحطات التطبيقية):
 // تظهر فقط في البرامج التي تستخدمها فعلاً على الصفحة، وتختفي في غيرها.
