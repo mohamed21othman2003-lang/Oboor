@@ -1190,9 +1190,17 @@ function AssessmentCardGroupPreview({ bases, values, lang }: { bases: string[]; 
   }
 
   // بطاقة نوع التقييم — أيقونة + عنوان + وصف + شبكة (المدة/الأسئلة/الفئة)
+  // «عدد الأسئلة» يُحسب تلقائياً من قائمة الأسئلة (مطابق للموقع: qLabel)
+  const qLabel = (n: number) => {
+    if (en) return `${n} question${n === 1 ? "" : "s"}`;
+    if (n === 1) return "سؤال واحد";
+    if (n === 2) return "سؤالان";
+    if (n >= 3 && n <= 10) return `${n} أسئلة`;
+    return `${n} سؤالاً`;
+  };
   const metas = [
     { i: clock, label: en ? "Duration" : "المدة", v: ps("duration") },
-    { i: qic, label: en ? "Questions" : "الأسئلة", v: ps("questions") },
+    { i: qic, label: en ? "Questions" : "الأسئلة", v: qLabel(qlist.length) },
     { i: age, label: en ? "Age" : "الفئة", v: ps("age_range") },
   ];
   return (

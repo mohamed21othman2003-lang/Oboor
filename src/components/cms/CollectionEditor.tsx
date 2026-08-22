@@ -204,6 +204,8 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
       }
       // الأخبار: حقول كارت الفعالية تظهر فقط للفعاليات والورش
       if (type === "news" && EVENT_FIELDS.has(f.name) && !["events", "workshops"].includes(String(values.section ?? ""))) continue;
+      // بطاقات التقييم: «عدد الأسئلة» يُحسب تلقائياً من قائمة الأسئلة، فنخفي الحقل اليدوي
+      if (type === "assessment-cards" && f.base === "questions") continue;
       // شارتا الهيرو: تظهران فقط في «المقدمة العلوية» بصفحة «عن عبور»
       if (BADGE_FIELDS.has(f.name) && !(type === "sections" && String(values.page ?? "") === "about" && sectionBlock === "hero")) continue;
       // الترويسة الصغيرة (eyebrow): تظهر لأقسام محدّدة + كل عناصر بلوك «الكل» (عناوين أقسام الأخبار)
@@ -709,11 +711,11 @@ const FIELD_SECTIONS: Record<string, { title: string; title_en: string; bases: s
       note: "قسم التواصل أسفل صفحة هذه الخدمة — خاص بها وحدها. اتركه فارغاً لاستخدام النص الافتراضي.", note_en: "The contact section at the bottom of this service's page — unique to it. Leave empty for the default text.", preview: "/services/{slug}" },
   ],
   "assessment-cards": [
-    { title: "بطاقة نوع التقييم", title_en: "Assessment-type card", bases: ["icon", "title", "desc", "duration", "questions", "age_range"],
-      note: "الكارت في قسم «اختر التقييم المناسب» بصفحة التقييم (أيقونة + عنوان + وصف + المدة/الأسئلة/الفئة).",
-      note_en: "The card in the \"Choose the right assessment\" section on the Assessment page (icon + title + desc + duration/questions/age).", preview: "/assessment" },
+    { title: "بطاقة نوع التقييم", title_en: "Assessment-type card", bases: ["icon", "title", "desc", "duration", "age_range"],
+      note: "الكارت في قسم «اختر التقييم المناسب» بصفحة التقييم (أيقونة + عنوان + وصف + المدة/الفئة). «عدد الأسئلة» يُحسب تلقائياً من قائمة الأسئلة بالأسفل.",
+      note_en: "The card in the \"Choose the right assessment\" section on the Assessment page (icon + title + desc + duration/age). The questions count is computed automatically from the questions list below.", preview: "/assessment" },
     { title: "أسئلة هذا النوع", title_en: "Questions for this type", bases: ["question_list"],
-      note: "الأسئلة التمهيدية التي تظهر عند اختيار هذا النوع من التقييم.", note_en: "The preliminary questions shown when this assessment type is selected.", preview: "/assessment" },
+      note: "الأسئلة التمهيدية التي تظهر عند اختيار هذا النوع — وعددها يظهر تلقائياً على البطاقة.", note_en: "The preliminary questions shown when this type is selected — their count shows automatically on the card.", preview: "/assessment" },
   ],
   specialists: [
     { title: "بطاقة الأخصائي", title_en: "Specialist card", bases: ["image", "image_file", "name", "specialty", "desc", "days", "branch", "experience", "hours"],
