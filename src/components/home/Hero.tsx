@@ -6,7 +6,11 @@ import { useState, useEffect, type ReactNode } from "react";
 import { pick, type Locale } from "@/i18n/config";
 import type { HomeChrome } from "@/lib/highlight";
 
-export type HeroSlide = { img: string; heading: ReactNode; desc: ReactNode; pos?: string; badge?: ReactNode; cta?: ReactNode; ctaHref?: string };
+export type HeroSlide = { img: string; heading: ReactNode; desc: ReactNode; pos?: string; badge?: ReactNode; cta?: ReactNode; ctaHref?: string; blur?: string };
+
+// معاينة مموّهة صغيرة جداً (inline base64) تظهر فوراً بدل الفراغ ريثما تُحمَّل صورة
+// الهيرو الكاملة — تُحسّن الإحساس بسرعة التحميل خاصةً على الاتصالات البطيئة.
+const GENERIC_BLUR = "data:image/webp;base64,UklGRjAAAABXRUJQVlA4ICQAAABwAQCdASoQAAgAA4BaJZACdAFAAAD+8DguiiwP4NyNvkMAAAA=";
 
 export default function Hero({ locale, slides: slidesProp, chrome }: { locale: Locale; slides?: HeroSlide[]; chrome?: HomeChrome }) {
   const badge = chrome?.["hero.chrome"]?.title || pick(locale, "نرعى نقاءهم، ونبني غدهم", "Nurturing Their Potential, Shaping Their Future");
@@ -15,6 +19,7 @@ export default function Hero({ locale, slides: slidesProp, chrome }: { locale: L
   const staticSlides: HeroSlide[] = [
     {
       img: "/figma/home/imgImageWithFallback.jpg",
+      blur: "data:image/webp;base64,UklGRlQAAABXRUJQVlA4IEgAAADQAQCdASoQAAgAA4BaJbACdADaD07eAAD9Ib7EijzZsCR8p8ofWxdncKsNLD+S5cJ1Gui1BNjAYu/ce+QdWD9IR3Wm4KS0AAA=",
       heading: pick(
         locale,
         <>مركز <span className="text-brand">عبور</span><br />للرعاية النهارية والتأهيل</>,
@@ -28,6 +33,7 @@ export default function Hero({ locale, slides: slidesProp, chrome }: { locale: L
     },
     {
       img: "/figma/home/hero-slide2-clean.jpg",
+      blur: "data:image/webp;base64,UklGRj4AAABXRUJQVlA4IDIAAADQAQCdASoQAAgAA4BaJZgCdADygjdOIAD+6STE0ESosElQLj+X/FSNWb2SpOICqMAAAA==",
       // الطفل في يسار الصورة العريضة؛ على الموبايل التوسيط يقصّه، لذا نثبّتها يسارًا
       // حتى عرض lg ثم نرجع للتوسيط الافتراضي على الشاشات الكبيرة.
       pos: "object-left lg:object-bottom",
@@ -44,6 +50,7 @@ export default function Hero({ locale, slides: slidesProp, chrome }: { locale: L
     },
     {
       img: "/figma/home/hero-slide3.jpg",
+      blur: "data:image/webp;base64,UklGRk4AAABXRUJQVlA4IEIAAACwAQCdASoQAAgAA4BaJaACdADczH3AAP7r/1Q6b0MbhrtY+Z/BKA0i6UolARA+7WQ5s8txV981alF2hoko5gXiAAA=",
       heading: pick(
         locale,
         <>ليُعبّروا بأصواتهم<br />ويُعبّروا بخطواتهم</>,
@@ -81,7 +88,7 @@ export default function Hero({ locale, slides: slidesProp, chrome }: { locale: L
       : "bg-gradient-to-l from-[rgba(13,61,69,0.85)] from-0% via-[rgba(13,61,69,0.28)] via-45% to-transparent to-75%";
 
   return (
-    <section className="relative min-h-[600px] w-full overflow-hidden lg:h-[791px]">
+    <section className="relative min-h-[600px] w-full overflow-hidden bg-brand-deep lg:h-[791px]">
       {/* Background images — one per slide, cross-fading.
           الشريحة الأولى فقط أولوية عالية وتُحمَّل فورًا (LCP)؛ الباقي بعد الإقلاع. */}
       {slides.map((sl, idx) =>
@@ -97,6 +104,9 @@ export default function Hero({ locale, slides: slidesProp, chrome }: { locale: L
             fetchPriority={idx === 0 ? "high" : undefined}
             loading={idx === 0 ? "eager" : "lazy"}
             quality={75}
+            // معاينة مموّهة تظهر فوراً (بلا شبكة) فلا يبقى الهيرو فارغاً أثناء التحميل
+            placeholder="blur"
+            blurDataURL={sl.blur || GENERIC_BLUR}
             sizes="100vw"
             className={`object-cover ${sl.pos ?? (sl.img.includes("hero-slide2") ? "object-left lg:object-bottom" : "object-bottom")} transition-opacity duration-700 ${idx === i ? "opacity-100" : "opacity-0"}`}
           />
