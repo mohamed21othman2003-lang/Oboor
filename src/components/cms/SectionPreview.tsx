@@ -1222,6 +1222,92 @@ function AssessmentCardGroupPreview({ bases, values, lang }: { bases: string[]; 
   );
 }
 
+// ===== معاينة أقسام «الوظائف» (مطابقة لـ /careers/[slug]) =====
+function CareerGroupPreview({ bases, values, lang }: { bases: string[]; values: Record<string, unknown>; lang: "ar" | "en" }) {
+  const en = lang === "en";
+  const dir = en ? "ltr" : "rtl";
+  const has = (b: string) => bases.includes(b);
+  const ps = (base: string) => { const v = en ? (values[`${base}_en`] || values[`${base}_ar`]) : values[`${base}_ar`]; return typeof v === "string" ? v : ""; };
+  const pl = (base: string): string[] => { const e = values[`${base}_en`], a = values[`${base}_ar`]; const v = en ? ((Array.isArray(e) && e.length) ? e : a) : a; return Array.isArray(v) ? (v as string[]) : []; };
+  const pin = <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>;
+  const clock = <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" strokeLinecap="round" /></svg>;
+  const bag = <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><rect x="2" y="7" width="20" height="14" rx="2" /><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></svg>;
+  const cal = <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" /></svg>;
+
+  // المهام والمسؤوليات — عنوان + قائمة بعلامات صح
+  if (has("responsibilities")) {
+    const items = pl("responsibilities");
+    return (
+      <div dir={dir} className="rounded-2xl border border-line bg-white p-4 text-start">
+        <h2 className="text-base font-extrabold text-ink">{en ? "Duties & Responsibilities" : "المهام والمسؤوليات"}</h2>
+        {items.length ? <ul className="mt-2 space-y-1.5">{items.map((r, i) => <li key={i} className="flex items-start gap-2 text-[12px] leading-6 text-ink-muted"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="mt-0.5 shrink-0 text-brand"><circle cx="12" cy="12" r="9" /><path d="M8.5 12l2.2 2.2L15.5 9.5" strokeLinecap="round" strokeLinejoin="round" /></svg>{r}</li>)}</ul> : <p className="mt-1 text-[11px] text-ink-soft">{en ? "No items yet" : "لا توجد بنود بعد"}</p>}
+      </div>
+    );
+  }
+
+  // الخبرة والمتطلبات — قائمة نقاط + كارت «ملخص الوظيفة»
+  if (has("requirements") || has("experience") || has("start_date")) {
+    const reqs = pl("requirements");
+    const rows = [
+      { label: en ? "City" : "المدينة", v: ps("city") },
+      { label: en ? "Employment" : "الدوام", v: ps("employment") },
+      { label: en ? "Experience" : "الخبرة", v: ps("experience") },
+      { label: en ? "Start date" : "المباشرة", v: ps("start_date") },
+    ].filter((r) => r.v);
+    return (
+      <div dir={dir} className="space-y-3">
+        {reqs.length > 0 && (
+          <div className="rounded-2xl border border-line bg-white p-4 text-start">
+            <h2 className="text-base font-extrabold text-ink">{en ? "Required Experience" : "الخبرة المطلوبة"}</h2>
+            <ul className="mt-2 space-y-1.5">{reqs.map((r, i) => <li key={i} className="flex items-start gap-2 text-[12px] leading-6 text-ink-muted"><span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand" />{r}</li>)}</ul>
+          </div>
+        )}
+        {rows.length > 0 && (
+          <div className="overflow-hidden rounded-2xl border border-line bg-white shadow-sm">
+            <h3 className="bg-gradient-to-bl from-brand to-brand-dark px-4 py-3 text-center text-[13px] font-bold text-white">{en ? "Job Summary" : "ملخص الوظيفة"}</h3>
+            <div className="divide-y divide-line">{rows.map((r, i) => <div key={i} className="flex items-center justify-between gap-3 px-4 py-2.5 text-[12px]"><span className="font-bold text-ink">{r.v}</span><span className="text-ink-soft">{r.label}</span></div>)}</div>
+            <div className="p-3"><div className="flex items-center justify-center gap-1.5 rounded-xl bg-brand py-2 text-[11px] font-semibold text-white"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z" /></svg>{en ? "Apply Now" : "قدّم الآن"}</div></div>
+          </div>
+        )}
+        {!reqs.length && !rows.length && <PreviewShell dir={dir} empty en={en} />}
+      </div>
+    );
+  }
+
+  // الوصف الوظيفي — عنوان + فقرة
+  if (has("description")) {
+    return (
+      <div dir={dir} className="rounded-2xl border border-line bg-white p-4 text-start">
+        <h2 className="text-base font-extrabold text-ink">{en ? "Job Description" : "الوصف الوظيفي"}</h2>
+        {ps("description") ? <p className="mt-2 text-[12px] leading-7 text-ink-muted">{ps("description")}</p> : <p className="mt-1 text-[11px] text-ink-soft">{en ? "No description yet" : "لا يوجد وصف بعد"}</p>}
+      </div>
+    );
+  }
+
+  // الهيرو — قسم داكن + العنوان + وسوم + زر التقديم
+  const isNew = Boolean(values.is_new);
+  const chips = [
+    { i: pin, v: ps("city") },
+    { i: clock, v: ps("employment") },
+    { i: bag, v: ps("department") },
+    { i: cal, v: ps("date") ? `${en ? "Posted: " : "تاريخ الطرح: "}${ps("date")}` : "" },
+  ].filter((c) => c.v);
+  return (
+    <div dir={dir} className="rounded-2xl bg-gradient-to-bl from-brand-deep to-[#0a2329] p-5 text-white">
+      <div className="flex items-start justify-between gap-3">
+        <div className="text-start">
+          <div className="flex items-center gap-2">
+            <h1 className="text-lg font-extrabold">{ps("title") || (en ? "Job title" : "المسمى الوظيفي")}</h1>
+            {isNew && <span className="rounded-full bg-brand px-2 py-0.5 text-[9px] font-bold text-white">{en ? "New" : "جديد"}</span>}
+          </div>
+          <div className="mt-3 flex flex-wrap items-center gap-1.5">{chips.map((c, i) => <span key={i} className="flex items-center gap-1 rounded-full bg-white/10 px-2.5 py-1 text-[10px] font-medium text-white/90"><span className="text-brand">{c.i}</span>{c.v}</span>)}</div>
+        </div>
+        <span className="flex shrink-0 items-center gap-1.5 rounded-xl bg-brand px-3 py-2 text-[10px] font-semibold text-white"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z" /></svg>{en ? "Apply Now" : "قدّم الآن"}</span>
+      </div>
+    </div>
+  );
+}
+
 export function GroupPreview({ type, bases, values, lang }: { type: string; bases: string[]; values: Record<string, unknown>; lang: "ar" | "en" }) {
   const en = lang === "en";
   const dir = en ? "ltr" : "rtl";
@@ -1229,6 +1315,7 @@ export function GroupPreview({ type, bases, values, lang }: { type: string; base
   // معاينات مطابقة بحسب نوع العنصر (كل صفحة لها تصميم أقسامها)
   if (type === "success") return <SuccessGroupPreview bases={bases} values={values} lang={lang} />;
   if (type === "assessment-cards") return <AssessmentCardGroupPreview bases={bases} values={values} lang={lang} />;
+  if (type === "careers") return <CareerGroupPreview bases={bases} values={values} lang={lang} />;
   if (type === "programs") return <ProgramGroupPreview bases={bases} values={values} lang={lang} />;
   if (type === "services") return <ClinicalGroupPreview bases={bases} values={values} lang={lang} />;
   if (type === "techniques") return <TechniqueGroupPreview bases={bases} values={values} lang={lang} />;

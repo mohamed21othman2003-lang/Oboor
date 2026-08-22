@@ -710,6 +710,18 @@ const FIELD_SECTIONS: Record<string, { title: string; title_en: string; bases: s
     { title: "قسم التواصل السفلي (CTA)", title_en: "Bottom contact section (CTA)", bases: ["cta_badge", "cta_title", "cta_text"],
       note: "قسم التواصل أسفل صفحة هذه الخدمة — خاص بها وحدها. اتركه فارغاً لاستخدام النص الافتراضي.", note_en: "The contact section at the bottom of this service's page — unique to it. Leave empty for the default text.", preview: "/services/{slug}" },
   ],
+  careers: [
+    { title: "بيانات الوظيفة (الهيرو)", title_en: "Job info (Hero)", bases: ["title", "department", "city", "employment", "date", "is_new"],
+      note: "أعلى صفحة الوظيفة: المسمى + وسوم (المدينة/الدوام/القسم/تاريخ الطرح) + زر «قدّم الآن».",
+      note_en: "Top of the job page: title + tags (city/employment/department/posted date) + \"Apply Now\".", preview: "/careers/{slug}" },
+    { title: "الوصف الوظيفي", title_en: "Job description", bases: ["description"],
+      note: "فقرة «الوصف الوظيفي» في متن الصفحة.", note_en: "The \"Job Description\" paragraph in the page body.", preview: "/careers/{slug}" },
+    { title: "المهام والمسؤوليات", title_en: "Duties & responsibilities", bases: ["responsibilities"],
+      note: "قائمة «المهام والمسؤوليات» (بعلامات صح).", note_en: "The \"Duties & Responsibilities\" checklist.", preview: "/careers/{slug}" },
+    { title: "الخبرة والمتطلبات", title_en: "Experience & requirements", bases: ["experience", "requirements", "start_date"],
+      note: "نقاط «الخبرة المطلوبة» + كارت «ملخص الوظيفة» الجانبي (المدينة/الدوام/الخبرة/المباشرة).",
+      note_en: "The \"Required Experience\" points + the side \"Job Summary\" card (city/employment/experience/start date).", preview: "/careers/{slug}" },
+  ],
   "assessment-cards": [
     { title: "بطاقة نوع التقييم", title_en: "Assessment-type card", bases: ["icon", "title", "desc", "duration", "age_range"],
       note: "الكارت في قسم «اختر التقييم المناسب» بصفحة التقييم (أيقونة + عنوان + وصف + المدة/الفئة). «عدد الأسئلة» يُحسب تلقائياً من قائمة الأسئلة بالأسفل.",
@@ -741,7 +753,7 @@ const FIELD_SECTIONS: Record<string, { title: string; title_en: string; bases: s
   ],
 };
 // أنواع العناصر التي تعرض معاينة حيّة بجوار الحقول (كما في الموقع)
-const LIVE_PREVIEW_TYPES = new Set(["news", "programs", "services", "techniques", "branches", "specialists", "success", "assessment-cards"]);
+const LIVE_PREVIEW_TYPES = new Set(["news", "programs", "services", "techniques", "branches", "specialists", "success", "assessment-cards", "careers"]);
 // حقول تقنية/اختيارية تُخفى إن كانت فارغة (تقليل التشويش لمن لا يحتاجها)
 // تشمل حقول البرامج الشرطية (قائمة الفئة المستهدفة + المحطات التطبيقية):
 // تظهر فقط في البرامج التي تستخدمها فعلاً على الصفحة، وتختفي في غيرها.
