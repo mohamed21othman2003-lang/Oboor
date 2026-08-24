@@ -35,7 +35,8 @@ const cairo = Cairo({
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://oboor.ido.sa";
 // معرّف Google Analytics (GA4). عام بطبيعته (يظهر في HTML). يُفعَّل في الإنتاج فقط.
-const GA_ID = process.env.NEXT_PUBLIC_GA_ID || "G-0LHKZ941HL";
+// property جديدة تحت حساب الشركة (2026-08) — القديمة G-0LHKZ941HL كانت للتجارب.
+const GA_ID = process.env.NEXT_PUBLIC_GA_ID || "G-KHL2RHN05H";
 const PROD = process.env.NODE_ENV === "production";
 const GA_ENABLED = PROD && GA_ID !== "G-XXXXXXXXXX";
 // تحقّق ملكية Google Search Console (وسم HTML)
