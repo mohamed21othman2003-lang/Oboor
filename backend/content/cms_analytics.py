@@ -233,7 +233,8 @@ def traffic_overview(request):
     if _GA_CACHE["data"] is not None and now - _GA_CACHE["ts"] < _GA_TTL:
         return Response(_GA_CACHE["data"])
 
-    prop = os.environ.get("GA4_PROPERTY_ID", "545831946")
+    # property جديدة تحت حساب الشركة (2026-08). القديمة 545831946 كانت للتجارب.
+    prop = os.environ.get("GA4_PROPERTY_ID", "551308073")
     try:
         from google.analytics.data_v1beta.types import (
             RunReportRequest, DateRange, Dimension, Metric, OrderBy, FilterExpression, Filter,
