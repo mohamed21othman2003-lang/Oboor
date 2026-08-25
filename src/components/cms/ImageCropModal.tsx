@@ -1,144 +1,226 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
+import Cropper from "react-easy-crop";
+import { useCmsLang } from "@/lib/cms/i18n";
 
-// أبعاد جاهزة تطابق أشكال الإطارات في صفحات الموقع
-const ASPECTS: { key: string; label: string; v: number }[] = [
-  { key: "free", label: "الأصلية (بدون قص)", v: 0 },
-  { key: "wide", label: "عريض 16:9", v: 16 / 9 },
-  { key: "landscape", label: "أفقي 4:3", v: 4 / 3 },
-  { key: "square", label: "مربّع 1:1", v: 1 },
-  { key: "portrait", label: "طولي 3:4", v: 3 / 4 },
+type Area = { x: number; y: number; width: number; height: number };
+
+// أبعاد جاهزة تطابق أشكال الإطارات في صفحات الموقع (0 = الأبعاد الأصلية للصورة)
+const ASPECTS: { key: string; ar: string; en: string; v: number }[] = [
+  { key: "free", ar: "الأصلية", en: "Original", v: 0 },
+  { key: "wide", ar: "عريض 16:9", en: "Wide 16:9", v: 16 / 9 },
+  { key: "landscape", ar: "أفقي 4:3", en: "Landscape 4:3", v: 4 / 3 },
+  { key: "square", ar: "مربّع 1:1", en: "Square 1:1", v: 1 },
+  { key: "portrait", ar: "طولي 3:4", en: "Portrait 3:4", v: 3 / 4 },
 ];
 
-// مواضع التركيز (الجزء الذي يبقى ظاهراً عند القص)
-const FOCALS: { fx: number; fy: number; label: string }[] = [
-  { fx: 0, fy: 0, label: "أعلى يمين" }, { fx: 0.5, fy: 0, label: "أعلى" }, { fx: 1, fy: 0, label: "أعلى يسار" },
-  { fx: 0, fy: 0.5, label: "يمين" }, { fx: 0.5, fy: 0.5, label: "الوسط" }, { fx: 1, fy: 0.5, label: "يسار" },
-  { fx: 0, fy: 1, label: "أسفل يمين" }, { fx: 0.5, fy: 1, label: "أسفل" }, { fx: 1, fy: 1, label: "أسفل يسار" },
-];
+function loadImage(src: string): Promise<HTMLImageElement> {
+  return new Promise((res, rej) => {
+    const im = new window.Image();
+    im.onload = () => res(im);
+    im.onerror = rej;
+    im.src = src;
+  });
+}
+
+// يرسم الصورة بعد (الدوران + الفلتر + القص + إعادة الأبعاد) على canvas ويرجّع blob
+async function renderEdited(
+  src: string, area: Area | null, rotation: number, filter: string, outW: number | null,
+): Promise<Blob | null> {
+  const img = await loadImage(src);
+  const rot = (rotation * Math.PI) / 180;
+  const bw = Math.abs(Math.cos(rot)) * img.width + Math.abs(Math.sin(rot)) * img.height;
+  const bh = Math.abs(Math.sin(rot)) * img.width + Math.abs(Math.cos(rot)) * img.height;
+  // 1) ارسم الصورة كاملة (مع الدوران والفلتر) على canvas مؤقّت بحجم الإطار المحيط
+  const tmp = document.createElement("canvas");
+  tmp.width = Math.round(bw); tmp.height = Math.round(bh);
+  const tctx = tmp.getContext("2d");
+  if (!tctx) return null;
+  tctx.filter = filter;
+  tctx.translate(bw / 2, bh / 2);
+  tctx.rotate(rot);
+  tctx.drawImage(img, -img.width / 2, -img.height / 2);
+  // 2) اقتطع الجزء المحدّد (area بإحداثيات react-easy-crop على الصورة المدوّرة)
+  const a: Area = area && area.width > 0 ? area : { x: 0, y: 0, width: tmp.width, height: tmp.height };
+  let cw = a.width, ch = a.height;
+  if (outW && cw > 0 && outW < cw) { const s = outW / cw; cw = outW; ch = Math.round(ch * s); }
+  const out = document.createElement("canvas");
+  out.width = Math.max(1, Math.round(cw)); out.height = Math.max(1, Math.round(ch));
+  const octx = out.getContext("2d");
+  if (!octx) return null;
+  octx.drawImage(tmp, a.x, a.y, a.width, a.height, 0, 0, out.width, out.height);
+  return new Promise((res) => out.toBlob((b) => res(b), "image/jpeg", 0.92));
+}
 
 export default function ImageCropModal({
-  file,
-  defaultAspect = 0,
-  onCancel,
-  onConfirm,
+  file, src, defaultAspect = 0, onCancel, onConfirm,
 }: {
-  file: File;
+  file?: File;
+  src?: string;
   defaultAspect?: number;
   onCancel: () => void;
   onConfirm: (out: Blob | File) => void;
 }) {
+  const { lang } = useCmsLang();
+  const en = lang === "en";
+  const t = (ar: string, e: string) => (en ? e : ar);
+
   const [url, setUrl] = useState("");
   const [nat, setNat] = useState<{ w: number; h: number } | null>(null);
-  const [aspect, setAspect] = useState(defaultAspect);
-  const [focal, setFocal] = useState({ fx: 0.5, fy: 0.5 });
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [rotation, setRotation] = useState(0);
+  const [aspectKey, setAspectKey] = useState(defaultAspect ? "custom" : "free");
+  const [aspectV, setAspectV] = useState(defaultAspect);
+  const [areaPx, setAreaPx] = useState<Area | null>(null);
+  const [bright, setBright] = useState(100);
+  const [contrast, setContrast] = useState(100);
+  const [sat, setSat] = useState(100);
+  const [outW, setOutW] = useState<number | "">("");
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    const u = URL.createObjectURL(file);
+    let u = "", revoke = false;
+    if (file) { u = URL.createObjectURL(file); revoke = true; } else if (src) { u = src; }
     setUrl(u);
-    const im = new window.Image();
-    im.onload = () => setNat({ w: im.naturalWidth, h: im.naturalHeight });
-    im.src = u;
-    return () => URL.revokeObjectURL(u);
-  }, [file]);
+    if (u) loadImage(u).then((im) => setNat({ w: im.naturalWidth, h: im.naturalHeight })).catch(() => {});
+    return () => { if (revoke && u) URL.revokeObjectURL(u); };
+  }, [file, src]);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onCancel(); };
+    document.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => { document.removeEventListener("keydown", onKey); document.body.style.overflow = ""; };
+  }, [onCancel]);
+
+  const onCropComplete = useCallback((_: Area, px: Area) => setAreaPx(px), []);
+  const filter = `brightness(${bright}%) contrast(${contrast}%) saturate(${sat}%)`;
+  // «الأصلية» = نسبة الصورة الطبيعية (إطار القص يغطّي الصورة كاملة)
+  const effectiveAspect = aspectV || (nat ? nat.w / nat.h : 4 / 3);
+  const changed = aspectV !== 0 || zoom !== 1 || rotation !== 0 || bright !== 100 || contrast !== 100 || sat !== 100 || outW !== "";
 
   async function confirm() {
-    // بدون قص → ارفع الملف الأصلي كما هو
-    if (!aspect || !nat) { onConfirm(file); return; }
+    // لا تغيير + ملف جديد → ارفع الأصلي كما هو (أسرع، بلا إعادة ترميز)
+    if (!changed && file) { onConfirm(file); return; }
     setBusy(true);
     try {
-      const im = new window.Image();
-      im.src = url;
-      await im.decode();
-      const { w: nw, h: nh } = nat;
-      const imgAspect = nw / nh;
-      let sw: number, sh: number, sx: number, sy: number;
-      if (imgAspect > aspect) { sh = nh; sw = nh * aspect; sx = (nw - sw) * focal.fx; sy = 0; }
-      else { sw = nw; sh = nw / aspect; sx = 0; sy = (nh - sh) * focal.fy; }
-      const outW = Math.min(1600, Math.round(sw));
-      const outH = Math.round(outW / aspect);
-      const canvas = document.createElement("canvas");
-      canvas.width = outW; canvas.height = outH;
-      const ctx = canvas.getContext("2d");
-      if (!ctx) { onConfirm(file); return; }
-      ctx.drawImage(im, sx, sy, sw, sh, 0, 0, outW, outH);
-      canvas.toBlob((blob) => { onConfirm(blob ?? file); }, "image/jpeg", 0.9);
+      const blob = await renderEdited(url, areaPx, rotation, filter, typeof outW === "number" ? outW : null);
+      onConfirm(blob ?? file ?? new File([], "image.jpg"));
     } catch {
-      onConfirm(file);
-    } finally {
-      setBusy(false);
-    }
+      if (file) onConfirm(file); else onCancel();
+    } finally { setBusy(false); }
   }
 
-  const objPos = `${focal.fx * 100}% ${focal.fy * 100}%`;
+  const reset = () => { setCrop({ x: 0, y: 0 }); setZoom(1); setRotation(0); setBright(100); setContrast(100); setSat(100); setOutW(""); setAspectKey("free"); setAspectV(0); };
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4" onClick={onCancel}>
-      <div dir="rtl" className="max-h-[90vh] w-full max-w-2xl overflow-auto rounded-2xl bg-white p-5 shadow-2xl sm:p-6" onClick={(e) => e.stopPropagation()}>
-        <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-lg font-extrabold text-ink">معاينة الصورة وضبطها</h3>
-          <button type="button" onClick={onCancel} className="rounded-lg p-1.5 text-ink-soft hover:bg-surface" aria-label="إغلاق">
+    <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/60 p-3 sm:p-4" onClick={onCancel}>
+      <div dir={en ? "ltr" : "rtl"} className="flex max-h-[94vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between border-b border-line px-5 py-3">
+          <h3 className="text-base font-extrabold text-ink">{t("محرّر الصورة", "Image Editor")}</h3>
+          <button type="button" onClick={onCancel} className="rounded-lg p-1.5 text-ink-soft hover:bg-surface" aria-label={t("إغلاق", "Close")}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
           </button>
         </div>
 
-        {/* المعاينة */}
-        <div className="flex justify-center rounded-xl bg-surface p-4">
-          <div
-            className="relative max-h-[46vh] overflow-hidden rounded-lg ring-1 ring-line"
-            style={aspect ? { aspectRatio: String(aspect), width: aspect >= 1 ? "min(100%, 520px)" : "auto", height: aspect >= 1 ? "auto" : "46vh" } : {}}
-          >
+        <div className="grid gap-4 overflow-auto p-5 lg:grid-cols-[1fr_260px]">
+          {/* المعاينة الحيّة (قص/دوران/تعديلات تظهر لحظياً) */}
+          <div className="relative h-[52vh] min-h-[280px] overflow-hidden rounded-xl bg-[#111] ring-1 ring-line">
             {url && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={url}
-                alt=""
-                className={aspect ? "h-full w-full object-cover" : "max-h-[46vh] w-auto"}
-                style={aspect ? { objectPosition: objPos } : {}}
+              <Cropper
+                image={url}
+                crop={crop}
+                zoom={zoom}
+                rotation={rotation}
+                aspect={effectiveAspect}
+                onCropChange={setCrop}
+                onZoomChange={setZoom}
+                onRotationChange={setRotation}
+                onCropComplete={onCropComplete}
+                showGrid
+                restrictPosition={false}
+                style={{ mediaStyle: { filter } }}
               />
             )}
           </div>
-        </div>
 
-        {/* اختيار الأبعاد */}
-        <div className="mt-5">
-          <p className="mb-2 text-xs font-bold text-ink-soft">الأبعاد (اختر ما يناسب مكان الصورة في الصفحة)</p>
-          <div className="flex flex-wrap gap-2">
-            {ASPECTS.map((a) => (
-              <button key={a.key} type="button" onClick={() => setAspect(a.v)}
-                className={`rounded-lg px-3 py-1.5 text-xs font-semibold ring-1 transition-colors ${aspect === a.v ? "bg-brand text-white ring-brand" : "bg-white text-ink-soft ring-line hover:ring-brand/40"}`}>
-                {a.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* تحديد الجزء الظاهر (يظهر فقط عند القص) */}
-        {!!aspect && (
-          <div className="mt-5">
-            <p className="mb-2 text-xs font-bold text-ink-soft">الجزء الذي يبقى ظاهراً</p>
-            <div className="grid w-28 grid-cols-3 gap-1">
-              {FOCALS.map((p) => {
-                const on = focal.fx === p.fx && focal.fy === p.fy;
-                return (
-                  <button key={p.label} type="button" title={p.label} onClick={() => setFocal({ fx: p.fx, fy: p.fy })}
-                    className={`h-8 rounded transition-colors ${on ? "bg-brand" : "bg-surface ring-1 ring-line hover:bg-brand/20"}`} />
-                );
-              })}
+          {/* أدوات التحكّم */}
+          <div className="space-y-4 text-start">
+            {/* الأبعاد */}
+            <div>
+              <p className="mb-1.5 text-[11px] font-bold text-ink-soft">{t("الأبعاد / القص", "Aspect / Crop")}</p>
+              <div className="flex flex-wrap gap-1.5">
+                {ASPECTS.map((a) => {
+                  const on = (a.v === 0 && aspectV === 0) || a.v === aspectV;
+                  return (
+                    <button key={a.key} type="button" onClick={() => { setAspectV(a.v); setAspectKey(a.key); }}
+                      className={`rounded-lg px-2.5 py-1 text-[11px] font-semibold ring-1 transition-colors ${on ? "bg-brand text-white ring-brand" : "bg-white text-ink-soft ring-line hover:ring-brand/40"}`}>
+                      {en ? a.en : a.ar}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        )}
 
-        {/* أزرار */}
-        <div className="mt-6 flex items-center justify-end gap-2 border-t border-line pt-4">
-          <button type="button" onClick={onCancel} className="rounded-xl px-4 py-2.5 text-sm font-semibold text-ink-soft hover:bg-surface">إلغاء</button>
-          <button type="button" onClick={confirm} disabled={busy} className="rounded-xl bg-brand px-5 py-2.5 text-sm font-bold text-white hover:bg-brand-dark disabled:opacity-60">
-            {busy ? "جارٍ التجهيز…" : "اعتماد الصورة"}
+            {/* التكبير */}
+            <Slider label={t("تكبير", "Zoom")} min={1} max={3} step={0.01} value={zoom} onChange={setZoom} fmt={(v) => `${v.toFixed(1)}×`} />
+
+            {/* الدوران */}
+            <div>
+              <div className="mb-1 flex items-center justify-between">
+                <span className="text-[11px] font-bold text-ink-soft">{t("الدوران", "Rotation")}</span>
+                <span className="text-[11px] text-ink-soft">{Math.round(rotation)}°</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <button type="button" onClick={() => setRotation((r) => (r - 90 + 360) % 360)} className="rounded-lg border border-line px-2 py-1 text-[11px] hover:border-brand">‑90°</button>
+                <input type="range" min={0} max={359} step={1} value={rotation} onChange={(e) => setRotation(Number(e.target.value))} className="flex-1 accent-brand" />
+                <button type="button" onClick={() => setRotation((r) => (r + 90) % 360)} className="rounded-lg border border-line px-2 py-1 text-[11px] hover:border-brand">+90°</button>
+              </div>
+            </div>
+
+            {/* تعديلات الألوان */}
+            <div className="space-y-2 rounded-xl bg-surface/60 p-2.5">
+              <p className="text-[11px] font-bold text-ink-soft">{t("تعديلات", "Adjustments")}</p>
+              <Slider label={t("السطوع", "Brightness")} min={50} max={150} step={1} value={bright} onChange={setBright} fmt={(v) => `${v}%`} />
+              <Slider label={t("التباين", "Contrast")} min={50} max={150} step={1} value={contrast} onChange={setContrast} fmt={(v) => `${v}%`} />
+              <Slider label={t("التشبّع", "Saturation")} min={0} max={200} step={1} value={sat} onChange={setSat} fmt={(v) => `${v}%`} />
+            </div>
+
+            {/* الأبعاد بالبكسل (تصغير عرض الإخراج) */}
+            <div>
+              <p className="mb-1.5 text-[11px] font-bold text-ink-soft">{t("عرض الإخراج (بكسل)", "Output width (px)")}</p>
+              <div className="flex items-center gap-2">
+                <input type="number" min={100} placeholder={nat ? String(Math.min(nat.w, 1600)) : "auto"} value={outW} onChange={(e) => setOutW(e.target.value === "" ? "" : Math.max(50, Number(e.target.value)))}
+                  className="w-full rounded-lg border border-line bg-white px-2.5 py-1.5 text-sm text-ink outline-none focus:border-brand" />
+                <span className="shrink-0 text-[11px] text-ink-soft">{t("اتركه فارغاً = بلا تصغير", "empty = keep")}</span>
+              </div>
+            </div>
+
+            <button type="button" onClick={reset} className="text-[11px] font-semibold text-brand hover:underline">{t("إعادة ضبط الكل", "Reset all")}</button>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-end gap-2 border-t border-line px-5 py-3">
+          <button type="button" onClick={onCancel} className="rounded-xl px-4 py-2.5 text-sm font-semibold text-ink-soft hover:bg-surface">{t("إلغاء", "Cancel")}</button>
+          <button type="button" onClick={confirm} disabled={busy || !url} className="rounded-xl bg-brand px-5 py-2.5 text-sm font-bold text-white hover:bg-brand-dark disabled:opacity-60">
+            {busy ? t("جارٍ التجهيز…", "Processing…") : t("اعتماد", "Apply")}
           </button>
         </div>
       </div>
+    </div>
+  );
+}
+
+function Slider({ label, min, max, step, value, onChange, fmt }: { label: string; min: number; max: number; step: number; value: number; onChange: (v: number) => void; fmt: (v: number) => string }) {
+  return (
+    <div>
+      <div className="mb-1 flex items-center justify-between">
+        <span className="text-[11px] font-bold text-ink-soft">{label}</span>
+        <span className="text-[11px] text-ink-soft">{fmt(value)}</span>
+      </div>
+      <input type="range" min={min} max={max} step={step} value={value} onChange={(e) => onChange(Number(e.target.value))} className="w-full accent-brand" />
     </div>
   );
 }

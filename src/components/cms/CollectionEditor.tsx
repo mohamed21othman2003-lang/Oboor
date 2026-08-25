@@ -1184,6 +1184,18 @@ function GalleryEditor({ value, onChange }: { value: unknown; onChange: (v: unkn
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
   const [zoom, setZoom] = useState(""); // الصورة المعروضة بالحجم الكامل عند الضغط
+  const [editIdx, setEditIdx] = useState<number | null>(null); // صورة قيد التعديل في محرّر الصورة
+
+  async function replaceAt(idx: number, out: Blob | File) {
+    setBusy(true); setErr("");
+    try {
+      const file = out instanceof File ? out : new File([out], "image.jpg", { type: "image/jpeg" });
+      const r = await uploadImage(file);
+      onChange(urls.map((u, j) => (j === idx ? r.url : u)));
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : t("تعذّر حفظ التعديل.", "Could not save the edit."));
+    } finally { setBusy(false); }
+  }
 
   async function onFiles(e: React.ChangeEvent<HTMLInputElement>) {
     const files = [...(e.target.files || [])];
@@ -1241,7 +1253,14 @@ function GalleryEditor({ value, onChange }: { value: unknown; onChange: (v: unkn
               <button type="button" onClick={() => move(i, -1)} disabled={i === 0} className="rounded p-0.5 text-white/90 hover:text-white disabled:opacity-30" title={t("لليمين", "Move earlier")}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" d="M9 6l6 6-6 6" /></svg>
               </button>
-              <button type="button" onClick={() => remove(i)} className="rounded bg-red-500/90 px-1.5 py-0.5 text-[10px] font-bold text-white" title={t("حذف", "Remove")}>{t("حذف", "Remove")}</button>
+              <div className="flex items-center gap-1">
+                {!isVideo(u) && (
+                  <button type="button" onClick={() => setEditIdx(i)} className="rounded p-0.5 text-white/90 hover:text-white" title={t("تعديل", "Edit")}>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" /></svg>
+                  </button>
+                )}
+                <button type="button" onClick={() => remove(i)} className="rounded bg-red-500/90 px-1.5 py-0.5 text-[10px] font-bold text-white" title={t("حذف", "Remove")}>{t("حذف", "Remove")}</button>
+              </div>
               <button type="button" onClick={() => move(i, 1)} disabled={i === urls.length - 1} className="rounded p-0.5 text-white/90 hover:text-white disabled:opacity-30" title={t("لليسار", "Move later")}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" d="M15 6l-6 6 6 6" /></svg>
               </button>
@@ -1263,6 +1282,7 @@ function GalleryEditor({ value, onChange }: { value: unknown; onChange: (v: unkn
       {urls.length === 0 && <p className="mt-2 text-xs text-ink-soft">{t("لا توجد وسائط بعد — اضغط «إضافة صور/فيديو» لرفع صور أو فيديوهات هذا الفرع (فيديو حتى 50 ميجا).", "No media yet — click “Add Media” to upload this branch's photos or videos (video up to 50 MB).")}</p>}
       {err && <p className="mt-1 text-xs text-red-600">{err}</p>}
       {zoom && <Lightbox src={zoom} onClose={() => setZoom("")} />}
+      {editIdx != null && urls[editIdx] && <ImageCropModal src={urls[editIdx]} onCancel={() => setEditIdx(null)} onConfirm={(b) => { const idx = editIdx; setEditIdx(null); replaceAt(idx, b); }} />}
     </div>
   );
 }
@@ -2034,6 +2054,7 @@ function ImageInput({ f, value, pathFallback, type, id, isNew, onUploaded, onCha
   const [err, setErr] = useState("");
   const [localPreview, setLocalPreview] = useState("");
   const [pending, setPending] = useState<File | null>(null); // الملف المختار قبل المعاينة/الاعتماد
+  const [editing, setEditing] = useState(false); // فتح محرّر الصورة على الصورة الحالية
   const [zoom, setZoom] = useState(false); // معاينة الصورة بحجم كامل عند الضغط عليها
   // كاسر كاش: التخزين قد يعيد استخدام نفس اسم/مسار الملف عند التغيير، فالمتصفح
   // يعرض الصورة القديمة المخزّنة. نضيف بصمة زمنية تتغيّر عند كل فتح وبعد كل رفع
@@ -2103,12 +2124,19 @@ function ImageInput({ f, value, pathFallback, type, id, isNew, onUploaded, onCha
             {busy ? t("جارٍ الرفع…", "Uploading…") : src ? t("تغيير الصورة", "Change Image") : t("رفع صورة", "Upload Image")}
             <input type="file" accept="image/*" onChange={onPick} disabled={busy} className="hidden" />
           </label>
+          {src && !busy && (
+            <button type="button" onClick={() => setEditing(true)} className="ms-2 inline-flex items-center gap-1.5 rounded-xl border border-line px-3.5 py-2.5 text-sm font-semibold text-ink-soft transition-colors hover:border-brand hover:text-brand">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" /></svg>
+              {t("تعديل الصورة", "Edit Image")}
+            </button>
+          )}
           {localPreview && !busy && <p className="mt-1.5 text-xs font-semibold text-emerald-600">{t("تم رفع الصورة ✓", "Image uploaded ✓")}</p>}
         </div>
       </div>
       {err && <p className="mt-1 text-xs text-red-600">{err}</p>}
       <Help text={f.help} />
       {pending && <ImageCropModal file={pending} onCancel={() => setPending(null)} onConfirm={doUpload} />}
+      {editing && src && <ImageCropModal src={src} onCancel={() => setEditing(false)} onConfirm={(b) => { setEditing(false); doUpload(b); }} />}
       {zoom && src && <Lightbox src={src} onClose={() => setZoom(false)} />}
     </div>
   );
