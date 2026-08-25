@@ -12,6 +12,27 @@ import PageChrome from "@/components/cms/PageChrome";
 // أنواع المحتوى التي لصفحتها «رأس صفحة» قابل للتعديل من نفس القائمة (نوع ← مفتاح الصفحة)
 const PAGE_CHROME: Record<string, string> = { careers: "careers", success: "success", specialists: "specialists", branches: "branches", news: "news", programs: "programs" };
 
+// مصغّرة الصورة في القائمة — تعرض بديلاً نظيفاً بدل الأيقونة المكسورة لو مفيش صورة أو فشل تحميلها
+function Thumb({ src, onZoom, title }: { src: string | null; onZoom: (s: string) => void; title: string }) {
+  const [err, setErr] = useState(false);
+  if (!src || err) {
+    return (
+      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-surface text-ink-soft/40 ring-1 ring-line" aria-hidden>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2.5" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" /></svg>
+      </span>
+    );
+  }
+  return (
+    <button type="button" onClick={() => onZoom(src)} title={title} className="group relative h-11 w-11 shrink-0 overflow-hidden rounded-lg ring-1 ring-line">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={src} alt="" onError={() => setErr(true)} className="h-full w-full object-cover" />
+      <span className="absolute inset-0 flex items-center justify-center text-white opacity-0 transition-all group-hover:bg-black/35 group-hover:opacity-100">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3M11 8v6M8 11h6" /></svg>
+      </span>
+    </button>
+  );
+}
+
 // أسماء ودّية لأقسام الصفحات (block) — لتجميع العناصر تحت قسمها بدل خلطها
 const BLOCK_LABELS: Record<string, string> = {
   hero: "المقدمة العلوية", intro: "نبذة تعريفية", about: "نبذة", mission: "الرسالة", vision: "الرؤية",
@@ -198,18 +219,7 @@ export default function CollectionList({ type }: { type: string }) {
         )}
         <td className="px-5 py-3.5">
           <div className="flex items-center gap-3">
-            {(() => {
-              const img = imageOf(it);
-              return img ? (
-                <button type="button" onClick={() => setZoom(img)} title={t("اضغط لعرض الصورة", "Click to view")} className="group relative h-11 w-11 shrink-0 overflow-hidden rounded-lg ring-1 ring-line">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={img} alt="" className="h-full w-full object-cover" />
-                  <span className="absolute inset-0 flex items-center justify-center text-white opacity-0 transition-all group-hover:bg-black/35 group-hover:opacity-100">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3M11 8v6M8 11h6" /></svg>
-                  </span>
-                </button>
-              ) : null;
-            })()}
+            <Thumb src={imageOf(it)} onZoom={setZoom} title={t("اضغط لعرض الصورة", "Click to view")} />
             <div className="min-w-0">
               <p className="font-semibold text-ink">{titleOf(it)}</p>
               {sub && <p className="mt-0.5 text-xs text-ink-soft">{t("القسم:", "Section:")} {sub}</p>}
