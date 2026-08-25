@@ -1,7 +1,11 @@
 // محتوى دليل استخدام لوحة التحكّم (ثنائي اللغة). صفحة العرض: src/app/cms/guide/page.tsx
 // كل خطوة قد تحمل لقطة شاشة تُحلّ حسب اللغة إلى /guide/<lang>/<area>/<name>.png
 
-export type GuideShot = { area: "cms" | "site"; name: string; caption_ar?: string; caption_en?: string };
+// نقطة توضيحية فوق اللقطة: صندوق تمييز بنسب مئوية (0–100) من أبعاد الصورة.
+// الإحداثيات تختلف بين العربي (RTL) والإنجليزي (LTR) لأن التخطيط منعكس.
+export type HBox = { x: number; y: number; w: number; h: number };
+export type GuideHotspot = { ar: HBox; en: HBox; label_ar?: string; label_en?: string };
+export type GuideShot = { area: "cms" | "site"; name: string; caption_ar?: string; caption_en?: string; hotspots?: GuideHotspot[] };
 // النصّ يدعم روابط بصيغة ماركداون: [النص الظاهر](الرابط) — تُحوّل إلى روابط قابلة للنقر.
 // points: نقاط فرعية (bullets) تظهر أسفل نصّ الخطوة لتفكيك الشرح الطويل.
 export type GuidePoint = { ar: string; en: string };
@@ -23,9 +27,9 @@ export type GuidePart = { id: string; title_ar: string; title_en: string; sectio
 const faq = (q_ar: string, q_en: string, a_ar: string, a_en: string): FaqItem => ({ q_ar, q_en, a_ar, a_en });
 const term = (term_ar: string, term_en: string, def_ar: string, def_en: string): GlossaryItem => ({ term_ar, term_en, def_ar, def_en });
 
-// اختصار لإنشاء خطوة بلقطة CMS (مع نقاط فرعية اختيارية)
-const cms = (name: string, ar: string, en: string, cap_ar?: string, cap_en?: string, points?: [string, string][]): GuideStep =>
-  ({ ar, en, shot: { area: "cms", name, caption_ar: cap_ar, caption_en: cap_en }, ...(points ? { points: points.map(([a, e]) => ({ ar: a, en: e })) } : {}) });
+// اختصار لإنشاء خطوة بلقطة CMS (مع نقاط فرعية + نقاط توضيحية اختيارية)
+const cms = (name: string, ar: string, en: string, cap_ar?: string, cap_en?: string, points?: [string, string][], hotspots?: GuideHotspot[]): GuideStep =>
+  ({ ar, en, shot: { area: "cms", name, caption_ar: cap_ar, caption_en: cap_en, ...(hotspots ? { hotspots } : {}) }, ...(points ? { points: points.map(([a, e]) => ({ ar: a, en: e })) } : {}) });
 const site = (name: string, ar: string, en: string): GuideStep =>
   ({ ar, en, shot: { area: "site", name } });
 const p = (ar: string, en: string): GuideStep => ({ ar, en });
@@ -278,7 +282,9 @@ export const GUIDE: GuidePart[] = [
         intro_ar: "الصور (صورة الفرع، الأخصائي، الخبر، شريحة الهيرو، صور المعرض) تُرفع من جهازك مباشرة.",
         intro_en: "Images (a branch, specialist, news, hero slide, gallery photos) are uploaded straight from your device.",
         steps: [
-          cms("detail-image", "في المحرّر اضغط منطقة الصورة أو زر «رفع صورة»، ثم اختر الملف من جهازك.", "In the editor click the image area or the “Upload image” button, then choose the file from your device."),
+          cms("detail-image", "في المحرّر اضغط منطقة الصورة أو زر «رفع صورة»، ثم اختر الملف من جهازك. ولتعديل صورة موجودة اضغط «تعديل الصورة» (المميَّز في الصورة).", "In the editor click the image area or the “Upload image” button, then choose the file from your device. To edit an existing image, click “Edit Image” (highlighted in the picture).", undefined, undefined, undefined, [
+            { ar: { x: 49.5, y: 47.2, w: 10.2, h: 5.5 }, en: { x: 40.2, y: 47.2, w: 9.1, h: 5.5 }, label_ar: "افتح المحرّر", label_en: "Open editor" },
+          ]),
           p("بعد اختيار الملف تظهر نافذة «قصّ الصورة» لتحديد الجزء الظاهر منها بالأبعاد المناسبة للمكان — حرّك الإطار وكبّره/صغّره ثم اضغط «تأكيد». هذا يضمن ظهور الصورة متناسقة دون تشويه. (تظهر النافذة للصور ذات الشكل/النسبة الثابتة؛ أما الأماكن الحرّة الحجم فقد تُرفَع مباشرةً دون قصّ.)", "After you pick a file, a “Crop image” window appears to choose the visible part at the right proportions for its place — move and resize the frame, then click “Confirm”. This keeps the image consistent without distortion. (The window appears for images with a fixed shape/ratio; free-size spots may upload directly without cropping.)"),
           cms("image-editor", "محرّر الصور: بجانب كل صورة زر «تعديل الصورة» يفتح محرّرًا كاملًا فيه معاينة حيّة للصورة تتغيّر مع كل تعديل. يمكنك:", "Image editor: next to each image a “Edit Image” button opens a full editor with a live preview of the image that updates as you tweak. You can:", undefined, undefined, [
             ["قصّ الصورة وتحديد الجزء الظاهر، مع أبعاد جاهزة (الأصلية / 16:9 / 4:3 / مربّع / 3:4).", "Crop it and pick the visible part, with ready ratios (original / 16:9 / 4:3 / square / 3:4)."],
@@ -645,6 +651,9 @@ export const GUIDE: GuidePart[] = [
           cms("branch-success", "قصص نجاح الفرع (نظام هجين): من داخل قسم «قصص النجاح» في محرّر الفرع تتحكّم في القصص التي تظهر لهذا الفرع بطريقتين معًا:", "Branch success stories (hybrid): inside the “Success stories” section of the branch editor you control which stories show for this branch in two ways together:", undefined, undefined, [
             ["الاختيار: علّم على قصص «أبطال عبور» الجاهزة لتظهر بطاقاتها الحقيقية داخل صفحة الفرع (وتظهر البطاقة فورًا في المعاينة الحيّة عند اختيارها).", "Select: tick ready “Oboor Champions” stories to show their real cards inside the branch page (the card appears immediately in the live preview when selected)."],
             ["الإضافة: أضف قصصًا خاصة بهذا الفرع وحده — ببطاقة كاملة ونافذة «عرض التفاصيل» خاصة بها، تمامًا كأي قصة نجاح.", "Add: create stories for this branch only — with a full card and its own “View Details” popup, just like any success story."],
+          ], [
+            { ar: { x: 30.5, y: 52.1, w: 44.8, h: 19.6 }, en: { x: 23.6, y: 54.1, w: 44.8, h: 19.6 }, label_ar: "اختر قصص عبور", label_en: "Pick champions" },
+            { ar: { x: 66.2, y: 83.4, w: 9.1, h: 4.9 }, en: { x: 23.6, y: 87.1, w: 8.4, h: 4.9 }, label_ar: "أو أضف قصة خاصة", label_en: "or add your own" },
           ]),
           p("معرض الفيديو في صفحة الفرع يعرض الوسائط تلقائيًا: كل صورة تظهر ~3 ثوانٍ ثم تنزلق للتالية، والفيديو يعمل تلقائيًا بلا صوت وأول ما يخلص ينتقل للي بعده. الفيديوهات الطولية تُملأ جوانبها بخلفية ناعمة بدل الأسود، وتظهر المصغّرات كأنها صور عادية.", "The branch page's gallery plays media automatically: each photo shows for ~3 seconds then slides to the next, and a video plays automatically muted and, when it ends, moves to the next. Portrait videos get a soft filled background on the sides instead of black, and thumbnails look like normal photos."),
         ],
