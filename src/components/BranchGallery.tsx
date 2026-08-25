@@ -22,7 +22,17 @@ export default function BranchGallery({ images, branchName, locale = "ar" }: { i
   const [open, setOpen] = useState(false);
   const [paused, setPaused] = useState(false);
   const touchX = useRef<number | null>(null);
+  const vidRefs = useRef<Record<number, HTMLVideoElement | null>>({});
   const multi = images.length > 1;
+
+  // يشغّل فيديو الشريحة الحالية فقط (صامت/متكرّر) ويوقف الباقي — تفادي تشغيل عدّة فيديوهات معًا
+  useEffect(() => {
+    Object.entries(vidRefs.current).forEach(([k, v]) => {
+      if (!v) return;
+      if (Number(k) === index) v.play().catch(() => {});
+      else v.pause();
+    });
+  }, [index]);
 
   const go = useCallback((dir: number) => {
     setIndex((i) => (i + dir + images.length) % images.length);
@@ -75,9 +85,10 @@ export default function BranchGallery({ images, branchName, locale = "ar" }: { i
               <div key={src + i} className={`absolute inset-0 transition-opacity duration-700 ${i === index ? "opacity-100" : "opacity-0"}`}>
                 {isVideo(src) ? (
                   <>
-                    {/* إطار الفيديو (يُشغَّل بالكامل عند فتح العارض) */}
-                    <video src={src} muted playsInline preload="metadata" className="h-full w-full bg-black object-contain" />
-                    <PlayBadge />
+                    {/* خلفية مموّهة من نفس الفيديو تملأ الجنبين بدل الأسود */}
+                    <video src={src} muted playsInline preload="metadata" aria-hidden className="absolute inset-0 h-full w-full scale-110 object-cover opacity-80 blur-2xl" />
+                    {/* الفيديو الفعلي — تشغيل تلقائي صامت متكرّر للشريحة الحالية */}
+                    <video ref={(el) => { vidRefs.current[i] = el; }} src={src} muted loop playsInline preload="auto" className="relative h-full w-full object-contain" />
                   </>
                 ) : (
                   <>
@@ -139,7 +150,7 @@ export default function BranchGallery({ images, branchName, locale = "ar" }: { i
 
           <div className="relative flex flex-1 items-center justify-center">
             {isVideo(images[index]) ? (
-              <video key={images[index]} src={images[index]} controls autoPlay playsInline className="max-h-[70vh] w-auto max-w-full rounded-xl" />
+              <video key={images[index]} src={images[index]} controls autoPlay muted loop playsInline className="max-h-[70vh] w-auto max-w-full rounded-xl" />
             ) : (
               <Image src={images[index]} alt={pick(locale, `${branchName} - صورة ${index + 1}`, `${branchName} - photo ${index + 1}`)} width={1200} height={800} className="max-h-[70vh] w-auto max-w-full rounded-xl object-contain" />
             )}
