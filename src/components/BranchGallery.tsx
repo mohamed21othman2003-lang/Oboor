@@ -3,6 +3,19 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
 import { pick, type Locale } from "@/i18n/config";
+import { isVideo } from "@/lib/media";
+
+// شارة «تشغيل» صغيرة فوق مصغّرات الفيديو
+function PlayBadge({ small }: { small?: boolean }) {
+  const s = small ? 12 : 16;
+  return (
+    <span className="pointer-events-none absolute inset-0 flex items-center justify-center">
+      <span className={`flex items-center justify-center rounded-full bg-black/55 text-white ${small ? "h-6 w-6" : "h-9 w-9"}`}>
+        <svg width={s} height={s} viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
+      </span>
+    </span>
+  );
+}
 
 export default function BranchGallery({ images, branchName, locale = "ar" }: { images: string[]; branchName: string; locale?: Locale }) {
   const [index, setIndex] = useState(0);
@@ -15,12 +28,12 @@ export default function BranchGallery({ images, branchName, locale = "ar" }: { i
     setIndex((i) => (i + dir + images.length) % images.length);
   }, [images.length]);
 
-  // تشغيل تلقائي (يتوقّف عند المرور بالماوس أو فتح العرض المكبّر)
+  // تشغيل تلقائي (يتوقّف عند المرور بالماوس أو فتح العرض المكبّر أو لو الشريحة الحالية فيديو)
   useEffect(() => {
-    if (!multi || paused || open) return;
+    if (!multi || paused || open || isVideo(images[index])) return;
     const id = setInterval(() => go(1), 5000);
     return () => clearInterval(id);
-  }, [multi, paused, open, go]);
+  }, [multi, paused, open, go, images, index]);
 
   // لوحة المفاتيح داخل العرض المكبّر
   useEffect(() => {
@@ -60,18 +73,28 @@ export default function BranchGallery({ images, branchName, locale = "ar" }: { i
           <button onClick={() => setOpen(true)} className="relative block h-[300px] w-full sm:h-[440px]" aria-label={pick(locale, "تكبير الصورة", "Zoom image")}>
             {images.map((src, i) => (
               <div key={src + i} className={`absolute inset-0 transition-opacity duration-700 ${i === index ? "opacity-100" : "opacity-0"}`}>
-                {/* خلفية مموّهة من نفس الصورة تملأ الفراغ على الجنبين بدل الأبيض */}
-                <Image src={src} alt="" aria-hidden fill className="scale-110 object-cover blur-2xl" sizes="100vw" />
-                <div className="absolute inset-0 bg-white/35" />
-                {/* الصورة الفعلية كاملة بدون قص */}
-                <Image
-                  src={src}
-                  alt={pick(locale, `${branchName} - صورة ${i + 1}`, `${branchName} - photo ${i + 1}`)}
-                  fill
-                  priority={i === 0}
-                  className="object-contain drop-shadow-[0_8px_28px_rgba(13,61,69,0.18)]"
-                  sizes="100vw"
-                />
+                {isVideo(src) ? (
+                  <>
+                    {/* إطار الفيديو (يُشغَّل بالكامل عند فتح العارض) */}
+                    <video src={src} muted playsInline preload="metadata" className="h-full w-full bg-black object-contain" />
+                    <PlayBadge />
+                  </>
+                ) : (
+                  <>
+                    {/* خلفية مموّهة من نفس الصورة تملأ الفراغ على الجنبين بدل الأبيض */}
+                    <Image src={src} alt="" aria-hidden fill className="scale-110 object-cover blur-2xl" sizes="100vw" />
+                    <div className="absolute inset-0 bg-white/35" />
+                    {/* الصورة الفعلية كاملة بدون قص */}
+                    <Image
+                      src={src}
+                      alt={pick(locale, `${branchName} - صورة ${i + 1}`, `${branchName} - photo ${i + 1}`)}
+                      fill
+                      priority={i === 0}
+                      className="object-contain drop-shadow-[0_8px_28px_rgba(13,61,69,0.18)]"
+                      sizes="100vw"
+                    />
+                  </>
+                )}
               </div>
             ))}
             <span className="absolute bottom-3 right-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-black/40 text-white opacity-0 transition-opacity group-hover:opacity-100">
@@ -96,7 +119,9 @@ export default function BranchGallery({ images, branchName, locale = "ar" }: { i
               onClick={() => setIndex(i)}
               className={`relative h-16 w-20 shrink-0 overflow-hidden rounded-lg border-2 transition-colors ${i === index ? "border-brand" : "border-transparent opacity-70 hover:opacity-100"}`}
             >
-              <Image src={src} alt="" fill className="object-cover" sizes="80px" />
+              {isVideo(src) ? (<><video src={src} muted playsInline preload="metadata" className="h-full w-full bg-black object-cover" /><PlayBadge small /></>) : (
+                <Image src={src} alt="" fill className="object-cover" sizes="80px" />
+              )}
             </button>
           ))}
         </div>
@@ -113,7 +138,11 @@ export default function BranchGallery({ images, branchName, locale = "ar" }: { i
           </div>
 
           <div className="relative flex flex-1 items-center justify-center">
-            <Image src={images[index]} alt={pick(locale, `${branchName} - صورة ${index + 1}`, `${branchName} - photo ${index + 1}`)} width={1200} height={800} className="max-h-[70vh] w-auto max-w-full rounded-xl object-contain" />
+            {isVideo(images[index]) ? (
+              <video key={images[index]} src={images[index]} controls autoPlay playsInline className="max-h-[70vh] w-auto max-w-full rounded-xl" />
+            ) : (
+              <Image src={images[index]} alt={pick(locale, `${branchName} - صورة ${index + 1}`, `${branchName} - photo ${index + 1}`)} width={1200} height={800} className="max-h-[70vh] w-auto max-w-full rounded-xl object-contain" />
+            )}
             <Arrow dir="prev" onClick={() => go(-1)} light locale={locale} />
             <Arrow dir="next" onClick={() => go(1)} light locale={locale} />
           </div>
@@ -125,7 +154,9 @@ export default function BranchGallery({ images, branchName, locale = "ar" }: { i
                 onClick={() => setIndex(i)}
                 className={`relative h-14 w-16 shrink-0 overflow-hidden rounded-md border-2 transition ${i === index ? "border-brand" : "border-transparent opacity-50 hover:opacity-90"}`}
               >
-                <Image src={src} alt="" fill className="object-cover" sizes="64px" />
+                {isVideo(src) ? (<><video src={src} muted playsInline preload="metadata" className="h-full w-full bg-black object-cover" /><PlayBadge small /></>) : (
+                  <Image src={src} alt="" fill className="object-cover" sizes="64px" />
+                )}
               </button>
             ))}
           </div>

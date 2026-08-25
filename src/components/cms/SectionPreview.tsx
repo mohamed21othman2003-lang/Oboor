@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { CMS_ICONS } from "@/lib/cms/icons";
 import { distinctIcons, iconByKey } from "@/lib/areaIcon";
 import { listCollection, type CmsItem } from "@/lib/cms/api";
+import { isVideo } from "@/lib/media";
 
 // معاينات حيّة لأقسام الصفحة داخل الـCMS — تعرض السكشن «كما يظهر على الموقع» بشكله
 // الحقيقي (كل العناصر مع بعض)، وتتحدّث لحظياً مع كل حرف قبل الحفظ.
@@ -1004,7 +1005,11 @@ function BranchGroupPreview({ bases, values, lang }: { bases: string[]; values: 
   if (has("gallery")) {
     const imgs = (Array.isArray(values.gallery) ? (values.gallery as unknown[]) : []).map((x) => String(typeof x === "string" ? x : ((x as Record<string, unknown>)?.image ?? ""))).filter(Boolean).map((s) => (/^(https?:|data:|blob:|\/)/.test(s) ? s : "/" + s.replace(/^\/+/, "")));
     if (!imgs.length) return <PreviewShell dir={dir} empty en={en} />;
-    return <div dir={dir} className="grid grid-cols-3 gap-2 rounded-xl bg-surface/40 p-3">{imgs.map((s, i) => (/* eslint-disable-next-line @next/next/no-img-element */<img key={i} src={s} alt="" className="h-24 w-full rounded-lg bg-white object-contain ring-1 ring-line" />))}</div>;
+    return <div dir={dir} className="grid grid-cols-3 gap-2 rounded-xl bg-surface/40 p-3">{imgs.map((s, i) => (
+      isVideo(s)
+        ? <div key={i} className="relative h-24 w-full overflow-hidden rounded-lg bg-black ring-1 ring-line"><video src={s} muted playsInline preload="metadata" className="h-full w-full object-contain" /><span className="pointer-events-none absolute inset-0 flex items-center justify-center"><span className="flex h-6 w-6 items-center justify-center rounded-full bg-black/55 text-white"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg></span></span></div>
+        : /* eslint-disable-next-line @next/next/no-img-element */ <img key={i} src={s} alt="" className="h-24 w-full rounded-lg bg-white object-contain ring-1 ring-line" />
+    ))}</div>;
   }
 
   // 6) بيانات الفرع الأساسية (الهيرو) — الاسم + المدينة + التقييم + صفوف معلومات + زرّان

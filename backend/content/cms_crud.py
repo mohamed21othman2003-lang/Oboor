@@ -308,13 +308,19 @@ def upload(request):
     f = request.FILES.get("file")
     if not f:
         return Response({"detail": "لا يوجد ملف."}, status=400)
-    if f.size > 5 * 1024 * 1024:
-        return Response({"detail": "الحد الأقصى 5 ميجابايت."}, status=400)
-    try:
-        PILImage.open(f).verify()
-        f.seek(0)
-    except Exception:
-        return Response({"detail": "الملف ليس صورة صالحة."}, status=400)
+    # نقبل صورًا وفيديو (لمعرض الفرع). الفيديو حدّه أكبر ولا يُتحقَّق منه بـPIL.
+    name = (f.name or "").lower()
+    ctype = getattr(f, "content_type", "") or ""
+    is_video = name.endswith((".mp4", ".webm", ".mov", ".ogg", ".m4v")) or ctype.startswith("video/")
+    max_mb = 50 if is_video else 5
+    if f.size > max_mb * 1024 * 1024:
+        return Response({"detail": f"الحد الأقصى {max_mb} ميجابايت."}, status=400)
+    if not is_video:
+        try:
+            PILImage.open(f).verify()
+            f.seek(0)
+        except Exception:
+            return Response({"detail": "الملف ليس صورة صالحة."}, status=400)
     path = default_storage.save(f"content/{f.name}", f)
     _fix_content_type(path)
     return Response({"url": default_storage.url(path)})

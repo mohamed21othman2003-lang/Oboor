@@ -13,6 +13,7 @@ import { CMS_ICONS, ICON_LABELS, iconNamesFor } from "@/lib/cms/icons";
 import { iconByKey, OFFER_ICON_KEYS } from "@/lib/areaIcon";
 import { useCmsLang } from "@/lib/cms/i18n";
 import { GroupPreview } from "@/components/cms/SectionPreview";
+import { isVideo } from "@/lib/media";
 import { fieldLabelEn } from "@/lib/cms/fieldLabels";
 import CustomSelect from "@/components/ui/Select";
 // تحميل مكوّن قصّ الصورة عند الحاجة فقط (يقلّل حجم باندل المحرّر)
@@ -1160,8 +1161,12 @@ function Lightbox({ src, onClose }: { src: string; onClose: () => void }) {
   if (typeof document === "undefined") return null;
   return createPortal(
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 p-4 sm:p-10" onClick={onClose}>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={src} alt="" className="max-h-[92vh] max-w-[94vw] rounded-xl object-contain shadow-2xl" onClick={(e) => e.stopPropagation()} />
+      {isVideo(src) ? (
+        <video src={src} controls autoPlay playsInline className="max-h-[92vh] max-w-[94vw] rounded-xl shadow-2xl" onClick={(e) => e.stopPropagation()} />
+      ) : (
+        /* eslint-disable-next-line @next/next/no-img-element */
+        <img src={src} alt="" className="max-h-[92vh] max-w-[94vw] rounded-xl object-contain shadow-2xl" onClick={(e) => e.stopPropagation()} />
+      )}
       <button type="button" onClick={onClose} aria-label={t("إغلاق", "Close")} className="absolute end-5 top-5 flex h-11 w-11 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur transition-colors hover:bg-white/30">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
       </button>
@@ -1187,7 +1192,9 @@ function GalleryEditor({ value, onChange }: { value: unknown; onChange: (v: unkn
     const added: string[] = [];
     try {
       for (const f of files) {
-        if (f.size > 5 * 1024 * 1024) { setErr(t("بعض الصور أكبر من 5 ميجابايت — تم تخطّيها.", "Some images are larger than 5 MB — they were skipped.")); continue; }
+        const vid = f.type.startsWith("video/");
+        const maxMb = vid ? 50 : 5;
+        if (f.size > maxMb * 1024 * 1024) { setErr(t(`بعض الملفات أكبر من ${maxMb} ميجابايت — تم تخطّيها.`, `Some files are larger than ${maxMb} MB — they were skipped.`)); continue; }
         const r = await uploadImage(f);
         added.push(r.url);
       }
@@ -1214,9 +1221,18 @@ function GalleryEditor({ value, onChange }: { value: unknown; onChange: (v: unkn
         {urls.map((u, i) => (
           <div key={u + i} className="group relative aspect-square overflow-hidden rounded-xl ring-1 ring-line">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <button type="button" onClick={() => setZoom(u)} title={t("اضغط لعرض الصورة", "Click to view")} className="block h-full w-full">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={u} alt="" className="h-full w-full object-cover" />
+            <button type="button" onClick={() => setZoom(u)} title={t("اضغط للعرض", "Click to view")} className="block h-full w-full">
+              {isVideo(u) ? (
+                <video src={u} muted playsInline preload="metadata" className="h-full w-full bg-black object-cover" />
+              ) : (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img src={u} alt="" className="h-full w-full object-cover" />
+              )}
+              {isVideo(u) && (
+                <span className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-black/55 text-white"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg></span>
+                </span>
+              )}
               <span className="pointer-events-none absolute inset-0 flex items-center justify-center text-white opacity-0 transition-all group-hover:bg-black/25 group-hover:opacity-100">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3M11 8v6M8 11h6" /></svg>
               </span>
@@ -1238,13 +1254,13 @@ function GalleryEditor({ value, onChange }: { value: unknown; onChange: (v: unkn
           ) : (
             <>
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>
-              <span className="text-xs font-semibold">{t("إضافة صور", "Add Images")}</span>
+              <span className="text-xs font-semibold">{t("إضافة صور/فيديو", "Add Media")}</span>
             </>
           )}
-          <input type="file" accept="image/*" multiple onChange={onFiles} disabled={busy} className="hidden" />
+          <input type="file" accept="image/*,video/*" multiple onChange={onFiles} disabled={busy} className="hidden" />
         </label>
       </div>
-      {urls.length === 0 && <p className="mt-2 text-xs text-ink-soft">{t("لا توجد صور بعد — اضغط «إضافة صور» لرفع صور هذا الفرع.", "No images yet — click “Add Images” to upload this branch's photos.")}</p>}
+      {urls.length === 0 && <p className="mt-2 text-xs text-ink-soft">{t("لا توجد وسائط بعد — اضغط «إضافة صور/فيديو» لرفع صور أو فيديوهات هذا الفرع (فيديو حتى 50 ميجا).", "No media yet — click “Add Media” to upload this branch's photos or videos (video up to 50 MB).")}</p>}
       {err && <p className="mt-1 text-xs text-red-600">{err}</p>}
       {zoom && <Lightbox src={zoom} onClose={() => setZoom("")} />}
     </div>
