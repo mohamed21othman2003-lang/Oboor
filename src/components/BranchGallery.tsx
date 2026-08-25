@@ -87,8 +87,8 @@ export default function BranchGallery({ images, branchName, locale = "ar" }: { i
                   <>
                     {/* خلفية مموّهة من نفس الفيديو تملأ الجنبين بدل الأسود */}
                     <video src={src} muted playsInline preload="metadata" aria-hidden className="absolute inset-0 h-full w-full scale-110 object-cover opacity-80 blur-2xl" />
-                    {/* الفيديو الفعلي — تشغيل تلقائي صامت متكرّر للشريحة الحالية */}
-                    <video ref={(el) => { vidRefs.current[i] = el; }} src={src} muted loop playsInline preload="auto" className="relative h-full w-full object-contain" />
+                    {/* الفيديو الفعلي — تشغيل تلقائي صامت للشريحة الحالية، وبعد انتهائه ينتقل للي بعده */}
+                    <video ref={(el) => { vidRefs.current[i] = el; }} src={src} muted loop={!multi} playsInline preload="auto" onEnded={() => { if (multi) go(1); }} className="relative h-full w-full object-contain" />
                   </>
                 ) : (
                   <>
@@ -150,7 +150,7 @@ export default function BranchGallery({ images, branchName, locale = "ar" }: { i
 
           <div className="relative flex flex-1 items-center justify-center">
             {isVideo(images[index]) ? (
-              <video key={images[index]} src={images[index]} controls autoPlay muted loop playsInline className="max-h-[70vh] w-auto max-w-full rounded-xl" />
+              <video key={images[index]} src={images[index]} controls autoPlay muted loop={!multi} playsInline onEnded={() => { if (multi) go(1); }} className="max-h-[70vh] w-auto max-w-full rounded-xl" />
             ) : (
               <Image src={images[index]} alt={pick(locale, `${branchName} - صورة ${index + 1}`, `${branchName} - photo ${index + 1}`)} width={1200} height={800} className="max-h-[70vh] w-auto max-w-full rounded-xl object-contain" />
             )}
