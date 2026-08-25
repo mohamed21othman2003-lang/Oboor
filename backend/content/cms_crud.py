@@ -312,7 +312,7 @@ def upload(request):
     name = (f.name or "").lower()
     ctype = getattr(f, "content_type", "") or ""
     is_video = name.endswith((".mp4", ".webm", ".mov", ".ogg", ".m4v")) or ctype.startswith("video/")
-    max_mb = 50 if is_video else 15
+    max_mb = 50 if is_video else 20
     if f.size > max_mb * 1024 * 1024:
         return Response({"detail": f"الحد الأقصى {max_mb} ميجابايت."}, status=400)
     if not is_video:

@@ -1205,7 +1205,7 @@ function GalleryEditor({ value, onChange }: { value: unknown; onChange: (v: unkn
     try {
       for (const f of files) {
         const vid = f.type.startsWith("video/");
-        const maxMb = vid ? 50 : 15;
+        const maxMb = vid ? 50 : 20;
         if (f.size > maxMb * 1024 * 1024) { setErr(t(`بعض الملفات أكبر من ${maxMb} ميجابايت — تم تخطّيها.`, `Some files are larger than ${maxMb} MB — they were skipped.`)); continue; }
         const r = await uploadImage(f);
         added.push(r.url);
@@ -2073,7 +2073,7 @@ function ImageInput({ f, value, pathFallback, type, id, isNew, onUploaded, onCha
     const file = e.target.files?.[0];
     e.target.value = "";
     if (!file) return;
-    if (file.size > 15 * 1024 * 1024) { setErr(t("الحد الأقصى 15 ميجابايت.", "Maximum size is 15 MB.")); return; }
+    if (file.size > 20 * 1024 * 1024) { setErr(t("الحد الأقصى 20 ميجابايت.", "Maximum size is 20 MB.")); return; }
     setErr("");
     setPending(file);
   }
