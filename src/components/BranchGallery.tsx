@@ -5,18 +5,6 @@ import Image from "next/image";
 import { pick, type Locale } from "@/i18n/config";
 import { isVideo } from "@/lib/media";
 
-// شارة «تشغيل» صغيرة فوق مصغّرات الفيديو
-function PlayBadge({ small }: { small?: boolean }) {
-  const s = small ? 12 : 16;
-  return (
-    <span className="pointer-events-none absolute inset-0 flex items-center justify-center">
-      <span className={`flex items-center justify-center rounded-full bg-black/55 text-white ${small ? "h-6 w-6" : "h-9 w-9"}`}>
-        <svg width={s} height={s} viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
-      </span>
-    </span>
-  );
-}
-
 export default function BranchGallery({ images, branchName, locale = "ar" }: { images: string[]; branchName: string; locale?: Locale }) {
   const [index, setIndex] = useState(0);
   const [open, setOpen] = useState(false);
@@ -130,7 +118,7 @@ export default function BranchGallery({ images, branchName, locale = "ar" }: { i
               onClick={() => setIndex(i)}
               className={`relative h-16 w-20 shrink-0 overflow-hidden rounded-lg border-2 transition-colors ${i === index ? "border-brand" : "border-transparent opacity-70 hover:opacity-100"}`}
             >
-              {isVideo(src) ? (<><video src={src} muted playsInline preload="metadata" className="h-full w-full bg-black object-cover" /><PlayBadge small /></>) : (
+              {isVideo(src) ? (<video src={src} muted playsInline preload="metadata" className="h-full w-full object-cover" />) : (
                 <Image src={src} alt="" fill className="object-cover" sizes="80px" />
               )}
             </button>
@@ -165,7 +153,7 @@ export default function BranchGallery({ images, branchName, locale = "ar" }: { i
                 onClick={() => setIndex(i)}
                 className={`relative h-14 w-16 shrink-0 overflow-hidden rounded-md border-2 transition ${i === index ? "border-brand" : "border-transparent opacity-50 hover:opacity-90"}`}
               >
-                {isVideo(src) ? (<><video src={src} muted playsInline preload="metadata" className="h-full w-full bg-black object-cover" /><PlayBadge small /></>) : (
+                {isVideo(src) ? (<video src={src} muted playsInline preload="metadata" className="h-full w-full object-cover" />) : (
                   <Image src={src} alt="" fill className="object-cover" sizes="64px" />
                 )}
               </button>
