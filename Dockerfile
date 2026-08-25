@@ -33,6 +33,9 @@ RUN addgroup -g 1001 -S nodejs && adduser -S nextjs -u 1001
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+# مجلد كاش تحسين الصور (AVIF/WebP) — يُركَّب عليه فوليوم كي لا يُمسح مع كل بناء،
+# فلا يُعاد تحسين الصور من الأصل الكبير بعد كل نشر.
+RUN mkdir -p /app/.next/cache/images && chown -R nextjs:nodejs /app/.next/cache
 USER nextjs
 EXPOSE 3000
 CMD ["node", "server.js"]

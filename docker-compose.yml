@@ -93,9 +93,13 @@ services:
       - backend
     ports:
       - "127.0.0.1:3000:3000"   # عبر nginx فقط (/)
+    volumes:
+      # كاش الصور المُحسَّنة (AVIF/WebP) يبقى بين عمليات البناء — بلا إعادة تحسين بعد كل نشر
+      - next_image_cache:/app/.next/cache/images
     restart: unless-stopped
 
 volumes:
   pgdata:
   miniodata:
+  next_image_cache:
   backend_media:
