@@ -15,6 +15,8 @@ export type GuideSection = {
   steps?: GuideStep[];
   faq?: FaqItem[];
   glossary?: GlossaryItem[];
+  // قائمة تحقّق شخصية (تُحفظ في متصفح المستخدم) — للبداية السريعة
+  checklist?: { ar: string; en: string }[];
 };
 export type GuidePart = { id: string; title_ar: string; title_en: string; sections: GuideSection[] };
 
@@ -32,6 +34,55 @@ const pl = (ar: string, en: string, points: [string, string][]): GuideStep =>
   ({ ar, en, points: points.map(([a, e]) => ({ ar: a, en: e })) });
 
 export const GUIDE: GuidePart[] = [
+  // ============================ الجزء: ابدأ من هنا ============================
+  {
+    id: "start",
+    title_ar: "ابدأ من هنا",
+    title_en: "Start Here",
+    sections: [
+      {
+        id: "quickstart",
+        title_ar: "ابدأ في ٥ دقائق",
+        title_en: "Get Started in 5 Minutes",
+        intro_ar: "أول مرة تدخل اللوحة؟ خمس خطوات بسيطة تخليك تعدّل موقعك بثقة. لكل شاشة زر «مساعدة» في الأعلى يفتح لك قسمها المفصّل في هذا الدليل.",
+        intro_en: "First time here? Five simple steps to edit your site with confidence. Every screen has a “Help” button at the top that opens its detailed section in this guide.",
+        steps: [
+          p("١) سجّل الدخول: افتح صفحة الدخول واكتب بريدك وكلمة المرور. (نسيت كلمة المرور؟ اضغط «نسيت كلمة المرور؟» ليصلك رابط على بريدك.)", "1) Sign in: open the login page and enter your email and password. (Forgot it? Click “Forgot password?” to get a reset link by email.)"),
+          p("٢) اختر الصفحة: من القائمة الجانبية افتح الصفحة التي تريد تعديلها (مثلاً «مراكزنا (الفروع)» أو «إعلامنا»). البحث في أعلى القائمة يساعدك تلاقيها بسرعة.", "2) Pick a page: from the sidebar open the page you want to edit (e.g. “Our Centers (Branches)” or “Our Media”). The search at the top of the menu helps you find it fast."),
+          p("٣) ادخل التعديل: اضغط «تعديل» على أي عنصر في القائمة، أو عدّل نصوص الصفحة الثابتة من لوحة «محتوى وعناوين الصفحة» أعلى الصفحة.", "3) Open the editor: click “Edit” on any list item, or edit the page's fixed texts from the “Page content & headings” panel at the top."),
+          p("٤) اكتب وشاهد: اكتب تعديلك في الخانة العربية والإنجليزية، وراقب «المعاينة الحيّة» بجانبك تتغيّر لحظيًا فتعرف الشكل النهائي قبل الحفظ.", "4) Type and watch: write your change in the Arabic and English boxes, and watch the “live preview” beside you change instantly so you see the final look before saving."),
+          p("٥) احفظ: اضغط «حفظ التعديلات» — يظهر تعديلك على الموقع خلال لحظات. وهذا كل شيء! 🎉", "5) Save: click “Save Changes” — your edit appears on the site within moments. That's it! 🎉"),
+          p("💡 نصيحة: زر «مساعدة» الموجود أعلى كل شاشة يفتح لك قسم هذا الدليل الخاص بها مباشرةً — استخدمه وقت ما تحتاج.", "💡 Tip: the “Help” button at the top of every screen opens this guide's section for that screen directly — use it whenever you need."),
+        ],
+        checklist: [
+          { ar: "سجّلت الدخول ووصلت للوحة التحكّم", en: "Signed in and reached the dashboard" },
+          { ar: "فتحت صفحة وعدّلت نصًّا وحفظته", en: "Opened a page, edited a text, and saved it" },
+          { ar: "رفعت صورة وجرّبت «محرّر الصور»", en: "Uploaded an image and tried the “Image editor”" },
+          { ar: "أضفت أو عدّلت عنصرًا في قائمة (فرع / خبر / أخصائي)", en: "Added or edited a list item (branch / news / specialist)" },
+          { ar: "راجعت طلبًا واردًا في «الطلبات والرسائل»", en: "Reviewed an incoming request in “Requests & Messages”" },
+          { ar: "ألقيت نظرة على صفحة «التحليلات»", en: "Took a look at the “Analytics” page" },
+        ],
+      },
+      {
+        id: "whatsnew",
+        title_ar: "الجديد في اللوحة",
+        title_en: "What's New",
+        intro_ar: "أحدث التحسينات المضافة للوحة التحكّم — لتعرف ما الجديد بسرعة.",
+        intro_en: "The latest improvements added to the control panel — so you know what's new at a glance.",
+        steps: [
+          pl("تحديثات أغسطس ٢٠٢٦:", "August 2026 updates:", [
+            ["**المعاينة الحيّة (Section View):** كل محرّر صار يعرض صورة طبق الأصل من القسم بجانب الحقول، تتحدّث مع كل حرف تكتبه.", "**Live Preview (Section View):** every editor now shows a faithful preview of the section beside the fields, updating as you type."],
+            ["**محرّر الصور الكامل:** قصّ، أبعاد جاهزة، تكبير، تدوير، وسطوع/تباين/تشبّع — بمعاينة حيّة، على كل صور اللوحة.", "**Full image editor:** crop, ready ratios, zoom, rotate, and brightness/contrast/saturation — with a live preview, on every image in the panel."],
+            ["**فيديو في معرض الفرع:** ارفع فيديوهات مع الصور؛ تعمل تلقائيًا بلا صوت وتنزلق للتالي عند انتهائها.", "**Video in the branch gallery:** upload videos alongside photos; they autoplay muted and slide to the next when finished."],
+            ["**قصص نجاح لكل فرع:** من محرّر الفرع تختار قصص «أبطال عبور» التي تظهر له، وتضيف قصصًا خاصة به.", "**Per-branch success stories:** from the branch editor, pick which “Oboor Champions” stories show, and add branch-specific ones."],
+            ["**رفع أكبر + تحسين تلقائي:** حد الصور صار ٥٠ ميجا، والنظام يولّد نسخة ويب سريعة تلقائيًا ويحتفظ بالأصل.", "**Bigger uploads + auto-optimization:** the image limit is now 50 MB, and the system auto-generates a fast web version while keeping the original."],
+            ["**مساعدة سياقية + بداية سريعة:** زر «مساعدة» أعلى كل شاشة يفتح قسمها في الدليل، وهذا القسم «ابدأ في ٥ دقائق».", "**Contextual help + quick start:** a “Help” button atop each screen opens its guide section, plus this “Get started in 5 minutes”."],
+          ]),
+        ],
+      },
+    ],
+  },
+
   // ============================ الجزء 1: الأساسيات ============================
   {
     id: "basics",

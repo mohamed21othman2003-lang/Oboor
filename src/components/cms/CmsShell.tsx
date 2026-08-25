@@ -56,6 +56,30 @@ const NAV: NavGroup[] = [
   },
 ];
 
+// يربط الشاشة الحالية بقسم الدليل المطابق (مساعدة سياقية)
+function guideAnchor(pathname: string): string {
+  const map: [string, string][] = [
+    ["/cms/content/branches", "site-branches"],
+    ["/cms/content/specialists", "site-specialists"],
+    ["/cms/content/success", "site-success"],
+    ["/cms/content/news", "site-news"],
+    ["/cms/content/careers", "site-careers"],
+    ["/cms/content/programs", "site-programs"],
+    ["/cms/content/services", "site-programs"],
+    ["/cms/content/techniques", "site-programs"],
+    ["/cms/content/sections", "page-text"],
+    ["/cms/analytics", "analytics-overview"],
+    ["/cms/settings", "settings"],
+    ["/cms/contact", "site-contact"],
+    ["/cms/assessment", "site-assessment"],
+    ["/cms/submissions", "submissions"],
+    ["/cms/account", "account"],
+    ["/cms/home", "site-home"],
+  ];
+  for (const [prefix, anchor] of map) if (pathname.startsWith(prefix)) return anchor;
+  return "quickstart"; // لوحة التحكّم أو أي صفحة أخرى ← ابدأ من هنا
+}
+
 export default function CmsShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -165,6 +189,18 @@ export default function CmsShell({ children }: { children: React.ReactNode }) {
             )}
           </div>
           <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+            {/* مساعدة سياقية — تفتح قسم الدليل المطابق للشاشة الحالية */}
+            <Link
+              href={`/cms/guide#${guideAnchor(pathname)}`}
+              target="_blank"
+              rel="noopener"
+              className="flex shrink-0 items-center gap-1.5 rounded-xl border border-[#e6eff0] px-2.5 py-2 text-xs font-bold text-[#0F6C73] transition-colors hover:bg-[#1FA6A8]/10 sm:px-3"
+              aria-label={t("مساعدة: افتح قسم الدليل الخاص بهذه الصفحة", "Help: open this page's guide section")}
+              title={t("مساعدة لهذه الصفحة", "Help for this page")}
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01" /></svg>
+              <span className="hidden sm:inline">{t("مساعدة", "Help")}</span>
+            </Link>
             {/* تبديل لغة اللوحة */}
             <button
               onClick={() => setLang(en ? "ar" : "en")}

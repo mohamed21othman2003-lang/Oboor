@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCmsLang } from "@/lib/cms/i18n";
 import { getToken } from "@/lib/cms/api";
@@ -11,6 +11,7 @@ import { GUIDE, type GuideShot, type GuideSection } from "@/lib/cms/guideContent
 // أيقونة لكل جزء رئيسي في الفهرس
 const I = (d: React.ReactNode) => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">{d}</svg>;
 const PART_ICON: Record<string, React.ReactNode> = {
+  start: I(<><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" /><path d="M4 22v-7" /></>),
   basics: I(<path d="m5 3 14 9-14 9V3z" />),
   content: I(<><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6" /></>),
   admin: I(<><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" /></>),
@@ -20,28 +21,53 @@ const PART_ICON: Record<string, React.ReactNode> = {
   help: I(<><circle cx="12" cy="12" r="9" /><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01" /></>),
 };
 
-// يحوّل نصًّا فيه روابط ماركداون [النص](الرابط) إلى عُقد React مع روابط قابلة للنقر.
+// يحوّل نصًّا فيه روابط ماركداون [النص](الرابط) وتمييز **غامق** إلى عُقد React.
 // الروابط الخارجية والداخلية تُفتح في تبويب جديد حتى لا يفقد المستخدم مكانه في الدليل.
 function renderRich(text: string): React.ReactNode {
-  const re = /\[([^\]]+)\]\(([^)]+)\)/g;
+  const re = /\[([^\]]+)\]\(([^)]+)\)|\*\*([^*]+)\*\*/g;
   const nodes: React.ReactNode[] = [];
   let last = 0;
   let m: RegExpExecArray | null;
   let i = 0;
   while ((m = re.exec(text))) {
     if (m.index > last) nodes.push(text.slice(last, m.index));
-    const [, label, url] = m;
-    nodes.push(
-      <a key={i++} href={url} target="_blank" rel="noopener noreferrer"
-         className="font-bold text-[#0F6C73] underline decoration-[#1FA6A8]/40 underline-offset-2 transition-colors hover:text-[#1FA6A8] hover:decoration-[#1FA6A8]">
-        {label}
-        <svg className="inline-block ms-0.5 mb-0.5 h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><path d="M15 3h6v6M10 14 21 3" /></svg>
-      </a>
-    );
+    if (m[1] !== undefined) {
+      const [, label, url] = m;
+      nodes.push(
+        <a key={i++} href={url} target="_blank" rel="noopener noreferrer"
+           className="font-bold text-[#0F6C73] underline decoration-[#1FA6A8]/40 underline-offset-2 transition-colors hover:text-[#1FA6A8] hover:decoration-[#1FA6A8]">
+          {label}
+          <svg className="inline-block ms-0.5 mb-0.5 h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><path d="M15 3h6v6M10 14 21 3" /></svg>
+        </a>
+      );
+    } else {
+      nodes.push(<strong key={i++} className="font-extrabold text-ink">{m[3]}</strong>);
+    }
     last = re.lastIndex;
   }
   if (last < text.length) nodes.push(text.slice(last));
   return nodes;
+}
+
+// صناديق التنبيه: خطوة تبدأ بإيموجي معيّن تُعرض كصندوق ملوّن (نصيحة/تحذير/تأكيد/ملاحظة)
+type Tone = "tip" | "warn" | "ok" | "info";
+const TONE: Record<Tone, { box: string; badge: string; icon: string }> = {
+  tip: { box: "bg-amber-50 ring-amber-200 hover:ring-amber-300", badge: "bg-amber-100 text-amber-700", icon: "💡" },
+  warn: { box: "bg-red-50 ring-red-200 hover:ring-red-300", badge: "bg-red-100 text-red-700", icon: "⚠️" },
+  ok: { box: "bg-emerald-50 ring-emerald-200 hover:ring-emerald-300", badge: "bg-emerald-100 text-emerald-700", icon: "✅" },
+  info: { box: "bg-sky-50 ring-sky-200 hover:ring-sky-300", badge: "bg-sky-100 text-sky-700", icon: "ℹ️" },
+};
+function toneOf(text: string): Tone | null {
+  const s = (text || "").trimStart();
+  if (s.startsWith("💡")) return "tip";
+  if (s.startsWith("⚠")) return "warn";
+  if (s.startsWith("✅")) return "ok";
+  if (s.startsWith("ℹ")) return "info";
+  return null;
+}
+// يزيل الإيموجي القائد (والمسافة/الرمز بعده) لأنه سيظهر في الشارة بدلًا من النص
+function stripLead(text: string): string {
+  return (text || "").replace(/^\s*(💡|⚠️?|✅|ℹ️?)\s*/, "");
 }
 
 // نصّ قابل للبحث داخل قسم (باللغة الحالية)
@@ -68,6 +94,20 @@ export default function GuidePage() {
   const [zoom, setZoom] = useState<string | null>(null);
   const [copied, setCopied] = useState("");
   const [today, setToday] = useState("");
+  const searchRef = useRef<HTMLInputElement>(null);
+
+  // اختصار «/» لتركيز حقل البحث (ما لم يكن المستخدم يكتب في حقل آخر)
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement | null)?.tagName || "";
+      if (e.key === "/" && !/^(INPUT|TEXTAREA|SELECT)$/.test(tag)) {
+        e.preventDefault();
+        searchRef.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   // حماية: الدليل مخصّص للمشرفين — لو المستخدم غير مسجّل الدخول في الـCMS
   // نحوّله لصفحة تسجيل الدخول (ونرجّعه للدليل بعد الدخول عبر next).
@@ -208,8 +248,10 @@ export default function GuidePage() {
             <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-[#e6eff0] lg:flex lg:max-h-[calc(100vh-7rem)] lg:flex-col">
               <div className="mb-3 flex shrink-0 items-center gap-2 rounded-xl border border-[#e6eff0] bg-[#f7fafa] px-3 py-2">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-[#0F6C73]/50"><circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3" /></svg>
-                <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t("ابحث في الدليل…", "Search the guide…")} className="w-full bg-transparent text-sm text-ink outline-none placeholder:text-[#0F6C73]/40" />
-                {query && <button onClick={() => setQuery("")} className="text-ink-soft hover:text-ink" aria-label={t("مسح", "Clear")}>✕</button>}
+                <input ref={searchRef} value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t("ابحث في الدليل…", "Search the guide…")} className="w-full bg-transparent text-sm text-ink outline-none placeholder:text-[#0F6C73]/40" />
+                {query
+                  ? <button onClick={() => setQuery("")} className="text-ink-soft hover:text-ink" aria-label={t("مسح", "Clear")}>✕</button>
+                  : <kbd className="no-print hidden shrink-0 rounded border border-[#e6eff0] bg-white px-1.5 py-0.5 text-[10px] font-bold text-[#0F6C73]/50 sm:inline" title={t("اضغط / للبحث", "Press / to search")}>/</kbd>}
               </div>
               <div className="lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:pe-1">
               {filtered.map((part) => (
@@ -275,12 +317,15 @@ export default function GuidePage() {
                       {/* خطوات */}
                       {s.steps && s.steps.length > 0 && (
                         <ol className="mt-4 space-y-5">
-                          {s.steps.map((step, i) => (
-                            <li key={i} className="group rounded-2xl bg-white p-4 shadow-sm ring-1 ring-[#e6eff0] transition-all hover:shadow-md hover:ring-[#1FA6A8]/30 sm:p-5">
+                          {s.steps.map((step, i) => {
+                            const raw = en ? step.en : step.ar;
+                            const tc = toneOf(raw) ? TONE[toneOf(raw)!] : null;
+                            return (
+                            <li key={i} className={`group rounded-2xl p-4 shadow-sm ring-1 transition-all hover:shadow-md sm:p-5 ${tc ? tc.box : "bg-white ring-[#e6eff0] hover:ring-[#1FA6A8]/30"}`}>
                               <div className="flex gap-3">
-                                <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#1FA6A8]/12 text-xs font-bold text-[#0F6C73]">{i + 1}</span>
+                                <span className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold ${tc ? tc.badge : "bg-[#1FA6A8]/12 text-[#0F6C73]"}`}>{tc ? tc.icon : i + 1}</span>
                                 <div className="min-w-0 flex-1">
-                                  <p className="text-sm leading-7 text-ink">{renderRich(en ? step.en : step.ar)}</p>
+                                  <p className="text-sm leading-7 text-ink">{renderRich(tc ? stripLead(raw) : raw)}</p>
                                   {step.points && step.points.length > 0 && (
                                     <ul className="mt-2.5 space-y-2">
                                       {step.points.map((pt, pi) => (
@@ -309,7 +354,8 @@ export default function GuidePage() {
                                 </figure>
                               )}
                             </li>
-                          ))}
+                            );
+                          })}
                         </ol>
                       )}
 
@@ -342,6 +388,11 @@ export default function GuidePage() {
                             </div>
                           ))}
                         </dl>
+                      )}
+
+                      {/* قائمة تحقّق شخصية */}
+                      {s.checklist && s.checklist.length > 0 && (
+                        <Checklist id={s.id} items={s.checklist} en={en} t={t} />
                       )}
 
                       {/* التالي / السابق */}
@@ -397,6 +448,59 @@ export default function GuidePage() {
           <img src={zoom} alt="" onClick={(e) => e.stopPropagation()} className="max-h-[92vh] max-w-[95vw] rounded-xl shadow-2xl ring-1 ring-white/10" />
         </div>
       )}
+    </div>
+  );
+}
+
+// قائمة تحقّق شخصية — تُحفظ حالتها في متصفح المستخدم فقط (localStorage)
+function Checklist({ id, items, en, t }: { id: string; items: { ar: string; en: string }[]; en: boolean; t: (ar: string, e: string) => string }) {
+  const key = `oboor_guide_checklist_${id}`;
+  const [done, setDone] = useState<boolean[]>(() => items.map(() => false));
+  const [loaded, setLoaded] = useState(false);
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(key);
+      if (raw) {
+        const arr = JSON.parse(raw);
+        if (Array.isArray(arr)) setDone(items.map((_, i) => !!arr[i]));
+      }
+    } catch {}
+    setLoaded(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key]);
+  const toggle = (i: number) =>
+    setDone((prev) => {
+      const next = prev.map((v, j) => (j === i ? !v : v));
+      try { localStorage.setItem(key, JSON.stringify(next)); } catch {}
+      return next;
+    });
+  const count = done.filter(Boolean).length;
+  const pct = Math.round((count / items.length) * 100);
+  return (
+    <div className="mt-4 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-[#e6eff0] sm:p-5">
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <p className="flex items-center gap-2 text-sm font-extrabold text-[#0F6C73]">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 11l3 3L22 4" /><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" /></svg>
+          {t("قائمة تحقّق سريعة", "Quick checklist")}
+        </p>
+        <span className="text-xs font-bold text-ink-soft">{loaded ? `${count}/${items.length}` : ""}</span>
+      </div>
+      <div className="mb-3 h-1.5 w-full overflow-hidden rounded-full bg-[#eef4f5]">
+        <div className="h-full rounded-full bg-gradient-to-r from-[#1FA6A8] to-[#0F6C73] transition-[width] duration-300" style={{ width: `${loaded ? pct : 0}%` }} />
+      </div>
+      <ul className="space-y-1.5">
+        {items.map((it, i) => (
+          <li key={i}>
+            <button onClick={() => toggle(i)} className="flex w-full items-center gap-3 rounded-lg px-2 py-1.5 text-start text-sm transition-colors hover:bg-[#1FA6A8]/8">
+              <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 transition-colors ${done[i] ? "border-[#1FA6A8] bg-[#1FA6A8] text-white" : "border-[#cfe0e1] bg-white"}`}>
+                {done[i] && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>}
+              </span>
+              <span className={done[i] ? "text-ink-soft line-through" : "text-ink"}>{en ? it.en : it.ar}</span>
+            </button>
+          </li>
+        ))}
+      </ul>
+      <p className="no-print mt-2 px-2 text-[11px] text-ink-soft">{t("تُحفظ حالتك في هذا المتصفح فقط.", "Your progress is saved in this browser only.")}</p>
     </div>
   );
 }
