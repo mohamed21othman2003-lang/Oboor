@@ -29,7 +29,7 @@ export default function BranchGallery({ images, branchName, locale = "ar" }: { i
   // تشغيل تلقائي (يتوقّف عند المرور بالماوس أو فتح العرض المكبّر أو لو الشريحة الحالية فيديو)
   useEffect(() => {
     if (!multi || paused || open || isVideo(images[index])) return;
-    const id = setInterval(() => go(1), 5000);
+    const id = setInterval(() => go(1), 3000);
     return () => clearInterval(id);
   }, [multi, paused, open, go, images, index]);
 
@@ -68,9 +68,10 @@ export default function BranchGallery({ images, branchName, locale = "ar" }: { i
           onTouchStart={onTouchStart}
           onTouchEnd={onTouchEnd}
         >
-          <button onClick={() => setOpen(true)} className="relative block h-[300px] w-full sm:h-[440px]" aria-label={pick(locale, "تكبير الصورة", "Zoom image")}>
+          <button onClick={() => setOpen(true)} className="relative block h-[300px] w-full overflow-hidden sm:h-[440px]" aria-label={pick(locale, "تكبير الصورة", "Zoom image")}>
+            <div dir="ltr" className="flex h-full w-full transition-transform duration-700 ease-out" style={{ transform: `translateX(-${index * 100}%)` }}>
             {images.map((src, i) => (
-              <div key={src + i} className={`absolute inset-0 transition-opacity duration-700 ${i === index ? "opacity-100" : "opacity-0"}`}>
+              <div key={src + i} className="relative h-full w-full shrink-0 basis-full">
                 {isVideo(src) ? (
                   <>
                     {/* خلفية مموّهة من نفس الفيديو تملأ الجنبين بدل الأسود */}
@@ -96,6 +97,7 @@ export default function BranchGallery({ images, branchName, locale = "ar" }: { i
                 )}
               </div>
             ))}
+            </div>
             <span className="absolute bottom-3 right-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-black/40 text-white opacity-0 transition-opacity group-hover:opacity-100">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3M11 8v6M8 11h6" /></svg>
             </span>

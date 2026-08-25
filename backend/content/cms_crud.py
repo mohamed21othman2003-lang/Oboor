@@ -315,15 +315,62 @@ def upload(request):
     max_mb = 50
     if f.size > max_mb * 1024 * 1024:
         return Response({"detail": f"الحد الأقصى {max_mb} ميجابايت."}, status=400)
-    if not is_video:
-        try:
-            PILImage.open(f).verify()
-            f.seek(0)
-        except Exception:
-            return Response({"detail": "الملف ليس صورة صالحة."}, status=400)
-    path = default_storage.save(f"content/{f.name}", f)
-    _fix_content_type(path)
-    return Response({"url": default_storage.url(path)})
+    # الفيديو: يُخزَّن كما هو
+    if is_video:
+        path = default_storage.save(f"content/{f.name}", f)
+        _fix_content_type(path)
+        return Response({"url": default_storage.url(path)})
+
+    # الصورة: تحقّق من صلاحيتها
+    try:
+        PILImage.open(f).verify()
+        f.seek(0)
+        img = PILImage.open(f)
+    except Exception:
+        return Response({"detail": "الملف ليس صورة صالحة."}, status=400)
+
+    # GIF متحرّك: خزّنه كما هو حتى لا نفقد الحركة
+    if (img.format or "").upper() == "GIF" and getattr(img, "is_animated", False):
+        f.seek(0)
+        path = default_storage.save(f"content/{f.name}", f)
+        _fix_content_type(path)
+        return Response({"url": default_storage.url(path)})
+
+    import os as _os
+    from io import BytesIO
+
+    from django.core.files.base import ContentFile
+    from PIL import ImageOps
+
+    # 1) نحتفظ بالأصل الكامل بلا أي معالجة (أرشيف)
+    f.seek(0)
+    orig_path = default_storage.save(f"content/originals/{f.name}", f)
+    _fix_content_type(orig_path)
+
+    # 2) نولّد نسخة ويب محسّنة: أقصى بُعد 2560px + WebP جودة عالية (بلا فرق مرئي، حجم أصغر بكثير)
+    try:
+        img = ImageOps.exif_transpose(img)  # صحّح الاتجاه من بيانات EXIF قبل التصغير
+        MAX = 2560
+        resample = getattr(PILImage, "Resampling", PILImage).LANCZOS
+        if max(img.size) > MAX:
+            img.thumbnail((MAX, MAX), resample)
+        has_alpha = img.mode in ("RGBA", "LA") or (img.mode == "P" and "transparency" in img.info)
+        stem = _os.path.splitext(f.name)[0]
+        buf = BytesIO()
+        if has_alpha:
+            # صور بشفافية (شعارات…): PNG محسّن يحافظ على الشفافية
+            img.convert("RGBA").save(buf, format="PNG", optimize=True)
+            ext = "png"
+        else:
+            img.convert("RGB").save(buf, format="WEBP", quality=90, method=6)
+            ext = "webp"
+        buf.seek(0)
+        web_path = default_storage.save(f"content/{stem}.{ext}", ContentFile(buf.read()))
+        _fix_content_type(web_path)
+        return Response({"url": default_storage.url(web_path)})
+    except Exception:
+        # فشل التوليد لأي سبب — نقدّم الأصل حتى لا يفشل الرفع
+        return Response({"url": default_storage.url(orig_path)})
 
 
 def _fix_content_type(path: str) -> None:
