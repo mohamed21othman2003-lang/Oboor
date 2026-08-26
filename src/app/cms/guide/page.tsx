@@ -160,7 +160,7 @@ export default function GuidePage() {
   }, [zoom]);
 
   const shotSrc = (s: GuideShot) => `/guide/${lang}/${s.area}/${s.name}.png`;
-  const clipSrc = (name: string) => `/guide/${lang}/clips/${name}.webp`;
+  const clipSrc = (name: string) => `/guide/${lang}/clips/${name}.webp?v=2`;
   const go = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
   const copyLink = (id: string) => {
     try { navigator.clipboard?.writeText(`${location.origin}${location.pathname}#${id}`); setCopied(id); setTimeout(() => setCopied(""), 1500); } catch {}
