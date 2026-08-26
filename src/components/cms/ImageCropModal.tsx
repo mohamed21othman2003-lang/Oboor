@@ -98,13 +98,6 @@ export default function ImageCropModal({
     return () => { document.removeEventListener("keydown", onKey); document.body.style.overflow = ""; };
   }, [onCancel]);
 
-  // تطبيق فلاتر الألوان على معاينة القص لحظياً
-  useEffect(() => {
-    if (!ready || !boxRef.current) return;
-    boxRef.current.querySelectorAll<HTMLElement>(".cropper-canvas img, .cropper-view-box img")
-      .forEach((im) => { im.style.filter = filter; });
-  }, [filter, ready]);
-
   const setAspect = (v: number) => {
     setAspectV(v); setTouched(true);
     const c = cropperRef.current; if (!c) return;
@@ -155,7 +148,9 @@ export default function ImageCropModal({
 
         <div className="grid gap-4 overflow-auto p-5 lg:grid-cols-[1fr_260px]">
           {/* المعاينة الحيّة: اسحب المقابض لقص أي جزء بحرّية */}
-          <div ref={boxRef} className="relative h-[52vh] min-h-[280px] overflow-hidden rounded-xl bg-[#111] ring-1 ring-line">
+          <div ref={boxRef} className="ic-crop relative h-[52vh] min-h-[280px] overflow-hidden rounded-xl bg-[#111] ring-1 ring-line">
+            {/* فلاتر الألوان تُطبَّق عبر قاعدة CSS (تصمد أمام إعادة رسم cropper وتتحدّث فورياً) */}
+            <style>{`.ic-crop .cropper-canvas > img, .ic-crop .cropper-view-box > img { filter: ${filter} !important; }`}</style>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             {url && <img ref={imgRef} src={url} alt="" className="block max-w-full" />}
           </div>
@@ -214,7 +209,7 @@ export default function ImageCropModal({
 
         <div className="flex items-center justify-end gap-2 border-t border-line px-5 py-3">
           <button type="button" onClick={onCancel} className="rounded-xl px-4 py-2.5 text-sm font-semibold text-ink-soft hover:bg-surface">{t("إلغاء", "Cancel")}</button>
-          <button type="button" onClick={confirm} disabled={busy || !url} className="rounded-xl bg-brand px-5 py-2.5 text-sm font-bold text-white hover:bg-brand-dark disabled:opacity-60">
+          <button type="button" onClick={confirm} disabled={busy || !url || !ready} className="rounded-xl bg-brand px-5 py-2.5 text-sm font-bold text-white hover:bg-brand-dark disabled:opacity-60">
             {busy ? t("جارٍ التجهيز…", "Processing…") : t("اعتماد", "Apply")}
           </button>
         </div>
