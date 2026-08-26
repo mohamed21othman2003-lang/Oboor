@@ -609,7 +609,7 @@ export const GUIDE: GuidePart[] = [
             { ar: { x: 30.5, y: 52.1, w: 44.8, h: 19.6 }, en: { x: 23.6, y: 54.1, w: 44.8, h: 19.6 }, label_ar: "اختر قصص عبور", label_en: "Pick champions" },
             { ar: { x: 66.2, y: 83.4, w: 9.1, h: 4.9 }, en: { x: 23.6, y: 87.1, w: 8.4, h: 4.9 }, label_ar: "أو أضف قصة خاصة", label_en: "or add your own" },
           ]),
-          p("معرض الفيديو في صفحة الفرع يعرض الوسائط تلقائيًا: كل صورة تظهر ~3 ثوانٍ ثم تنزلق للتالية، والفيديو يعمل تلقائيًا بلا صوت وأول ما يخلص ينتقل للي بعده. الفيديوهات الطولية تُملأ جوانبها بخلفية ناعمة بدل الأسود، وتظهر المصغّرات كأنها صور عادية.", "The branch page's gallery plays media automatically: each photo shows for ~3 seconds then slides to the next, and a video plays automatically muted and, when it ends, moves to the next. Portrait videos get a soft filled background on the sides instead of black, and thumbnails look like normal photos."),
+          clip("gallery", "معرض الفيديو في صفحة الفرع يعرض الوسائط تلقائيًا: كل صورة تظهر ~3 ثوانٍ ثم تنزلق للتالية، والفيديو يعمل تلقائيًا بلا صوت وأول ما يخلص ينتقل للي بعده. الفيديوهات الطولية تُملأ جوانبها بخلفية ناعمة بدل الأسود، وتظهر المصغّرات كأنها صور عادية.", "The branch page's gallery plays media automatically: each photo shows for ~3 seconds then slides to the next, and a video plays automatically muted and, when it ends, moves to the next. Portrait videos get a soft filled background on the sides instead of black, and thumbnails look like normal photos."),
         ],
       },
       {
