@@ -77,7 +77,7 @@ function guideAnchor(pathname: string): string {
     ["/cms/home", "site-home"],
   ];
   for (const [prefix, anchor] of map) if (pathname.startsWith(prefix)) return anchor;
-  return "quickstart"; // لوحة التحكّم أو أي صفحة أخرى ← ابدأ من هنا
+  return "dashboard"; // لوحة التحكّم أو أي صفحة أخرى ← قسم لوحة التحكّم الرئيسية
 }
 
 export default function CmsShell({ children }: { children: React.ReactNode }) {
