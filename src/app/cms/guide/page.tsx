@@ -346,18 +346,8 @@ export default function GuidePage() {
                                     <span className="ms-2 truncate rounded-md bg-white px-2 py-0.5 text-[10px] font-medium text-ink-soft ring-1 ring-[#e6eff0]">{step.shot.area === "cms" ? "/cms" : t("الموقع", "site")}</span>
                                     <span className="no-print ms-auto text-[10px] text-ink-soft">{t("اضغط للتكبير", "click to zoom")}</span>
                                   </div>
-                                  <button type="button" onClick={() => setZoom(shotSrc(step.shot!))} className="relative block w-full cursor-zoom-in">
+                                  <button type="button" onClick={() => setZoom(shotSrc(step.shot!))} className="block w-full cursor-zoom-in">
                                     <Image src={shotSrc(step.shot)} alt={(en ? step.en : step.ar).slice(0, 80)} width={1440} height={960} className="h-auto w-full" />
-                                    {step.shot.hotspots?.map((h, hi) => {
-                                      const b = en ? h.en : h.ar;
-                                      const label = en ? h.label_en : h.label_ar;
-                                      return (
-                                        <span key={hi} className="pointer-events-none absolute rounded-lg bg-amber-300/10 ring-[3px] ring-amber-400" style={{ left: `${b.x}%`, top: `${b.y}%`, width: `${b.w}%`, height: `${b.h}%` }}>
-                                          <span className="absolute inset-0 rounded-lg ring-[3px] ring-amber-400/70 motion-safe:animate-ping" />
-                                          {label && <span className="absolute left-1/2 top-full z-10 mt-1 -translate-x-1/2 whitespace-nowrap rounded-md bg-amber-400 px-2 py-0.5 text-[11px] font-extrabold text-amber-950 shadow">{label}</span>}
-                                        </span>
-                                      );
-                                    })}
                                   </button>
                                   {(step.shot.caption_ar || step.shot.caption_en) && (
                                     <figcaption className="bg-[#f7fafa] px-3 py-2 text-xs text-ink-soft">{en ? step.shot.caption_en : step.shot.caption_ar}</figcaption>

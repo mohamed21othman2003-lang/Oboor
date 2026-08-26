@@ -1,11 +1,7 @@
 // محتوى دليل استخدام لوحة التحكّم (ثنائي اللغة). صفحة العرض: src/app/cms/guide/page.tsx
 // كل خطوة قد تحمل لقطة شاشة تُحلّ حسب اللغة إلى /guide/<lang>/<area>/<name>.png
 
-// نقطة توضيحية فوق اللقطة: صندوق تمييز بنسب مئوية (0–100) من أبعاد الصورة.
-// الإحداثيات تختلف بين العربي (RTL) والإنجليزي (LTR) لأن التخطيط منعكس.
-export type HBox = { x: number; y: number; w: number; h: number };
-export type GuideHotspot = { ar: HBox; en: HBox; label_ar?: string; label_en?: string };
-export type GuideShot = { area: "cms" | "site"; name: string; caption_ar?: string; caption_en?: string; hotspots?: GuideHotspot[] };
+export type GuideShot = { area: "cms" | "site"; name: string; caption_ar?: string; caption_en?: string };
 // النصّ يدعم روابط بصيغة ماركداون: [النص الظاهر](الرابط) — تُحوّل إلى روابط قابلة للنقر.
 // points: نقاط فرعية (bullets) تظهر أسفل نصّ الخطوة لتفكيك الشرح الطويل.
 export type GuidePoint = { ar: string; en: string };
@@ -28,9 +24,9 @@ export type GuidePart = { id: string; title_ar: string; title_en: string; sectio
 const faq = (q_ar: string, q_en: string, a_ar: string, a_en: string): FaqItem => ({ q_ar, q_en, a_ar, a_en });
 const term = (term_ar: string, term_en: string, def_ar: string, def_en: string): GlossaryItem => ({ term_ar, term_en, def_ar, def_en });
 
-// اختصار لإنشاء خطوة بلقطة CMS (مع نقاط فرعية + نقاط توضيحية اختيارية)
-const cms = (name: string, ar: string, en: string, cap_ar?: string, cap_en?: string, points?: [string, string][], hotspots?: GuideHotspot[]): GuideStep =>
-  ({ ar, en, shot: { area: "cms", name, caption_ar: cap_ar, caption_en: cap_en, ...(hotspots ? { hotspots } : {}) }, ...(points ? { points: points.map(([a, e]) => ({ ar: a, en: e })) } : {}) });
+// اختصار لإنشاء خطوة بلقطة CMS (مع نقاط فرعية اختيارية)
+const cms = (name: string, ar: string, en: string, cap_ar?: string, cap_en?: string, points?: [string, string][]): GuideStep =>
+  ({ ar, en, shot: { area: "cms", name, caption_ar: cap_ar, caption_en: cap_en }, ...(points ? { points: points.map(([a, e]) => ({ ar: a, en: e })) } : {}) });
 const site = (name: string, ar: string, en: string): GuideStep =>
   ({ ar, en, shot: { area: "site", name } });
 const p = (ar: string, en: string): GuideStep => ({ ar, en });
@@ -605,9 +601,6 @@ export const GUIDE: GuidePart[] = [
           cms("branch-success", "قصص نجاح الفرع (نظام هجين): من داخل قسم «قصص النجاح» في محرّر الفرع تتحكّم في القصص التي تظهر لهذا الفرع بطريقتين معًا:", "Branch success stories (hybrid): inside the “Success stories” section of the branch editor you control which stories show for this branch in two ways together:", undefined, undefined, [
             ["الاختيار: علّم على قصص «أبطال عبور» الجاهزة لتظهر بطاقاتها الحقيقية داخل صفحة الفرع (وتظهر البطاقة فورًا في المعاينة الحيّة عند اختيارها).", "Select: tick ready “Oboor Champions” stories to show their real cards inside the branch page (the card appears immediately in the live preview when selected)."],
             ["الإضافة: أضف قصصًا خاصة بهذا الفرع وحده — ببطاقة كاملة ونافذة «عرض التفاصيل» خاصة بها، تمامًا كأي قصة نجاح.", "Add: create stories for this branch only — with a full card and its own “View Details” popup, just like any success story."],
-          ], [
-            { ar: { x: 30.5, y: 52.1, w: 44.8, h: 19.6 }, en: { x: 23.6, y: 54.1, w: 44.8, h: 19.6 }, label_ar: "اختر قصص عبور", label_en: "Pick champions" },
-            { ar: { x: 66.2, y: 83.4, w: 9.1, h: 4.9 }, en: { x: 23.6, y: 87.1, w: 8.4, h: 4.9 }, label_ar: "أو أضف قصة خاصة", label_en: "or add your own" },
           ]),
           clip("gallery", "معرض الفيديو في صفحة الفرع يعرض الوسائط تلقائيًا: كل صورة تظهر ~3 ثوانٍ ثم تنزلق للتالية، والفيديو يعمل تلقائيًا بلا صوت وأول ما يخلص ينتقل للي بعده. الفيديوهات الطولية تُملأ جوانبها بخلفية ناعمة بدل الأسود، وتظهر المصغّرات كأنها صور عادية.", "The branch page's gallery plays media automatically: each photo shows for ~3 seconds then slides to the next, and a video plays automatically muted and, when it ends, moves to the next. Portrait videos get a soft filled background on the sides instead of black, and thumbnails look like normal photos."),
         ],

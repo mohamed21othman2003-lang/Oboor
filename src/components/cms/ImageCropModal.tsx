@@ -1,57 +1,19 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
-import Cropper from "react-easy-crop";
+import { useEffect, useMemo, useRef, useState } from "react";
+import Cropper from "cropperjs";
+import "cropperjs/dist/cropper.css";
 import { useCmsLang } from "@/lib/cms/i18n";
 
-type Area = { x: number; y: number; width: number; height: number };
-
-// أبعاد جاهزة تطابق أشكال الإطارات في صفحات الموقع (0 = الأبعاد الأصلية للصورة)
+// أبعاد القص: «حر» = قص يدوي بأي مقاس (تسحب المقابض بحرّية)، «الأصلية» = نسبة الصورة، والباقي نسب جاهزة.
 const ASPECTS: { key: string; ar: string; en: string; v: number }[] = [
-  { key: "free", ar: "الأصلية", en: "Original", v: 0 },
+  { key: "free", ar: "حر", en: "Free", v: 0 },
+  { key: "orig", ar: "الأصلية", en: "Original", v: -1 },
   { key: "wide", ar: "عريض 16:9", en: "Wide 16:9", v: 16 / 9 },
   { key: "landscape", ar: "أفقي 4:3", en: "Landscape 4:3", v: 4 / 3 },
   { key: "square", ar: "مربّع 1:1", en: "Square 1:1", v: 1 },
   { key: "portrait", ar: "طولي 3:4", en: "Portrait 3:4", v: 3 / 4 },
 ];
-
-function loadImage(src: string): Promise<HTMLImageElement> {
-  return new Promise((res, rej) => {
-    const im = new window.Image();
-    im.onload = () => res(im);
-    im.onerror = rej;
-    im.src = src;
-  });
-}
-
-// يرسم الصورة بعد (الدوران + الفلتر + القص + إعادة الأبعاد) على canvas ويرجّع blob
-async function renderEdited(
-  src: string, area: Area | null, rotation: number, filter: string, outW: number | null,
-): Promise<Blob | null> {
-  const img = await loadImage(src);
-  const rot = (rotation * Math.PI) / 180;
-  const bw = Math.abs(Math.cos(rot)) * img.width + Math.abs(Math.sin(rot)) * img.height;
-  const bh = Math.abs(Math.sin(rot)) * img.width + Math.abs(Math.cos(rot)) * img.height;
-  // 1) ارسم الصورة كاملة (مع الدوران والفلتر) على canvas مؤقّت بحجم الإطار المحيط
-  const tmp = document.createElement("canvas");
-  tmp.width = Math.round(bw); tmp.height = Math.round(bh);
-  const tctx = tmp.getContext("2d");
-  if (!tctx) return null;
-  tctx.filter = filter;
-  tctx.translate(bw / 2, bh / 2);
-  tctx.rotate(rot);
-  tctx.drawImage(img, -img.width / 2, -img.height / 2);
-  // 2) اقتطع الجزء المحدّد (area بإحداثيات react-easy-crop على الصورة المدوّرة)
-  const a: Area = area && area.width > 0 ? area : { x: 0, y: 0, width: tmp.width, height: tmp.height };
-  let cw = a.width, ch = a.height;
-  if (outW && cw > 0 && outW < cw) { const s = outW / cw; cw = outW; ch = Math.round(ch * s); }
-  const out = document.createElement("canvas");
-  out.width = Math.max(1, Math.round(cw)); out.height = Math.max(1, Math.round(ch));
-  const octx = out.getContext("2d");
-  if (!octx) return null;
-  octx.drawImage(tmp, a.x, a.y, a.width, a.height, 0, 0, out.width, out.height);
-  return new Promise((res) => out.toBlob((b) => res(b), "image/jpeg", 0.92));
-}
 
 export default function ImageCropModal({
   file, src, defaultAspect = 0, onCancel, onConfirm,
@@ -66,28 +28,69 @@ export default function ImageCropModal({
   const en = lang === "en";
   const t = (ar: string, e: string) => (en ? e : ar);
 
+  const imgRef = useRef<HTMLImageElement>(null);
+  const boxRef = useRef<HTMLDivElement>(null);
+  const cropperRef = useRef<Cropper | null>(null);
+  const baseZoomRef = useRef(1);
+
   const [url, setUrl] = useState("");
   const [nat, setNat] = useState<{ w: number; h: number } | null>(null);
-  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [ready, setReady] = useState(false);
+  const [aspectV, setAspectV] = useState<number>(defaultAspect || 0);
   const [zoom, setZoom] = useState(1);
   const [rotation, setRotation] = useState(0);
-  const [aspectKey, setAspectKey] = useState(defaultAspect ? "custom" : "free");
-  const [aspectV, setAspectV] = useState(defaultAspect);
-  const [areaPx, setAreaPx] = useState<Area | null>(null);
   const [bright, setBright] = useState(100);
   const [contrast, setContrast] = useState(100);
   const [sat, setSat] = useState(100);
   const [outW, setOutW] = useState<number | "">("");
+  const [touched, setTouched] = useState(false);
   const [busy, setBusy] = useState(false);
 
+  const filter = useMemo(() => `brightness(${bright}%) contrast(${contrast}%) saturate(${sat}%)`, [bright, contrast, sat]);
+
+  // تجهيز رابط الصورة
   useEffect(() => {
     let u = "", revoke = false;
     if (file) { u = URL.createObjectURL(file); revoke = true; } else if (src) { u = src; }
     setUrl(u);
-    if (u) loadImage(u).then((im) => setNat({ w: im.naturalWidth, h: im.naturalHeight })).catch(() => {});
     return () => { if (revoke && u) URL.revokeObjectURL(u); };
   }, [file, src]);
 
+  // تهيئة cropper بعد تحميل الصورة
+  useEffect(() => {
+    if (!url || !imgRef.current) return;
+    const el = imgRef.current;
+    const startAspect = (defaultAspect && defaultAspect > 0) ? defaultAspect : NaN;
+    const c = new Cropper(el, {
+      viewMode: 1,
+      dragMode: "crop",
+      autoCropArea: 1,
+      aspectRatio: startAspect,
+      background: true,
+      responsive: true,
+      checkOrientation: false,
+      guides: true,
+      center: true,
+      zoomable: true,
+      ready() {
+        try {
+          const cd = c.getCanvasData(); const id = c.getImageData();
+          baseZoomRef.current = cd.width / (id.naturalWidth || cd.width);
+          setNat({ w: id.naturalWidth, h: id.naturalHeight });
+        } catch {}
+        setReady(true);
+      },
+      zoom(e) {
+        const b = baseZoomRef.current || 1;
+        setZoom(Math.max(1, Math.min(3, e.detail.ratio / b)));
+      },
+      cropstart() { setTouched(true); },
+    });
+    cropperRef.current = c;
+    return () => { c.destroy(); cropperRef.current = null; setReady(false); };
+  }, [url, defaultAspect]);
+
+  // إغلاق بالمفتاح Esc + قفل تمرير الصفحة
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onCancel(); };
     document.addEventListener("keydown", onKey);
@@ -95,25 +98,50 @@ export default function ImageCropModal({
     return () => { document.removeEventListener("keydown", onKey); document.body.style.overflow = ""; };
   }, [onCancel]);
 
-  const onCropComplete = useCallback((_: Area, px: Area) => setAreaPx(px), []);
-  const filter = `brightness(${bright}%) contrast(${contrast}%) saturate(${sat}%)`;
-  // «الأصلية» = نسبة الصورة الطبيعية (إطار القص يغطّي الصورة كاملة)
-  const effectiveAspect = aspectV || (nat ? nat.w / nat.h : 4 / 3);
-  const changed = aspectV !== 0 || zoom !== 1 || rotation !== 0 || bright !== 100 || contrast !== 100 || sat !== 100 || outW !== "";
+  // تطبيق فلاتر الألوان على معاينة القص لحظياً
+  useEffect(() => {
+    if (!ready || !boxRef.current) return;
+    boxRef.current.querySelectorAll<HTMLElement>(".cropper-canvas img, .cropper-view-box img")
+      .forEach((im) => { im.style.filter = filter; });
+  }, [filter, ready]);
+
+  const setAspect = (v: number) => {
+    setAspectV(v); setTouched(true);
+    const c = cropperRef.current; if (!c) return;
+    c.setAspectRatio(v === -1 ? (nat ? nat.w / nat.h : NaN) : (v === 0 ? NaN : v));
+  };
+  const applyZoom = (v: number) => { setZoom(v); setTouched(true); cropperRef.current?.zoomTo(baseZoomRef.current * v); };
+  const applyRotation = (deg: number) => { setRotation(deg); setTouched(true); cropperRef.current?.rotateTo(deg); };
+  const rotateBy = (delta: number) => { let d = rotation + delta; while (d > 180) d -= 360; while (d < -180) d += 360; applyRotation(d); };
 
   async function confirm() {
-    // لا تغيير + ملف جديد → ارفع الأصلي كما هو (أسرع، بلا إعادة ترميز)
-    if (!changed && file) { onConfirm(file); return; }
+    const c = cropperRef.current;
+    if (!touched && file) { onConfirm(file); return; }
+    if (!c) { if (file) onConfirm(file); else onCancel(); return; }
     setBusy(true);
     try {
-      const blob = await renderEdited(url, areaPx, rotation, filter, typeof outW === "number" ? outW : null);
+      const srcCanvas = c.getCroppedCanvas({ imageSmoothingEnabled: true, imageSmoothingQuality: "high", maxWidth: 6000, maxHeight: 6000 });
+      if (!srcCanvas) throw new Error("no canvas");
+      let cw = srcCanvas.width, ch = srcCanvas.height;
+      if (typeof outW === "number" && outW > 0 && outW < cw) { const s = outW / cw; cw = outW; ch = Math.round(ch * s); }
+      const out = document.createElement("canvas");
+      out.width = Math.max(1, Math.round(cw)); out.height = Math.max(1, Math.round(ch));
+      const ctx = out.getContext("2d");
+      if (!ctx) throw new Error("no ctx");
+      ctx.filter = filter;
+      ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = "high";
+      ctx.drawImage(srcCanvas, 0, 0, out.width, out.height);
+      const blob = await new Promise<Blob | null>((res) => out.toBlob((b) => res(b), "image/jpeg", 0.95));
       onConfirm(blob ?? file ?? new File([], "image.jpg"));
     } catch {
       if (file) onConfirm(file); else onCancel();
     } finally { setBusy(false); }
   }
 
-  const reset = () => { setCrop({ x: 0, y: 0 }); setZoom(1); setRotation(0); setBright(100); setContrast(100); setSat(100); setOutW(""); setAspectKey("free"); setAspectV(0); };
+  const reset = () => {
+    setAspectV(0); setZoom(1); setRotation(0); setBright(100); setContrast(100); setSat(100); setOutW(""); setTouched(false);
+    const c = cropperRef.current; if (c) { c.reset(); c.setAspectRatio(NaN); }
+  };
 
   return (
     <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/60 p-3 sm:p-4" onClick={onCancel}>
@@ -126,73 +154,55 @@ export default function ImageCropModal({
         </div>
 
         <div className="grid gap-4 overflow-auto p-5 lg:grid-cols-[1fr_260px]">
-          {/* المعاينة الحيّة (قص/دوران/تعديلات تظهر لحظياً) */}
-          <div className="relative h-[52vh] min-h-[280px] overflow-hidden rounded-xl bg-[#111] ring-1 ring-line">
-            {url && (
-              <Cropper
-                image={url}
-                crop={crop}
-                zoom={zoom}
-                rotation={rotation}
-                aspect={effectiveAspect}
-                onCropChange={setCrop}
-                onZoomChange={setZoom}
-                onRotationChange={setRotation}
-                onCropComplete={onCropComplete}
-                showGrid
-                restrictPosition={false}
-                style={{ mediaStyle: { filter } }}
-              />
-            )}
+          {/* المعاينة الحيّة: اسحب المقابض لقص أي جزء بحرّية */}
+          <div ref={boxRef} className="relative h-[52vh] min-h-[280px] overflow-hidden rounded-xl bg-[#111] ring-1 ring-line">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            {url && <img ref={imgRef} src={url} alt="" className="block max-w-full" />}
           </div>
 
           {/* أدوات التحكّم */}
           <div className="space-y-4 text-start">
-            {/* الأبعاد */}
             <div>
               <p className="mb-1.5 text-[11px] font-bold text-ink-soft">{t("الأبعاد / القص", "Aspect / Crop")}</p>
               <div className="flex flex-wrap gap-1.5">
                 {ASPECTS.map((a) => {
-                  const on = (a.v === 0 && aspectV === 0) || a.v === aspectV;
+                  const on = a.v === aspectV;
                   return (
-                    <button key={a.key} type="button" onClick={() => { setAspectV(a.v); setAspectKey(a.key); }}
+                    <button key={a.key} type="button" onClick={() => setAspect(a.v)}
                       className={`rounded-lg px-2.5 py-1 text-[11px] font-semibold ring-1 transition-colors ${on ? "bg-brand text-white ring-brand" : "bg-white text-ink-soft ring-line hover:ring-brand/40"}`}>
                       {en ? a.en : a.ar}
                     </button>
                   );
                 })}
               </div>
+              <p className="mt-1.5 text-[10px] leading-4 text-ink-soft">{t("«حر» = اسحب أطراف الإطار لقص الصورة بأي مقاس تحبّه.", "“Free” = drag the frame's edges to crop at any size you like.")}</p>
             </div>
 
-            {/* التكبير */}
-            <Slider label={t("تكبير", "Zoom")} min={1} max={3} step={0.01} value={zoom} onChange={setZoom} fmt={(v) => `${v.toFixed(1)}×`} />
+            <Slider label={t("تكبير", "Zoom")} min={1} max={3} step={0.01} value={zoom} onChange={applyZoom} fmt={(v) => `${v.toFixed(1)}×`} />
 
-            {/* الدوران */}
             <div>
               <div className="mb-1 flex items-center justify-between">
                 <span className="text-[11px] font-bold text-ink-soft">{t("الدوران", "Rotation")}</span>
                 <span className="text-[11px] text-ink-soft">{Math.round(rotation)}°</span>
               </div>
               <div className="flex items-center gap-2">
-                <button type="button" onClick={() => setRotation((r) => (r - 90 + 360) % 360)} className="rounded-lg border border-line px-2 py-1 text-[11px] hover:border-brand">‑90°</button>
-                <input type="range" min={0} max={359} step={1} value={rotation} onChange={(e) => setRotation(Number(e.target.value))} className="flex-1 accent-brand" />
-                <button type="button" onClick={() => setRotation((r) => (r + 90) % 360)} className="rounded-lg border border-line px-2 py-1 text-[11px] hover:border-brand">+90°</button>
+                <button type="button" onClick={() => rotateBy(-90)} className="rounded-lg border border-line px-2 py-1 text-[11px] hover:border-brand">‑90°</button>
+                <input type="range" min={-180} max={180} step={1} value={rotation} onChange={(e) => applyRotation(Number(e.target.value))} className="flex-1 accent-brand" />
+                <button type="button" onClick={() => rotateBy(90)} className="rounded-lg border border-line px-2 py-1 text-[11px] hover:border-brand">+90°</button>
               </div>
             </div>
 
-            {/* تعديلات الألوان */}
             <div className="space-y-2 rounded-xl bg-surface/60 p-2.5">
               <p className="text-[11px] font-bold text-ink-soft">{t("تعديلات", "Adjustments")}</p>
-              <Slider label={t("السطوع", "Brightness")} min={50} max={150} step={1} value={bright} onChange={setBright} fmt={(v) => `${v}%`} />
-              <Slider label={t("التباين", "Contrast")} min={50} max={150} step={1} value={contrast} onChange={setContrast} fmt={(v) => `${v}%`} />
-              <Slider label={t("التشبّع", "Saturation")} min={0} max={200} step={1} value={sat} onChange={setSat} fmt={(v) => `${v}%`} />
+              <Slider label={t("السطوع", "Brightness")} min={50} max={150} step={1} value={bright} onChange={(v) => { setBright(v); setTouched(true); }} fmt={(v) => `${v}%`} />
+              <Slider label={t("التباين", "Contrast")} min={50} max={150} step={1} value={contrast} onChange={(v) => { setContrast(v); setTouched(true); }} fmt={(v) => `${v}%`} />
+              <Slider label={t("التشبّع", "Saturation")} min={0} max={200} step={1} value={sat} onChange={(v) => { setSat(v); setTouched(true); }} fmt={(v) => `${v}%`} />
             </div>
 
-            {/* الأبعاد بالبكسل (تصغير عرض الإخراج) */}
             <div>
               <p className="mb-1.5 text-[11px] font-bold text-ink-soft">{t("عرض الإخراج (بكسل)", "Output width (px)")}</p>
               <div className="flex items-center gap-2">
-                <input type="number" min={100} placeholder={nat ? String(Math.min(nat.w, 1600)) : "auto"} value={outW} onChange={(e) => setOutW(e.target.value === "" ? "" : Math.max(50, Number(e.target.value)))}
+                <input type="number" min={100} placeholder={nat ? String(Math.min(nat.w, 1600)) : "auto"} value={outW} onChange={(e) => { setOutW(e.target.value === "" ? "" : Math.max(50, Number(e.target.value))); setTouched(true); }}
                   className="w-full rounded-lg border border-line bg-white px-2.5 py-1.5 text-sm text-ink outline-none focus:border-brand" />
                 <span className="shrink-0 text-[11px] text-ink-soft">{t("اتركه فارغاً = بلا تصغير", "empty = keep")}</span>
               </div>
