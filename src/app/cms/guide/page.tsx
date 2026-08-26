@@ -160,6 +160,7 @@ export default function GuidePage() {
   }, [zoom]);
 
   const shotSrc = (s: GuideShot) => `/guide/${lang}/${s.area}/${s.name}.png`;
+  const clipSrc = (name: string) => `/guide/${lang}/clips/${name}.webp`;
   const go = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
   const copyLink = (id: string) => {
     try { navigator.clipboard?.writeText(`${location.origin}${location.pathname}#${id}`); setCopied(id); setTimeout(() => setCopied(""), 1500); } catch {}
@@ -361,6 +362,21 @@ export default function GuidePage() {
                                   {(step.shot.caption_ar || step.shot.caption_en) && (
                                     <figcaption className="bg-[#f7fafa] px-3 py-2 text-xs text-ink-soft">{en ? step.shot.caption_en : step.shot.caption_ar}</figcaption>
                                   )}
+                                </figure>
+                              )}
+                              {step.clip && (
+                                <figure className="mt-4 overflow-hidden rounded-xl bg-white shadow-lg ring-1 ring-[#e6eff0]">
+                                  <div className="flex items-center gap-2 border-b border-[#eef4f5] bg-[#f7fafa] px-3 py-2">
+                                    <span className="flex items-center gap-1.5 rounded-md bg-[#1FA6A8]/12 px-2 py-0.5 text-[10px] font-bold text-[#0F6C73]">
+                                      <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
+                                      {t("توضيح متحرّك", "animated demo")}
+                                    </span>
+                                    <span className="no-print ms-auto text-[10px] text-ink-soft">{t("اضغط للتكبير", "click to zoom")}</span>
+                                  </div>
+                                  <button type="button" onClick={() => setZoom(clipSrc(step.clip!.name))} className="block w-full cursor-zoom-in">
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img src={clipSrc(step.clip.name)} alt={(en ? step.en : step.ar).slice(0, 80)} className="h-auto w-full" />
+                                  </button>
                                 </figure>
                               )}
                             </li>

@@ -9,7 +9,8 @@ export type GuideShot = { area: "cms" | "site"; name: string; caption_ar?: strin
 // النصّ يدعم روابط بصيغة ماركداون: [النص الظاهر](الرابط) — تُحوّل إلى روابط قابلة للنقر.
 // points: نقاط فرعية (bullets) تظهر أسفل نصّ الخطوة لتفكيك الشرح الطويل.
 export type GuidePoint = { ar: string; en: string };
-export type GuideStep = { ar: string; en: string; shot?: GuideShot; points?: GuidePoint[] };
+// clip: توضيح متحرّك (WebP) يُحلّ إلى /guide/<lang>/clips/<name>.webp
+export type GuideStep = { ar: string; en: string; shot?: GuideShot; points?: GuidePoint[]; clip?: { name: string } };
 export type FaqItem = { q_ar: string; q_en: string; a_ar: string; a_en: string };
 export type GlossaryItem = { term_ar: string; term_en: string; def_ar: string; def_en: string };
 export type GuideSection = {
@@ -33,6 +34,8 @@ const cms = (name: string, ar: string, en: string, cap_ar?: string, cap_en?: str
 const site = (name: string, ar: string, en: string): GuideStep =>
   ({ ar, en, shot: { area: "site", name } });
 const p = (ar: string, en: string): GuideStep => ({ ar, en });
+// خطوة بتوضيح متحرّك (WebP) بدل لقطة ثابتة
+const clip = (name: string, ar: string, en: string): GuideStep => ({ ar, en, clip: { name } });
 // خطوة بنقاط فرعية (bullets). كل نقطة زوج [عربي، إنجليزي]، ويمكن أن تحوي روابط [نص](رابط).
 const pl = (ar: string, en: string, points: [string, string][]): GuideStep =>
   ({ ar, en, points: points.map(([a, e]) => ({ ar: a, en: e })) });
@@ -181,6 +184,7 @@ export const GUIDE: GuidePart[] = [
         intro_en: "Most editors now have a “live preview”: the screen is split into two columns — the fields on one side, and a faithful preview of the section exactly as it will look on the site on the other — updating instantly as you type.",
         steps: [
           cms("section-view", "افتح أي عنصر للتعديل (فرع، برنامج، خدمة، أخصائي، خبر، قصة نجاح، وظيفة، بطاقة تقييم…). سترى الحقول على جهة والمعاينة الحيّة على الجهة المقابلة.", "Open any item to edit (a branch, program, service, specialist, news item, success story, job, assessment card…). You'll see the fields on one side and the live preview on the opposite side."),
+          clip("live-preview", "شاهد الفكرة متحركة: بمجرد ما تكتب في حقل «الاسم»، تتغيّر بطاقة المعاينة على الجهة المقابلة لحظيًا بنفس النص.", "See it in motion: the moment you type in the “Name” field, the preview card on the other side changes instantly with the same text."),
           p("اكتب في أي حقل ولاحظ المعاينة تتغيّر لحظيًا — العنوان، النص، الأيقونة، الصورة، الكروت، الألوان… كلّها تظهر بنفس شكلها النهائي على الموقع دون الحاجة لفتح صفحة أخرى.", "Type in any field and watch the preview change live — title, text, icon, image, cards, colours… all shown in their exact final look on the site, without opening another page."),
           p("المعاينة مقسّمة حسب أقسام الصفحة، فكل مجموعة حقول لها معاينتها المقابلة. والصور فيها تظهر كاملة (غير مقصوصة) لتراها كما هي.", "The preview is split by the page's sections, so each group of fields has its matching preview. Images in it are shown in full (not cropped) so you see them as they are."),
           p("المعاينة للعرض فقط ولا يُكتب فيها — تظل تكتب في الحقول. وكالعادة اضغط «حفظ» ليُطبَّق كل شيء على الموقع دفعة واحدة.", "The preview is view-only — you still type in the fields. As always, click “Save” to apply everything to the site at once."),
