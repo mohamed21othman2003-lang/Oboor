@@ -39,6 +39,11 @@ export default async function AdmissionPage() {
   const ctaTitle = ctaRow?.title_ar ? hl(en ? ctaRow.title_en || ctaRow.title_ar : ctaRow.title_ar) : undefined;
   const ctaSub = ctaRow ? (en ? ctaRow.text_en || ctaRow.text_ar : ctaRow.text_ar) || undefined : undefined;
   const ctaBadge = ctaRow ? (en ? ctaRow.tagline_en || ctaRow.tagline_ar : ctaRow.tagline_ar) || undefined : undefined;
+  // القسم العلوي (الهيرو) من الـCMS مع fallback ثابت
+  const hero = sections?.hero ?? [];
+  const hF = (k: string) => hero.find((r) => r.key === k);
+  const hT = (r?: (typeof hero)[number]) => (r ? (en ? r.title_en || r.title_ar : r.title_ar) : "");
+  const hB = (r?: (typeof hero)[number]) => (r ? (en ? r.text_en || r.text_ar : r.text_ar) : "");
   return (
     <>
       {/* Hero */}
@@ -53,13 +58,13 @@ export default async function AdmissionPage() {
           <div className="mx-auto max-w-3xl text-center">
             <span className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-1.5 text-sm font-medium text-brand-dark shadow-sm ring-1 ring-line">
               <span className="h-2 w-2 rounded-full bg-success" />
-              {pick(locale, "التسجيل متاح الآن في جميع الفروع", "Registration is now open at all branches")}
+              {hT(hF("badge")) || pick(locale, "التسجيل متاح الآن في جميع الفروع", "Registration is now open at all branches")}
             </span>
             <h1 className="mt-5 text-4xl font-extrabold leading-tight text-ink sm:text-5xl">
-              {pick(locale, "غدُه بانتظار ", "A Future Awaits Your ")}<span className="text-brand">{pick(locale, "خطوتك", "First Step")}</span>
+              {hF("heading") ? hl(hT(hF("heading"))) : <>{pick(locale, "غدُه بانتظار ", "A Future Awaits Your ")}<span className="text-brand">{pick(locale, "خطوتك", "First Step")}</span></>}
             </h1>
             <p className="mx-auto mt-5 max-w-2xl text-base leading-8 text-ink-muted">
-              {pick(locale, "سجّل طلب الالتحاق لطفلك. نموذج التسجيل يسير ويختصر الكثير؛ ضع البيانات الآن، وستواصل معك ونمدّ يد العون.", "Submit your child's enrollment request. A simple and streamlined registration form designed for ease and convenience. Enter your details, and we will get in touch to provide full support and guidance.")}
+              {hB(hF("heading")) || pick(locale, "سجّل طلب الالتحاق لطفلك. نموذج التسجيل يسير ويختصر الكثير؛ ضع البيانات الآن، وستواصل معك ونمدّ يد العون.", "Submit your child's enrollment request. A simple and streamlined registration form designed for ease and convenience. Enter your details, and we will get in touch to provide full support and guidance.")}
             </p>
           </div>
         </div>
