@@ -49,7 +49,8 @@ export default function ProgramCard({ p, locale = "ar" }: { p: Program; locale?:
         </div>
       </div>
 
-      <p className="mt-2 text-[13px] leading-7 text-ink-muted">{p.desc}</p>
+      {/* ارتفاع ثابت للوصف (٣ أسطر) حتى تتحاذى «يناسب» والفئة العمرية والقائمة عبر كل الكروت */}
+      <p className="mt-2 min-h-[5.25rem] text-[13px] leading-7 text-ink-muted">{p.desc}</p>
 
       {/* يناسب pill */}
       {p.suits && (
