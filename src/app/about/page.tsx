@@ -3,7 +3,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { pageMeta } from "@/lib/seo";
 import { getSpecialists } from "@/lib/specialistsData";
-import { REGION_BRANCHES, REGION_BRANCHES_EN, type Branch } from "@/lib/branchesData";
+import { ALL_BRANCHES, ALL_BRANCHES_EN, type Branch } from "@/lib/branchesData";
 import { loadBranches } from "@/lib/server/branches";
 import { fetchSections, fetchContent } from "@/lib/server/django";
 import { CMS_ICONS } from "@/lib/cms/icons";
@@ -45,14 +45,14 @@ const PROGRAMS = [
   { title: "العلاج الاجتماعي", title_en: "Social Services", desc: "برامج تُعزز مهارات التواصل الاجتماعي والاندماج المجتمعي، وتُسهم في بناء شبكة دعم متينة للفرد وأسرته.", desc_en: "Programs that strengthen social communication skills and community integration, helping build a strong support network for the individual and their family.", icon: "users" },
 ];
 
-// ترتيب العرض كما في الديزاين
-const SMALL_BRANCH_SLUGS = ["kharj", "wadi-dawasir", "qassim", "majmaah", "sharqia", "jouf", "madinah", "taif", "aseer"];
+// فروع حقيقية ممثِّلة للمناطق (سلاجات الفروع الفعلية — تُحلّ فعليًا في /branches/<slug>)
+const SMALL_BRANCH_SLUGS = ["branch-14", "branch-11", "branch-20", "branch-31", "branch-25", "branch-10", "branch-19", "branch-28", "branch-30"];
 
 export default async function AboutPage() {
   const locale = await getLocale();
   const en = locale === "en";
   // الفروع والأخصائيون من الـCMS (مع fallback للبيانات الثابتة)
-  const staticBranches = locale === "en" ? REGION_BRANCHES_EN : REGION_BRANCHES;
+  const staticBranches = locale === "en" ? ALL_BRANCHES_EN : ALL_BRANCHES;
   // طلبات الـCMS بالتوازي (تقليل زمن الاستجابة/TTFB)
   const [cmsBranches, specRows, about] = await Promise.all([
     loadBranches(locale),
