@@ -80,7 +80,8 @@ export default function CollectionList({ type }: { type: string }) {
   function imageOf(it: CmsItem): string {
     // الفروع تخزّن صورها في «gallery» (مصفوفة) بدل حقل image — نعرض أول صورة كغلاف
     const gallery = Array.isArray(it.gallery) ? (it.gallery as unknown[]) : [];
-    const raw = String(it.image ?? it.image_file ?? gallery[0] ?? "");
+    // نفضّل الصورة المرفوعة (image_file) على مسار الصورة الثابت (image) حتى تظهر التعديلات الجديدة فورًا
+    const raw = String(it.image_file || it.image || gallery[0] || "");
     if (!raw) return "";
     const resolved = /^(https?:|data:|blob:|\/)/.test(raw) ? raw : "/" + raw.replace(/^\/+/, "");
     return /^(https?:|\/)/.test(resolved) ? `${resolved}${resolved.includes("?") ? "&" : "?"}v=${bust}` : resolved;

@@ -560,7 +560,7 @@ export default function PageChrome({ page }: { page: string }) {
                     (k) => String((it as Record<string, unknown>)[k] ?? "").trim() !== "" || (k in (edits[it.id] || {})),
                   );
                   const hasData = (Array.isArray(it.data_ar) && (it.data_ar as unknown[]).length > 0) || (Array.isArray(it.data_en) && (it.data_en as unknown[]).length > 0) || ("data_ar" in (edits[it.id] || {}));
-                  const imgResolved = resolveSrc(String(it.image ?? ""));
+                  const imgResolved = resolveSrc(String((it.image_file as string) || it.image || ""));
                   const imgSrc = imgResolved && /^(https?:|\/)/.test(imgResolved) ? `${imgResolved}${imgResolved.includes("?") ? "&" : "?"}v=${bust}` : imgResolved;
                   return (
                     <div key={it.id} className="rounded-xl border border-line bg-surface/40 p-3">
@@ -686,7 +686,7 @@ export default function PageChrome({ page }: { page: string }) {
                 </div>
                 {!COMPLEX_BLOCKS.has(g.block) && (() => {
                   const pvItems: PItem[] = g.items.map((it) => {
-                    const ir = resolveSrc(String(it.image ?? ""));
+                    const ir = resolveSrc(String((it.image_file as string) || it.image || ""));
                     const image = ir && /^(https?:|\/)/.test(ir) ? `${ir}${ir.includes("?") ? "&" : "?"}v=${bust}` : ir;
                     return {
                       tagline: en ? (val(it, "tagline_en") || val(it, "tagline_ar")) : val(it, "tagline_ar"),
