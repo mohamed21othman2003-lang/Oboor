@@ -94,18 +94,31 @@ function JoinGrid({ lang, items }: { lang: "ar" | "en"; items: PItem[] }) {
 
 // ===== صف الأرقام =====
 function StatsRow({ lang, items }: { lang: "ar" | "en"; items: PItem[] }) {
-  const nums = items.filter((it) => String(it.value ?? "").trim() !== "" || (!it.text && !it.bullets.length));
+  // عناصر الأرقام (لها قيمة) وعناصر العنوان (عنوان/وصف بلا قيمة — مثل ترويسة قسم الأرقام)
+  const nums = items.filter((it) => String(it.value ?? "").trim() !== "");
+  const heads = items.filter((it) => String(it.value ?? "").trim() === "" && (it.title || it.text));
+  if (!nums.length && !heads.length) return null;
   return (
-    <div dir={lang === "en" ? "ltr" : "rtl"} className="flex flex-wrap items-center justify-center gap-6 rounded-xl bg-white p-5 shadow-sm ring-1 ring-line">
-      {nums.map((it, i) => (
-        <div key={i} className="flex items-center gap-3">
-          {it.icon && <span className="flex h-11 w-11 items-center justify-center rounded-full bg-brand/10 text-brand">{CMS_ICONS[it.icon]}</span>}
-          <div className="text-start">
-            <p className="text-2xl font-extrabold text-brand" dir="ltr">{it.value || "0"}</p>
-            <p className="text-[11px] text-ink-muted">{it.title}</p>
-          </div>
+    <div dir={lang === "en" ? "ltr" : "rtl"} className="space-y-3">
+      {heads.map((it, i) => (
+        <div key={"h" + i} className="text-center">
+          {it.title && <h3 className="text-lg font-extrabold text-ink">{highlight(it.title)}</h3>}
+          {it.text && <p className="mt-1 text-[12px] leading-6 text-ink-muted">{it.text}</p>}
         </div>
       ))}
+      {nums.length > 0 && (
+        <div className="flex flex-wrap items-center justify-center gap-6 rounded-xl bg-white p-5 shadow-sm ring-1 ring-line">
+          {nums.map((it, i) => (
+            <div key={i} className="flex items-center gap-3">
+              {it.icon && <span className="flex h-11 w-11 items-center justify-center rounded-full bg-brand/10 text-brand">{CMS_ICONS[it.icon]}</span>}
+              <div className="text-start">
+                <p className="text-2xl font-extrabold text-brand" dir="ltr">{it.value || "0"}</p>
+                <p className="text-[11px] text-ink-muted">{it.title}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
