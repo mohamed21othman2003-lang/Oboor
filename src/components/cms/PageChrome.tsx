@@ -107,6 +107,12 @@ const BLOCK_LABELS: Record<string, string> = {
   form: "قسم «ارسل طلبك»",
   map: "قسم الخريطة (مراكزنا)",
   social: "قسم «تابعنا» (السوشيال)",
+  intro: "قسم التعريف (تعرّف على عبور)",
+  mission: "قسم الرسالة",
+  vision: "قسم الرؤية",
+  programs: "قسم البرامج",
+  specialists: "قسم الأخصائيين",
+  branches: "قسم الفروع",
 };
 const BLOCK_LABELS_EN: Record<string, string> = {
   hero: "Top intro (Hero)",
@@ -142,6 +148,12 @@ const BLOCK_LABELS_EN: Record<string, string> = {
   form: "“Send Your Request” section",
   map: "Map section (Our Branches)",
   social: "“Follow Us” (social) section",
+  intro: "Introduction section",
+  mission: "Mission section",
+  vision: "Vision section",
+  programs: "Programs section",
+  specialists: "Specialists section",
+  branches: "Branches section",
 };
 const ITEM_LABELS: Record<string, string> = {
   "info.main": "عنوان قسم «معلومات التواصل»",
