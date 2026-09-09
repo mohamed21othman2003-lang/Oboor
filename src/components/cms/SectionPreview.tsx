@@ -144,7 +144,23 @@ function StepsRow({ lang, items }: { lang: "ar" | "en"; items: PItem[] }) {
 // ===== شبكة صور المعرض =====
 function GalleryGrid({ items }: { items: PItem[] }) {
   const imgs = items.filter((it) => it.image);
-  if (!imgs.length) return null;
+  // لا صور في هذا القسم (صور المعرض تُدار من قسم منفصل) — نعرض العنوان/الوسم بدل صندوق فارغ
+  if (!imgs.length) {
+    const heads = items.filter((it) => it.title || it.text);
+    if (!heads.length) return null;
+    return (
+      <div className="space-y-1 text-center">
+        {heads.map((it, i) => (
+          <div key={i}>
+            {it.title && (i === heads.length - 1
+              ? <h3 className="text-lg font-extrabold text-ink">{highlight(it.title)}</h3>
+              : <p className="text-[12px] font-bold text-brand">{it.title}</p>)}
+            {it.text && <p className="mt-1 text-[12px] leading-6 text-ink-muted">{it.text}</p>}
+          </div>
+        ))}
+      </div>
+    );
+  }
   return (
     <div className="grid grid-cols-3 gap-2 rounded-xl bg-surface/40 p-3">
       {imgs.map((it, i) => (
