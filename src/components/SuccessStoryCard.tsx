@@ -32,20 +32,20 @@ export default function SuccessStoryCard({ story, locale = "ar", highlights }: {
         <div className="flex flex-1 flex-col p-5">
           <h3 className="text-start text-lg font-extrabold text-ink">{story.name} - {story.age}</h3>
 
-          <div className="mt-4 grid grid-cols-2 gap-3">
+          <div className="mb-4 mt-4 grid grid-cols-2 gap-3">
             <div className="rounded-xl border border-[#f4dcdc] bg-[#fdf3f3] p-3 text-start">
               <p className="text-xs font-bold text-[#d9534f]">{pick(locale, "قبل الالتحاق", "Before")}</p>
-              <p className="mt-1.5 text-xs leading-6 text-ink-muted">{story.before}</p>
+              <p className="mt-1.5 line-clamp-4 min-h-24 text-xs leading-6 text-ink-muted">{story.before}</p>
             </div>
             <div className="rounded-xl border border-brand/15 bg-[#eef9fa] p-3 text-start">
               <p className="text-xs font-bold text-brand-dark">{pick(locale, "بعد البرنامج", "After")}</p>
-              <p className="mt-1.5 text-xs leading-6 text-ink-muted">{story.after}</p>
+              <p className="mt-1.5 line-clamp-4 min-h-24 text-xs leading-6 text-ink-muted">{story.after}</p>
             </div>
           </div>
 
-          <div className="mt-4 rounded-xl border border-brand/15 bg-[#f7fcfd] p-4 text-start">
+          <div className="mt-auto rounded-xl border border-brand/15 bg-[#f7fcfd] p-4 text-start">
             <QuoteIcon />
-            <p className="mt-1 text-xs leading-6 text-ink-muted">{story.quote}</p>
+            <p className="mt-1 line-clamp-3 min-h-18 text-xs leading-6 text-ink-muted">{story.quote}</p>
             <div className="mt-3 flex items-center justify-between gap-2 border-t border-brand/10 pt-3 text-[11px] text-ink-soft">
               <div className="flex items-center gap-3">
                 <span className="flex items-center gap-1"><span className="text-brand"><UserIcon /></span>{story.author}</span>
