@@ -77,7 +77,7 @@ DATA = json.loads(r"""[
   "region": "الرياض",
   "city": "النرجس",
   "address": "منطقة الرياض - حي النرجس - شارع الأمير سعود بن عبدالله الجلوي",
-  "manager": "أ. أسيل سعود الراشد",
+  "manager": "أ. أفنان",
   "phone": "555258611",
   "phone_evening": "555257611",
   "email": "oboor.alnarjis@hdc.edu.sa",

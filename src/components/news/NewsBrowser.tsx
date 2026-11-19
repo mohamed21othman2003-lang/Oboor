@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Fragment } from "react";
+import { Fragment, useState } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { pick, type Locale } from "@/i18n/config";
 import type { NewsItem } from "@/lib/newsData";
@@ -148,6 +148,11 @@ export default function NewsBrowser({ locale, categories, heads, workshopFeature
     document.getElementById("news-tabs")?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
+  // المكتبة التوعوية: فلترة المقالات حسب التصنيف (التخصص/الموضوع)
+  const allArticles = [...(articleFeatured ? [articleFeatured] : []), ...articles];
+  const topics = Array.from(new Set(allArticles.map((a) => (a.category || "").trim()).filter(Boolean)));
+  const [topic, setTopic] = useState("");
+
   const sections: React.ReactNode[] = [];
   if (show(3)) sections.push(
     <Section key="workshops">
@@ -178,13 +183,29 @@ export default function NewsBrowser({ locale, categories, heads, workshopFeature
   );
   if (show(4)) sections.push(
     <Section key="articles">
-      <SectionHead tag={heads?.articles?.tag || pick(locale, "ثقّف وابنِ الثقة", "Inform & Build Confidence")} title={heads?.articles?.title || pick(locale, "المحتوى التوعوي للأسر", "Awareness Content for Families")} linkText={pick(locale, "جميع المقالات", "All Articles")} onViewAll={() => goToTab(4)} showLink={tab === 0} desc={heads?.articles?.desc || pick(locale, "مقالات وأدلة متخصصة أُعدّت بعناية لمساعدة أسر المستفيدين على فهم الحالة ودعم أبنائهم.", "Specialized articles and guides carefully prepared to help families understand their child's condition and support them.")} />
-      <div className="grid gap-6 lg:grid-cols-2">
-        {articleFeatured && <FeaturedArticle item={articleFeatured} locale={locale} />}
-        <div className="space-y-4">
-          {articles.map((a) => <ArticleRow key={a.slug} item={a} locale={locale} />)}
+      <SectionHead tag={heads?.articles?.tag || pick(locale, "ثقّف وابنِ الثقة", "Inform & Build Confidence")} title={heads?.articles?.title || pick(locale, "المكتبة التوعوية", "Awareness Library")} linkText={pick(locale, "تصفّح المكتبة", "Browse the Library")} onViewAll={() => goToTab(4)} showLink={tab === 0} desc={heads?.articles?.desc || pick(locale, "مقالات وأدلة متخصصة أُعدّت بعناية لمساعدة أسر المستفيدين على فهم الحالة ودعم أبنائهم.", "Specialized articles and guides carefully prepared to help families understand their child's condition and support them.")} />
+      {/* تصنيفات المكتبة حسب التخصص/الموضوع (من حقل «التصنيف» لكل مقال) */}
+      {topics.length > 1 && (
+        <div className="mb-6 flex flex-wrap items-center justify-start gap-2">
+          {["", ...topics].map((tp) => (
+            <button key={tp || "all"} type="button" onClick={() => setTopic(tp)} className={`rounded-full border px-4 py-1.5 text-xs font-bold transition-colors ${topic === tp ? "border-brand bg-brand text-white" : "border-line bg-white text-ink-muted hover:border-brand hover:text-brand"}`}>
+              {tp || pick(locale, "كل المواضيع", "All Topics")}
+            </button>
+          ))}
         </div>
-      </div>
+      )}
+      {topic ? (
+        <div className="grid gap-4 lg:grid-cols-2">
+          {allArticles.filter((a) => a.category === topic).map((a) => <ArticleRow key={a.slug} item={a} locale={locale} />)}
+        </div>
+      ) : (
+        <div className="grid gap-6 lg:grid-cols-2">
+          {articleFeatured && <FeaturedArticle item={articleFeatured} locale={locale} />}
+          <div className="space-y-4">
+            {articles.map((a) => <ArticleRow key={a.slug} item={a} locale={locale} />)}
+          </div>
+        </div>
+      )}
     </Section>
   );
 

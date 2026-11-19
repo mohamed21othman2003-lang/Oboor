@@ -16,7 +16,8 @@ const BRANCHES: { ar: string; en: string }[] = [
 const MESSAGE_TYPES: { value: string; ar: string; en: string }[] = [
   { value: "خدمة", ar: "خدمة", en: "Service" },
   { value: "مقترح", ar: "مقترح", en: "Suggestion" },
-  { value: "شكوى", ar: "شكوى", en: "Complaint" },
+  // كان «شكوى» — عُدِّل إلى «حماية المستفيد» حسب ملاحظة الإشراف الفني (أشمل وأوضح)
+  { value: "حماية المستفيد", ar: "حماية المستفيد", en: "Beneficiary Protection" },
 ];
 
 export default function ContactForm({ locale, branches }: { locale: Locale; branches?: (string | SelectOption)[] }) {

@@ -3,6 +3,10 @@
 
 import { type Locale } from "@/i18n/config";
 
+// إظهار اسم مدير الفرع للزوار — مُطفأ بناءً على ملاحظة الإشراف الفني (تجنّب تحديث الأسماء
+// مع كل تغيير إداري والاكتفاء بمعلومات التواصل). الاسم يبقى محفوظًا ويُحرَّر من الـCMS.
+export const SHOW_BRANCH_MANAGER = false;
+
 export type Branch = {
   slug: string;
   name: string;
@@ -101,7 +105,7 @@ export const ALL_BRANCHES: Branch[] = [
   { slug: "branch-3", name: "مركز فرع عبور ظهرة لبن  للرعاية النهارية", area: "", city: "ظهرة لبن", region: "الرياض", address: "منطقة الرياض - حي ظهرة لبن - شارع نجران", hours: "", phone: "555259611", phoneEvening: "536487581", email: "rep.labn@hdc.edu.sa", manager: "أ.العنود القحطاني", mapUrl: "https://maps.app.goo.gl/4KkiUUU5GcQcua6C9?g_st=iw", services: DEF_SERVICES, lat: null, lng: null, isNew: false },
   { slug: "branch-4", name: "مركز فرع عبور الروضة  للرعاية النهارية", area: "", city: "الروضة", region: "الرياض", address: "منطقة الرياض - حي الروضه - مخرج 11 طريق الدائري الشرقي", hours: "", phone: "555256411", phoneEvening: "555032398", email: "oboor.rawda@hdc.edu.sa", manager: "أ.اماني الشهري", mapUrl: "https://maps.app.goo.gl/ETWVnEcu7qbjMzeT8?g_st=iw", services: DEF_SERVICES, lat: null, lng: null, isNew: false },
   { slug: "branch-5", name: "مركز فرع عبور المعيزلية  للرعاية النهارية", area: "", city: "المعيزلية", region: "الرياض", address: "منطقة الرياض - حي المعيزلية - شارع فنون", hours: "", phone: "553553209", phoneEvening: "541012037", email: "almaizilah@hdc.edu.sa", manager: "أ. مها مبارك ال شوغب", mapUrl: "https://maps.app.goo.gl/QAPwtSzhtkthnWfR7?g_st=ipc", services: DEF_SERVICES, lat: null, lng: null, isNew: false },
-  { slug: "branch-6", name: "مركز  فرع عبور  النرجس  للرعاية النهارية", area: "", city: "النرجس", region: "الرياض", address: "منطقة الرياض - حي النرجس - شارع الأمير سعود بن عبدالله الجلوي", hours: "", phone: "555258611", phoneEvening: "555257611", email: "oboor.alnarjis@hdc.edu.sa", manager: "أ. أسيل سعود الراشد", mapUrl: "https://maps.app.goo.gl/exrTahmyTdiGfLdW8", services: DEF_SERVICES, lat: null, lng: null, isNew: false },
+  { slug: "branch-6", name: "مركز  فرع عبور  النرجس  للرعاية النهارية", area: "", city: "النرجس", region: "الرياض", address: "منطقة الرياض - حي النرجس - شارع الأمير سعود بن عبدالله الجلوي", hours: "", phone: "555258611", phoneEvening: "555257611", email: "oboor.alnarjis@hdc.edu.sa", manager: "أ. أفنان", mapUrl: "https://maps.app.goo.gl/exrTahmyTdiGfLdW8", services: DEF_SERVICES, lat: null, lng: null, isNew: false },
   { slug: "branch-7", name: "مركز فرع عبور الملقا  للرعاية النهارية", area: "", city: "الملقا", region: "الرياض", address: "منطقة الرياض- الملقا -وادي وج،، الرياض", hours: "", phone: "550287769", phoneEvening: "", email: "oboor.almalqa@hdc.edu.sa", manager: "أ. لطيفة الصالح", mapUrl: "https://maps.app.goo.gl/RfbfXbniNNEa4qxq6", services: DEF_SERVICES, lat: null, lng: null, isNew: false },
   { slug: "branch-8", name: "مركز عبور المرسلات للرعاية النهارية", area: "", city: "المرسلات", region: "الرياض", address: "الرياض - حي المرسلات", hours: "", phone: "553642443", phoneEvening: "", email: "almursalat@hdc.edu.sa", manager: "أ.رجاء سعد القحطاني", mapUrl: "https://maps.app.goo.gl/B5v2cjGSHRj2SzVm6?g_st=ipc", services: DEF_SERVICES, lat: null, lng: null, isNew: false },
   { slug: "branch-9", name: "مركز عبور السلام للرعاية النهارية", area: "", city: "السلام", region: "الرياض", address: "الرياض - حي السلام", hours: "", phone: "533130590", phoneEvening: "", email: "alsalam@hdc.edu.sa", manager: "أ. شذى العصيمي", mapUrl: "https://maps.app.goo.gl/itJBiVWSqFYipxQq8?g_st=ipc", services: DEF_SERVICES, lat: null, lng: null, isNew: false },
@@ -171,7 +175,7 @@ const BRANCH_EN: Record<string, { name: string; city: string; address: string; m
   "branch-3": { name: "Oboor Dhahrat Laban Day Care Center", city: "Dhahrat Laban", address: "Riyadh Region – Dhahrat Laban District – Najran Street", manager: "Al-Anoud Al-Qahtani" },
   "branch-4": { name: "Oboor Al-Rawdah Day Care Center", city: "Al-Rawdah", address: "Riyadh Region – Al-Rawdah District – Exit 11, Eastern Ring Road", manager: "Amani Al-Shehri" },
   "branch-5": { name: "Oboor Al-Muaizilah Day Care Center", city: "Al-Muaizilah", address: "Riyadh Region – Al-Muaizilah District – Funun Street", manager: "Maha Mubarak Al-Shoghab" },
-  "branch-6": { name: "Oboor Al-Narjes Day Care Center", city: "Al-Narjes", address: "Riyadh Region – Al-Narjes District – Prince Saud Bin Abdullah Al-Jalawi Street", manager: "Aseel Saud Al-Rashed" },
+  "branch-6": { name: "Oboor Al-Narjes Day Care Center", city: "Al-Narjes", address: "Riyadh Region – Al-Narjes District – Prince Saud Bin Abdullah Al-Jalawi Street", manager: "Afnan" },
   "branch-7": { name: "Oboor Al-Malqa Day Care Center", city: "Al-Malqa", address: "Riyadh Region – Al-Malqa – Wadi Wej, Riyadh", manager: "Latifa Al-Saleh" },
   "branch-8": { name: "Oboor Al-Mursalat Day Care Center", city: "Al-Mursalat", address: "Riyadh – Al-Mursalat District", manager: "Rajaa Saad Al-Qahtani" },
   "branch-9": { name: "Oboor Al-Salam Day Care Center", city: "Al-Salam", address: "Riyadh – Al-Salam District", manager: "Shatha Al-Osaimi" },

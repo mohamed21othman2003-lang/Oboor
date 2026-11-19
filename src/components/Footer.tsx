@@ -24,7 +24,7 @@ const QUICK_LINKS: { key: "about" | "services" | "branches" | "programs" | "blog
   { key: "services", href: "/programs" },
   { key: "branches", href: "/branches" },
   { key: "programs", href: "/programs" },
-  { key: "blog", href: "/news" },
+  { key: "blog", href: "/news?tab=4" },
   { key: "contact", href: "/contact" },
 ];
 

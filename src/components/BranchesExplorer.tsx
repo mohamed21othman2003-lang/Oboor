@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
-import { BRANCHES, BRANCHES_EN, regionTabsFrom, type Branch } from "@/lib/branchesData";
+import { BRANCHES, BRANCHES_EN, regionTabsFrom, SHOW_BRANCH_MANAGER, type Branch } from "@/lib/branchesData";
 import { pick, type Locale } from "@/i18n/config";
 
 export default function BranchesExplorer({ locale, branches }: { locale: Locale; branches?: Branch[] }) {
@@ -139,7 +139,7 @@ function BranchCard({ b, locale }: { b: Branch; locale: Locale }) {
       <div className="space-y-3 py-4">
         {b.address && <InfoRow icon={<PinIcon />} label={pick(locale, "العنوان", "Address")} value={b.address} />}
         {b.hours && <InfoRow icon={<ClockIcon />} label={pick(locale, "أوقات العمل", "Working Hours")} value={b.hours} />}
-        {b.manager && <InfoRow icon={<UserIcon />} label={pick(locale, "مدير الفرع", "Branch Manager")} value={b.manager} />}
+        {SHOW_BRANCH_MANAGER && b.manager && <InfoRow icon={<UserIcon />} label={pick(locale, "مدير الفرع", "Branch Manager")} value={b.manager} />}
         {b.phone && <InfoRow icon={<PhoneIcon />} label={pick(locale, "رقم التواصل", "Phone Number")} value={b.phone} href={`tel:${b.phone}`} />}
         {b.phoneEvening && <InfoRow icon={<PhoneIcon />} label={pick(locale, "رقم المساء", "Evening Phone")} value={b.phoneEvening} href={`tel:${b.phoneEvening}`} />}
         {b.email && <InfoRow icon={<MailIcon />} label={pick(locale, "البريد الإلكتروني", "Email")} value={b.email} href={`mailto:${b.email}`} />}

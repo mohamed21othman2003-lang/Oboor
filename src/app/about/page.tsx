@@ -9,6 +9,7 @@ import { fetchSections, fetchContent } from "@/lib/server/django";
 import { CMS_ICONS } from "@/lib/cms/icons";
 import { getLocale } from "@/i18n/locale";
 import { pick, type Locale } from "@/i18n/config";
+import { CONTACT } from "@/lib/site";
 
 // الأخصائيون كما يرجع من Django
 type ApiSpec = { slug: string; name_ar: string; name_en: string; specialty_ar: string; specialty_en: string; desc_ar: string; desc_en: string; image: string };
@@ -81,10 +82,16 @@ export default async function AboutPage() {
   // كارت الفرع الرئيسي في قسم «نبذة عن الفروع» (من الـCMS مع fallback)
   const mainCard = (about?.branches ?? []).find((r) => r.key === "main_card");
   const mcCity = mainCard ? (en ? mainCard.title_en || mainCard.title_ar : mainCard.title_ar) : pick(locale, "الرياض", "Riyadh");
-  const mcRegion = mainCard ? (en ? mainCard.text_en || mainCard.text_ar : mainCard.text_ar) : pick(locale, "منطقة الرياض — ٣ فروع", "Riyadh Region — 3 branches");
+  // {count} في نص المنطقة = عدد مراكز المنطقة الفعلي من بيانات الفروع نفسها (نفس مصدر صفحة «مراكزنا»)
+  // حتى يبقى الرقم موحّدًا تلقائيًا مع أي إضافة/حذف فرع.
+  const allBranches = cmsBranches.length ? cmsBranches : staticBranches;
+  const regionCount = allBranches.filter((b) => b.region.trim() === mcCity.trim()).length;
+  const countStr = en ? String(regionCount) : String(regionCount).replace(/\d/g, (d) => "٠١٢٣٤٥٦٧٨٩"[Number(d)]);
+  const mcRegionRaw = mainCard ? (en ? mainCard.text_en || mainCard.text_ar : mainCard.text_ar) : pick(locale, "منطقة الرياض — {count} مركزًا", "Riyadh Region — {count} centers");
+  const mcRegion = mcRegionRaw.replace(/\{count\}/g, countStr);
   const mcDistrictsRaw = mainCard ? ((en ? mainCard.data_en : mainCard.data_ar) as unknown) : null;
-  const mcDistricts = Array.isArray(mcDistrictsRaw) && mcDistrictsRaw.length ? (mcDistrictsRaw as string[]) : pick(locale, ["حي العليا", "حي النرجس", "حي الصحافة"], ["Al-Olaya District", "Al-Narjes District", "Al-Sahafa District"]);
-  const mcPhone = mainCard?.value || "920-000-001";
+  const mcDistricts = Array.isArray(mcDistrictsRaw) && mcDistrictsRaw.length ? (mcDistrictsRaw as string[]) : pick(locale, ["حي العزيزية", "حي النرجس", "حي الملقا", "حي الروضة", "حي المرسلات", "حي السلام"], ["Al-Aziziyah District", "Al-Narjes District", "Al-Malqa District", "Al-Rawdah District", "Al-Mursalat District", "Al-Salam District"]);
+  const mcPhone = mainCard?.value || CONTACT.unified;
 
   // شارتا الهيرو — حقول داخل عنصر «المقدمة العلوية» نفسه (badge1/2 label+value، عربي/إنجليزي)
   // تُحرَّر من الـCMS تحت صورة القسم، مع fallback ثابت.

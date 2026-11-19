@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { pageMeta } from "@/lib/seo";
 import { notFound } from "next/navigation";
-import { ALL_BRANCHES, getBranch, BRANCH_FEATURES, BRANCH_FEATURES_EN } from "@/lib/branchesData";
+import { ALL_BRANCHES, getBranch, BRANCH_FEATURES, BRANCH_FEATURES_EN, SHOW_BRANCH_MANAGER } from "@/lib/branchesData";
 import { loadBranch } from "@/lib/server/branches";
 import { getLocale } from "@/i18n/locale";
 import { pick } from "@/i18n/config";
@@ -31,7 +31,7 @@ export default async function BranchProfilePage({ params }: { params: Promise<{ 
     { label: pick(locale, "المنطقة", "Region"), value: b.region },
     { label: pick(locale, "الحي", "District"), value: b.area },
     { label: pick(locale, "العنوان", "Address"), value: b.address },
-    { label: pick(locale, "مدير الفرع", "Branch Manager"), value: b.manager || "" },
+    { label: pick(locale, "مدير الفرع", "Branch Manager"), value: SHOW_BRANCH_MANAGER ? b.manager || "" : "" },
     { label: pick(locale, "رقم الهاتف", "Phone"), value: b.phone },
     { label: pick(locale, "رقم المساء", "Evening Phone"), value: b.phoneEvening || "" },
     { label: pick(locale, "البريد الإلكتروني", "Email"), value: b.email || CONTACT.email },

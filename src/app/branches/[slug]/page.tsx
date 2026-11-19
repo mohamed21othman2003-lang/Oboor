@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { pageMeta } from "@/lib/seo";
 import { notFound } from "next/navigation";
-import { ALL_BRANCHES, getBranch, BRANCH_FEATURES, BRANCH_FEATURES_EN } from "@/lib/branchesData";
+import { ALL_BRANCHES, getBranch, BRANCH_FEATURES, BRANCH_FEATURES_EN, SHOW_BRANCH_MANAGER } from "@/lib/branchesData";
 import { loadBranch } from "@/lib/server/branches";
 import { getSuccessStories } from "@/lib/successStoriesData";
 import ProgramCard, { type Program } from "@/components/ProgramCard";
@@ -106,7 +106,7 @@ export default async function BranchDetailPage({ params }: { params: Promise<{ s
     { icon: <PhoneIcon />, label: pick(locale, "رقم الهاتف", "Phone Number"), value: b.phone, href: b.phone ? `tel:${b.phone}` : undefined },
     { icon: <PhoneIcon />, label: pick(locale, "رقم المساء", "Evening Phone"), value: b.phoneEvening || "", href: b.phoneEvening ? `tel:${b.phoneEvening}` : undefined },
     { icon: <MailIcon />, label: pick(locale, "البريد الإلكتروني", "Email"), value: b.email || "", href: b.email ? `mailto:${b.email}` : undefined },
-    { icon: <UserIcon />, label: pick(locale, "مدير الفرع", "Branch Manager"), value: b.manager || "", href: undefined },
+    { icon: <UserIcon />, label: pick(locale, "مدير الفرع", "Branch Manager"), value: SHOW_BRANCH_MANAGER ? b.manager || "" : "", href: undefined },
     { icon: <ClockIcon />, label: pick(locale, "ساعات العمل", "Working Hours"), value: b.hours, href: undefined },
     { icon: <PinIcon />, label: pick(locale, "العنوان", "Address"), value: b.address, href: undefined },
   ].filter((it) => it.value);

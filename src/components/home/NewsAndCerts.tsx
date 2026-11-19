@@ -40,11 +40,11 @@ function NewsCard({ n, locale }: { n: (typeof NEWS)[number]; locale: Locale }) {
   );
 }
 
-type Cert = { name: string; label: string };
+type Cert = { name: string; label: string; issuer?: string; issued?: string; expires?: string };
 
 export default function NewsAndCerts({ locale, news: newsProp, certs: certsProp, chrome }: { locale: Locale; news?: (typeof NEWS)[number][]; certs?: Cert[]; chrome?: HomeChrome }) {
   const news = newsProp?.length ? newsProp : (locale === "en" ? NEWS_EN : NEWS);
-  const certs: Cert[] = certsProp?.length ? certsProp : [0, 1, 2, 3].map(() => ({ name: "ISO 9001", label: pick(locale, "إدارة الجودة", "Quality Mgmt.") }));
+  const certs: Cert[] = certsProp?.length ? certsProp : [{ name: "ISO 9001", label: pick(locale, "إدارة الجودة", "Quality Mgmt.") }];
   const trackRef = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0);
   // عدد صفحات التمرير الفعلية (وليس عدد الكروت) — لتفادي نقاط زائدة تصل لنفس نهاية التمرير
@@ -162,14 +162,22 @@ export default function NewsAndCerts({ locale, news: newsProp, certs: certsProp,
               <svg className="dir-flip" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M15 6l-6 6 6 6" /></svg>
             </Link>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className={`grid gap-4 ${certs.length > 1 ? "grid-cols-2" : "grid-cols-1"}`}>
             {certs.map((c, i) => (
               <div key={i} className="flex flex-col items-center rounded-2xl bg-white/95 p-6 text-center">
                 <div className="flex h-14 w-14 flex-col items-center justify-center rounded-full border-2 border-brand text-[10px] font-bold leading-tight text-brand-deep">
-                  {c.name.split(" ").map((w, j) => <span key={j}>{w}</span>)}
+                  {c.name.split(" ").slice(0, 3).map((w, j) => <span key={j}>{w}</span>)}
                 </div>
                 <p className="mt-3 text-sm font-bold text-ink">{c.name}</p>
-                <p className="text-[11px] text-ink-muted">{c.label}</p>
+                {c.label && <p className="text-[11px] text-ink-muted">{c.label}</p>}
+                {c.issuer && <p className="mt-2 text-[11px] text-ink-muted"><span className="font-semibold text-ink">{pick(locale, "الجهة المانحة:", "Issued by:")}</span> {c.issuer}</p>}
+                {(c.issued || c.expires) && (
+                  <p className="mt-1 text-[11px] text-ink-muted">
+                    {c.issued && <span>{pick(locale, "الإصدار:", "Issued:")} {c.issued}</span>}
+                    {c.issued && c.expires && <span className="mx-1.5 text-line">|</span>}
+                    {c.expires && <span>{pick(locale, "الانتهاء:", "Expires:")} {c.expires}</span>}
+                  </p>
+                )}
               </div>
             ))}
           </div>

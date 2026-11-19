@@ -17,7 +17,7 @@ export const NEWS_CATEGORIES = [
   { label: "أخبار المراكز" },
   { label: "الفعاليات" },
   { label: "الورش التدريبية" },
-  { label: "التوعية الأسرية" },
+  { label: "المكتبة التوعوية" },
 ];
 
 export const NEWS_CATEGORIES_EN = [
@@ -25,7 +25,7 @@ export const NEWS_CATEGORIES_EN = [
   { label: "Center News" },
   { label: "Events" },
   { label: "Training Workshops" },
-  { label: "Family Awareness" },
+  { label: "Awareness Library" },
 ];
 
 export const WORKSHOP_FEATURED: NewsItem = {

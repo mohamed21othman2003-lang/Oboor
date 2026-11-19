@@ -20,7 +20,7 @@ const common = {
       mainBranch: "الرياض ( الفرع الرئيسي )",
       privacy: "سياسة الخصوصية",
       rights: "© 2026 مركز عبور للرعاية والتأهيل. جميع الحقوق محفوظة.",
-      quick: { about: "عن عبور", services: "برامجنا التمكينية", branches: "مراكزنا", programs: "البرامج التأهيلية", blog: "المدوّنة والمقالات", contact: "خذ الخطوة لعبور" },
+      quick: { about: "عن عبور", services: "برامجنا التمكينية", branches: "مراكزنا", programs: "البرامج التأهيلية", blog: "المكتبة التوعوية", contact: "خذ الخطوة لعبور" },
       services: [
         { label: "التدخل المبكر", href: "/programs" },
         { label: "النطق والتخاطب", href: "/services/speech" },
@@ -49,7 +49,7 @@ const common = {
       mainBranch: "Riyadh (Main Branch)",
       privacy: "Privacy Policy",
       rights: "© 2026 Oboor Center for Care & Rehabilitation. All rights reserved.",
-      quick: { about: "About Us", services: "Services", branches: "Branches", programs: "Rehabilitation Programs", blog: "Blog & Articles", contact: "Take the Step to Oboor" },
+      quick: { about: "About Us", services: "Services", branches: "Branches", programs: "Rehabilitation Programs", blog: "Awareness Library", contact: "Take the Step to Oboor" },
       services: [
         { label: "Early Intervention", href: "/programs" },
         { label: "Speech & Language Therapy", href: "/services/speech" },

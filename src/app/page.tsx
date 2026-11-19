@@ -107,12 +107,27 @@ async function loadChrome(locale: Locale): Promise<HomeChrome> {
 }
 
 // شهادات الاعتماد في الرئيسية (sections/home/certs)
-async function loadCerts(locale: Locale): Promise<{ name: string; label: string }[] | undefined> {
+// لكل شهادة: الاسم + المجال + الجهة المانحة (tagline) + تاريخ الإصدار/الانتهاء (badge1/badge2 value).
+// تُحذف الشهادات المكررة (نفس الاسم والجهة والمجال) والفارغة.
+async function loadCerts(locale: Locale): Promise<{ name: string; label: string; issuer: string; issued: string; expires: string }[] | undefined> {
   const sections = await fetchSections("home");
   const rows = sections?.certs?.filter((r) => r.key !== "heading");
   if (!rows || !rows.length) return undefined;
   const en = locale === "en";
-  return rows.map((r) => ({ name: en ? r.title_en || r.title_ar : r.title_ar, label: en ? r.text_en || r.text_ar : r.text_ar }));
+  const f = (r: Record<string, unknown>, base: string) => String((en ? r[`${base}_en`] || r[`${base}_ar`] : r[`${base}_ar`]) ?? "").trim();
+  const seen = new Set<string>();
+  const out = rows
+    .map((row) => {
+      const r = row as unknown as Record<string, unknown>;
+      return { name: f(r, "title"), label: f(r, "text"), issuer: f(r, "tagline"), issued: f(r, "badge1_value"), expires: f(r, "badge2_value") };
+    })
+    .filter((c) => {
+      const k = `${c.name}|${c.issuer}|${c.label}`.toLowerCase();
+      if (!c.name || seen.has(k)) return false;
+      seen.add(k);
+      return true;
+    });
+  return out.length ? out : undefined;
 }
 
 export default async function Home() {

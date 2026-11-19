@@ -25,8 +25,10 @@ const COMPLEX_BLOCKS = new Set(["highlights", "services"]);
 const LIST_BLOCKS = new Set([
   "answer_options", "prelim_questions", "cities", "employment_types",
   "accreditations", "journey", "profile_stats", "join_cards",
-  "features", "stats", "steps", "services",
+  "features", "stats", "steps", "services", "certs",
 ]);
+// عناصر الشهادات (عدا عنوان القسم): لها حقول ثابتة — الجهة المانحة + تاريخ الإصدار + تاريخ الانتهاء
+const isCertItem = (block: string, key: string) => block === "certs" && key !== "heading";
 // بلوكات لم تعُد تُدار من هنا (انتقل تحكّمها لمكان أنسب) — تُخفى من محرّر الصفحة
 // محتوى صفحة الفرع/ملف الفرع صار لكل فرع مستقلاً داخل محرّر الفرع نفسه.
 const HIDDEN_BLOCKS = new Set([
@@ -62,6 +64,7 @@ const BLOCK_ADD: Record<string, string> = {
   profile_stats: "إضافة إحصائية", join_cards: "إضافة بطاقة",
   features: "إضافة ميزة",
   stats: "إضافة رقم", steps: "إضافة خطوة", services: "إضافة خدمة",
+  certs: "إضافة شهادة",
 };
 const BLOCK_ADD_EN: Record<string, string> = {
   answer_options: "Add answer option", prelim_questions: "Add question",
@@ -70,6 +73,7 @@ const BLOCK_ADD_EN: Record<string, string> = {
   profile_stats: "Add statistic", join_cards: "Add card",
   features: "Add feature",
   stats: "Add number", steps: "Add step", services: "Add service",
+  certs: "Add certificate",
 };
 
 // أسماء ودّية لأقسام رأس الصفحة وعناصرها
@@ -567,8 +571,9 @@ export default function PageChrome({ page }: { page: string }) {
                   const hasImage = String(it.image ?? "").trim() !== "" || Boolean(it.image_file);
                   const hasTitle = String(it.title_ar ?? "").trim() !== "" || String(it.title_en ?? "").trim() !== "" || ("title_ar" in (edits[it.id] || {}));
                   const showTitle = hasTitle || !hasImage; // العناصر المخصّصة للصورة فقط لا تعرض حقل العنوان
-                  const hasTagline = String(it.tagline_ar ?? "").trim() !== "" || String(it.tagline_en ?? "").trim() !== "" || ("tagline_ar" in (edits[it.id] || {}));
-                  const hasBadges = ["badge1_label_ar", "badge1_value_ar", "badge2_label_ar", "badge2_value_ar"].some(
+                  const certItem = isCertItem(g.block, String(it.key ?? ""));
+                  const hasTagline = certItem || String(it.tagline_ar ?? "").trim() !== "" || String(it.tagline_en ?? "").trim() !== "" || ("tagline_ar" in (edits[it.id] || {}));
+                  const hasBadges = !certItem && ["badge1_label_ar", "badge1_value_ar", "badge2_label_ar", "badge2_value_ar"].some(
                     (k) => String((it as Record<string, unknown>)[k] ?? "").trim() !== "" || (k in (edits[it.id] || {})),
                   );
                   const hasData = (Array.isArray(it.data_ar) && (it.data_ar as unknown[]).length > 0) || (Array.isArray(it.data_en) && (it.data_en as unknown[]).length > 0) || ("data_ar" in (edits[it.id] || {}));
@@ -597,7 +602,7 @@ export default function PageChrome({ page }: { page: string }) {
                         })()}
                         {hasTagline && (
                           <div>
-                            <p className="mb-1 text-xs font-semibold text-ink-soft">{(en ? FIELD_LABELS_EN[key]?.tagline : FIELD_LABELS[key]?.tagline) || t("الترويسة الصغيرة (فوق العنوان)", "Eyebrow (above title)")}</p>
+                            <p className="mb-1 text-xs font-semibold text-ink-soft">{certItem ? t("الجهة المانحة", "Issuing body") : (en ? FIELD_LABELS_EN[key]?.tagline : FIELD_LABELS[key]?.tagline) || t("الترويسة الصغيرة (فوق العنوان)", "Eyebrow (above title)")}</p>
                             <div className="grid gap-2 sm:grid-cols-2">
                               <input value={val(it, "tagline_ar")} onChange={(e) => setVal(it.id, "tagline_ar", e.target.value)} className={INPUT} placeholder={t("عربي", "Arabic")} />
                               <input value={val(it, "tagline_en")} onChange={(e) => setVal(it.id, "tagline_en", e.target.value)} dir="ltr" className={INPUT} placeholder="English" />
@@ -606,16 +611,16 @@ export default function PageChrome({ page }: { page: string }) {
                         )}
                         {showTitle && (
                           <div>
-                            <p className="mb-1 text-xs font-semibold text-ink-soft">{(en ? FIELD_LABELS_EN[key]?.title : FIELD_LABELS[key]?.title) || t("العنوان", "Title")}</p>
+                            <p className="mb-1 text-xs font-semibold text-ink-soft">{certItem ? t("اسم الشهادة", "Certificate name") : (en ? FIELD_LABELS_EN[key]?.title : FIELD_LABELS[key]?.title) || t("العنوان", "Title")}</p>
                             <div className="grid gap-2 sm:grid-cols-2">
                               <input value={val(it, "title_ar")} onChange={(e) => setVal(it.id, "title_ar", e.target.value)} className={INPUT} placeholder={t("عربي", "Arabic")} />
                               <input value={val(it, "title_en")} onChange={(e) => setVal(it.id, "title_en", e.target.value)} dir="ltr" className={INPUT} placeholder="English" />
                             </div>
                           </div>
                         )}
-                        {hasText && (
+                        {(hasText || certItem) && (
                           <div>
-                            <p className="mb-1 text-xs font-semibold text-ink-soft">{(en ? FIELD_LABELS_EN[key]?.text : FIELD_LABELS[key]?.text) || t("النص", "Text")}</p>
+                            <p className="mb-1 text-xs font-semibold text-ink-soft">{certItem ? t("المجال / التصنيف", "Field / category") : (en ? FIELD_LABELS_EN[key]?.text : FIELD_LABELS[key]?.text) || t("النص", "Text")}</p>
                             {PARAGRAPH_KEYS.has(key) ? (
                               <ParagraphsField ar={val(it, "text_ar")} en={val(it, "text_en")} onChange={(a, e) => { setVal(it.id, "text_ar", a); setVal(it.id, "text_en", e); }} />
                             ) : (
@@ -664,6 +669,21 @@ export default function PageChrome({ page }: { page: string }) {
                             </div>
                           </div>
                         )}
+                        {certItem && (
+                          <div className="rounded-lg border border-line bg-white p-2.5">
+                            <p className="mb-2 text-xs font-bold text-ink">{t("تواريخ الشهادة", "Certificate dates")}</p>
+                            {([["badge1", t("تاريخ الإصدار", "Issue date")], ["badge2", t("تاريخ الانتهاء", "Expiry date")]] as const).map(([b, lbl]) => (
+                              <div key={b} className="mb-2 last:mb-0">
+                                <p className="mb-1 text-[11px] font-semibold text-ink-soft">{lbl}</p>
+                                <div className="grid gap-1.5 sm:grid-cols-2">
+                                  <input value={val(it, `${b}_value_ar`)} onChange={(e) => setVal(it.id, `${b}_value_ar`, e.target.value)} className={INPUT} placeholder={t("مثال: ١٤٤٦هـ أو مارس ٢٠٢٥", "Arabic, e.g. March 2025")} />
+                                  <input value={val(it, `${b}_value_en`)} onChange={(e) => setVal(it.id, `${b}_value_en`, e.target.value)} dir="ltr" className={INPUT} placeholder="English, e.g. March 2025" />
+                                </div>
+                              </div>
+                            ))}
+                            <p className="mt-1 text-[10px] text-ink-soft">{t("اترك الحقل فارغًا لإخفائه من الموقع.", "Leave a field empty to hide it on the site.")}</p>
+                          </div>
+                        )}
                         {hasBadges && (
                           <div className="rounded-lg border border-line bg-white p-2.5">
                             <p className="mb-2 text-xs font-bold text-ink">{t("الشارتان العائمتان (فوق الصورة)", "Floating badges (over the image)")}</p>
@@ -681,7 +701,7 @@ export default function PageChrome({ page }: { page: string }) {
                           </div>
                         )}
                       </div>
-                      {LIST_BLOCKS.has(g.block) && (
+                      {LIST_BLOCKS.has(g.block) && !(g.block === "certs" && String(it.key ?? "") === "heading") && (
                         <div className="mt-3 flex">
                           <button type="button" onClick={() => removeItem(it)} disabled={savingId === it.id} className="ms-auto rounded-lg bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-600 hover:text-white disabled:opacity-50">{savingId === it.id ? "…" : t("حذف", "Delete")}</button>
                         </div>
