@@ -200,7 +200,7 @@ export default async function SuccessStoriesPage() {
           pick(locale, "متابعة دورية مستمرة", "Ongoing periodic follow-up"),
           pick(locale, "دعم الأسرة الكامل", "Full family support"),
         ]}
-        primary={{ href: "/assessment", label: pick(locale, "قيّم طفلك الآن", "Assess your child now") }}
+        primary={{ href: "/assessment", label: pick(locale, "قيّم الحالة الآن", "Assess your child now") }}
         showApply={false}
         showBranches={false}
       />

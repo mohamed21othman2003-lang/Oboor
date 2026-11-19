@@ -71,7 +71,7 @@ function InfoCard({ icon, title, value, note, cta, href }: Card) {
       <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/15">{icon}</div>
       <div>
         <h3 className="text-lg font-bold">{title}</h3>
-        <p className="mt-1 text-sm text-white/70">{note}</p>
+        {note && <p className="mt-1 text-sm text-white/70">{note}</p>}
       </div>
       <p dir="ltr" className="text-start text-xl font-bold tracking-wide">{value}</p>
       <span className="mt-auto inline-flex items-center gap-1 text-sm font-semibold text-white/90">
@@ -102,9 +102,10 @@ function ContactCards({ locale, site, c }: { locale: Locale; site: SiteInfo | nu
     <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
       <h2 className="mb-8 text-center text-2xl font-bold text-ink">{c.infoMain}</h2>
       <div className="grid gap-6 md:grid-cols-3">
-        <InfoCard icon={mail} title={c.emailTitle} note={c.emailNote} value={email} cta={pick(locale, "تواصل الآن", "Contact Now")} href={`mailto:${email}`} />
-        <InfoCard icon={headset} title={c.customerTitle} note={c.customerNote} value={customer} cta={pick(locale, "اتصل الآن", "Call Now")} href={`tel:${customer}`} />
+        {/* الترتيب حسب الشيت المعتمد: الرقم الموحد ← خدمة العملاء ← البريد الإلكتروني */}
         <InfoCard icon={phone} title={c.unifiedTitle} note={c.unifiedNote} value={unified} cta={pick(locale, "اتصل الآن", "Call Now")} href={`tel:${unified}`} />
+        <InfoCard icon={headset} title={c.customerTitle} note={c.customerNote} value={customer} cta={pick(locale, "اتصل الآن", "Call Now")} href={`tel:${customer}`} />
+        <InfoCard icon={mail} title={c.emailTitle} note={c.emailNote} value={email} cta={pick(locale, "تواصل الآن", "Contact Now")} href={`mailto:${email}`} />
       </div>
     </section>
   );
@@ -238,7 +239,8 @@ export default async function ContactPage() {
     heroSub: B("hero", "heading", pick(locale, "نسعد بتواصلك معنا للإجابة على استفساراتك والاستماع إليك.", "We are pleased to connect with you, answer your inquiries, and listen to your needs.")),
     infoMain: T("info", "main", pick(locale, "معلومات التواصل", "Contact Information")),
     emailTitle: T("info", "email", pick(locale, "البريد الإلكتروني", "Email")),
-    emailNote: B("info", "email", pick(locale, "نرد خلال ٢٤ ساعة", "We reply within 24 hours")),
+    // بلا نص افتراضي: الشيت المعتمد اكتفى بـ«خلال يوم واحد» في النموذج وألغى «نرد خلال ٢٤ ساعة»
+    emailNote: B("info", "email", ""),
     customerTitle: T("info", "customer", pick(locale, "خدمة العملاء", "Customer Service")),
     customerNote: B("info", "customer", pick(locale, "للدعم والمتابعة", "For support & follow-up")),
     unifiedTitle: T("info", "unified", pick(locale, "الرقم الموحد", "Unified Number")),

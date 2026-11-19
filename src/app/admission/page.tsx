@@ -82,7 +82,8 @@ export default async function AdmissionPage() {
         locale={locale}
         badge={ctaBadge}
         title={ctaTitle ?? pick(locale, "إن راودك أي سؤال، فريقنا معك على مدار الساعة وفي كل حال.", "If you have any questions, our team is available around the clock to support you at all times.")}
-        subtitle={ctaSub ?? pick(locale, "خبراؤنا في أتمّ الاستعداد للإجابة عن استفساراتك، وتوجيهك نحو البرنامج الأمثل لطفلك. تواصل الآن.", "Our experts are fully prepared to answer your inquiries and guide you toward the most suitable program for your child. Get in touch with us today.")}
+        subtitle={ctaSub ?? pick(locale, "خبراؤنا في أتمّ الاستعداد للإجابة عن استفساراتك، وتوجيهك نحو البرنامج الأمثل. تواصل الآن.", "Our experts are fully prepared to answer your inquiries and guide you toward the most suitable program for your child. Get in touch with us today.")}
+        features={pick(locale, ["أخصائيون معتمدون", "استجابة فورية", "متابعة مستمرة"], ["Certified specialists", "Immediate response", "Continuous follow-up"])}
       />
     </>
   );

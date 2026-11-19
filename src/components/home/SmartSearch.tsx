@@ -46,7 +46,7 @@ export default function SmartSearch({ locale, chrome, cards, regions }: { locale
           </p>
         </div>
 
-        <ServiceSearchBar locale={locale} cards={cards} regions={regions} />
+        <ServiceSearchBar locale={locale} cards={cards} regions={regions} searchLabel={pick(locale, "اتخذ الخطوة الأولى الآن", "Search Now")} />
 
         {/* Quick chips — centered; switch the results below in-place */}
         <div className="mt-5 flex flex-wrap items-center justify-center gap-2">

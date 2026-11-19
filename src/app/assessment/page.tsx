@@ -178,9 +178,16 @@ export default async function AssessmentPage() {
       <section className="bg-white py-16">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mx-auto mb-12 max-w-2xl text-center">
-            <span className="text-sm font-bold text-brand">{pick(locale, "لماذا هذا التقييم؟", "Why this assessment?")}</span>
+            {/* الترويسة الصغيرة تُخفى إذا صار العنوان نفسه «لماذا هذا التقييم؟» (الشيت المعتمد) لتجنّب التكرار */}
+            {(hF("why_heading") ? hT(hF("why_heading")) : "").replace(/\*/g, "").trim() !== pick(locale, "لماذا هذا التقييم؟", "Why this assessment?") && (
+              <span className="text-sm font-bold text-brand">{pick(locale, "لماذا هذا التقييم؟", "Why this assessment?")}</span>
+            )}
             <h2 className="mt-2 text-3xl font-extrabold text-ink sm:text-4xl">{hF("why_heading") ? hl(hT(hF("why_heading"))) : pick(locale, "خطوة صغيرة، فرق كبير في حياة طفلك", "A small step, a big difference in your child's life")}</h2>
-            <p className="mt-3 text-sm leading-7 text-ink-muted">{hB(hF("why_heading")) || pick(locale, "التقييم المبكر هو الخطوة الأولى نحو مستقبل أفضل. نحن نساعدك على فهم احتياجات طفلك بطريقة بسيطة وواضحة.", "Early assessment is the first step toward a better future. We help you understand your child's needs in a simple, clear way.")}</p>
+            {/* الوصف من الـCMS؛ إن وُجد العنصر وتُرك وصفه فارغًا لا يظهر شيء (النص الثابت للاحتياط فقط) */}
+            {(() => {
+              const sub = hF("why_heading") ? hB(hF("why_heading")) : pick(locale, "التقييم المبكر هو الخطوة الأولى نحو مستقبل أفضل. نحن نساعدك على فهم احتياجات طفلك بطريقة بسيطة وواضحة.", "Early assessment is the first step toward a better future. We help you understand your child's needs in a simple, clear way.");
+              return sub ? <p className="mt-3 text-sm leading-7 text-ink-muted">{sub}</p> : null;
+            })()}
           </div>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {ASSESS_FEATURES.map((f) => (
@@ -209,7 +216,7 @@ export default async function AssessmentPage() {
               <div key={s.title} className="relative z-10 text-center">
                 <span className="relative mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-brand text-white shadow-lg">
                   {STEP_ICONS[s.icon]}
-                  <span className="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full bg-brand-deep text-xs font-bold text-white ring-2 ring-white/20">{i + 1}</span>
+                  <span className="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full bg-brand-deep text-xs font-bold text-white ring-2 ring-white/20">{locale === "en" ? i + 1 : String(i + 1).replace(/\d/g, (d) => "٠١٢٣٤٥٦٧٨٩"[Number(d)])}</span>
                 </span>
                 <h3 className="mt-4 text-base font-bold">{s.title}</h3>
                 <p className="mt-1.5 text-xs leading-6 text-white/70">{s.desc}</p>

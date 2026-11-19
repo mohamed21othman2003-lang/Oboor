@@ -219,7 +219,7 @@ export default async function SpecialistsPage() {
             </p>
             <Link href="/careers" className="mt-7 flex w-full items-center justify-center gap-2 rounded-xl bg-brand py-3.5 text-base font-bold text-white transition-colors hover:bg-brand-dark">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M19 8v6M22 11h-6" /></svg>
-              {pick(locale, "قدم الآن", "Apply Now")}
+              {pick(locale, "قدّم الآن", "Apply Now")}
             </Link>
           </div>
 

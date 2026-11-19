@@ -193,7 +193,7 @@ export default function ServiceSearchBar({ locale = "ar", searchLabel, cards, re
 
       {/* الأزرار: في صفّ واحد على الموبايل (يمنع تيتم زر إعادة التعيين) — وعناصر مباشرة على الديسكتوب */}
       <div className="mt-1 flex items-center gap-2 lg:mt-0 lg:contents">
-        <button onClick={search} className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-brand px-6 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-brand-dark lg:flex-none lg:shrink-0">
+        <button onClick={search} className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-brand px-6 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-brand-dark lg:flex-none lg:shrink-0 whitespace-nowrap">
           {searchLabel ?? pick(locale, "ابحث الآن", "Search Now")}
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="7" /><path d="M21 21l-4-4" strokeLinecap="round" /></svg>
         </button>
