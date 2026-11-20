@@ -41,6 +41,11 @@ function isEmptyHelp(h: Partial<HelpSection> | undefined): boolean {
   return !h || Object.keys(h).length === 0;
 }
 
+// سطر لاتيني تحت عنوان التقنيات ذات الاسم العربي (حسب الشيت المعتمد)
+const TECH_LATIN_LINE: Record<string, string> = {
+  "auditory-integration": "Auditory Integration Technology",
+};
+
 function toTechnique(row: ApiTechnique, locale: Locale): Technique {
   const en = locale === "en";
   const rawHelp = en ? row.help_section_en : row.help_section_ar;
@@ -133,7 +138,14 @@ export default async function TechniqueDetailPage({ params }: { params: Promise<
                 <span className={`h-2 w-2 rounded-full ${available ? "bg-success" : "bg-ink-soft"}`} />
                 {t.badge}
               </span>
-              <h1 className="mt-4 text-4xl font-extrabold text-brand">{t.title}</h1>
+              {/* العنوان الرئيسي فقط حسب الشيت المعتمد: «تقنية <الاسم>» للأسماء اللاتينية،
+                  والاسم العربي يُضاف تحته سطر لاتيني. باقي العناوين (ماذا يقدم…) تبقى بالاسم وحده. */}
+              <h1 className="mt-4 text-4xl font-extrabold text-brand">
+                {locale !== "en" && !/[؀-ۿ]/.test(t.title) ? `تقنية ${t.title}` : t.title}
+              </h1>
+              {locale !== "en" && TECH_LATIN_LINE[t.slug] && /[؀-ۿ]/.test(t.title) && (
+                <p dir="ltr" className="mt-1 text-start text-base font-semibold text-ink-soft">{TECH_LATIN_LINE[t.slug]}</p>
+              )}
               <div className="mt-5 space-y-4">
                 {t.about.map((p, i) => <p key={i} className="text-sm leading-8 text-ink-muted">{p}</p>)}
               </div>
