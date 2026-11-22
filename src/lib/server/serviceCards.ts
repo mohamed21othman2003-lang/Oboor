@@ -33,14 +33,44 @@ function toProgram(row: ServiceCardRow, en: boolean): Program {
   };
 }
 
-// يجلب بطاقات الخدمات من CMS مجمّعة حسب التبويب (مع احترام الترتيب). يرجّع undefined لو الجسر غير متاح → fallback ثابت
+// صفحة التفاصيل المرتبطة بكل بطاقة (programs / services / techniques) هي المصدر الوحيد لـ:
+// الاسم، والإظهار/الإخفاء، والترتيب. البطاقة نفسها تحتفظ بالوصف والمميزات والفئة والعمر والمناطق فقط.
+type DetailRow = { slug: string; title_ar: string; title_en: string; order: number };
+const DETAIL_TYPE: Record<ServiceCardRow["tab"], string> = { programs: "programs", clinical: "services", techniques: "techniques" };
+
+function linkedSlug(row: ServiceCardRow): string {
+  if (row.slug) return row.slug;
+  const m = (row.href || "").match(/^\/(?:programs|services|techniques)\/([^/?#]+)/);
+  return m ? m[1] : "";
+}
+
+// يجلب بطاقات الخدمات من CMS مجمّعة حسب التبويب. يرجّع undefined لو الجسر غير متاح → fallback ثابت
 export async function loadServiceCards(locale: Locale): Promise<ServiceCards | undefined> {
-  const rows = await fetchContent<ServiceCardRow[]>("service-cards");
+  const [rows, programs, services, techniques] = await Promise.all([
+    fetchContent<ServiceCardRow[]>("service-cards"),
+    fetchContent<DetailRow[]>("programs"),
+    fetchContent<DetailRow[]>("services"),
+    fetchContent<DetailRow[]>("techniques"),
+  ]);
   if (!rows || !rows.length) return undefined;
   const en = locale === "en";
+  const details: Record<string, DetailRow[] | null> = { programs, services, techniques };
   const grouped: ServiceCards = { programs: [], clinical: [], techniques: [] };
-  for (const row of [...rows].sort((a, b) => a.order - b.order)) {
-    if (row.tab in grouped) grouped[row.tab].push(toProgram(row, en));
+  const sortKey = new Map<ServiceCardRow, number>();
+  const visible: ServiceCardRow[] = [];
+  for (const row of rows) {
+    if (!(row.tab in grouped)) continue;
+    const list = details[DETAIL_TYPE[row.tab]];
+    const slug = linkedSlug(row);
+    // لو قائمة التفاصيل متاحة والبطاقة مربوطة بعنصر مش منشور ⇒ البطاقة تختفي مع صفحتها
+    const d = list?.length && slug ? list.find((x) => x.slug === slug) : undefined;
+    if (list?.length && slug && !d) continue;
+    const card = d ? { ...row, title_ar: d.title_ar || row.title_ar, title_en: d.title_en || row.title_en } : row;
+    sortKey.set(card, d ? d.order : row.order);
+    visible.push(card);
+  }
+  for (const row of visible.sort((a, b) => sortKey.get(a)! - sortKey.get(b)!)) {
+    grouped[row.tab].push(toProgram(row, en));
   }
   return grouped;
 }

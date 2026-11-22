@@ -57,7 +57,7 @@ function Social({ href, label, children }: { href: string; label: string; childr
 }
 
 // Maps a CMS platform key to the matching inline SVG icon. Unknown → null (hidden).
-function SocialIcon({ platform }: { platform: string }) {
+export function SocialIcon({ platform }: { platform: string }) {
   switch (platform) {
     case "x":
       return <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2H21.5l-7.5 8.57L23 22h-6.594l-5.165-6.75L5.32 22H2.06l8.02-9.166L1 2h6.76l4.668 6.17L18.244 2zm-1.157 18h1.83L7.01 3.92H5.05L17.087 20z" /></svg>;

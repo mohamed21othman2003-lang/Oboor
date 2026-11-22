@@ -39,7 +39,7 @@ const HIDDEN_BLOCKS = new Set([
 ]);
 // أقسام يعرض كل عنصر فيها أيقونة قابلة للاختيار (المفتاح = اسم البلوك، القيمة = الأيقونات المتاحة)
 const ICON_BLOCK_NAMES: Record<string, string[]> = {
-  features: ["graduation", "shield", "heart", "building", "team", "book", "target", "star", "trophy", "bulb", "hand", "activity", "clipboard", "list"],
+  features: ["graduation", "shield", "heart", "building", "team", "book", "target", "star", "trophy", "bulb", "hand", "activity", "clipboard", "list", "chart", "search"],
   join_cards: ["growth", "building", "book", "heart", "target", "star", "trophy", "bulb", "hand", "activity", "team", "graduation", "shield", "clipboard"],
 };
 // عناصر مفردة (block.key) تعرض منتقي أيقونة — لبلوكات فيها بعض العناصر أيقونات فقط

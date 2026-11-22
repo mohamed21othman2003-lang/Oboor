@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 import { TECHNIQUES, getTechnique, type Technique } from "@/lib/techniquesData";
 import { distinctIcons, iconByKey } from "@/lib/areaIcon";
 import CtaSection from "@/components/CtaSection";
+import { loadSharedCta } from "@/lib/server/detailCta";
 import { fetchContent } from "@/lib/server/django";
 import { hl } from "@/lib/highlight";
 import { getLocale } from "@/i18n/locale";
@@ -71,7 +72,8 @@ async function loadTechnique(slug: string, locale: Locale): Promise<Technique | 
   const rows = await fetchContent<ApiTechnique[]>("techniques");
   if (rows && rows.length) {
     const row = rows.find((r) => r.slug === slug);
-    if (row) return toTechnique(row, locale);
+    // الـCMS متاح والعنصر مش منشور (أو مش موجود) ⇒ 404 بدل نص قديم من الكود
+    return row ? toTechnique(row, locale) : undefined;
   }
   return getTechnique(slug, locale);
 }
@@ -99,9 +101,12 @@ export default async function TechniqueDetailPage({ params }: { params: Promise<
   const t = await loadTechnique(slug, locale);
   if (!t) notFound();
   // قسم التواصل السفلي (CTA) الخاص بهذه التقنية — يُدار من محرّر التقنية نفسها (مستقل لكل تقنية)
-  const ctaTitle = t.ctaTitle ? hl(t.ctaTitle) : undefined;
-  const ctaSub = t.ctaText || undefined;
-  const ctaBadge = t.ctaBadge || undefined;
+  // الأولوية: CTA العنصر نفسه ← صف «technique-detail» المشترك في الـCMS ({name} = اسم العنصر) ← النص الثابت
+  const sharedCta = await loadSharedCta("technique-detail", locale, t.title);
+  const ctaTitleRaw = t.ctaTitle || sharedCta.title;
+  const ctaTitle = ctaTitleRaw ? hl(ctaTitleRaw) : undefined;
+  const ctaSub = t.ctaText || sharedCta.text || undefined;
+  const ctaBadge = t.ctaBadge || sharedCta.badge || undefined;
   const available = locale === "en"
     ? !t.badge.toLowerCase().includes("not")
     : t.badge.includes("متوفر") && !t.badge.includes("غير");

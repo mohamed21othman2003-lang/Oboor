@@ -4,8 +4,8 @@
 import { type Locale } from "@/i18n/config";
 
 // إظهار اسم مدير الفرع للزوار — مُطفأ بناءً على ملاحظة الإشراف الفني (تجنّب تحديث الأسماء
-// مع كل تغيير إداري والاكتفاء بمعلومات التواصل). الاسم يبقى محفوظًا ويُحرَّر من الـCMS.
-export const SHOW_BRANCH_MANAGER = false;
+// مع كل تغيير إداري والاكتفاء بمعلومات التواصل). الاسم يبقى محفوظًا في البيانات، والخانة مخفية من محرر الـCMS كمان.
+export { SHOW_BRANCH_MANAGER } from "@/lib/flags";
 
 export type Branch = {
   slug: string;

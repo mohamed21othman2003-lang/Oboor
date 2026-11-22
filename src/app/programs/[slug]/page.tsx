@@ -10,6 +10,7 @@ import { pick, type Locale } from "@/i18n/config";
 import { fetchContent } from "@/lib/server/django";
 import { hl } from "@/lib/highlight";
 import CtaSection from "@/components/CtaSection";
+import { loadSharedCta } from "@/lib/server/detailCta";
 
 export function generateStaticParams() {
   return PROGRAM_DETAILS.map((p) => ({ slug: p.slug }));
@@ -78,7 +79,8 @@ async function loadProgram(slug: string, locale: Locale): Promise<ProgramDetail 
   const rows = await fetchContent<ApiProgram[]>("programs");
   if (rows && rows.length) {
     const row = rows.find((r) => r.slug === slug);
-    if (row) return mapProgram(row, locale);
+    // الـCMS متاح والعنصر مش منشور (أو مش موجود) ⇒ 404 بدل نص قديم من الكود
+    return row ? mapProgram(row, locale) : undefined;
   }
   return getProgram(slug, locale);
 }
@@ -105,9 +107,12 @@ export default async function ProgramDetailPage({ params }: { params: Promise<{ 
   if (!p) notFound();
 
   // قسم التواصل السفلي (CTA) الخاص بهذا البرنامج — يُدار من محرّر البرنامج نفسه (مستقل لكل برنامج)
-  const ctaTitle = p.ctaTitle ? hl(p.ctaTitle) : undefined;
-  const ctaSub = p.ctaText || undefined;
-  const ctaBadge = p.ctaBadge || undefined;
+  // الأولوية: CTA العنصر نفسه ← صف «program-detail» المشترك في الـCMS ({name} = اسم العنصر) ← النص الثابت
+  const sharedCta = await loadSharedCta("program-detail", locale, p.title);
+  const ctaTitleRaw = p.ctaTitle || sharedCta.title;
+  const ctaTitle = ctaTitleRaw ? hl(ctaTitleRaw) : undefined;
+  const ctaSub = p.ctaText || sharedCta.text || undefined;
+  const ctaBadge = p.ctaBadge || sharedCta.badge || undefined;
 
   return (
     <>
@@ -153,7 +158,8 @@ export default async function ProgramDetailPage({ params }: { params: Promise<{ 
       </section>
 
       {/* Philosophy */}
-      {p.philosophy.length > 0 && (
+      {/* القسم يظهر لو فيه كروت أو مقدمة (المقدمة لوحدها كانت بتختفي) */}
+      {(p.philosophy.length > 0 || p.philosophyIntro) && (
         <section className="bg-gradient-to-bl from-[#003333] via-[#0f4a54] to-[#174646] py-16 text-white">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="mb-10 text-start">
@@ -223,7 +229,7 @@ export default async function ProgramDetailPage({ params }: { params: Promise<{ 
       </section>
 
       {/* Training areas */}
-      {p.trainingAreas.length > 0 && (
+      {(p.trainingAreas.length > 0 || p.trainingIntro) && (
         <section className="bg-white py-16">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="mb-10 text-start">
@@ -249,7 +255,7 @@ export default async function ProgramDetailPage({ params }: { params: Promise<{ 
       )}
 
       {/* Application stations (youth only) */}
-      {p.stations && p.stations.length > 0 && (
+      {((p.stations && p.stations.length > 0) || p.stationsIntro) && (
         <section className="bg-surface py-16">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="mb-10 text-center">
@@ -257,7 +263,7 @@ export default async function ProgramDetailPage({ params }: { params: Promise<{ 
               {p.stationsIntro && <p className="mx-auto mt-3 max-w-3xl text-sm text-ink-muted">{p.stationsIntro}</p>}
             </div>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {p.stations.map((s) => (
+              {(p.stations ?? []).map((s) => (
                 <div key={s} className="rounded-xl bg-gradient-to-bl from-brand to-brand-deep py-5 text-center text-sm font-bold text-white shadow-md transition-transform hover:scale-[1.03]">
                   {s}
                 </div>

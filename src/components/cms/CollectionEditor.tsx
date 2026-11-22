@@ -1,5 +1,6 @@
 "use client";
 
+import { SHOW_BRANCH_MANAGER, HAS_PRIVACY_PAGE } from "@/lib/flags";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
@@ -203,6 +204,11 @@ export default function CollectionEditor({ type, id }: { type: string; id: strin
           continue;
         }
       }
+      // خانات ملهاش أثر على الموقع حاليًا ⇒ مخفية (نفس المفاتيح اللي الموقع بيقرا منها)
+      if (type === "branches" && f.base === "manager" && !SHOW_BRANCH_MANAGER) continue;
+      if (type === "site" && f.base === "privacy_label" && !HAS_PRIVACY_PAGE) continue;
+      // بطاقات البرامج/الخدمات/التقنيات: الاسم بيتاخد من صفحة العنصر المرتبط (مصدر واحد) ⇒ نخفي خانة الاسم هنا
+      if (type === "service-cards" && f.base === "title") continue;
       // الأخبار: حقول كارت الفعالية تظهر فقط للفعاليات والورش
       if (type === "news" && EVENT_FIELDS.has(f.name) && !["events", "workshops"].includes(String(values.section ?? ""))) continue;
       // بطاقات التقييم: «عدد الأسئلة» يُحسب تلقائياً من قائمة الأسئلة، فنخفي الحقل اليدوي
@@ -797,6 +803,8 @@ const listAdd = (base: string, en = false) =>
 const EVENT_FIELDS = new Set([
   "time_ar", "time_en", "location_ar", "location_en", "map_url", "audience_ar", "audience_en",
   "seats_ar", "seats_en", "reg_status_ar", "reg_status_en",
+  // «ما الذي ستتعلمه» بتظهر في صفحة الفعالية/الورشة بس ⇒ نخفيها من المقالات وأخبار المراكز
+  "learn_ar", "learn_en",
 ]);
 // شارتا الهيرو — تظهران فقط في «المقدمة العلوية» بصفحة «عن عبور»
 const BADGE_FIELDS = new Set([

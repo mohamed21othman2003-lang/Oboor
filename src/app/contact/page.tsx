@@ -9,6 +9,8 @@ import type { SelectOption } from "@/components/ui/Select";
 import { CONTACT } from "@/lib/site";
 import { fetchContent, fetchSections } from "@/lib/server/django";
 import { getLocale } from "@/i18n/locale";
+import { socialLinks } from "@/lib/social";
+import { SocialIcon } from "@/components/Footer";
 import { pick, type Locale } from "@/i18n/config";
 import { hl } from "@/lib/highlight";
 import { CMS_ICONS } from "@/lib/cms/icons";
@@ -189,24 +191,19 @@ function SocialLink({ label, href, children }: { label: string; href: string; ch
 }
 
 function SocialSection({ site, c }: { locale: Locale; site: SiteInfo | null; c: ContactCopy }) {
-  const ig = site?.instagram_url || "https://www.instagram.com/hdc_ksa";
-  const tk = site?.tiktok_url || "https://www.tiktok.com/@hdc_ksa";
-  const x = site?.x_url || "https://x.com/hdc_ksa";
+  // نفس مصدر الفوتر («إعدادات الموقع»): كل منصة ليها رابط تظهر (حتى يوتيوب وسناب لو اتملوا)
+  const links = socialLinks(site, true, { order: ["instagram", "tiktok", "x", "youtube", "snapchat"] });
   return (
     <section className="relative overflow-hidden bg-gradient-to-bl from-brand to-brand-deep">
       <div className="mx-auto max-w-7xl px-4 py-16 text-center sm:px-6 lg:px-8">
         <h2 className="text-4xl font-extrabold text-white">{c.socialTitle}</h2>
         <p className="mx-auto mt-3 max-w-xl text-sm leading-7 text-white/80">{c.socialSub}</p>
         <div className="mx-auto mt-8 flex max-w-md flex-col items-stretch justify-center gap-4 sm:max-w-none sm:flex-row sm:flex-wrap">
-          <SocialLink label="Instagram" href={ig}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="5" /><circle cx="12" cy="12" r="4" /><circle cx="17.5" cy="6.5" r="1" fill="currentColor" /></svg>
-          </SocialLink>
-          <SocialLink label="Tik Tok" href={tk}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 3a5.5 5.5 0 0 0 4 4v3a8.5 8.5 0 0 1-4-1v6a6 6 0 1 1-6-6v3a3 3 0 1 0 3 3V3h3z" /></svg>
-          </SocialLink>
-          <SocialLink label="X" href={x}>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2H21.5l-7.5 8.57L23 22h-6.594l-5.165-6.75L5.32 22H2.06l8.02-9.166L1 2h6.76l4.668 6.17L18.244 2zm-1.157 18h1.83L7.01 3.92H5.05L17.087 20z" /></svg>
-          </SocialLink>
+          {links.map((l) => (
+            <SocialLink key={l.platform} label={l.label} href={l.url}>
+              <SocialIcon platform={l.platform} />
+            </SocialLink>
+          ))}
         </div>
       </div>
     </section>

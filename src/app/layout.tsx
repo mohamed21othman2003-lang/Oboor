@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { Cairo } from "next/font/google";
 import "./globals.css";
 import SiteChrome, { type SiteChromeData } from "@/components/SiteChrome";
+import { socialLinks } from "@/lib/social";
 import PreviewBanner from "@/components/PreviewBanner";
 import { getLocale, dirOf } from "@/i18n/locale";
 import { fetchContent, fetchSections, type SectionRow } from "@/lib/server/django";
@@ -16,6 +17,7 @@ type SiteSettings = {
   email?: string;
   phone_unified?: string;
   whatsapp?: string;
+  x_url?: string; instagram_url?: string; tiktok_url?: string; youtube_url?: string; snapchat_url?: string;
   main_branch_ar?: string; main_branch_en?: string;
   brand_desc_ar?: string; brand_desc_en?: string;
   cta_admission_ar?: string; cta_admission_en?: string;
@@ -138,22 +140,8 @@ export default async function RootLayout({
     ? mapRows(footer.services)
     : t.footer.services.map((s) => ({ label: s.label, href: s.href }));
 
-  const social = footer?.social?.length
-    ? [...footer.social]
-        .sort((a, b) => a.order - b.order)
-        .map((row) => ({
-          platform: row.icon,
-          // رقم الواتساب موحَّد من إعدادات الموقع (حقل whatsapp) — بقية المنصّات من قيمتها
-          url: row.icon === "whatsapp" ? waUrl(site?.whatsapp) : row.value,
-          label: r(row.title_ar, row.title_en) || row.icon,
-        }))
-        .filter((s) => s.platform && s.url)
-    : [
-        { platform: "x", url: "https://x.com/hdc_ksa", label: en ? "X" : "إكس" },
-        { platform: "instagram", url: "https://www.instagram.com/hdc_ksa", label: en ? "Instagram" : "انستغرام" },
-        { platform: "tiktok", url: "https://www.tiktok.com/@hdc_ksa", label: en ? "TikTok" : "تيك توك" },
-        { platform: "whatsapp", url: waUrl(site?.whatsapp), label: en ? "WhatsApp" : "واتساب" },
-      ];
+  // السوشيال من «إعدادات الموقع» فقط (نفس مصدر قسم «تابعنا» في صفحة التواصل)
+  const social = socialLinks(site, en, { whatsapp: true });
 
   const chrome: SiteChromeData = {
     logo,

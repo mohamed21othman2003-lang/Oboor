@@ -56,6 +56,9 @@ const blockLabel = (b: string, en: boolean) => (en ? BLOCK_LABELS_EN[b] : BLOCK_
 
 // صفحات لها كيان مستقل في السايد بار ⇒ تُستبعد من قائمة «أقسام الصفحات» العامة
 const DEDICATED_PAGES = new Set(["about", "careers", "home", "success", "specialists", "assessment", "branches", "news", "programs"]);
+// صفوف اتلغى استخدامها في الموقع ⇒ مش بتظهر في الـCMS عشان محدش يعدّل حاجة ملهاش أثر
+// روابط السوشيال في الفوتر بقت من «إعدادات الموقع» (نفس مصدر قسم «تابعنا»)
+const RETIRED = (it: CmsItem) => String(it.page ?? "") === "footer" && String(it.block ?? "") === "social";
 
 export default function CollectionList({ type }: { type: string }) {
   const router = useRouter();
@@ -119,7 +122,8 @@ export default function CollectionList({ type }: { type: string }) {
 
   // أنواع زمنية (الأحدث أولاً) — لا تُرتَّب يدوياً
   const TIME_ORDERED = new Set(["news", "careers"]);
-  const canReorder = items.length > 0 && "order" in items[0] && !readonly && !TIME_ORDERED.has(type);
+  // بطاقات البحث/البرامج: الترتيب والاسم والإظهار بيتاخدوا من صفحة البرنامج/الخدمة/التقنية المرتبطة ⇒ مفيش أسهم هنا
+  const canReorder = items.length > 0 && "order" in items[0] && !readonly && !TIME_ORDERED.has(type) && type !== "service-cards";
 
   async function move(it: CmsItem, dir: -1 | 1) {
     const idx = items.findIndex((x) => x.id === it.id);
@@ -170,7 +174,7 @@ export default function CollectionList({ type }: { type: string }) {
     // مهّد المجموعات المعرّفة مسبقاً لحفظ الترتيب
     for (const g of groupDefs || []) buckets.set(g.value, { key: g.value, label: g.label, items: [] });
     // استبعد الصفحات التي لها كيان مستقل من القائمة العامة
-    const src = type === "sections" ? items.filter((it) => !DEDICATED_PAGES.has(String(it.page ?? ""))) : items;
+    const src = type === "sections" ? items.filter((it) => !DEDICATED_PAGES.has(String(it.page ?? "")) && !RETIRED(it)) : items;
     for (const it of src) {
       const raw = it[groupBy];
       const key = raw === null || raw === undefined || raw === "" ? "__other__" : String(raw);
@@ -182,7 +186,7 @@ export default function CollectionList({ type }: { type: string }) {
 
   // وضع «صفحة واحدة» (مثل عن عبور) — نعرض أقسام صفحة بعينها فقط
   const pageLabel = pageFilter ? groupLabel(groupDefs?.find((g) => g.value === pageFilter)?.label || pageFilter, lang) : null;
-  const pageItems = pageFilter ? items.filter((it) => String(it.page ?? "") === pageFilter) : items;
+  const pageItems = pageFilter ? items.filter((it) => String(it.page ?? "") === pageFilter && !(type === "sections" && RETIRED(it))) : items;
 
   // تجميع عناصر صفحة فرعيًا حسب القسم (block) مع الحفاظ على الترتيب
   function blockGroups(list: CmsItem[]) {
@@ -248,6 +252,13 @@ export default function CollectionList({ type }: { type: string }) {
 
   function Table({ list, hideSub }: { list: CmsItem[]; hideSub?: boolean }) {
     return (
+      <>
+      {type === "service-cards" && (
+        <p className="mb-3 rounded-xl bg-brand/5 px-4 py-2.5 text-xs leading-6 text-ink-muted ring-1 ring-brand/15">
+          {t("اسم الكارت وترتيبه وظهوره بيتاخدوا من صفحة البرنامج أو الخدمة أو التقنية نفسها (من قوائم «برامجنا التمكينية»). هنا بتعدّل الوصف والمميزات والفئة والعمر والمناطق بس.",
+            "Each card's name, order and visibility come from its program/service/technique page (in the “Programs” lists). Here you edit only the description, features, audience, age and regions.")}
+        </p>
+      )}
       <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-line">
         <table className="w-full text-start text-sm">
           <thead className="bg-surface text-xs font-semibold text-ink-soft">
@@ -256,6 +267,7 @@ export default function CollectionList({ type }: { type: string }) {
           <tbody className="divide-y divide-line">{list.map((it) => <Row key={it.id} it={it} hideSub={hideSub} />)}</tbody>
         </table>
       </div>
+      </>
     );
   }
 

@@ -8,52 +8,11 @@ import ServiceSearchBar from "@/components/ServiceSearchBar";
 import ServicesTabs from "@/components/ServicesTabs";
 import CtaSection from "@/components/CtaSection";
 import type { Program } from "@/components/ProgramCard";
-import { fetchContent, fetchSections, getBranchRegions } from "@/lib/server/django";
+import { fetchSections, getBranchRegions } from "@/lib/server/django";
+import { loadServiceCards } from "@/lib/server/serviceCards";
 import { hl } from "@/lib/highlight";
 
-// صفّ بطاقة خدمة كما يرجع من Django (content/service-cards)
-type ServiceCardRow = {
-  tab: "programs" | "clinical" | "techniques";
-  slug: string;
-  href: string;
-  order: number;
-  badge_ar: string; badge_en: string;
-  title_ar: string; title_en: string;
-  desc_ar: string; desc_en: string;
-  suits_ar: string; suits_en: string;
-  age_ar: string; age_en: string;
-  features_ar: string[]; features_en: string[];
-  regions_ar: string[]; regions_en: string[];
-};
-
 type ServiceCards = { programs: Program[]; clinical: Program[]; techniques: Program[] };
-
-// نحوّل صفّ Django إلى شكل Program حسب اللغة
-function toProgram(row: ServiceCardRow, en: boolean): Program {
-  return {
-    slug: row.slug,
-    href: row.href || undefined,
-    badge: en ? row.badge_en || row.badge_ar : row.badge_ar,
-    title: en ? row.title_en || row.title_ar : row.title_ar,
-    desc: en ? row.desc_en || row.desc_ar : row.desc_ar,
-    suits: en ? row.suits_en || row.suits_ar : row.suits_ar,
-    age: en ? row.age_en || row.age_ar : row.age_ar,
-    features: en ? (row.features_en?.length ? row.features_en : row.features_ar) : row.features_ar,
-    regions: en ? (row.regions_en?.length ? row.regions_en : row.regions_ar) : row.regions_ar,
-  };
-}
-
-// نجمّع البطاقات حسب الـ tab مع احترام order. نرجّع undefined لو Django مش متاح → ServicesTabs يستخدم الثابت
-async function getServiceCards(locale: Locale): Promise<ServiceCards | undefined> {
-  const rows = await fetchContent<ServiceCardRow[]>("service-cards");
-  if (!rows || !rows.length) return undefined;
-  const en = locale === "en";
-  const grouped: ServiceCards = { programs: [], clinical: [], techniques: [] };
-  for (const row of [...rows].sort((a, b) => a.order - b.order)) {
-    if (row.tab in grouped) grouped[row.tab].push(toProgram(row, en));
-  }
-  return grouped;
-}
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
@@ -118,7 +77,7 @@ export default async function ServicesPage() {
   const locale = await getLocale();
   const en = locale === "en";
   const [cards, sections, regions] = await Promise.all([
-    getServiceCards(locale),
+    loadServiceCards(locale),
     fetchSections("programs"),
     getBranchRegions(locale),
   ]);

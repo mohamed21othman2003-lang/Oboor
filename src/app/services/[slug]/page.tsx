@@ -10,6 +10,7 @@ import { pick, type Locale } from "@/i18n/config";
 import { fetchContent } from "@/lib/server/django";
 import { hl } from "@/lib/highlight";
 import CtaSection from "@/components/CtaSection";
+import { loadSharedCta } from "@/lib/server/detailCta";
 
 export function generateStaticParams() {
   return CLINICAL_SERVICES.map((s) => ({ slug: s.slug }));
@@ -67,7 +68,8 @@ async function loadService(slug: string, locale: Locale): Promise<ClinicalServic
   const rows = await fetchContent<ApiService[]>("services");
   if (rows && rows.length) {
     const row = rows.find((r) => r.slug === slug);
-    if (row) return toService(row, locale);
+    // الـCMS متاح والعنصر مش منشور (أو مش موجود) ⇒ 404 بدل نص قديم من الكود
+    return row ? toService(row, locale) : undefined;
   }
   return getClinicalService(slug, locale);
 }
@@ -127,6 +129,8 @@ function Block({ b }: { b: ClinicalBlock }) {
           <div className={`grid gap-5 sm:grid-cols-2 ${b.cols === 3 ? "lg:grid-cols-3" : ""}`}>
             {b.items.map((it, i) => (
               <div key={i} className="rounded-2xl border border-white/10 bg-gradient-to-br from-[#1c4e57] to-[#215d68] p-6 text-start">
+                {/* الأيقونة اختيارية من الـCMS — تظهر لو اتختارت */}
+                {it.icon && <span className="mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 text-brand">{iconByKey(it.icon)}</span>}
                 <h3 className="text-lg font-bold text-white">{it.title}{it.sub && <span className="mr-2 text-sm font-medium text-brand"> {it.sub}</span>}</h3>
                 {it.desc && <p className="mt-2 text-sm leading-7 text-white/75">{it.desc}</p>}
                 {it.bullets && (
@@ -165,9 +169,25 @@ function Block({ b }: { b: ClinicalBlock }) {
               <div key={i} className="rounded-2xl border border-line bg-white p-6 text-start shadow-sm">
                 <div className="mb-3 flex items-center justify-start gap-3">
                   <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand/10 text-brand">{it.icon ? iconByKey(it.icon) : autoIcons[i]}</span>
-                  <h3 className="text-base font-bold text-ink">{it.title}</h3>
+                  <h3 className="text-base font-bold text-ink">{it.title}{it.sub && <span className="mr-2 text-sm font-medium text-brand"> {it.sub}</span>}</h3>
                 </div>
                 {it.desc && <p className="text-sm leading-7 text-ink-muted">{it.desc}</p>}
+                {/* خانات اختيارية من الـCMS (نقاط + وسوم) — تظهر لو اتملت */}
+                {it.bullets && it.bullets.length > 0 && (
+                  <ul className="mt-3 space-y-2">
+                    {it.bullets.map((bl) => (
+                      <li key={bl} className="flex items-start gap-2 text-sm leading-7 text-ink-muted">
+                        <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-brand" />
+                        <span>{bl}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {it.tags && it.tags.length > 0 && (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {it.tags.map((t) => <span key={t} className="rounded-full bg-brand/10 px-3 py-1 text-xs font-medium text-brand-dark">{t}</span>)}
+                  </div>
+                )}
               </div>
             )); })()}
           </div>
@@ -211,7 +231,8 @@ function Block({ b }: { b: ClinicalBlock }) {
       return (
         <section className="bg-gradient-to-bl from-[#0d3d45] via-[#13505b] to-[#123749] py-16 text-white">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
-            <h2 className="mb-10 text-center text-3xl font-extrabold">{b.heading}</h2>
+            <h2 className={`${b.intro ? "mb-3" : "mb-10"} text-center text-3xl font-extrabold`}>{b.heading}</h2>
+            {b.intro && <p className="mx-auto mb-10 max-w-3xl text-center text-sm leading-7 text-white/70">{b.intro}</p>}
             <div className={`grid gap-5 sm:grid-cols-2 ${colCls}`}>
               {b.items.map((it) => (
                 <div key={it} className="rounded-2xl border border-white/10 bg-gradient-to-br from-[#1c4e57] to-[#215d68] p-6 text-center text-sm leading-7 text-white/85">{it}</div>
@@ -225,7 +246,8 @@ function Block({ b }: { b: ClinicalBlock }) {
     return (
       <section className="bg-white py-16">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <h2 className="mb-10 text-center text-3xl font-extrabold text-ink">{first} <span className="text-brand">{rest.join(" ")}</span></h2>
+          <h2 className={`${b.intro ? "mb-3" : "mb-10"} text-center text-3xl font-extrabold text-ink`}>{first} <span className="text-brand">{rest.join(" ")}</span></h2>
+          {b.intro && <p className="mx-auto mb-10 max-w-3xl text-center text-sm leading-7 text-ink-muted">{b.intro}</p>}
           <div className={`grid gap-5 sm:grid-cols-2 ${colCls}`}>
             {b.items.map((it) => (
               <div key={it} className="flex items-center justify-center rounded-2xl bg-gradient-to-b from-brand-dark to-brand-deep p-6 text-center text-sm font-semibold leading-7 text-white shadow-md">{it}</div>
@@ -242,7 +264,8 @@ function Block({ b }: { b: ClinicalBlock }) {
       return (
         <section className="bg-gradient-to-bl from-[#0d3d45] via-[#13505b] to-[#123749] py-16 text-white">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
-            {b.heading && <h2 className="mb-10 text-center text-3xl font-extrabold">{first} <span className="text-brand">{rest.join(" ")}</span></h2>}
+            {b.heading && <h2 className={`${b.intro ? "mb-3" : "mb-10"} text-center text-3xl font-extrabold`}>{first} <span className="text-brand">{rest.join(" ")}</span></h2>}
+            {b.intro && <p className="mx-auto mb-10 max-w-3xl text-center text-sm leading-7 text-white/70">{b.intro}</p>}
             <ul className="grid gap-4 sm:grid-cols-2">
               {b.items.map((it, i) => (
                 <li key={it} className={`flex items-start gap-3 rounded-2xl border border-white/10 bg-gradient-to-br from-[#1c4e57] to-[#215d68] p-5 text-start text-sm leading-7 text-white/85 ${odd && i === b.items.length - 1 ? "sm:col-span-2 sm:mx-auto sm:w-1/2" : ""}`}>
@@ -305,9 +328,12 @@ export default async function ClinicalDetailPage({ params }: { params: Promise<{
   if (!s) notFound();
 
   // قسم التواصل السفلي (CTA) الخاص بهذه الخدمة — يُدار من محرّر الخدمة نفسها (مستقل لكل خدمة)
-  const ctaTitle = s.ctaTitle ? hl(s.ctaTitle) : undefined;
-  const ctaSub = s.ctaText || undefined;
-  const ctaBadge = s.ctaBadge || undefined;
+  // الأولوية: CTA العنصر نفسه ← صف «service-detail» المشترك في الـCMS ({name} = اسم العنصر) ← النص الثابت
+  const sharedCta = await loadSharedCta("service-detail", locale, s.title);
+  const ctaTitleRaw = s.ctaTitle || sharedCta.title;
+  const ctaTitle = ctaTitleRaw ? hl(ctaTitleRaw) : undefined;
+  const ctaSub = s.ctaText || sharedCta.text || undefined;
+  const ctaBadge = s.ctaBadge || sharedCta.badge || undefined;
 
   // العنوان: أول كلمة بلون داكن وباقي العنوان باللون التركوازي (مطابقة للتصميم)
   const [titleFirst, ...titleRest] = s.title.split(" ");

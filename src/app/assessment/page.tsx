@@ -11,6 +11,8 @@ import { fetchContent, fetchSections, getWhatsAppUrl } from "@/lib/server/django
 import { loadBranches } from "@/lib/server/branches";
 import { branchSelectOptions } from "@/lib/branchesData";
 import { hl } from "@/lib/highlight";
+// أي أيقونة يختارها العميل من منتقي الـCMS تترسم (مش الأربعة بتوع الصفحة بس)
+import { CMS_ICONS } from "@/lib/cms/icons";
 
 // الشكل اللي بيرجع من Django (content/assessment)
 type ApiAssessment = {
@@ -192,7 +194,7 @@ export default async function AssessmentPage() {
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {ASSESS_FEATURES.map((f) => (
               <div key={f.title} className="rounded-2xl border border-line bg-surface/40 p-6 text-start">
-                <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand/10 text-brand">{FEATURE_ICONS[f.icon]}</span>
+                <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand/10 text-brand">{FEATURE_ICONS[f.icon] ?? CMS_ICONS[f.icon] ?? CMS_ICONS.heart}</span>
                 <h3 className="mt-4 text-base font-bold text-ink">{f.title}</h3>
                 <p className="mt-2 text-sm leading-7 text-ink-muted">{f.desc}</p>
               </div>
@@ -215,7 +217,7 @@ export default async function AssessmentPage() {
             {ASSESS_STEPS.map((s, i) => (
               <div key={s.title} className="relative z-10 text-center">
                 <span className="relative mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-brand text-white shadow-lg">
-                  {STEP_ICONS[s.icon]}
+                  {STEP_ICONS[s.icon] ?? CMS_ICONS[s.icon]}
                   <span className="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full bg-brand-deep text-xs font-bold text-white ring-2 ring-white/20">{locale === "en" ? i + 1 : String(i + 1).replace(/\d/g, (d) => "٠١٢٣٤٥٦٧٨٩"[Number(d)])}</span>
                 </span>
                 <h3 className="mt-4 text-base font-bold">{s.title}</h3>
