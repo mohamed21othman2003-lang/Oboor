@@ -75,15 +75,29 @@ async function loadSuccessHome(locale: Locale) {
   }));
 }
 
-// أخبار الرئيسية — من نفس بيانات الـCMS (أحدث 6)
-type ApiNewsHome = { image: string; title_ar: string; title_en: string; desc_ar: string; desc_en: string; category_ar: string; category_en: string };
+// أخبار الرئيسية — من نفس بيانات الـCMS: المميّز («مميز») أولًا، ثم تناوب بين الأقسام
+// (أخبار المراكز ← المقالات ← الفعاليات ← الورش) بترتيب الـCMS حتى تظهر كل الأنواع — بحد أقصى 6.
+// كل كارت يفتح الخبر نفسه (/news/<slug>) لا صفحة الأخبار العامة.
+type ApiNewsHome = { slug: string; section: string; featured: boolean; image: string; title_ar: string; title_en: string; desc_ar: string; desc_en: string; category_ar: string; category_en: string };
+const HOME_NEWS_SECTIONS = ["center", "articles", "events", "workshops"];
+function pickHomeNews<T extends { section: string; featured: boolean }>(rows: T[], limit = 6): T[] {
+  const out: T[] = rows.filter((r) => r.featured).slice(0, limit);
+  const queues = HOME_NEWS_SECTIONS.map((sec) => rows.filter((r) => r.section === sec && !out.includes(r)));
+  // أي قسم غير معروف يدخل في الآخر بدل ما يختفي
+  queues.push(rows.filter((r) => !HOME_NEWS_SECTIONS.includes(r.section) && !out.includes(r)));
+  while (out.length < limit && queues.some((q) => q.length)) {
+    for (const q of queues) { const r = q.shift(); if (r && out.length < limit) out.push(r); }
+  }
+  return out;
+}
 async function loadNewsHome(locale: Locale) {
   const rows = await fetchContent<ApiNewsHome[]>("news");
   if (!rows || !rows.length) return undefined;
   const en = locale === "en";
-  return rows.slice(0, 6).map((r) => ({
+  return pickHomeNews(rows).map((r) => ({
     img: r.image, badge: t(en, r.category_ar, r.category_en),
     title: t(en, r.title_ar, r.title_en), desc: t(en, r.desc_ar, r.desc_en),
+    href: r.slug ? `/news/${r.slug}` : undefined,
   }));
 }
 

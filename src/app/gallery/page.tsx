@@ -44,8 +44,10 @@ export default async function GalleryPage() {
   const locale = await getLocale();
   const items = await loadGallery(locale);
   const images = items.map((i) => i.src);
-  // الكولاج العلوي: أول ١٠ صور من المعرض (مع fallback لكل خانة)
-  const collage = Array.from({ length: 10 }, (_, i) => images[i] ?? FALLBACK[i % FALLBACK.length]);
+  // الكولاج العلوي: ١٠ خانات من صور المعرض نفسه — لو الصور أقل من ١٠ تتكرر صور الـCMS
+  // (بدل حشو صور ثابتة مش موجودة في الـCMS). الصور الثابتة فقط لو المعرض فاضي تمامًا.
+  const pool = images.length ? images : FALLBACK;
+  const collage = Array.from({ length: 10 }, (_, i) => pool[i % pool.length]);
   const W = [[150, 88, 187], [150, 209, 70], [129, 113, 96, 70]];
   const rows = [collage.slice(0, 3), collage.slice(3, 6), collage.slice(6, 10)];
 

@@ -4,7 +4,7 @@ import { pageMeta } from "@/lib/seo";
 import { notFound } from "next/navigation";
 import { ALL_BRANCHES, getBranch, BRANCH_FEATURES, BRANCH_FEATURES_EN, SHOW_BRANCH_MANAGER } from "@/lib/branchesData";
 import { loadBranch } from "@/lib/server/branches";
-import { getSuccessStories } from "@/lib/successStoriesData";
+import { loadStories } from "@/lib/server/successStories";
 import ProgramCard, { type Program } from "@/components/ProgramCard";
 import SuccessStoryCard from "@/components/SuccessStoryCard";
 import BranchGallery from "@/components/BranchGallery";
@@ -76,7 +76,8 @@ export default async function BranchDetailPage({ params }: { params: Promise<{ s
   if (!b) notFound();
 
   const en = locale === "en";
-  const allStories = getSuccessStories(locale);
+  // قصص «أبطال عبور» من الـCMS (المنشورة وبترتيبها) — مش من الملف الثابت
+  const allStories = await loadStories(locale);
   // قصص نجاح هذا الفرع: المختارة من «أبطال عبور» (بالـslug) + القصص الخاصة بالفرع.
   // لو الفرع لم يحدّد أياً منها ⇒ نرجع لأول ٣ قصص عامة (السلوك الافتراضي القديم).
   const selectedStories = (b.successStorySlugs ?? [])

@@ -6,24 +6,27 @@ import { useEffect, useRef, useState } from "react";
 import { pick, type Locale } from "@/i18n/config";
 import { type HomeChrome } from "@/lib/highlight";
 
-const NEWS = [
+// href اختياري: من الـCMS يكون رابط الخبر نفسه (/news/<slug>)، والبيانات الاحتياطية تفتح صفحة الأخبار
+type NewsItem = { img: string; badge: string; title: string; desc: string; href?: string };
+
+const NEWS: NewsItem[] = [
   { img: "/figma/home/imgImageWithFallback14.jpg", badge: "تطوير", title: "إطلاق النسخة المحدثة من برنامج التدخل المبكر", desc: "تشمل فنيات علاجية جديدة للأطفال دون سن الثلاث." },
   { img: "/figma/home/imgImageWithFallback15.jpg", badge: "فعالية", title: "يوم التوعية بالإعاقة الذهنية", desc: "للتوعية بحقوق ذوي الإعاقة وأساليب الدعم الأسري المناسبة." },
   { img: "/figma/home/imgImageWithFallback16.jpg", badge: "تدريب", title: "إطلاق برنامج تدريب أسر المستفيدين", desc: "لمساعدة الأسر على أفضل أساليب دعم أبنائهم في البيئة المنزلية." },
   { img: "/figma/home/imgImageWithFallback17.jpg", badge: "شراكة", title: "تعاون مع الجهات الحكومية", desc: "لتقديم خدمات تأهيلية متكاملة بالتنسيق مع الجهات الحكومية." },
 ];
 
-const NEWS_EN: typeof NEWS = [
+const NEWS_EN: NewsItem[] = [
   { img: "/figma/home/imgImageWithFallback14.jpg", badge: "Development", title: "Launch of the updated Early Intervention Program", desc: "Including new therapeutic techniques for children under three." },
   { img: "/figma/home/imgImageWithFallback15.jpg", badge: "Event", title: "Intellectual Disability Awareness Day", desc: "Raising awareness of the rights of people with disabilities and suitable family support methods." },
   { img: "/figma/home/imgImageWithFallback16.jpg", badge: "Training", title: "Launch of the beneficiary families training program", desc: "Helping families learn the best ways to support their children at home." },
   { img: "/figma/home/imgImageWithFallback17.jpg", badge: "Partnership", title: "Collaboration with government agencies", desc: "To provide integrated rehabilitation services in coordination with government agencies." },
 ];
 
-function NewsCard({ n, locale }: { n: (typeof NEWS)[number]; locale: Locale }) {
+function NewsCard({ n, locale }: { n: NewsItem; locale: Locale }) {
   return (
     // الكارت كله قابل للضغط + ارتفاع كامل ليتساوى مع باقي الكروت
-    <Link href="/news" className="group flex h-full flex-col overflow-hidden rounded-2xl bg-white text-start shadow-sm transition-shadow hover:shadow-xl">
+    <Link href={n.href || "/news"} className="group flex h-full flex-col overflow-hidden rounded-2xl bg-white text-start shadow-sm transition-shadow hover:shadow-xl">
       <div className="relative h-36 shrink-0">
         <Image src={n.img} alt={n.title} fill sizes="(max-width:768px) 100vw, 33vw" className="object-cover transition-transform duration-300 group-hover:scale-105" />
         <span className="absolute right-3 top-3 rounded-full bg-brand px-3 py-1 text-[11px] font-semibold text-white">{n.badge}</span>
@@ -42,7 +45,7 @@ function NewsCard({ n, locale }: { n: (typeof NEWS)[number]; locale: Locale }) {
 
 type Cert = { name: string; label: string; issuer?: string; issued?: string; expires?: string };
 
-export default function NewsAndCerts({ locale, news: newsProp, certs: certsProp, chrome }: { locale: Locale; news?: (typeof NEWS)[number][]; certs?: Cert[]; chrome?: HomeChrome }) {
+export default function NewsAndCerts({ locale, news: newsProp, certs: certsProp, chrome }: { locale: Locale; news?: NewsItem[]; certs?: Cert[]; chrome?: HomeChrome }) {
   const news = newsProp?.length ? newsProp : (locale === "en" ? NEWS_EN : NEWS);
   const certs: Cert[] = certsProp?.length ? certsProp : [{ name: "ISO 9001", label: pick(locale, "إدارة الجودة", "Quality Mgmt.") }];
   const trackRef = useRef<HTMLDivElement>(null);
