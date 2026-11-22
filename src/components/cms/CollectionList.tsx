@@ -252,13 +252,6 @@ export default function CollectionList({ type }: { type: string }) {
 
   function Table({ list, hideSub }: { list: CmsItem[]; hideSub?: boolean }) {
     return (
-      <>
-      {type === "service-cards" && (
-        <p className="mb-3 rounded-xl bg-brand/5 px-4 py-2.5 text-xs leading-6 text-ink-muted ring-1 ring-brand/15">
-          {t("اسم الكارت وترتيبه وظهوره بيتاخدوا من صفحة البرنامج أو الخدمة أو التقنية نفسها (من قوائم «برامجنا التمكينية»). هنا بتعدّل الوصف والمميزات والفئة والعمر والمناطق بس.",
-            "Each card's name, order and visibility come from its program/service/technique page (in the “Programs” lists). Here you edit only the description, features, audience, age and regions.")}
-        </p>
-      )}
       <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-line">
         <table className="w-full text-start text-sm">
           <thead className="bg-surface text-xs font-semibold text-ink-soft">
@@ -267,7 +260,6 @@ export default function CollectionList({ type }: { type: string }) {
           <tbody className="divide-y divide-line">{list.map((it) => <Row key={it.id} it={it} hideSub={hideSub} />)}</tbody>
         </table>
       </div>
-      </>
     );
   }
 
@@ -282,6 +274,13 @@ export default function CollectionList({ type }: { type: string }) {
       </div>
 
       {!pageFilter && PAGE_CHROME[type] && <PageChrome page={PAGE_CHROME[type]} />}
+
+      {type === "service-cards" && (
+        <p className="rounded-xl bg-brand/5 px-4 py-2.5 text-xs leading-6 text-ink-muted ring-1 ring-brand/15">
+          {t("اسم الكارت وترتيبه وظهوره بيتاخدوا من صفحة البرنامج أو الخدمة أو التقنية نفسها (من قوائم «برامجنا التمكينية»). هنا بتعدّل الوصف والمميزات والفئة والعمر والمناطق بس.",
+            "Each card's name, order and visibility come from its program/service/technique page (in the “Programs” lists). Here you edit only the description, features, audience, age and regions.")}
+        </p>
+      )}
 
       {error && <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">{error}</p>}
 

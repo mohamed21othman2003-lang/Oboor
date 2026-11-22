@@ -1,5 +1,6 @@
 "use client";
 
+import { SHOW_BRANCH_MANAGER } from "@/lib/flags";
 import { useEffect, useState } from "react";
 import { CMS_ICONS } from "@/lib/cms/icons";
 import { distinctIcons, iconByKey } from "@/lib/areaIcon";
@@ -1048,7 +1049,7 @@ function BranchGroupPreview({ bases, values, lang }: { bases: string[]; values: 
     { label: en ? "Phone Number" : "رقم الهاتف", value: raw("phone"), icon: "phone" },
     { label: en ? "Evening Phone" : "رقم المساء", value: raw("phone_evening"), icon: "phone" },
     { label: en ? "Email" : "البريد الإلكتروني", value: raw("email"), icon: "mail" },
-    { label: en ? "Branch Manager" : "مدير الفرع", value: en ? (raw("manager_en") || raw("manager")) : raw("manager"), icon: "user" },
+    { label: en ? "Branch Manager" : "مدير الفرع", value: SHOW_BRANCH_MANAGER ? (en ? (raw("manager_en") || raw("manager")) : raw("manager")) : "", icon: "user" }, // مخفي على الموقع ⇒ مخفي في المعاينة
     { label: en ? "Working Hours" : "ساعات العمل", value: ps("hours"), icon: "clock" },
     { label: en ? "Address" : "العنوان", value: ps("address"), icon: "pin" },
   ].filter((r) => r.value);

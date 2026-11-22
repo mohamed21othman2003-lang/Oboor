@@ -408,7 +408,8 @@ export default function PageChrome({ page }: { page: string }) {
 
   useEffect(() => {
     listCollection("sections")
-      .then((d) => setItems(d.items.filter((it) => String(it.page ?? "") === page)))
+      // روابط السوشيال في الفوتر بقت من «إعدادات الموقع» ⇒ صفوفها القديمة مش بتظهر هنا
+      .then((d) => setItems(d.items.filter((it) => String(it.page ?? "") === page && !(page === "footer" && String(it.block ?? "") === "social"))))
       .catch((e) => setErr(e.message))
       .finally(() => setLoading(false));
   }, [page]);
