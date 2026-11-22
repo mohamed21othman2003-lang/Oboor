@@ -161,8 +161,8 @@ export default function Hero({ locale, slides: slidesProp, chrome }: { locale: L
         </button>
       </div>
 
-      {/* Bottom wave */}
-      <svg className="pointer-events-none absolute bottom-0 left-0 w-full text-white" viewBox="0 0 1440 100" fill="currentColor" preserveAspectRatio="none">
+      {/* Bottom wave — نازلة 2px تحت حافة القسم: مع تكبير الشاشة 125% كان التقريب بيسيب خط غامق رفيع تحت الموجة */}
+      <svg className="pointer-events-none absolute -bottom-[2px] left-0 block w-full text-white" viewBox="0 0 1440 100" fill="currentColor" preserveAspectRatio="none">
         <path d="M0 60 C 240 100 480 100 720 70 C 960 40 1200 40 1440 70 L 1440 100 L 0 100 Z" />
       </svg>
     </section>
