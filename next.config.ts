@@ -6,9 +6,10 @@ const nextConfig: NextConfig = {
   output: "standalone",
   // لا نُفشي إطار العمل في الهيدرات (X-Powered-By) — نظافة أمنية بلا أثر وظيفي.
   poweredByHeader: false,
-  // تضمين الـCSS الحرج داخل الصفحة وتأجيل الباقي — يزيل حجب الرسم (render-blocking)
-  // فيتحسّن FCP و LCP، خاصةً على الموبايل. يعتمد على حزمة beasties.
-  experimental: { optimizeCss: true },
+  // inlineCss: الـCSS (Tailwind، ~17KB) يتحط جوه الـHTML بدل ملفات <link> منفصلة —
+  // بيشيل رحلة شبكة كاملة كانت بتحجب أول رسم للصفحة (render-blocking) → FCP/LCP أسرع على الموبايل.
+  // (optimizeCss/beasties مكانش بيأثر على صفحات الـApp Router الديناميكية.)
+  experimental: { inlineCss: true },
   images: {
     qualities: [75, 90],
     // AVIF أولًا (ضغط أعلى ~٢٠-٣٠٪ من WebP) ثم WebP كبديل — يقلّل وزن الصور على الموبايل.
