@@ -31,7 +31,9 @@ type SiteSettings = {
 
 const cairo = Cairo({
   variable: "--font-cairo",
-  subsets: ["arabic", "latin"],
+  // subsets = الملفات اللي بتتعمل لها preload بس (الـ@font-face للاتيني بيفضل موجود ويتحمّل عند الحاجة).
+  // الموقع عربي أساسًا: preload للعربي بس عشان ملف اللاتيني (~33KB) ميزاحمش صورة الهيرو (LCP) على الموبايل.
+  subsets: ["arabic"],
   weight: ["400", "500", "600", "700", "800"],
 });
 
