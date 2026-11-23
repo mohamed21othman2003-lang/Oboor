@@ -10,6 +10,16 @@ export type HeroSlide = { img: string; heading: ReactNode; desc: ReactNode; pos?
 
 // معاينة مموّهة صغيرة جداً (inline base64) تظهر فوراً بدل الفراغ ريثما تُحمَّل صورة
 // الهيرو الكاملة — تُحسّن الإحساس بسرعة التحميل خاصةً على الاتصالات البطيئة.
+// صور الهيرو الجديدة (نوفمبر 2026): عريضة (2951×898) والطفل في المنتصف وحواليه خلفية ممتدة.
+// الإزاحة حسب عرض الشاشة: الطفل في الجهة المقابلة للنص (يسار في العربي، يمين في الإنجليزي)، وفي النص على الموبايل.
+const FOCAL_AR = "object-[49%_100%] lg:object-[57%_100%] xl:object-[74%_100%] 2xl:object-[90%_100%]";
+const FOCAL_EN = "object-[49%_100%] lg:object-[43%_100%] xl:object-[26%_100%] 2xl:object-[10%_100%]";
+// معاينة مموّهة للصور نفسها لما تيجي من الـCMS بنفس المسار
+const HERO_BLUR: Record<string, string> = {
+  "/figma/home/hero-1.jpg": "data:image/webp;base64,UklGRlAAAABXRUJQVlA4IEQAAACwAQCdASoQAAUAAsBMJbACdADdGFuAAP68Vrta2PmlZk7hPg9bv1oF557QzNY3FKis7+T/PZEnX+aAVbE+CwGiGhPAAA==",
+  "/figma/home/hero-2.jpg": "data:image/webp;base64,UklGRlQAAABXRUJQVlA4IEgAAADwAQCdASoQAAUAAsBMJbACdAEWO2BQ0YAA/rsKg5Y1INGbgEdxTYYlgnlc7QR4gmcU1+70pi38+5Zdi/cKJfeWfHVzXTKAAAA=",
+  "/figma/home/hero-3.jpg": "data:image/webp;base64,UklGRlQAAABXRUJQVlA4IEgAAADwAQCdASoQAAUAAsBMJbACdAEQ/aZz3gAA/rxVwM81UNsMnLi/Xt4MJ99enV0A01Q4pPV5lX/u1/u79WZCnz81mq7EcpRLgAA=",
+};
 const GENERIC_BLUR = "data:image/webp;base64,UklGRjAAAABXRUJQVlA4ICQAAABwAQCdASoQAAgAA4BaJZACdAFAAAD+8DguiiwP4NyNvkMAAAA=";
 
 export default function Hero({ locale, slides: slidesProp, chrome }: { locale: Locale; slides?: HeroSlide[]; chrome?: HomeChrome }) {
@@ -18,8 +28,8 @@ export default function Hero({ locale, slides: slidesProp, chrome }: { locale: L
 
   const staticSlides: HeroSlide[] = [
     {
-      img: "/figma/home/imgImageWithFallback.jpg",
-      blur: "data:image/webp;base64,UklGRlQAAABXRUJQVlA4IEgAAADQAQCdASoQAAgAA4BaJbACdADaD07eAAD9Ib7EijzZsCR8p8ofWxdncKsNLD+S5cJ1Gui1BNjAYu/ce+QdWD9IR3Wm4KS0AAA=",
+      img: "/figma/home/hero-1.jpg",
+      blur: "data:image/webp;base64,UklGRlAAAABXRUJQVlA4IEQAAACwAQCdASoQAAUAAsBMJbACdADdGFuAAP68Vrta2PmlZk7hPg9bv1oF557QzNY3FKis7+T/PZEnX+aAVbE+CwGiGhPAAA==",
       heading: pick(
         locale,
         <>مركز <span className="text-brand">عبور</span><br />للرعاية النهارية والتأهيل</>,
@@ -32,11 +42,8 @@ export default function Hero({ locale, slides: slidesProp, chrome }: { locale: L
       ),
     },
     {
-      img: "/figma/home/hero-slide2-clean.jpg",
-      blur: "data:image/webp;base64,UklGRj4AAABXRUJQVlA4IDIAAADQAQCdASoQAAgAA4BaJZgCdADygjdOIAD+6STE0ESosElQLj+X/FSNWb2SpOICqMAAAA==",
-      // الطفل في يسار الصورة العريضة؛ على الموبايل التوسيط يقصّه، لذا نثبّتها يسارًا
-      // حتى عرض lg ثم نرجع للتوسيط الافتراضي على الشاشات الكبيرة.
-      pos: "object-left lg:object-bottom",
+      img: "/figma/home/hero-2.jpg",
+      blur: "data:image/webp;base64,UklGRlQAAABXRUJQVlA4IEgAAADwAQCdASoQAAUAAsBMJbACdAEWO2BQ0YAA/rsKg5Y1INGbgEdxTYYlgnlc7QR4gmcU1+70pi38+5Zdi/cKJfeWfHVzXTKAAAA=",
       heading: pick(
         locale,
         <>التدخل المبكر خطوة مبكرة في الصغر<br />تُنير سائر العُمر</>,
@@ -49,8 +56,8 @@ export default function Hero({ locale, slides: slidesProp, chrome }: { locale: L
       ),
     },
     {
-      img: "/figma/home/hero-slide3.jpg",
-      blur: "data:image/webp;base64,UklGRk4AAABXRUJQVlA4IEIAAACwAQCdASoQAAgAA4BaJaACdADczH3AAP7r/1Q6b0MbhrtY+Z/BKA0i6UolARA+7WQ5s8txV981alF2hoko5gXiAAA=",
+      img: "/figma/home/hero-3.jpg",
+      blur: "data:image/webp;base64,UklGRlQAAABXRUJQVlA4IEgAAADwAQCdASoQAAUAAsBMJbACdAEQ/aZz3gAA/rxVwM81UNsMnLi/Xt4MJ99enV0A01Q4pPV5lX/u1/u79WZCnz81mq7EcpRLgAA=",
       heading: pick(
         locale,
         <>ليُعبّروا بأصواتهم<br />ويُعبّروا بخطواتهم</>,
@@ -103,12 +110,12 @@ export default function Hero({ locale, slides: slidesProp, chrome }: { locale: L
             preload={idx === 0}
             fetchPriority={idx === 0 ? "high" : undefined}
             loading={idx === 0 ? "eager" : "lazy"}
-            quality={75}
+            quality={90}
             // معاينة مموّهة تظهر فوراً (بلا شبكة) فلا يبقى الهيرو فارغاً أثناء التحميل
             placeholder="blur"
-            blurDataURL={sl.blur || GENERIC_BLUR}
+            blurDataURL={sl.blur || HERO_BLUR[sl.img] || GENERIC_BLUR}
             sizes="100vw"
-            className={`object-cover ${sl.pos ?? (sl.img.includes("hero-slide2") ? "object-left lg:object-bottom" : "object-bottom")} transition-opacity duration-700 ${idx === i ? "opacity-100" : "opacity-0"}`}
+            className={`object-cover ${sl.pos ?? (locale === "en" ? FOCAL_EN : FOCAL_AR)} transition-opacity duration-700 ${idx === i ? "opacity-100" : "opacity-0"}`}
           />
         ) : null,
       )}
