@@ -25,17 +25,17 @@ const HERO_BLUR: Record<string, string> = {
   "/figma/home/hero-2.jpg": "data:image/webp;base64,UklGRlQAAABXRUJQVlA4IEgAAADwAQCdASoQAAUAAsBMJbACdAEWO2BQ0YAA/rsKg5Y1INGbgEdxTYYlgnlc7QR4gmcU1+70pi38+5Zdi/cKJfeWfHVzXTKAAAA=",
   "/figma/home/hero-3.jpg": "data:image/webp;base64,UklGRlQAAABXRUJQVlA4IEgAAADwAQCdASoQAAUAAsBMJbACdAEQ/aZz3gAA/rxVwM81UNsMnLi/Xt4MJ99enV0A01Q4pPV5lX/u1/u79WZCnz81mq7EcpRLgAA=",
 };
-// نسخة موبايل مقصوصة من منتصف الصورة العريضة (960×898) — شاشة الموبايل بتعرض الجزء ده بس،
-// فبدل تنزيل الصورة العريضة كلها (~77KB) بننزّل النص بنفس الدقة (~30KB) → LCP أسرع.
+// نسخة موبايل مقصوصة من منتصف الصورة العريضة (720×898، بدقة الأصل) — شاشة الموبايل (حتى 479px)
+// بتعرض الجزء ده بس، فبدل تنزيل الصورة العريضة كلها بننزّل الجزء الظاهر بجودة 75 → LCP أسرع.
 // ?v= لكسر كاش المتصفح/الـCDN بعد تحديث الملفات (الـCMS بيفضل شايل المسار من غير ?v).
 const HERO_ART: Record<string, { desk: string; mob: string }> = {
-  "/figma/home/hero-1.jpg": { desk: "/figma/home/hero-1.jpg?v=2", mob: "/figma/home/hero-1-m.jpg?v=2" },
-  "/figma/home/hero-2.jpg": { desk: "/figma/home/hero-2.jpg?v=2", mob: "/figma/home/hero-2-m.jpg?v=2" },
-  "/figma/home/hero-3.jpg": { desk: "/figma/home/hero-3.jpg?v=2", mob: "/figma/home/hero-3-m.jpg?v=2" },
+  "/figma/home/hero-1.jpg": { desk: "/figma/home/hero-1.jpg?v=2", mob: "/figma/home/hero-1-m.jpg?v=3" },
+  "/figma/home/hero-2.jpg": { desk: "/figma/home/hero-2.jpg?v=2", mob: "/figma/home/hero-2-m.jpg?v=3" },
+  "/figma/home/hero-3.jpg": { desk: "/figma/home/hero-3.jpg?v=2", mob: "/figma/home/hero-3-m.jpg?v=3" },
 };
-// ارتفاع الهيرو على الموبايل 600px × نسبة النسخة المقصوصة (960/898) ≈ 642px عرض فعلي
-const HERO_MOBILE_SIZES = "642px";
-const HERO_MOBILE_MEDIA = "(max-width: 639px)";
+// ارتفاع الهيرو على الموبايل 600px × نسبة النسخة المقصوصة (720/898) ≈ 481px عرض فعلي
+const HERO_MOBILE_SIZES = "481px";
+const HERO_MOBILE_MEDIA = "(max-width: 479px)";
 const GENERIC_BLUR = "data:image/webp;base64,UklGRjAAAABXRUJQVlA4ICQAAABwAQCdASoQAAgAA4BaJZACdAFAAAD+8DguiiwP4NyNvkMAAAA=";
 
 export default function Hero({ locale, slides: slidesProp, chrome }: { locale: Locale; slides?: HeroSlide[]; chrome?: HomeChrome }) {
@@ -218,6 +218,7 @@ function HeroArtImage({ art, alt, first, blur, className }: { art: { desk: strin
     ...common,
     src: art.mob,
     sizes: HERO_MOBILE_SIZES,
+    quality: 75,
     loading: first ? "eager" : "lazy",
     fetchPriority: first ? "high" : undefined,
   });
