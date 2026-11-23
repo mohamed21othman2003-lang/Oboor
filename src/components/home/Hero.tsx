@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import Image, { getImageProps } from "next/image";
 import Link from "next/link";
 import { useState, useEffect, type ReactNode } from "react";
 import { pick, type Locale } from "@/i18n/config";
@@ -25,6 +25,17 @@ const HERO_BLUR: Record<string, string> = {
   "/figma/home/hero-2.jpg": "data:image/webp;base64,UklGRlQAAABXRUJQVlA4IEgAAADwAQCdASoQAAUAAsBMJbACdAEWO2BQ0YAA/rsKg5Y1INGbgEdxTYYlgnlc7QR4gmcU1+70pi38+5Zdi/cKJfeWfHVzXTKAAAA=",
   "/figma/home/hero-3.jpg": "data:image/webp;base64,UklGRlQAAABXRUJQVlA4IEgAAADwAQCdASoQAAUAAsBMJbACdAEQ/aZz3gAA/rxVwM81UNsMnLi/Xt4MJ99enV0A01Q4pPV5lX/u1/u79WZCnz81mq7EcpRLgAA=",
 };
+// نسخة موبايل مقصوصة من منتصف الصورة العريضة (960×898) — شاشة الموبايل بتعرض الجزء ده بس،
+// فبدل تنزيل الصورة العريضة كلها (~77KB) بننزّل النص بنفس الدقة (~30KB) → LCP أسرع.
+// ?v= لكسر كاش المتصفح/الـCDN بعد تحديث الملفات (الـCMS بيفضل شايل المسار من غير ?v).
+const HERO_ART: Record<string, { desk: string; mob: string }> = {
+  "/figma/home/hero-1.jpg": { desk: "/figma/home/hero-1.jpg?v=2", mob: "/figma/home/hero-1-m.jpg?v=2" },
+  "/figma/home/hero-2.jpg": { desk: "/figma/home/hero-2.jpg?v=2", mob: "/figma/home/hero-2-m.jpg?v=2" },
+  "/figma/home/hero-3.jpg": { desk: "/figma/home/hero-3.jpg?v=2", mob: "/figma/home/hero-3-m.jpg?v=2" },
+};
+// ارتفاع الهيرو على الموبايل 600px × نسبة النسخة المقصوصة (960/898) ≈ 642px عرض فعلي
+const HERO_MOBILE_SIZES = "642px";
+const HERO_MOBILE_MEDIA = "(max-width: 639px)";
 const GENERIC_BLUR = "data:image/webp;base64,UklGRjAAAABXRUJQVlA4ICQAAABwAQCdASoQAAgAA4BaJZACdAFAAAD+8DguiiwP4NyNvkMAAAA=";
 
 export default function Hero({ locale, slides: slidesProp, chrome }: { locale: Locale; slides?: HeroSlide[]; chrome?: HomeChrome }) {
@@ -90,6 +101,11 @@ export default function Hero({ locale, slides: slidesProp, chrome }: { locale: L
     return () => clearInterval(t);
   }, [n]);
 
+  const alt = pick(locale, "مركز عبور للرعاية والتأهيل", "Oboor Center for Care & Rehabilitation");
+  // تحميل الشرائح بالتدريج: الشريحة التالية بس (مش كل الشرائح مرة واحدة) عشان متنافسش
+  // على النت مع باقي الصفحة في أول تحميل.
+  const [loadedUpTo, setLoadedUpTo] = useState(1);
+  if (i + 1 > loadedUpTo) setLoadedUpTo(i + 1);
   const go = (idx: number) => setI(((idx % n) + n) % n);
   const s = slides[i];
 
@@ -104,11 +120,21 @@ export default function Hero({ locale, slides: slidesProp, chrome }: { locale: L
       {/* Background images — one per slide, cross-fading.
           الشريحة الأولى فقط أولوية عالية وتُحمَّل فورًا (LCP)؛ الباقي بعد الإقلاع. */}
       {slides.map((sl, idx) =>
-        idx === 0 || mounted ? (
+        idx === 0 || (mounted && idx <= loadedUpTo) ? (
+          HERO_ART[sl.img] ? (
+            <HeroArtImage
+              key={sl.img}
+              art={HERO_ART[sl.img]}
+              alt={alt}
+              first={idx === 0}
+              blur={sl.blur || HERO_BLUR[sl.img] || GENERIC_BLUR}
+              className={`object-cover ${sl.pos ?? (locale === "en" ? FOCAL_EN : FOCAL_AR)} transition-opacity duration-700 ${idx === i ? "opacity-100" : "opacity-0"}`}
+            />
+          ) : (
           <Image
             key={sl.img}
             src={sl.img}
-            alt={pick(locale, "مركز عبور للرعاية والتأهيل", "Oboor Center for Care & Rehabilitation")}
+            alt={alt}
             fill
             // Next 16: `priority` صار deprecated. الشريحة الأولى = عنصر LCP →
             // preload (رابط في <head> للاكتشاف المبكر) + fetchPriority=high على الطلب.
@@ -122,6 +148,7 @@ export default function Hero({ locale, slides: slidesProp, chrome }: { locale: L
             sizes={HERO_SIZES}
             className={`object-cover ${sl.pos ?? (locale === "en" ? FOCAL_EN : FOCAL_AR)} transition-opacity duration-700 ${idx === i ? "opacity-100" : "opacity-0"}`}
           />
+          )
         ) : null,
       )}
       {/* Gradient — teal concentrated behind the text side (direction-aware) */}
@@ -178,5 +205,27 @@ export default function Hero({ locale, slides: slidesProp, chrome }: { locale: L
         <path d="M0 60 C 240 100 480 100 720 70 C 960 40 1200 40 1440 70 L 1440 100 L 0 100 Z" />
       </svg>
     </section>
+  );
+}
+
+// صورة الهيرو بـ art direction: <picture> بنسخة موبايل مقصوصة ونسخة عريضة للتابلت/الديسكتوب.
+function HeroArtImage({ art, alt, first, blur, className }: { art: { desk: string; mob: string }; alt: string; first: boolean; blur: string; className: string }) {
+  const common = { alt, fill: true, quality: 90, placeholder: "blur" as const, blurDataURL: blur };
+  const {
+    props: { srcSet: deskSet },
+  } = getImageProps({ ...common, src: art.desk, sizes: HERO_SIZES });
+  const { props: mob } = getImageProps({
+    ...common,
+    src: art.mob,
+    sizes: HERO_MOBILE_SIZES,
+    loading: first ? "eager" : "lazy",
+    fetchPriority: first ? "high" : undefined,
+  });
+  return (
+    <picture>
+      <source media={HERO_MOBILE_MEDIA} srcSet={mob.srcSet} sizes={HERO_MOBILE_SIZES} />
+      <source srcSet={deskSet} sizes={HERO_SIZES} />
+      <img {...mob} alt={alt} className={className} />
+    </picture>
   );
 }
