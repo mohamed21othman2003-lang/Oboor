@@ -11,9 +11,14 @@ export type HeroSlide = { img: string; heading: ReactNode; desc: ReactNode; pos?
 // معاينة مموّهة صغيرة جداً (inline base64) تظهر فوراً بدل الفراغ ريثما تُحمَّل صورة
 // الهيرو الكاملة — تُحسّن الإحساس بسرعة التحميل خاصةً على الاتصالات البطيئة.
 // صور الهيرو الجديدة (نوفمبر 2026): عريضة (2951×898) والطفل في المنتصف وحواليه خلفية ممتدة.
-// الإزاحة حسب عرض الشاشة: الطفل في الجهة المقابلة للنص (يسار في العربي، يمين في الإنجليزي)، وفي النص على الموبايل.
-const FOCAL_AR = "object-[49%_100%] lg:object-[57%_100%] xl:object-[74%_100%] 2xl:object-[90%_100%]";
-const FOCAL_EN = "object-[49%_100%] lg:object-[43%_100%] xl:object-[26%_100%] 2xl:object-[10%_100%]";
+// الإزاحة حسب عرض الشاشة (حسب تصميم العميل): الطفل قريب من المنتصف مائل ناحية عكس النص
+// (منتصف الصورة الأصلية عند ~45% من العرض في العربي و~55% في الإنجليزي)، وفي النص على الموبايل.
+const FOCAL_AR = "object-[49%_100%] lg:object-[54%_100%] xl:object-[56%_100%] 2xl:object-[58%_100%]";
+const FOCAL_EN = "object-[49%_100%] lg:object-[46%_100%] xl:object-[44%_100%] 2xl:object-[42%_100%]";
+// الصورة عريضة (نسبة 3.29) و object-cover بيكبّرها على الارتفاع، فالعرض المعروض فعليًا = الارتفاع × 3.29
+// (791px → ~2600px على الديسكتوب، 600px → ~1975px على الموبايل) وليس عرض الشاشة.
+// لو sizes="100vw" المتصفح بيحمّل نسخة 1920 ويمطّها → صورة باهتة. فنطلب العرض الحقيقي.
+const HERO_SIZES = "(min-width: 2600px) 100vw, (min-width: 1024px) 2600px, 1975px";
 // معاينة مموّهة للصور نفسها لما تيجي من الـCMS بنفس المسار
 const HERO_BLUR: Record<string, string> = {
   "/figma/home/hero-1.jpg": "data:image/webp;base64,UklGRlAAAABXRUJQVlA4IEQAAACwAQCdASoQAAUAAsBMJbACdADdGFuAAP68Vrta2PmlZk7hPg9bv1oF557QzNY3FKis7+T/PZEnX+aAVbE+CwGiGhPAAA==",
@@ -114,7 +119,7 @@ export default function Hero({ locale, slides: slidesProp, chrome }: { locale: L
             // معاينة مموّهة تظهر فوراً (بلا شبكة) فلا يبقى الهيرو فارغاً أثناء التحميل
             placeholder="blur"
             blurDataURL={sl.blur || HERO_BLUR[sl.img] || GENERIC_BLUR}
-            sizes="100vw"
+            sizes={HERO_SIZES}
             className={`object-cover ${sl.pos ?? (locale === "en" ? FOCAL_EN : FOCAL_AR)} transition-opacity duration-700 ${idx === i ? "opacity-100" : "opacity-0"}`}
           />
         ) : null,
