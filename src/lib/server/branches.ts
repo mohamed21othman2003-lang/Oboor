@@ -91,6 +91,12 @@ function toBranch(row: ApiBranch, locale: Locale): Branch {
     mapUrl: row.map_url || "",
     rating: row.rating || "",
     reviewsCount: row.reviews_count || "",
+    // البحث يشتغل باللغتين مهما كانت لغة الصفحة
+    searchText: [
+      row.name_ar, row.name_en, row.city_ar, row.city_en, row.area_ar, row.area_en,
+      row.region_ar, row.region_en || REGION_EN[row.region_ar], row.address_ar, row.address_en,
+      ...(row.services_ar || []), ...(row.services_en?.length ? row.services_en : (row.services_ar || []).map(serviceEn)),
+    ].filter(Boolean).join(" "),
     // خدمات إنجليزية إن وُجدت، وإلا نترجم القياسية، وإلا العربي كما هو
     services: en ? (row.services_en?.length ? row.services_en : (row.services_ar || []).map(serviceEn)) : row.services_ar,
     serviceCards: (Array.isArray(row.service_cards) ? row.service_cards : []).map((c) => ({

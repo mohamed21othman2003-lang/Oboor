@@ -43,6 +43,8 @@ export type Branch = {
   isNew?: boolean;
   rating?: string;
   reviewsCount?: string;
+  // نص بحث إضافي (اللغتان معاً) — يُملأ من الـCMS ليعمل البحث بالعربي والإنجليزي
+  searchText?: string;
 };
 
 const HOURS = "الأحد – الخميس: ٨ص – ٨م";

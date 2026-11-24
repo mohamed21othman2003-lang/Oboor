@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { BRANCHES, BRANCHES_EN, regionTabsFrom, SHOW_BRANCH_MANAGER, type Branch } from "@/lib/branchesData";
 import { pick, type Locale } from "@/i18n/config";
+import { normalizeSearch, matchesSearch } from "@/lib/searchText";
 
 export default function BranchesExplorer({ locale, branches }: { locale: Locale; branches?: Branch[] }) {
   // قائمة الفروع من الـ props (CMS) مع fallback للبيانات الثابتة
@@ -19,8 +20,15 @@ export default function BranchesExplorer({ locale, branches }: { locale: Locale;
   const [query, setQuery] = useState(urlQ);
   useEffect(() => { setQuery(urlQ); }, [urlQ]);
 
-  const q = query.trim().toLowerCase();
-  const matches = (b: Branch) => [b.name, b.city, b.area, b.region, ...b.services].some((v) => v.toLowerCase().includes(q));
+  const q = query.trim();
+  // نص البحث لكل فرع (مُوحَّد إملائياً): الاسم/المدينة/الحي/المنطقة/العنوان/الخدمات/الهاتف/البريد + اللغة الأخرى
+  const haystacks = useMemo(
+    () => new Map(source.map((b) => [b.slug, normalizeSearch(
+      [b.name, b.city, b.area, b.region, b.address, ...b.services, b.phone, b.phoneEvening, b.email, b.searchText].filter(Boolean).join(" "),
+    )])),
+    [source],
+  );
+  const matches = (b: Branch) => matchesSearch(haystacks.get(b.slug) || "", q);
 
   // عند البحث: نبحث في كل المناطق (لا نقيّده بالتاب اليدوي)، ونفعّل تاب المنطقة
   // تلقائياً إذا كانت كل النتائج تنتمي لمنطقة واحدة — وإلا نُبقي «الكل».
